@@ -87,7 +87,8 @@ Physical calibration is demo evidence, not a prerequisite for developing generic
 assembly export. Visual resemblance is not dynamics validation.
 
 ### 7. Polish, sponsor integrations and submission
-- [ ] Package an end-to-end demo, cached backup and explicit supported scope.
+- [x] Add reusable scripted assembly replay and cached generated-SO101 action evidence.
+- [ ] Package full end-to-end demo and physical comparison; keep supported scope explicit.
 - [ ] Document processing effort, manual interventions and remaining uncertainty.
 - [ ] Complete Fetch public integration if feasible; revisit Vultr when accessible.
 - [ ] Verify sponsor eligibility and submit actual implemented integrations.
@@ -117,3 +118,5 @@ and estimates. Keep secrets/raw large captures out of Git. No scope claim should
 outpace tested evidence. Main remains separate from feature integration.
 
 Current guided slice: [workflow](GUIDED_ASSEMBLIES.md) and [SO101 evidence](../examples/assemblies/so101-guided/README.md). The workbench is local-file based; no automatic photo articulation or hardware dynamics validation is claimed.
+
+Simulation-only demo backup: [SO101 action replay](../examples/assemblies/so101-guided/collision-revision/motion-demo/README.md). This remains independent of physical pose mapping and Atul's HTTP integration.
