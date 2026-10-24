@@ -1,0 +1,4 @@
+# Preserve generated mesh hashes across Windows checkouts.
+# Trimesh emits a final blank line; retain source bytes in these fixtures.
+*.obj text eol=lf whitespace=-blank-at-eof
+*.stl -text

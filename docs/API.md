@@ -112,3 +112,9 @@ Read relative mesh paths from `asset_dir`, build a portable scene bundle in `out
 ## Frontend boundary — Atul
 
 Own `frontend/`, independent of the Python backend directory. Use the HTTP interface above. Set API base URL via configuration. Multipart uploads must let the browser choose the boundary. Show synthetic/provider labels, preserve property provenance, and distinguish reconstruction progress from scene completion. Polling must stop on terminal/error/awaiting-input states. Preview/download controls appear only when the corresponding artifact exists. Build mocks using the same response shape while backend/preparation/export are being integrated. Fetch integration later calls this same API; it does not duplicate reconstruction or geometry logic.
+
+## Articulated assets
+
+The new [assembly format](ASSEMBLIES.md) is a separate local library/CLI. These
+HTTP endpoints still process rigid AssetRecord v1 only; do not POST assembly JSON
+to them. Guided assembly UI/API integration is a later milestone.

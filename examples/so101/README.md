@@ -1,4 +1,8 @@
-# SO101 simulation and joint mapping bootstrap
+# SO101 imported reference model and joint mapping bootstrap
+
+**Provenance:** this robot is imported from Menagerie. It is a comparison target,
+not output of Photo2Sim photo/CAD articulated conversion. See the
+[current product plan](../../docs/PROJECT.md) and [Yash handoff](../../docs/handoffs/yash-articulated-demo.md).
 
 The pinned standalone robot loads and runs a two-second zero-target hold on
 MuJoCo 3.3.7 on Johaan's Mac. The numerical report is

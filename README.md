@@ -2,9 +2,15 @@
 
 Turn photos of real objects into editable MuJoCo simulation assets. Built for Cal Hacks 13.0.
 
-**Goal:** demonstrate two objects going from photos to downloadable simulation scenes, with confirmed dimensions, documented physical assumptions, collision geometry, and basic simulation checks.
+**Goal:** reusable conversion middleware for robotics and engineering. Photos,
+optional CAD and measurements become reviewed geometry, physical properties and
+articulation, then a runnable simulator export that can be iterated.
 
-**Workflow:** Photos → generated mesh → scale and property confirmation → collision geometry → simulation validation → downloadable scene.
+**Workflow:** Inputs → geometry/part proposals → user corrections to scale,
+properties and joints → simulation export → validation and refinement.
+
+The rigid-object workflow is working. Guided articulated conversion is now the
+next milestone; automatic photos-to-robot conversion is not yet implemented.
 
 ## Start here
 
@@ -15,19 +21,24 @@ Turn photos of real objects into editable MuJoCo simulation assets. Built for Ca
 - [Shared API and asset contracts](docs/API.md): exact endpoints, units, and integration boundaries.
 - [Team environment setup](docs/ENVIRONMENT.md): which credentials each laptop needs.
 - [Vultr deployment](deploy/README.md): container, HTTPS, access token and persistence checks.
-- Agent handoffs: [Srijan](docs/handoffs/srijan-agent.md), [Atul](docs/handoffs/atul-agent.md).
+- [Current Windows handoff](docs/handoffs/yash-articulated-demo.md); older Srijan/Atul handoffs are historical.
+- [Example provenance](examples/README.md): generated assets, synthetic fixtures and imported references.
 - [Capture workspace](hardware/README.md): photography and reference measurements.
 
 ## Current status
 
 The backend branch connects uploads, persistent jobs, Meshy reconstruction, explicit property confirmation, geometry preparation, MuJoCo validation, and authenticated ZIP downloads. The integrated frontend includes mesh preview, saved orientation and Gemini suggestions. The cleaned real charger completed through the API and passed Windows native-viewer and relocation checks; dimensions/mass remain estimated and collision/inertia approximate. Gemini suggestions have a successful live backend request; frontend acceptance used cached suggestions. Fetch public integration and Vultr deployment remain unfinished. Main is separate from feature integration.
 
-The current demo priority is a live real-versus-simulated SO101 action comparison.
-The [combined robot/charger/table scene](examples/so101/WORKSPACE.md) passes offline
-hold/drop/reset checks. Yash is gathering hardware configuration, calibration and
-reference-pose evidence before we implement real-to-simulation joint conversion
-and action replay. The current combined layout and servo dynamics are assumptions;
-no physical arm control or manipulation success is established by these checks.
+The intended articulated demo converts the SO101 itself through reusable assembly
+preparation/review/export, then compares it with the physical arm. Our existing
+[SO101 scene](examples/so101/WORKSPACE.md) uses an **imported reference model**;
+it does not prove articulated conversion. Windows combined-viewer/reset acceptance
+was reported by Yash at `74cf11a`. Physical mapping remains unverified.
+
+A [reviewed assembly format](docs/ASSEMBLIES.md) and
+[synthetic two-link export](examples/assemblies/two-link-hinge/README.md) now
+provide the local articulated-conversion foundation. CAD grouping, photo part/joint inference and assembly UI/API
+integration remain future work. See [the plan](docs/PROJECT.md).
 
 ## Basic infrastructure
 
