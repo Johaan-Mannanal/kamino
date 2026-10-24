@@ -82,6 +82,7 @@ is not yet proven. Reusing a template must be labeled template-assisted.
 
 ### 6. Compare with the physical arm
 - [x] Audit saved stationary observations/calibration identity without hardware access.
+- [x] Import operator-paired take-3 photos and produce a labeled static mapping-hypothesis comparison.
 - [ ] Match timestamped whole-arm images and joint observations in several poses.
 - [ ] Verify signs/zeros/gripper mapping and measured base/table placement.
 - [ ] Compare observation replay (kinematics) before commanded-motion prediction.
@@ -89,6 +90,9 @@ is not yet proven. Reusing a template must be labeled template-assisted.
 - [ ] Show discrepancies and one useful input correction/regeneration cycle.
 Physical calibration is demo evidence, not a prerequisite for developing generic
 assembly export. Visual resemblance is not dynamics validation.
+The [take-3 comparison](../examples/so101/comparisons/take3/README.md) broadly matches
+the folded posture, but its direct-angle shoulder reading exceeds the model limit
+by 4.18 degrees. Signs/zeros, jaw conversion and mounting remain unverified.
 
 ### 7. Polish, sponsor integrations and submission
 - [x] Add reusable scripted assembly replay and cached generated-SO101 action evidence.
