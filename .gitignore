@@ -1,0 +1,37 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Credentials and machine-local configuration
+.env
+.env.*
+!.env.example
+
+# Large robot/media artifacts; share links in team notes
+/data/
+/datasets/
+/recordings/
+/checkpoints/
+/artifacts/
+*.safetensors
+*.pt
+*.pth
+*.mp4
+*.mov
+*.gcode
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+node_modules/

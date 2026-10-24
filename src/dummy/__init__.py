@@ -1,0 +1,1 @@
+"""DUMMY robotic assembly workspace."""
