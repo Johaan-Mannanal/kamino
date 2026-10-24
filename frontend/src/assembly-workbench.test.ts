@@ -153,6 +153,7 @@ it('opens a saved job and downloads its validated result with API authentication
     (item) => item.textContent === 'Download Result ZIP',
   )!
   expect(button).toBeDefined()
+  expect(document.querySelector<HTMLButtonElement>('#process')!.disabled).toBe(true)
   button.click()
   await vi.waitFor(() =>
     expect(file).toHaveBeenCalledWith('test-job', 'attempts/0001/simulation.zip'),
@@ -160,6 +161,37 @@ it('opens a saved job and downloads its validated result with API authentication
   expect(create).toHaveBeenCalled()
   expect(click).toHaveBeenCalled()
   click.mockRestore()
+})
+
+it('edits property provenance and preserves unknown friction until explicitly supplied', async () => {
+  await load()
+  const set = (label: string, value: string, event = 'input') => {
+    const field = document.querySelector<HTMLInputElement>(`[aria-label="${label}"]`)!
+    expect(field).not.toBeNull()
+    field.value = value
+    field.dispatchEvent(new Event(event))
+  }
+  set('Mass provenance', 'measured', 'change')
+  set('Mass note', 'Scale reading')
+  document.querySelector<HTMLElement>('#apply')!.click()
+  let record = JSON.parse(document.querySelector<HTMLTextAreaElement>('#editor')!.value)
+  expect(record.mass_kg).toEqual({ value: 0.1, source: 'measured', note: 'Scale reading' })
+  expect(record.sliding_friction).toBeNull()
+  set('Sliding friction (blank = unknown)', '0.4')
+  set('Friction provenance', 'estimated', 'change')
+  set('Friction note', 'Trial assumption')
+  document.querySelector<HTMLElement>('#apply')!.click()
+  record = JSON.parse(document.querySelector<HTMLTextAreaElement>('#editor')!.value)
+  expect(record.sliding_friction).toEqual({
+    value: 0.4,
+    source: 'estimated',
+    note: 'Trial assumption',
+  })
+  set('Sliding friction (blank = unknown)', '')
+  document.querySelector<HTMLElement>('#apply')!.click()
+  record = JSON.parse(document.querySelector<HTMLTextAreaElement>('#editor')!.value)
+  expect(record.sliding_friction).toBeNull()
+  expect(document.querySelector('#summary')?.textContent).toContain('0/1 acknowledged')
 })
 
 function deferred<T>() {

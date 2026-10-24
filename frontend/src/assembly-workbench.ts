@@ -22,8 +22,8 @@ root.innerHTML = `<header><a href="/">Photo2Sim</a><span>Guided assembly review<
 <p id="message" role="status">Import a project and its meshes, open a saved job, or load an offline review package.</p>
 <div id="workspace" hidden><div class="layout"><section class="stage"><div id="viewer"></div><button id="reset">Reset preview pose</button><p id="summary"></p><div id="sliders"></div></section>
 <section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div>
-<h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; limits are radians. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
-<h2>3. Save and process</h2><button id="save-revision">Save revision to job</button><label>Collision geometry <select id="collision-mode"><option value="box">Box (historical default)</option><option value="convex_mesh">Convex mesh</option></select></label><label><input id="exclude-joint-pairs" type="checkbox"> Exclude direct parent-child collision pairs</label><button id="process">Run preparation, export and validation</button><p>These export settings are recorded per attempt and do not alter the reviewed source project. Save the review before processing. Previous attempts remain available after a revision or failed validation.</p><button id="save">Download project JSON</button><button id="save-package">Download review package</button>
+<h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; limits are radians. Pivot edits change joint frames while preserving source geometry at the reference pose; they do not translate the entire scene. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
+<h2>3. Save and process</h2><button id="save-revision">Save revision to job</button><label>Collision geometry <select id="collision-mode"><option value="box">Box (historical default)</option><option value="convex_mesh">Convex mesh</option></select></label><label><input id="exclude-joint-pairs" type="checkbox"> Exclude direct parent-child collision pairs</label><button id="process">Run preparation, export and validation</button><p>These export settings are recorded per attempt and do not alter the reviewed source project. Save the review before processing. To change a completed result, apply edits, acknowledge the revised inputs and save a new revision. Previous attempts remain available after a revision or failed validation.</p><button id="save">Download project JSON</button><button id="save-package">Download review package</button>
 <details><summary>Advanced: full project / add links and joints</summary><textarea id="full" aria-label="Full project JSON" spellcheck="false"></textarea><button id="apply-full">Apply full project</button></details><details><summary>Provenance and limitations</summary><pre id="notes"></pre></details></section></div></div></main>`
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 let payload: ReviewPackage | undefined,
@@ -91,7 +91,11 @@ function renderJob() {
   status.textContent = `Job ${job.id} · revision ${job.revision} · ${job.status} · ${job.synthetic ? 'synthetic' : 'source-assisted'} · ${dirty ? 'unsaved edits' : 'saved'} · export generated: ${job.export_generated ? 'yes' : 'no'} · motion validation passed: ${job.motion_validation_passed === null ? 'pending' : job.motion_validation_passed ? 'yes' : 'no'}${job.error ? ' · ' + job.error.message : ''}`
   el<HTMLButtonElement>('save-revision').disabled = mutationPending || running(job.status) || !dirty
   el<HTMLButtonElement>('process').disabled =
-    mutationPending || running(job.status) || dirty || !payload
+    mutationPending || !['awaiting_review', 'failed'].includes(job.status) || dirty || !payload
+  el<HTMLButtonElement>('process').textContent =
+    job.status === 'failed'
+      ? 'Retry preparation, export and validation'
+      : 'Run preparation, export and validation'
   for (const attempt of job.attempts) {
     const row = document.createElement('div')
     row.className = 'attempt'
@@ -172,6 +176,25 @@ function select() {
     row.append(field)
     fields.append(row)
   }
+  function provenance(label: string, value: string, update: (value: string) => void) {
+    const row = document.createElement('label')
+    row.textContent = label
+    const field = document.createElement('select')
+    field.setAttribute('aria-label', label)
+    for (const source of ['estimated', 'measured', 'sourced', 'user_supplied']) {
+      const option = document.createElement('option')
+      option.value = source
+      option.textContent = source.replace('_', ' ')
+      field.append(option)
+    }
+    field.value = value
+    field.onchange = () => {
+      update(field.value)
+      editor.value = JSON.stringify(item, null, 2)
+    }
+    row.append(field)
+    fields.append(row)
+  }
   if ('frame' in item) {
     ;['X', 'Y', 'Z'].forEach((axis, i) =>
       input(`Pivot ${axis} (m)`, item.frame.position_m[i], (v) => {
@@ -186,8 +209,31 @@ function select() {
     input('Mass (kg)', item.mass_kg.value, (v) => {
       item.mass_kg.value = Number(v)
     })
-    input('Mass provenance', item.mass_kg.source, (v) => {
+    provenance('Mass provenance', item.mass_kg.source, (v) => {
       item.mass_kg.source = v
+    })
+    input('Mass note', item.mass_kg.note ?? '', (v) => {
+      item.mass_kg.note = v
+    })
+    let frictionSource = item.sliding_friction?.source ?? 'estimated'
+    let frictionNote = item.sliding_friction?.note ?? ''
+    input('Sliding friction (blank = unknown)', item.sliding_friction?.value ?? '', (v) => {
+      item.sliding_friction =
+        v.trim() === ''
+          ? null
+          : {
+              value: Number(v),
+              source: frictionSource,
+              note: frictionNote,
+            }
+    })
+    provenance('Friction provenance', frictionSource, (v) => {
+      frictionSource = v
+      if (item.sliding_friction) item.sliding_friction.source = v
+    })
+    input('Friction note', frictionNote, (v) => {
+      frictionNote = v
+      if (item.sliding_friction) item.sliding_friction.note = v
     })
   } else {
     input('Parent link', item.parent, (v) => {
@@ -220,7 +266,7 @@ function select() {
       input('Damping (Nm s/rad)', item.damping.value, (v) => {
         item.damping!.value = Number(v)
       })
-    input('Joint provenance', item.source, (v) => {
+    provenance('Joint provenance', item.source, (v) => {
       item.source = v
     })
   }
