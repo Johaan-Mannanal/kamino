@@ -1,0 +1,54 @@
+{
+  "take": 3,
+  "operator_ready_before_capture": true,
+  "samples": 599,
+  "first_read_utc": "2026-10-24T12:20:46.134340+00:00",
+  "last_read_utc": "2026-10-24T12:22:45.984484+00:00",
+  "first_read_pacific": "2026-10-24T05:20:46.134340-07:00",
+  "last_read_pacific": "2026-10-24T05:22:45.984484-07:00",
+  "recorded_span_s": 119.84362090000286,
+  "measured_sample_rate_hz": 4.9898358837052275,
+  "ranges": {
+    "shoulder_pan.pos": {
+      "minimum": -0.3956043956043956,
+      "maximum": -0.3956043956043956,
+      "first": -0.3956043956043956,
+      "last": -0.3956043956043956
+    },
+    "shoulder_lift.pos": {
+      "minimum": -104.17582417582418,
+      "maximum": -104.17582417582418,
+      "first": -104.17582417582418,
+      "last": -104.17582417582418
+    },
+    "elbow_flex.pos": {
+      "minimum": 96.17582417582418,
+      "maximum": 96.17582417582418,
+      "first": 96.17582417582418,
+      "last": 96.17582417582418
+    },
+    "wrist_flex.pos": {
+      "minimum": 84.04395604395604,
+      "maximum": 84.04395604395604,
+      "first": 84.04395604395604,
+      "last": 84.04395604395604
+    },
+    "wrist_roll.pos": {
+      "minimum": 4.175824175824176,
+      "maximum": 4.175824175824176,
+      "first": 4.175824175824176,
+      "last": 4.175824175824176
+    },
+    "gripper.pos": {
+      "minimum": 0.9549795361527967,
+      "maximum": 0.9549795361527967,
+      "first": 0.9549795361527967,
+      "last": 0.9549795361527967
+    }
+  },
+  "photo_pairing_status": "paired_by_operator_stationary_association",
+  "hardware_synchronized": false,
+  "jaw_opening_mm": null,
+  "base_table_measurements": null,
+  "photo_pairing_record": "pairing.json"
+}
