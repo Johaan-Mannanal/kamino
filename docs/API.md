@@ -121,6 +121,16 @@ assemblies use separate endpoints and the same optional application token. The
 assembly endpoints require the `simulation` optional dependencies; without them,
 the rigid API still starts and serves its existing routes:
 
+- `POST /api/assembly-jobs/from-meshes`: multipart `name`, required `units`
+  (`m` or `mm`), optional `synthetic` (default false), and repeated `meshes`.
+  Accepts 1–128 flat, unique filenames (case-insensitive) ending in OBJ/STL;
+  archives/subdirectories are rejected. Existing per-file/total byte limits apply;
+  parsed geometry is limited to two million triangles total. Returns 202 with an
+  unreviewed one-link draft. Normalized OBJ geometry preserves the common frame
+  and converts to metres; it does not infer joints, recenter or rotate parts.
+  Original bytes are kept under `originals/`, and original hashes/units are
+  recorded in part provenance notes. Starting mass is explicitly estimated;
+  friction remains unknown. User review is required before processing.
 - `POST /api/assembly-jobs`: multipart `project` (`assembly-review-1.0` JSON)
   plus repeated `meshes` files. Upload exactly one mesh per distinct relative
   `part.mesh` path, using that path as the multipart filename. Every declared
@@ -162,3 +172,9 @@ before publication; retry preserves an unreferenced numbered revision under
 `interrupted-revisions/` and recreates that revision number. Published revisions
 and attempts are never overwritten. This filesystem store runs in one server
 process; do not run multiple backend workers against the same data directory.
+
+New motion reports include `tracking_errors_rad`, keyed by actual joint name in
+`original.trials[].phases[]` and the relocated equivalent. The existing aggregate
+error remains compatible. The workbench compares these to the report's
+`tracking_tolerance_rad`; legacy aggregate-only reports do not identify a failing
+joint. Downloaded raw inputs from mesh-only imports are included under `originals/`.

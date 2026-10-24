@@ -1,0 +1,153 @@
+{
+  "schema_version": "assembly-review-1.0",
+  "name": "hinged_panel",
+  "synthetic": true,
+  "root_link": "post",
+  "parts": [
+    {
+      "id": "part_001",
+      "mesh": "meshes/part_001.obj",
+      "sha256": "be80e755df8f457e3ee8a76332bc1864feadd1c7bb3dccccaaaabe733af22947",
+      "pose": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "source": "user_supplied",
+      "note": "Input post.obj; original SHA256 647b2378d44418a70bc6b12ca782d7fbafaaa1189354c4cb89f90ab54091018f; declared mm, converted to metres without centering or rotation",
+      "group": "post",
+      "excluded_reason": null
+    },
+    {
+      "id": "part_002",
+      "mesh": "meshes/part_002.obj",
+      "sha256": "68aff6020d06cd36e012bed4d13a4a9a548059403c4fe98dfa93f1fd0cd00d14",
+      "pose": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "source": "user_supplied",
+      "note": "Input panel.obj; original SHA256 779a05acde3a90171e652112dc87ef87e91808c9394b60f5676507ee13297a78; declared mm, converted to metres without centering or rotation",
+      "group": "panel",
+      "excluded_reason": null
+    }
+  ],
+  "groups": [
+    {
+      "name": "post",
+      "frame": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mass_kg": {
+        "value": 0.1,
+        "source": "estimated",
+        "note": "Starting assumption; review or replace before export"
+      },
+      "sliding_friction": null,
+      "reviewed": true,
+      "review_note": "Reviewed synthetic fixed post; mass is estimated."
+    },
+    {
+      "name": "panel",
+      "frame": {
+        "position_m": [
+          0.02,
+          0.0,
+          0.18
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mass_kg": {
+        "value": 0.1,
+        "source": "estimated",
+        "note": "Starting assumption; review or replace before export"
+      },
+      "sliding_friction": null,
+      "reviewed": true,
+      "review_note": "Reviewed synthetic panel geometry; mass and drive remain assumptions."
+    }
+  ],
+  "joints": [
+    {
+      "name": "panel_hinge",
+      "parent": "post",
+      "child": "panel",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -0.8,
+        0.8
+      ],
+      "damping": {
+        "value": 0.2,
+        "source": "estimated",
+        "note": "Starting assumption; review before export"
+      },
+      "drive": {
+        "kp": 1e-6,
+        "force_limit_nm": 2.0,
+        "source": "estimated",
+        "note": "Starting assumption; not calibrated to hardware"
+      },
+      "source": "user_supplied",
+      "note": "Connection chosen in the guided editor; axis and limits require review",
+      "reviewed": true,
+      "review_note": "Synthetic Z hinge; deliberately weak estimated drive for failure and correction demo."
+    }
+  ],
+  "notes": [
+    "Mesh-only import: declared source units mm. All parts must share a common reference frame. Original files retained under originals/.",
+    "All parts initially belong to base. Define rigid links and joints; no articulation or physical properties were inferred.",
+    "Starting link masses are estimates. Unknown friction remains null; simulator defaults are documented separately."
+  ],
+  "review_snapshot": "{\"schema_version\":\"assembly-review-1.0\",\"name\":\"hinged_panel\",\"synthetic\":true,\"root_link\":\"post\",\"parts\":[{\"id\":\"part_001\",\"mesh\":\"meshes/part_001.obj\",\"sha256\":\"be80e755df8f457e3ee8a76332bc1864feadd1c7bb3dccccaaaabe733af22947\",\"pose\":{\"position_m\":[0,0,0],\"quaternion_wxyz\":[1,0,0,0]},\"source\":\"user_supplied\",\"note\":\"Input post.obj; original SHA256 647b2378d44418a70bc6b12ca782d7fbafaaa1189354c4cb89f90ab54091018f; declared mm, converted to metres without centering or rotation\",\"group\":\"post\",\"excluded_reason\":null},{\"id\":\"part_002\",\"mesh\":\"meshes/part_002.obj\",\"sha256\":\"68aff6020d06cd36e012bed4d13a4a9a548059403c4fe98dfa93f1fd0cd00d14\",\"pose\":{\"position_m\":[0,0,0],\"quaternion_wxyz\":[1,0,0,0]},\"source\":\"user_supplied\",\"note\":\"Input panel.obj; original SHA256 779a05acde3a90171e652112dc87ef87e91808c9394b60f5676507ee13297a78; declared mm, converted to metres without centering or rotation\",\"group\":\"panel\",\"excluded_reason\":null}],\"groups\":[{\"name\":\"post\",\"frame\":{\"position_m\":[0,0,0],\"quaternion_wxyz\":[1,0,0,0]},\"mass_kg\":{\"value\":0.1,\"source\":\"estimated\",\"note\":\"Starting assumption; review or replace before export\"},\"sliding_friction\":null,\"reviewed\":true,\"review_note\":\"Reviewed synthetic fixed post; mass is estimated.\"},{\"name\":\"panel\",\"frame\":{\"position_m\":[0.02,0,0.18],\"quaternion_wxyz\":[1,0,0,0]},\"mass_kg\":{\"value\":0.1,\"source\":\"estimated\",\"note\":\"Starting assumption; review or replace before export\"},\"sliding_friction\":null,\"reviewed\":true,\"review_note\":\"Reviewed synthetic panel geometry; mass and drive remain assumptions.\"}],\"joints\":[{\"name\":\"panel_hinge\",\"parent\":\"post\",\"child\":\"panel\",\"kind\":\"revolute\",\"origin\":{\"position_m\":[0,0,0],\"quaternion_wxyz\":[1,0,0,0]},\"axis\":[0,0,1],\"limits_rad\":[-0.8,0.8],\"source\":\"user_supplied\",\"note\":\"Connection chosen in the guided editor; axis and limits require review\",\"damping\":{\"value\":0.2,\"source\":\"estimated\",\"note\":\"Starting assumption; review before export\"},\"drive\":{\"kp\":0.000001,\"force_limit_nm\":2,\"source\":\"estimated\",\"note\":\"Starting assumption; not calibrated to hardware\"},\"reviewed\":true,\"review_note\":\"Synthetic Z hinge; deliberately weak estimated drive for failure and correction demo.\"}],\"notes\":[\"Mesh-only import: declared source units mm. All parts must share a common reference frame. Original files retained under originals/.\",\"All parts initially belong to base. Define rigid links and joints; no articulation or physical properties were inferred.\",\"Starting link masses are estimates. Unknown friction remains null; simulator defaults are documented separately.\"],\"review_snapshot\":null}"
+}

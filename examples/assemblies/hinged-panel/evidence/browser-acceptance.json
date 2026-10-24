@@ -1,0 +1,13 @@
+{
+  "job_id": "c9a2a703-80bb-4a71-92ea-6de303350548",
+  "synthetic": true,
+  "browser_download_matches_server": true,
+  "zip_sha256": "53eeea937514a491d33bd9b98ec5ffb8cc5419cc9b46791b8c9b1cad5fa913eb",
+  "zip_bytes": 9215,
+  "browser_console_warnings_errors": 0,
+  "failed_revision": 2,
+  "corrected_revision": 3,
+  "input_units": "mm",
+  "photo_reconstruction": false,
+  "native_viewer_inspected": false
+}

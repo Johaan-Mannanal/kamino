@@ -92,10 +92,11 @@ def _one(scene):
                                 )
                         actual = float(d.qpos[qi])
                         actuals.append(actual)
-                        errors = [
-                            abs(float(d.qpos[oq]) - float(d.ctrl[oa])) for _other, oq, oa in indices
-                        ]
-                        error = max(errors)
+                        errors = {
+                            other.name: abs(float(d.qpos[oq]) - float(d.ctrl[oa]))
+                            for other, oq, oa in indices
+                        }
+                        error = max(errors.values())
                         max_error = max(max_error, error)
                         phases.append(
                             {
@@ -103,6 +104,7 @@ def _one(scene):
                                 "target_rad": target,
                                 "actual_rad": actual,
                                 "max_all_joint_tracking_error_rad": error,
+                                "tracking_errors_rad": errors,
                                 "simulated_time_s": float(d.time),
                             }
                         )

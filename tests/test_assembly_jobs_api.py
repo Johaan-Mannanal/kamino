@@ -82,6 +82,57 @@ def finished(client, job_id):
     raise AssertionError("Assembly processing timed out")
 
 
+def test_real_motion_failure_corrected_revision_preserves_history(tmp_path):
+    """A real weak-drive failure recovers without replacing its original evidence."""
+    from photo2sim.assemblies.review import ReviewProject, review_snapshot
+
+    def reviewed(raw):
+        parsed = ReviewProject.model_validate(raw)
+        parsed.review_snapshot = review_snapshot(parsed)
+        return parsed.model_dump(mode="json")
+
+    weak = project()
+    weak["joints"][0]["drive"]["kp"] = 0.000001
+    with TestClient(create_app(Settings(data_dir=tmp_path))) as client:
+        response = upload(client, reviewed(weak))
+        assert response.status_code == 202, response.text
+        base = f"/api/assembly-jobs/{response.json()['id']}"
+        assert client.post(base + "/process", json={"expected_revision": 1}).status_code == 202
+        failed = finished(client, response.json()["id"])
+        assert failed["status"] == "failed"
+        assert failed["export_generated"] and not failed["bundle_path"]
+        failure = client.get(base + "/files/" + failed["validation_path"])
+        assert failure.json()["original"]["checks"]["tracking"] is False
+        assert (
+            failure.json()["original"]["trials"][0]["phases"][0]["tracking_errors_rad"]["hinge"]
+            > 0.03
+        )
+
+        corrected = project()
+        corrected["joints"][0]["limits_rad"] = [-0.6, 0.6]
+        corrected["groups"][1]["frame"]["position_m"][2] = 0.32
+        corrected["groups"][1]["mass_kg"]["value"] = 0.12
+        saved = client.put(
+            base + "/revisions", json={"expected_revision": 1, "project": reviewed(corrected)}
+        )
+        assert saved.status_code == 201, saved.text
+        assert client.post(base + "/process", json={"expected_revision": 1}).status_code == 409
+        assert client.post(base + "/process", json={"expected_revision": 2}).status_code == 202
+        completed = finished(client, response.json()["id"])
+        assert completed["status"] == "completed"
+        assert [a["status"] for a in completed["attempts"]] == ["failed", "completed"]
+        assert client.get(base + "/files/" + failed["validation_path"]).content == failure.content
+        archive = client.get(base + "/files/" + completed["bundle_path"])
+        with zipfile.ZipFile(io.BytesIO(archive.content)) as bundle:
+            record = json.loads(bundle.read("assembly.json"))
+        assert record["joints"][0]["limits_rad"] == [-0.6, 0.6]
+        assert record["joints"][0]["origin"]["position_m"][2] == pytest.approx(0.07)
+        assert record["links"][1]["mass_kg"]["value"] == 0.12
+        assert record["links"][1]["mass_kg"]["source"] == "estimated"
+        assert record["links"][1]["sliding_friction"] is None
+        assert record["synthetic"] is True
+
+
 def test_two_link_import_revision_process_and_download(tmp_path):
     with TestClient(create_app(Settings(data_dir=tmp_path))) as client:
         response = upload(client)

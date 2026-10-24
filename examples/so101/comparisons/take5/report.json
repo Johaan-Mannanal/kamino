@@ -1,0 +1,304 @@
+{
+  "source_commit": "3ec35e6b50e32c6e4bb4d84d2500e467e1dfe7de",
+  "scope": "Offline baseline FK and evidence audit, not physical accuracy validation",
+  "mujoco_version": "3.3.7",
+  "bundle_sha256": "aff9c1a3a7690e8cafcae30eaa37ce5b33c82d7b46621dc51741fd05311344b0",
+  "scene_sha256": "758e6995c89a3a747e676da2005b6f111e70ddc2deebff15ae1b50d9fd745b74",
+  "integrity_manifest_sha256": "f744a8cc3337622e9c7b01de87b961e10d7e4181bb06f14cd8dae5fbd64ee29b",
+  "evidence_integrity_passed": true,
+  "calibration_unchanged": true,
+  "pairing": {
+    "take_id": "reference-20261024-take5",
+    "association": "operator-confirmed stationary association; not hardware synchronized",
+    "operator_confirmation": "they are unchanged",
+    "scope": "Arm and jaw opening unchanged during capture and front/side photos, in response to explicit confirmation request",
+    "image_exposure_times": "unknown",
+    "jaw_measurement": {
+      "reported_inches": 0.125,
+      "approximate_mm": 3.175,
+      "status": "operator approximate measurement; ruler photograph before capture; continuity supported by operator confirmation, no synchronized measurement",
+      "uncertainty_mm": "unknown"
+    },
+    "hardware": {
+      "teleop": "Operator-selected pose via leader before capture; then stopped with disable_torque_on_disconnect=false",
+      "capture": "read-only; no targets or torque changes",
+      "torque": "all six enabled in earlier hold check; capture preserves torque"
+    },
+    "limitations": [
+      "Multiple joints changed; does not independently establish each sign or zero.",
+      "Single jaw opening does not establish full gripper conversion.",
+      "No new model mapping selected or calibration modified."
+    ]
+  },
+  "capture_audit": {
+    "schema_version": "stationary-audit-1.0",
+    "scope": "Saved capture integrity and signal ranges only; not physical calibration",
+    "capture_integrity_passed": true,
+    "units_verified": false,
+    "hardware_mapping_verified": false,
+    "physical_pose_pairing_verified": false,
+    "operator_stationarity_verified": false,
+    "source_hashes": {
+      "capture.json": "af32817618b4fcf3c8642daca6406aa5788c17a700c309c10cabb0f91f61fc27",
+      "calibration.json": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+      "observations.jsonl": "142c56729d038dd5b69933bc09d5417e1b0eab68e72becab965b9f8b527d9c27"
+    },
+    "samples": 599,
+    "first_read_utc": "2026-10-24T14:37:38.995401+00:00",
+    "last_read_utc": "2026-10-24T14:39:38.879866+00:00",
+    "elapsed_span_s": 119.88069309999992,
+    "sample_rate_hz": 4.988292814600022,
+    "signals": {
+      "shoulder_pan.pos": {
+        "declared_unit": "degrees",
+        "minimum": 0.3956043956043956,
+        "maximum": 0.3956043956043956,
+        "span": 0.0,
+        "median": 0.3956043956043956
+      },
+      "shoulder_lift.pos": {
+        "declared_unit": "degrees",
+        "minimum": -61.27472527472528,
+        "maximum": -61.27472527472528,
+        "span": 0.0,
+        "median": -61.27472527472528
+      },
+      "elbow_flex.pos": {
+        "declared_unit": "degrees",
+        "minimum": 95.47252747252747,
+        "maximum": 95.47252747252747,
+        "span": 0.0,
+        "median": 95.47252747252747
+      },
+      "wrist_flex.pos": {
+        "declared_unit": "degrees",
+        "minimum": 1.2307692307692308,
+        "maximum": 1.2307692307692308,
+        "span": 0.0,
+        "median": 1.2307692307692308
+      },
+      "wrist_roll.pos": {
+        "declared_unit": "degrees",
+        "minimum": -4.43956043956044,
+        "maximum": -4.43956043956044,
+        "span": 0.0,
+        "median": -4.43956043956044
+      },
+      "gripper.pos": {
+        "declared_unit": "normalized_0_100",
+        "minimum": 0.6139154160982265,
+        "maximum": 0.6139154160982265,
+        "span": 0.0,
+        "median": 0.6139154160982265
+      }
+    },
+    "mapping_review": {
+      "shoulder_pan.pos": {
+        "declared_source_unit": "degrees",
+        "simulation_joint": null,
+        "sign": null,
+        "offset_rad": null,
+        "radians_per_unit": null,
+        "status": "unreviewed",
+        "evidence": []
+      },
+      "shoulder_lift.pos": {
+        "declared_source_unit": "degrees",
+        "simulation_joint": null,
+        "sign": null,
+        "offset_rad": null,
+        "radians_per_unit": null,
+        "status": "unreviewed",
+        "evidence": []
+      },
+      "elbow_flex.pos": {
+        "declared_source_unit": "degrees",
+        "simulation_joint": null,
+        "sign": null,
+        "offset_rad": null,
+        "radians_per_unit": null,
+        "status": "unreviewed",
+        "evidence": []
+      },
+      "wrist_flex.pos": {
+        "declared_source_unit": "degrees",
+        "simulation_joint": null,
+        "sign": null,
+        "offset_rad": null,
+        "radians_per_unit": null,
+        "status": "unreviewed",
+        "evidence": []
+      },
+      "wrist_roll.pos": {
+        "declared_source_unit": "degrees",
+        "simulation_joint": null,
+        "sign": null,
+        "offset_rad": null,
+        "radians_per_unit": null,
+        "status": "unreviewed",
+        "evidence": []
+      },
+      "gripper.pos": {
+        "declared_source_unit": "normalized_0_100",
+        "simulation_joint": null,
+        "sign": null,
+        "offset_rad": null,
+        "radians_per_unit": null,
+        "status": "unreviewed",
+        "evidence": []
+      }
+    },
+    "mapping_equation": "q_rad = sign * radians_per_unit * observation + offset_rad",
+    "missing_evidence": [
+      "Associated whole-arm front/side photographs and operator unchanged-pose confirmation",
+      "Multiple distinct associated poses to resolve joint signs and offsets",
+      "Measured jaw opening and reviewed gripper conversion",
+      "Measured base/table placement before world-frame comparison"
+    ],
+    "limitations": [
+      "Calibration agreement checks recorded metadata against saved bytes; hardware was not contacted.",
+      "Units are declarations from capture metadata, not independently verified by this generic audit.",
+      "Encoder stability alone does not establish stationary camera association or joint mapping.",
+      "No normalized signal is treated as an angle; mapping fields intentionally remain unset.",
+      "No requested or sent actions are inferred from observations."
+    ]
+  },
+  "joint_mapping_hypothesis": {
+    "shoulder_pan": {
+      "declared_unit": "degrees",
+      "minimum": 0.3956043956043956,
+      "maximum": 0.3956043956043956,
+      "span": 0.0,
+      "median": 0.3956043956043956,
+      "delta_from_take3": 0.7912087912087912,
+      "display_angle_rad": 0.006904599238658886,
+      "range_excess_deg": 0.0,
+      "assumption": "Unverified positive sign and zero offset, identical to take 3",
+      "verified": false
+    },
+    "shoulder_lift": {
+      "declared_unit": "degrees",
+      "minimum": -61.27472527472528,
+      "maximum": -61.27472527472528,
+      "span": 0.0,
+      "median": -61.27472527472528,
+      "delta_from_take3": 42.9010989010989,
+      "display_angle_rad": -1.0694457042989431,
+      "range_excess_deg": 0.0,
+      "assumption": "Unverified positive sign and zero offset, identical to take 3",
+      "verified": false
+    },
+    "elbow_flex": {
+      "declared_unit": "degrees",
+      "minimum": 95.47252747252747,
+      "maximum": 95.47252747252747,
+      "span": 0.0,
+      "median": 95.47252747252747,
+      "delta_from_take3": -0.7032967032967008,
+      "display_angle_rad": 1.6663099495963445,
+      "range_excess_deg": 0.0,
+      "assumption": "Unverified positive sign and zero offset, identical to take 3",
+      "verified": false
+    },
+    "wrist_flex": {
+      "declared_unit": "degrees",
+      "minimum": 1.2307692307692308,
+      "maximum": 1.2307692307692308,
+      "span": 0.0,
+      "median": 1.2307692307692308,
+      "delta_from_take3": -82.81318681318682,
+      "display_angle_rad": 0.02148097540916098,
+      "range_excess_deg": 0.0,
+      "assumption": "Unverified positive sign and zero offset, identical to take 3",
+      "verified": false
+    },
+    "wrist_roll": {
+      "declared_unit": "degrees",
+      "minimum": -4.43956043956044,
+      "maximum": -4.43956043956044,
+      "span": 0.0,
+      "median": -4.43956043956044,
+      "delta_from_take3": -8.615384615384617,
+      "display_angle_rad": -0.07748494701161639,
+      "range_excess_deg": 0.0,
+      "assumption": "Unverified positive sign and zero offset, identical to take 3",
+      "verified": false
+    },
+    "gripper": {
+      "declared_unit": "normalized_0_100",
+      "minimum": 0.6139154160982265,
+      "maximum": 0.6139154160982265,
+      "span": 0.0,
+      "median": 0.6139154160982265,
+      "delta_from_take3": -0.3410641200545702,
+      "display_angle_rad": 0.0,
+      "range_excess_deg": 0.0,
+      "assumption": "Display-only zero; no gripper conversion",
+      "verified": false
+    }
+  },
+  "hardware_mapping_verified": false,
+  "physical_accuracy_verified": false,
+  "dynamics_steps": 0,
+  "base_origin_world_m": [
+    0.0,
+    0.0,
+    0.15
+  ],
+  "joint_anchor_positions_m": {
+    "shoulder_pan": [
+      0.0388353,
+      0.0,
+      0.21239999999999998
+    ],
+    "shoulder_lift": [
+      0.06910757550366302,
+      -0.018487256943914752,
+      0.26659999999999995
+    ],
+    "elbow_flex": [
+      -0.01614978870828314,
+      -0.017898579657090154,
+      0.34525646957932654
+    ],
+    "wrist_flex": [
+      0.09834622856497084,
+      -0.01868914133376934,
+      0.2737366328848957
+    ],
+    "wrist_roll": [
+      0.14825666639212992,
+      -0.0009333269275144246,
+      0.23831772196612355
+    ],
+    "gripper": [
+      0.18042228462712373,
+      0.014953770458458745,
+      0.24300953826786048
+    ]
+  },
+  "render_camera": {
+    "azimuths_deg": [
+      0,
+      90,
+      180,
+      270
+    ],
+    "elevation_deg": -12,
+    "lookat_m": [
+      0.09545119972913176,
+      3.699928800837693e-10,
+      0.25242820272726496
+    ],
+    "distance_m": 0.5069356854822036,
+    "fitted_to_photos": false
+  },
+  "limitations": [
+    "Several joints changed together; signs and offsets are not identified independently.",
+    "One approximate jaw gap does not determine normalized-value to angle conversion.",
+    "Photo mirroring, camera calibration and full mounting transform remain unverified.",
+    "No fitting, clamping, new limits, calibration changes or hardware commands.",
+    "Base height remains the fixture's free-space assumption, not a measured table pose.",
+    "CAD structural subset omits servos, wrist camera, wires and clamps."
+  ]
+}

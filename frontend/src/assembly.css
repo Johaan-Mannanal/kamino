@@ -161,3 +161,29 @@ summary {
   width: 100%;
   margin-top: 6px;
 }
+.guided-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  max-width: 950px;
+  margin: 16px 0;
+}
+.guided-grid input:not([type='checkbox']),
+.guided-grid select,
+#fields select {
+  width: 100%;
+  margin-top: 6px;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.attempt {
+  border-top: 1px solid #34434c;
+  padding: 12px 0;
+}
+.validation-details:not(:empty) {
+  border-left: 3px solid #ddc487;
+  padding: 2px 16px;
+  margin: 12px 0;
+}

@@ -13,6 +13,7 @@ import trimesh
 
 from photo2sim.assemblies.contracts import AssemblyRecord
 from photo2sim.contracts import bundle_path
+from photo2sim.simulation.portable import write_portable_files
 
 TIMESTEP_S = 0.001
 
@@ -221,6 +222,7 @@ def export_assembly(
         )
         ET.indent(root)
         ET.ElementTree(root).write(stage / "scene.xml", encoding="utf-8", xml_declaration=True)
+        write_portable_files(stage, record.model_dump(mode="json"), assumptions)
         mujoco.MjModel.from_xml_path(str(stage / "scene.xml"))
         if output.exists() or output.is_symlink():
             raise FileExistsError("Output appeared during export; nothing overwritten")

@@ -54,12 +54,16 @@ steps**. This pose is not a valid control target or a dynamics acceptance result
 - The real images are oblique; render cameras are illustrative cardinal views
   at -12 degrees elevation. No pixel alignment, camera intrinsics, extrinsics,
   3D endpoint error or numeric physical-accuracy score is claimed.
-- Possible mirroring of the front photograph remains unconfirmed (background
-  lettering appears reversed). Neither photograph was flipped or geometrically
-  corrected. The comparison only resizes originals proportionally.
+- Follow-up at Windows commit `1ca9a52` confirms both originals used the rear
+  camera and were not flipped horizontally. This supersedes our earlier visual
+  suspicion about background lettering; the images remain unchanged. Camera
+  intrinsics/extrinsics are still unknown. The comparison only resizes originals
+  proportionally.
 - The zero-radian jaw looks broadly near-closed, but jaw opening is unmeasured.
   `render-4.png` and `render-5.png` show the model's two gripper range endpoints
   solely as an uncertainty illustration, not alternate measured poses.
+- The later approximately 3.18 mm jaw-gap measurement followed shoulder
+  repositioning; jaw continuity is unknown. It is not a take-3 calibration point.
 - The accepted model retains its assumed 0.15 m free-space base height. The real
   base is mounted at the table; these renders cannot establish mounting alignment.
 - The CAD subset omits servos, camera/mount, wiring and clamps visible in photos.
@@ -92,8 +96,8 @@ joint limits or existing validation thresholds were changed.
 
 ## Next evidence needed
 
-Yash should investigate the shoulder offset/limit discrepancy, confirm photo
-mirroring, and obtain additional operator-associated poses to disambiguate signs
+Yash should investigate the shoulder offset/limit discrepancy
+and obtain additional operator-associated poses to disambiguate signs
 and zeros. Measure jaw opening and base/table reference. One stationary pose
 cannot identify both sign and offset for each joint. Only after mapping review
 should observation replay and then commanded-motion prediction be compared.
