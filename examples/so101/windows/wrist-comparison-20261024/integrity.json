@@ -1,0 +1,70 @@
+{
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-baseline-20261024-155247/calibration.json": {
+    "sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+    "bytes": 961
+  },
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-baseline-20261024-155247/capture.json": {
+    "sha256": "6a77bcd70725306ecf3e09ce94931826e7f10a74c81d01ca9183003bba70a7bc",
+    "bytes": 1690
+  },
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-baseline-20261024-155247/observations.jsonl": {
+    "sha256": "b1dd72a65b229c44ab227c278d8319b8a1609fa5e3b357034c9aea18b2532028",
+    "bytes": 28604
+  },
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-baseline-20261024-155719/calibration.json": {
+    "sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+    "bytes": 961
+  },
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-baseline-20261024-155719/capture.json": {
+    "sha256": "6a77bcd70725306ecf3e09ce94931826e7f10a74c81d01ca9183003bba70a7bc",
+    "bytes": 1690
+  },
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-baseline-20261024-155719/observations.jsonl": {
+    "sha256": "5dd278d832826365754481ac088fc3ae2fa7c8a3421edfe0077958e757c4fb7c",
+    "bytes": 28548
+  },
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-changed-20261024-160156/calibration.json": {
+    "sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+    "bytes": 961
+  },
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-changed-20261024-160156/capture.json": {
+    "sha256": "6a77bcd70725306ecf3e09ce94931826e7f10a74c81d01ca9183003bba70a7bc",
+    "bytes": 1690
+  },
+  "examples/so101/windows/wrist-comparison-20261024/captures/wrist-changed-20261024-160156/observations.jsonl": {
+    "sha256": "70efcde60dc3a9ea82fe39c75926484f879479b1155b45deba7b61d99b03679d",
+    "bytes": 28500
+  },
+  "examples/so101/windows/wrist-comparison-20261024/connection-audit.md": {
+    "sha256": "32ff4491d7b37b2ef3a3839ce49c7724b13cdd2c2951a596e5c56e65fc85f232",
+    "bytes": 2967
+  },
+  "examples/so101/windows/wrist-comparison-20261024/pairing.json": {
+    "sha256": "35495728da19c27cfed42c89e3eb7778e32a0886a418caeb5bd45cf31072404d",
+    "bytes": 676
+  },
+  "examples/so101/windows/wrist-comparison-20261024/README.md": {
+    "sha256": "066c1b5a43fd29640b11a2a2f40e315e4a7860a0495fb522663cd074782fa085",
+    "bytes": 2230
+  },
+  "examples/so101/windows/wrist-comparison-20261024/wrist-capture-comparison.json": {
+    "sha256": "6125c24c0edd83a5b40ce0c5ce411edd815f132d4e43504f1fb644c5075a242f",
+    "bytes": 6118
+  },
+  "examples/so101/windows/wrist-comparison-20261024/wrist-capture-comparison.md": {
+    "sha256": "701b223440282393660908f41a8d398e86732d8376c3a7c080cadb887cf324eb",
+    "bytes": 3818
+  },
+  "tools/so101/move_wrist_relative.py": {
+    "sha256": "477e1eda34297ae2d1b19d0277737ae6983d211596d6cdbc55f33e2a85d8fcf3",
+    "bytes": 10799
+  },
+  "tools/so101/test_move_wrist_relative.py": {
+    "sha256": "3b13a3b7d219531d261bdf92e284ebd9a70736ed334fe03a8b3e30cc246d2ed2",
+    "bytes": 7579
+  },
+  "tools/so101/wrist-relative-operator.md": {
+    "sha256": "bd99ddef37b1e24116fa3ad62a36775b76b6f162e1663923c125c30962e54311",
+    "bytes": 4958
+  }
+}

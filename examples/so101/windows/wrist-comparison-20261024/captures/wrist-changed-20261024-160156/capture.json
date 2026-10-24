@@ -1,0 +1,65 @@
+{
+  "source_sha": "146d8474932c8b566717eb2738ba459337ab71c4",
+  "lerobot_version": "0.6.2",
+  "port": "COM5",
+  "robot_id": "hackathon_follower",
+  "calibration_sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+  "use_degrees": true,
+  "units": {
+    "shoulder_pan.pos": "degrees",
+    "shoulder_lift.pos": "degrees",
+    "elbow_flex.pos": "degrees",
+    "wrist_flex.pos": "degrees",
+    "wrist_roll.pos": "degrees",
+    "gripper.pos": "normalized_0_100"
+  },
+  "method": "Direct SerialMotorsBus reads; no Robot.connect/configure; no servo writes",
+  "photo_synchronization": "unpaired; operator stationary association required",
+  "requested_actions": null,
+  "actually_sent_actions": null,
+  "samples": 50,
+  "hardware_calibration": {
+    "shoulder_pan": {
+      "id": 1,
+      "drive_mode": 0,
+      "homing_offset": -1655,
+      "range_min": 745,
+      "range_max": 3444
+    },
+    "shoulder_lift": {
+      "id": 2,
+      "drive_mode": 0,
+      "homing_offset": 1217,
+      "range_min": 948,
+      "range_max": 3342
+    },
+    "elbow_flex": {
+      "id": 3,
+      "drive_mode": 0,
+      "homing_offset": -1316,
+      "range_min": 796,
+      "range_max": 2994
+    },
+    "wrist_flex": {
+      "id": 4,
+      "drive_mode": 0,
+      "homing_offset": -1617,
+      "range_min": 933,
+      "range_max": 2935
+    },
+    "wrist_roll": {
+      "id": 5,
+      "drive_mode": 0,
+      "homing_offset": -1438,
+      "range_min": 0,
+      "range_max": 4095
+    },
+    "gripper": {
+      "id": 6,
+      "drive_mode": 0,
+      "homing_offset": 335,
+      "range_min": 2041,
+      "range_max": 3507
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "captures": {
+    "wrist-baseline-20261024-155247": {
+      "first_utc": "2026-10-24T22:52:49.786157+00:00",
+      "last_utc": "2026-10-24T22:52:59.615658+00:00",
+      "checks": {
+        "samples": 50,
+        "recorded_samples_match": true,
+        "calibration_hash_ok": true,
+        "hardware_calibration_matches_file": true,
+        "time_ordered": true,
+        "normalization_max_error": 0.0
+      },
+      "stats": {
+        "shoulder_pan.pos": {
+          "median": 1.098901098901099,
+          "min": 1.098901098901099,
+          "max": 1.098901098901099
+        },
+        "shoulder_lift.pos": {
+          "median": -103.91208791208791,
+          "min": -103.91208791208791,
+          "max": -103.91208791208791
+        },
+        "elbow_flex.pos": {
+          "median": 70.15384615384616,
+          "min": 70.15384615384616,
+          "max": 70.15384615384616
+        },
+        "wrist_flex.pos": {
+          "median": 46.417582417582416,
+          "min": 46.417582417582416,
+          "max": 46.417582417582416
+        },
+        "wrist_roll.pos": {
+          "median": -5.758241758241758,
+          "min": -5.758241758241758,
+          "max": -5.758241758241758
+        },
+        "gripper.pos": {
+          "median": 0.4092769440654843,
+          "min": 0.4092769440654843,
+          "max": 0.4092769440654843
+        }
+      },
+      "calibration_sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+      "source_path": "C:\\Users\\ypira\\.codex\\worktrees\\windows-simulation-setup\\calhacks-arm\\outputs\\so101\\wrist-baseline-20261024-155247",
+      "portable_path": "captures/wrist-baseline-20261024-155247"
+    },
+    "wrist-baseline-20261024-155719": {
+      "first_utc": "2026-10-24T22:57:22.259586+00:00",
+      "last_utc": "2026-10-24T22:57:32.081937+00:00",
+      "checks": {
+        "samples": 50,
+        "recorded_samples_match": true,
+        "calibration_hash_ok": true,
+        "hardware_calibration_matches_file": true,
+        "time_ordered": true,
+        "normalization_max_error": 0.0
+      },
+      "stats": {
+        "shoulder_pan.pos": {
+          "median": 5.934065934065934,
+          "min": 5.846153846153846,
+          "max": 5.934065934065934
+        },
+        "shoulder_lift.pos": {
+          "median": -103.91208791208791,
+          "min": -103.91208791208791,
+          "max": -103.91208791208791
+        },
+        "elbow_flex.pos": {
+          "median": 76.57142857142857,
+          "min": 76.57142857142857,
+          "max": 76.57142857142857
+        },
+        "wrist_flex.pos": {
+          "median": 52.65934065934066,
+          "min": 52.65934065934066,
+          "max": 52.65934065934066
+        },
+        "wrist_roll.pos": {
+          "median": -8.747252747252746,
+          "min": -8.747252747252746,
+          "max": -8.747252747252746
+        },
+        "gripper.pos": {
+          "median": 0.8867667121418827,
+          "min": 0.8867667121418827,
+          "max": 0.8867667121418827
+        }
+      },
+      "calibration_sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+      "source_path": "C:\\Users\\ypira\\.codex\\worktrees\\windows-simulation-setup\\calhacks-arm\\outputs\\so101\\wrist-baseline-20261024-155719",
+      "portable_path": "captures/wrist-baseline-20261024-155719"
+    },
+    "wrist-changed-20261024-160156": {
+      "first_utc": "2026-10-24T23:01:59.581978+00:00",
+      "last_utc": "2026-10-24T23:02:09.407366+00:00",
+      "checks": {
+        "samples": 50,
+        "recorded_samples_match": true,
+        "calibration_hash_ok": true,
+        "hardware_calibration_matches_file": true,
+        "time_ordered": true,
+        "normalization_max_error": 0.0
+      },
+      "stats": {
+        "shoulder_pan.pos": {
+          "median": 4.351648351648351,
+          "min": 4.351648351648351,
+          "max": 4.351648351648351
+        },
+        "shoulder_lift.pos": {
+          "median": -103.91208791208791,
+          "min": -103.91208791208791,
+          "max": -103.91208791208791
+        },
+        "elbow_flex.pos": {
+          "median": 85.71428571428571,
+          "min": 85.71428571428571,
+          "max": 85.71428571428571
+        },
+        "wrist_flex.pos": {
+          "median": 66.9010989010989,
+          "min": 66.9010989010989,
+          "max": 66.9010989010989
+        },
+        "wrist_roll.pos": {
+          "median": -8.747252747252746,
+          "min": -8.747252747252746,
+          "max": -8.747252747252746
+        },
+        "gripper.pos": {
+          "median": 0.6821282401091405,
+          "min": 0.6821282401091405,
+          "max": 0.6821282401091405
+        }
+      },
+      "calibration_sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+      "source_path": "C:\\Users\\ypira\\.codex\\worktrees\\windows-simulation-setup\\calhacks-arm\\outputs\\so101\\wrist-changed-20261024-160156",
+      "portable_path": "captures/wrist-changed-20261024-160156"
+    }
+  },
+  "changed_minus_baseline": {
+    "wrist-baseline-20261024-155247": {
+      "shoulder_pan.pos": 3.2527472527472523,
+      "shoulder_lift.pos": 0.0,
+      "elbow_flex.pos": 15.560439560439548,
+      "wrist_flex.pos": 20.48351648351649,
+      "wrist_roll.pos": -2.989010989010988,
+      "gripper.pos": 0.2728512960436562
+    },
+    "wrist-baseline-20261024-155719": {
+      "shoulder_pan.pos": -1.582417582417583,
+      "shoulder_lift.pos": 0.0,
+      "elbow_flex.pos": 9.142857142857139,
+      "wrist_flex.pos": 14.241758241758248,
+      "wrist_roll.pos": 0.0,
+      "gripper.pos": -0.2046384720327422
+    }
+  },
+  "helper_executed": false,
+  "photo_status": "Four photos reported captured by operator; files not yet located for packaging or pixel inspection",
+  "selected_baseline": "wrist-baseline-20261024-155719 (chronological choice, pairing unconfirmed)",
+  "current_state": "Not verified; historical statements do not establish current pose, power or torque",
+  "mapping_verified": false
+}

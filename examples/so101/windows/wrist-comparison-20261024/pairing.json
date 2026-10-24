@@ -1,0 +1,14 @@
+{
+  "status": "incomplete",
+  "motion_method": "leader teleoperation, operator reported",
+  "helper_executed": false,
+  "photo_files": [],
+  "photo_count_reported_by_operator": 4,
+  "baseline_capture_for_photos": "unconfirmed: two candidate baselines preserved",
+  "unchanged_pose_and_jaws_between_capture_and_photos": "not yet confirmed in accessible records",
+  "photo_mirroring": "unconfirmed for these new photos",
+  "rear_camera_use": "unconfirmed; not inferred from take 3 or take 5",
+  "synchronization": "no hardware synchronization established",
+  "current_state": "unknown; no hardware access made during packaging",
+  "repeat_test_requested": false
+}

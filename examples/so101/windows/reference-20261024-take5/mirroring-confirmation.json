@@ -1,0 +1,11 @@
+{
+  "take_id": "reference-20261024-take5",
+  "operator_confirmation": "Neither was flipped",
+  "scope": [
+    "photos/front.png",
+    "photos/side.png"
+  ],
+  "meaning": "No left-right flip reported; portrait/landscape rotation is separate",
+  "rear_camera_for_take5": "not separately confirmed",
+  "association": "operator-confirmed, not synchronized"
+}
