@@ -100,3 +100,39 @@ it('provides guided numeric fields and applies a pivot edit before acknowledgeme
   ).toBe(0.15)
   expect(document.querySelector('#summary')?.textContent).toContain('0/1 acknowledged')
 })
+it('opens a saved job and downloads its validated result with API authentication', async () => {
+  const file = vi.fn(async () => new Blob(['bundle']))
+  const job = {
+    id: 'test-job', name: 'test', synthetic: true, status: 'completed', revision: 1,
+    project_path: 'revisions/0001/project.json', package_path: 'revisions/0001/package.json',
+    export_generated: true, motion_validation_passed: true,
+    export_path: 'attempts/0001/bundle/scene.xml',
+    validation_path: 'attempts/0001/bundle/validation.json',
+    bundle_path: 'attempts/0001/simulation.zip', error: null,
+    attempts: [{ number: 1, revision: 1, status: 'completed', export_generated: true,
+      motion_validation_passed: true, export_path: 'attempts/0001/bundle/scene.xml',
+      validation_path: 'attempts/0001/bundle/validation.json',
+      bundle_path: 'attempts/0001/simulation.zip', error: null,
+      export_config: { collision_mode: 'box', exclude_joint_pairs: false } }],
+  }
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: { get: vi.fn(async () => job), reviewPackage: vi.fn(async () => pack), file },
+    setAssemblyToken: vi.fn(),
+  }))
+  const create = vi.fn(() => 'blob:test')
+  const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+  Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: create })
+  Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() })
+  await import('./assembly-workbench')
+  document.querySelector<HTMLInputElement>('#job-id')!.value = 'test-job'
+  document.querySelector<HTMLElement>('#open-job')!.click()
+  await vi.waitFor(() => expect(document.querySelector('#job-status')?.textContent).toContain('motion validation passed: yes'))
+  const button = [...document.querySelectorAll<HTMLButtonElement>('#attempts button')]
+    .find((item) => item.textContent === 'Download Result ZIP')!
+  expect(button).toBeDefined()
+  button.click()
+  await vi.waitFor(() => expect(file).toHaveBeenCalledWith('test-job', 'attempts/0001/simulation.zip'))
+  expect(create).toHaveBeenCalled()
+  expect(click).toHaveBeenCalled()
+  click.mockRestore()
+})

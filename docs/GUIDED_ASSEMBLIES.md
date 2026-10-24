@@ -2,8 +2,10 @@
 
 This local workflow turns supplied component meshes into editable rigid links and
 reviewed joints, then uses the generic assembly exporter. The browser is at
-`/assembly.html` in the existing Vite app. HTTP assembly jobs and photo-based
-part segmentation are not implemented yet. The rigid-object app stays separate.
+`/assembly.html` in the existing Vite app. Import the review project JSON and
+its original OBJ/STL source meshes to create a persistent HTTP job, or open a
+saved job by ID. Photo-based part segmentation is not implemented. The rigid-object
+app stays separate.
 
 ## Workflow
 1. Supply geometry-only OBJ/STL parts in metres and an `assembly-review-1.0`
@@ -23,12 +25,14 @@ part segmentation are not implemented yet. The rigid-object app stays separate.
    edits invalidate earlier acknowledgements. A semantic snapshot also rejects
    externally edited stale approvals at preparation time. This is a consistency
    guard, not a signed approval or physical certification.
-6. Download the project JSON beside its original source meshes. Downloading the
-   complete review package also preserves the browser preview for later edits.
-7. Run `python -m photo2sim.assemblies prepare PATH/reviewed-project.json --output-dir NEW/prepared`.
-8. Run `python -m photo2sim.assemblies export NEW/prepared/assembly.json --output-dir NEW/bundle`.
-   A failed motion check returns exit 1 and retains the bundle/report. Inspect it;
-   do not equate a successful load or moving preview with passing physics.
+6. Save the reviewed revision in the job, then run preparation, export and
+   validation from the workbench. The job shows **export generated** separately
+   from **motion validation passed**. Download the result ZIP only after a pass;
+   failed reports and exports remain downloadable from previous attempts.
+   Offline review package and project downloads remain available.
+7. The CLI remains available: `python -m photo2sim.assemblies prepare PATH/reviewed-project.json --output-dir NEW/prepared`,
+   then `python -m photo2sim.assemblies export NEW/prepared/assembly.json --output-dir NEW/bundle`.
+   A failed motion check returns exit 1 and retains the bundle/report.
 
 Every command requires a new output path. Previous attempts and source meshes
 remain intact. A reviewed JSON can be authored programmatically, but the caller

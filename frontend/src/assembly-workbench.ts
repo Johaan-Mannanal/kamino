@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { assemblyApi, setAssemblyToken, type AssemblyJob } from './assembly-api'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import {
   assignPart,
@@ -13,17 +14,22 @@ import {
 import './assembly.css'
 
 const root = document.querySelector<HTMLDivElement>('#assembly-app')!
-root.innerHTML = `<header><a href="/">Photo2Sim</a><span>Guided assembly review · local workspace</span></header>
+root.innerHTML = `<header><a href="/">Photo2Sim</a><span>Guided assembly review</span></header>
 <main><h1>From parts to a moving assembly.</h1><p>Group rigid parts, review pivots and joint limits, then prepare a simulator export. This preview is kinematic; it does not test forces, collisions or hardware accuracy.</p>
+<details><summary>API access</summary><label>Application token <input id="api-token" type="password" autocomplete="off"></label><button id="set-token">Set token for this session</button></details>
+<section class="job-controls"><h2>Import source project</h2><label>Review project JSON <input id="import-project" type="file" accept=".json,application/json"></label><label>Source meshes (select all files) <input id="import-meshes" type="file" accept=".obj,.stl" multiple></label><button id="import">Import and open review</button><p>Mesh filenames must match the paths in the project. For nested paths, select a folder below.</p><label>Source mesh folder <input id="import-folder" type="file" webkitdirectory multiple></label><h2>Open existing job</h2><label>Job ID <input id="job-id" type="text" autocomplete="off"></label><button id="open-job">Open job</button><p id="job-status"></p><div id="attempts"></div></section>
 <label class="load">Open review package <input id="load" type="file" accept=".json,application/json"></label>
-<p id="message" role="status">Create a package with: python -m photo2sim.assemblies package project.json --output review-package.json</p>
+<p id="message" role="status">Import a project and its meshes, open a saved job, or load an offline review package.</p>
 <div id="workspace" hidden><div class="layout"><section class="stage"><div id="viewer"></div><button id="reset">Reset preview pose</button><p id="summary"></p><div id="sliders"></div></section>
 <section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div>
 <h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; limits are radians. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
-<h2>3. Save your revision</h2><button id="save">Download project JSON</button><button id="save-package">Download review package</button><p>Save the project beside its original meshes, then run the CLI prepare/export commands. This workbench does not upload files or run simulation.</p>
+<h2>3. Save and process</h2><button id="save-revision">Save revision to job</button><label>Collision geometry <select id="collision-mode"><option value="box">Box (historical default)</option><option value="convex_mesh">Convex mesh</option></select></label><label><input id="exclude-joint-pairs" type="checkbox"> Exclude direct parent-child collision pairs</label><button id="process">Run preparation, export and validation</button><p>These export settings are recorded per attempt and do not alter the reviewed source project. Save the review before processing. Previous attempts remain available after a revision or failed validation.</p><button id="save">Download project JSON</button><button id="save-package">Download review package</button>
 <details><summary>Advanced: full project / add links and joints</summary><textarea id="full" aria-label="Full project JSON" spellcheck="false"></textarea><button id="apply-full">Apply full project</button></details><details><summary>Provenance and limitations</summary><pre id="notes"></pre></details></section></div></div></main>`
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 let payload: ReviewPackage | undefined,
+  job: AssemblyJob | undefined,
+  savedProject = '',
+  pollTimer: ReturnType<typeof setTimeout> | undefined,
   values: Record<string, number> = {},
   dispose: (() => void) | undefined,
   updateView: (() => void) | undefined
@@ -40,6 +46,69 @@ const download = (name: string, data: unknown) => {
   a.download = name
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+const running = (status: string) => ['preparing', 'exporting', 'validating'].includes(status)
+async function downloadArtifact(path: string) {
+  if (!job) return
+  const blob = await assemblyApi.file(job.id, path)
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = path.split('/').at(-1) || 'artifact'
+  link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+function renderJob() {
+  const status = el('job-status')
+  const attempts = el('attempts')
+  attempts.replaceChildren()
+  if (!job) {
+    status.textContent = 'Offline review package. Import its source project and meshes to process it.'
+    return
+  }
+  const dirty = !!payload && JSON.stringify(payload.project) !== savedProject
+  status.textContent = `Job ${job.id} · revision ${job.revision} · ${job.status} · ${job.synthetic ? 'synthetic' : 'source-assisted'} · ${dirty ? 'unsaved edits' : 'saved'} · export generated: ${job.export_generated ? 'yes' : 'no'} · motion validation passed: ${job.motion_validation_passed === null ? 'pending' : job.motion_validation_passed ? 'yes' : 'no'}${job.error ? ' · ' + job.error.message : ''}`
+  el<HTMLButtonElement>('save-revision').disabled = running(job.status) || !dirty
+  el<HTMLButtonElement>('process').disabled = running(job.status) || dirty || !payload
+  for (const attempt of job.attempts) {
+    const row = document.createElement('div')
+    row.className = 'attempt'
+    const label = document.createElement('p')
+    label.textContent = `Attempt ${attempt.number} · revision ${attempt.revision} · ${attempt.status} · ${attempt.export_config?.collision_mode || 'box'} collision · adjacent pairs ${attempt.export_config?.exclude_joint_pairs ? 'excluded' : 'native'} · export generated: ${attempt.export_generated ? 'yes' : 'no'} · motion validation passed: ${attempt.motion_validation_passed === null ? 'pending' : attempt.motion_validation_passed ? 'yes' : 'no'}${attempt.error ? ' · ' + attempt.error.message : ''}`
+    row.append(label)
+    for (const [title, path] of [['Export', attempt.export_path], ['Validation report', attempt.validation_path], ['Result ZIP', attempt.bundle_path]] as const) {
+      if (!path) continue
+      const button = document.createElement('button')
+      button.textContent = `Download ${title}`
+      button.onclick = () => downloadArtifact(path).catch(error)
+      row.append(button)
+    }
+    attempts.append(row)
+  }
+  if (running(job.status)) schedulePoll()
+}
+function schedulePoll() {
+  if (pollTimer || !job) return
+  pollTimer = setTimeout(async () => {
+    pollTimer = undefined
+    try {
+      job = await assemblyApi.get(job!.id)
+      renderJob()
+    } catch (e) { error(e) }
+  }, 1200)
+}
+async function openJob(id: string) {
+  if (pollTimer) clearTimeout(pollTimer)
+  pollTimer = undefined
+  const next = await assemblyApi.get(id)
+  const packageData = parsePackage(JSON.stringify(await assemblyApi.reviewPackage(next)))
+  job = next
+  payload = packageData
+  savedProject = JSON.stringify(payload.project)
+  el<HTMLInputElement>('job-id').value = id
+  render()
+  renderJob()
+  message('Opened saved job and review package.')
 }
 function selection() {
   const [kind, n] = el<HTMLSelectElement>('selection').value.split(':')
@@ -201,6 +270,7 @@ function render() {
     sliders.append(label)
   }
   mount()
+  renderJob()
 }
 function mount() {
   dispose?.()
@@ -342,11 +412,69 @@ el<HTMLInputElement>('load').onchange = async () => {
     if (!f) return
     if (f.size > 100 * 1024 * 1024) throw Error('Maximum package size: 100 MiB')
     payload = parsePackage(await f.text())
+    job = undefined
+    savedProject = ''
     render()
     message('Loaded locally. Review all groups and joints; physical calibration remains separate.')
   } catch (e) {
     error(e)
   }
+}
+el('set-token').onclick = () => {
+  setAssemblyToken(el<HTMLInputElement>('api-token').value)
+  message('Application token set for this browser session.')
+}
+el('import').onclick = async () => {
+  try {
+    const project = el<HTMLInputElement>('import-project').files?.[0]
+    if (!project) throw Error('Select a review project JSON.')
+    const raw = JSON.parse(await project.text()) as ReviewPackage['project']
+    if (raw.schema_version !== 'assembly-review-1.0' || !Array.isArray(raw.parts))
+      throw Error('Select an assembly-review-1.0 project.')
+    const expected = new Set(raw.parts.map((part) => part.mesh))
+    const files = [
+      ...Array.from(el<HTMLInputElement>('import-meshes').files || []),
+      ...Array.from(el<HTMLInputElement>('import-folder').files || []),
+    ]
+    const meshes = [...expected].map((path) => {
+      const matches = files.filter((file) =>
+        file.name === path || file.webkitRelativePath === path ||
+        file.webkitRelativePath.endsWith('/' + path),
+      )
+      if (matches.length !== 1) throw Error(`Select exactly one source mesh for ${path}.`)
+      return { path, file: matches[0] }
+    })
+    message('Importing source meshes and checking hashes…')
+    const created = await assemblyApi.create(project, meshes)
+    await openJob(created.id)
+  } catch (e) { error(e) }
+}
+el('open-job').onclick = () => {
+  openJob(el<HTMLInputElement>('job-id').value.trim()).catch(error)
+}
+el('save-revision').onclick = async () => {
+  if (!job || !payload) return
+  try {
+    job = await assemblyApi.save(job.id, payload.project, job.revision)
+    savedProject = JSON.stringify(payload.project)
+    renderJob()
+    message(`Saved revision ${job.revision}.`)
+  } catch (e) { error(e) }
+}
+el('process').onclick = async () => {
+  if (!job || !payload) return
+  if (JSON.stringify(payload.project) !== savedProject) {
+    message('Save this revision before processing.')
+    return
+  }
+  try {
+    job = await assemblyApi.process(job.id, job.revision, {
+      collision_mode: el<HTMLSelectElement>('collision-mode').value as 'box' | 'convex_mesh',
+      exclude_joint_pairs: el<HTMLInputElement>('exclude-joint-pairs').checked,
+    })
+    renderJob()
+    message('Preparation started. Export and motion validation results will appear separately.')
+  } catch (e) { error(e) }
 }
 el('selection').onchange = select
 el('apply').onclick = () => {
@@ -398,4 +526,7 @@ el('save').onclick = () => {
 el('save-package').onclick = () => {
   if (payload) download(payload.project.name + '-review-package.json', payload)
 }
-window.addEventListener('pagehide', () => dispose?.())
+window.addEventListener('pagehide', () => {
+  dispose?.()
+  if (pollTimer) clearTimeout(pollTimer)
+})
