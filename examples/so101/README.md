@@ -11,7 +11,8 @@ Vendored unchanged from [MuJoCo Menagerie robotstudio_so101](https://github.com/
 commit `f3b6013629c7b94f8ee93fd977b161fa8350f9bc`.
 The 22 source files total 17,440,242 bytes. The upstream Apache-2.0 license,
 README, and per-file SHA-256 manifest are in `third_party/robotstudio_so101/`.
-No model geometry, gains, limits, collisions, or timestep were changed.
+The vendored model geometry, gains, limits, collisions, and timestep are unchanged.
+The derived combined workspace below uses a smaller timestep.
 Upstream describes this as the **new calibration** variant and requires MuJoCo
 3.1.3 or later. Whether our physical arm uses compatible calibration is pending.
 
@@ -77,11 +78,25 @@ No hardware converter or hardware-control path is implemented in this bootstrap.
 4. Separately replay recorded commanded targets, with timestamps and the actual
    post-clipping targets, to assess simulated tracking. This requires actuator
    assumptions and must not be presented as measured dynamics without evidence.
-5. Add the accepted charger, measured base/table placement, and one agreed short
-   action. Compare live real and simulated outcomes with assumptions visible.
+5. Replace the combined workspace's assumed base/table/object placement with
+   measurements and add one agreed short action. Compare live real and simulated
+   outcomes with assumptions visible.
 
 The current charger uses a single collision box and estimated dimensions/mass.
 A broad-body push is a possible first action; pin insertion is unsupported.
-Upstream servo dynamics, the 5 ms robot timestep, and the charger's separate
-0.1 ms drop-validation settings need a new combined-scene check. Standalone
-passes do not establish that the combined contact simulation will work.
+The combined scene now passes offline hold/drop/reset checks at a 0.1 ms timestep,
+with upstream servo gains unchanged. These checks do not establish manipulation
+success, calibrated dynamics, or real-world agreement.
+
+## Combined robot, charger and tabletop
+
+[WORKSPACE.md](WORKSPACE.md) contains reproducible build, validation and resettable
+viewer commands. The builder preserves the accepted API charger's saved orientation
+and estimated properties. The complete output folder can be moved to another
+computer; it includes the robot source/license, object mesh and metadata.
+
+On this Mac, original and relocated scenes each passed two three-second trials:
+maximum penetration 0.2515 mm, maximum robot hold deviation 0.000825 rad,
+zero warnings and exactly repeatable final states after reset. See
+[numerical evidence](workspace-validation-macos.json). Native combined-scene
+viewer acceptance remains pending on Windows.

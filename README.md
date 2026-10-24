@@ -20,9 +20,14 @@ Turn photos of real objects into editable MuJoCo simulation assets. Built for Ca
 
 ## Current status
 
-The backend branch connects image uploads, SQLite-backed jobs, Meshy reconstruction, explicit property confirmation, geometry preparation, MuJoCo export/validation, and portable ZIP downloads. One real charger reconstruction completed through Meshy; its cached mesh also passed the integrated simulation pipeline and relocation checks. Properties remain estimated, collision/inertia are approximate, and native Windows viewer inspection of this real asset remains outstanding. Gemini property suggestions are connected and one real charger request succeeded, with caching and manual confirmation kept separate. Docker/HTTPS deployment packaging is present; an actual Vultr deployment still requires account/server access. The frontend and Fetch workflow integration are separate work. These feature-branch changes are not yet part of `main`.
+The backend branch connects uploads, persistent jobs, Meshy reconstruction, explicit property confirmation, geometry preparation, MuJoCo validation, and authenticated ZIP downloads. The integrated frontend includes mesh preview, saved orientation and Gemini suggestions. The cleaned real charger completed through the API and passed Windows native-viewer and relocation checks; dimensions/mass remain estimated and collision/inertia approximate. Gemini suggestions have a successful live backend request; frontend acceptance used cached suggestions. Fetch public integration and Vultr deployment remain unfinished. Main is separate from feature integration.
 
-The Windows handoff reports working wrist-camera capture. Image sharpness at task distances still needs evaluation. Any useful camera may supply object photos; physical arm control is optional. See the [pivot decision](docs/decisions/2026-10-23-photo-to-simulation.md).
+The current demo priority is a live real-versus-simulated SO101 action comparison.
+The [combined robot/charger/table scene](examples/so101/WORKSPACE.md) passes offline
+hold/drop/reset checks. Yash is gathering hardware configuration, calibration and
+reference-pose evidence before we implement real-to-simulation joint conversion
+and action replay. The current combined layout and servo dynamics are assumptions;
+no physical arm control or manipulation success is established by these checks.
 
 ## Basic infrastructure
 
@@ -53,7 +58,7 @@ src/photo2sim/
   assets/             Reconstruction, asset metadata, geometry preparation
   simulation/         MuJoCo export and validation
   integrations/       Gemini, Fetch, and provider adapters
-frontend/             Reserved for Atul's interface workspace
+frontend/             Integrated upload, properties, preview and export UI
 tools/simulation/     Standalone simulation checks and helper commands
 examples/simulation/  Small portable scenes and test fixtures
 hardware/             Capture fixtures and measurements
