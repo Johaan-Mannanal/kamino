@@ -1,8 +1,14 @@
 # Yash: SO101 inventory for live real-versus-simulation comparison
 
-Finish your current charger acceptance first. Johaan is preparing the robot model
-and mapping locally; the frontend is being completed separately. We need the
-following Windows evidence before matching real and simulated arm motion.
+Your API-produced charger ZIP acceptance is complete, reported at
+`eaa705cef28083abdd2b0af9f570e7659f5ae836`. Original/relocated validation, native
+appearance and saved +90° X orientation passed. No repeated charger demo or
+Meshy reconstruction is needed. Keep its estimated properties and single-box
+collision limitations documented.
+
+Next, focus on the following SO101 inventory. Johaan has pushed the model setup
+at `3ca9c3e` and is integrating the frontend separately. We need the following
+Windows evidence before matching real and simulated arm motion.
 
 ## 1. Synchronize without losing work
 

@@ -17,9 +17,9 @@ This is the overall project checklist. Update it as verified handoffs arrive; ke
 
 - **Johaan + this agent:** backend/integration, Srijan's remaining geometry work,
   and the SO101 model/joint mapping. Vultr remains deferred.
-- **Background GPT-6.1-sol agent:** Atul's remaining core frontend work in
-  `codex/frontend-demo-completion`: GLB preview, saved orientation, Gemini
-  suggestions, and real cached-object browser acceptance. Work is in progress.
+- **GPT-6.1-sol frontend agent:** completed GLB preview, saved orientation,
+  Gemini suggestions and real cached-object browser acceptance. Integrated
+  locally on `codex/backend-pipeline`; remote publication is pending.
 - **Yash + Windows agent:** native simulation acceptance and the actual SO101
   environment/calibration/recording inventory. Branch: `codex/windows-simulation-setup`.
 - **Srijan and Atul:** no active implementation dependency; their remaining work
@@ -34,11 +34,16 @@ single collision-box limitation remain visible.
 
 Saved orientation is now supported in persistent processing at `2ceb121`. The
 cached cleaned charger completed through the API with +90° X rotation and passed
-original/relocated checks locally. Windows acceptance of that API-generated ZIP
-remains distinct from the earlier manually exported candidate. See
+original/relocated checks locally. Yash then reported acceptance of the actual
+API-generated ZIP on Windows at `eaa705c`: original/relocated checks passed,
+native appearance and upward pins matched, saved +90° X rotation was retained,
+and geometry matched the manual candidate within approximately 1e-17 m. See
 [API acceptance](../examples/simulation/apple-20w-charger-cleaned/api-acceptance/README.md).
-Gemini suggestions are live-tested through the backend; frontend adoption is
-in progress. Fetch public integration and Vultr deployment are not complete.
+Gemini suggestions are live-tested through the backend; the frontend now loads
+suggestions, requires explicit application/save, and preserves manual drafts.
+The frontend acceptance used cached suggestions and a cached real charger;
+it did not submit a new reconstruction or successful Gemini generation.
+Fetch public integration and Vultr deployment are not complete.
 
 **Current demo priority:** compare a real SO101 action live in person with its
 simulated counterpart. Start with matching joint names, units, calibration and
@@ -110,7 +115,7 @@ Unknown values remain explicit. A material label alone does not establish mass o
 
 - [x] Export `scene.xml`, relative-path meshes, and metadata (first charger and synthetic fixtures).
 - [x] Check loading, scale, valid mass/inertia, contact, and settling (headless first charger).
-- [ ] Inspect visual and collision geometry separately in the viewer.
+- [x] Inspect visual and collision geometry separately in the viewer (Windows charger acceptance).
 - [x] Produce a report that distinguishes headless checks from viewer observations.
 - [x] Copy the bundle to another directory and verify portability (first charger).
 
@@ -118,8 +123,8 @@ Passing these checks establishes basic simulation usability, not measured real-w
 
 ### Phase 6 — Complete the application
 
-- [ ] Connect upload, processing, property confirmation, preview, and download.
-- [x] Provide backend errors and simulation retries that retain completed work; frontend integration pending.
+- [x] Connect upload, processing, property confirmation, preview, and download (local integration; remote publication pending).
+- [x] Provide errors and simulation retries that retain completed work, with frontend controls.
 - [ ] Run the entire pipeline on two real objects.
 - [ ] Record total processing time, manual edits, and failure causes.
 
@@ -127,7 +132,7 @@ Passing these checks establishes basic simulation usability, not measured real-w
 
 - [ ] Fetch: expose the primary workflow through ASI:One, register the agent, implement its chat protocol, and complete submission requirements.
 - [ ] Vultr: deploy actual backend or processing jobs if access is available.
-- [x] Gemini: connect the property-assistance API and verify a real request; frontend adoption and sponsor submission remain pending.
+- [x] Gemini: connect the property-assistance API and verify a real request; explicit frontend adoption is implemented. Sponsor submission remains pending.
 - [ ] Verify final eligibility and submission requirements using [the sponsor checklist](SPONSORS.md).
 
 ### Phase 8 — Validate, polish, and submit
