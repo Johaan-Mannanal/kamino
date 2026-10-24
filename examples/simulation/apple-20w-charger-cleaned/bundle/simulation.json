@@ -1,0 +1,44 @@
+{
+  "format": "photo2sim-box-export/1",
+  "units": {
+    "length": "m",
+    "mass": "kg",
+    "time": "s",
+    "inertia": "kg*m^2"
+  },
+  "prepared_mesh_scale": [
+    1,
+    1,
+    1
+  ],
+  "inertia": {
+    "method": "uniform_cuboid_approximation",
+    "diagonal_kg_m2": [
+      2.0123916666666662e-05,
+      2.563058333333333e-05,
+      1.2675166666666662e-05
+    ],
+    "note": "Approximates the confirmed bounding box as uniformly filled; not measured inertia"
+  },
+  "collision": "centred axis-aligned box; full property extents divided by two",
+  "friction": [
+    0.8,
+    0.005,
+    0.0001
+  ],
+  "sliding_friction_source": "simulation_default_not_measured",
+  "friction_note": "Original property/provenance is preserved in asset.json; torsional and rolling terms are assumed defaults",
+  "timestep_s": 0.0001,
+  "gravity_m_s2": [
+    0,
+    0,
+    -9.81
+  ],
+  "initial_bottom_height_m": 0.02,
+  "contact_solref": [
+    0.002,
+    1
+  ],
+  "numerical_note": "20 substeps per contact time constant; modest 20 mm upright drop; not calibrated material response",
+  "status": "load_checked_only; run validate_export for dynamic evidence"
+}

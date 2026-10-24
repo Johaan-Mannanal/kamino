@@ -1,0 +1,28 @@
+{
+  "sha256": "bf153592c7408a0dd88d7e36f7a51a8d17977af8b671ab10df0661cafa39e25e",
+  "bytes": 2097108,
+  "vertices": 58234,
+  "faces": 116460,
+  "bounds": [
+    [
+      -0.7440102696418762,
+      -0.9508327841758728,
+      -0.4421674311161041
+    ],
+    [
+      0.742101788520813,
+      0.9488049745559692,
+      0.4403289556503296
+    ]
+  ],
+  "extents": [
+    1.4861120581626892,
+    1.899637758731842,
+    0.8824963867664337
+  ],
+  "finite": true,
+  "watertight": true,
+  "winding_consistent": true,
+  "units": "raw provider units; not measured metres",
+  "render": "Full triangle mesh, orthographic software painter rendering; no physical validation."
+}

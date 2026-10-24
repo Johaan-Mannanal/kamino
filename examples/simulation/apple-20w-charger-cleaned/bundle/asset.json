@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "asset_id": "8791ee1d-4660-4d20-b628-33efdfe2849d",
+  "visual_mesh": "meshes/visual.obj",
+  "properties": {
+    "dimensions_m": {
+      "x": 0.043,
+      "y": 0.027,
+      "z": 0.058,
+      "source": "estimated",
+      "note": "Includes an assumed 16 mm pin allowance. Similar-adapter reference only; exact model unconfirmed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+    },
+    "mass_kg": {
+      "value": 0.059,
+      "source": "estimated",
+      "note": "Rounded from 58.5 g published for a similar adapter, not weighed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+    },
+    "sliding_friction": null
+  },
+  "collision": {
+    "kind": "box",
+    "mesh_path": null
+  },
+  "synthetic": false,
+  "notes": [
+    "Orientation: the input mesh axes are assumed to already match the requested x/y/z dimension axes; no rotation or axis permutation was applied.",
+    "Bounding box centred at the origin; source centre was (-0.000954241, 0.000919238, -0.0010139) in input units.",
+    "Scaled per axis independently from source extents (1.48611, 0.882496, 1.89964) (input units, treated as unknown) to confirmed full extents (0.043, 0.027, 0.058) m.",
+    "Nonuniform distortion: per-axis scale factors differ by up to 5.7% (x:y:z ratio 1.000:1.057:1.055); the mesh's proportions did not match the confirmed dimensions.",
+    "Collision is a box centred at the origin with the confirmed dimensions; mass and friction were passed through unchanged and not inferred from geometry.",
+    "x=raw x; y=-raw z; z=raw y. Pins point +Z. Rotation +90 degrees about X before scaling.",
+    "Raw source SHA256: bf153592c7408a0dd88d7e36f7a51a8d17977af8b671ab10df0661cafa39e25e",
+    "Manual per-asset orientation review; API/UI orientation editing remains unimplemented.",
+    "Body and separate pins visually inspected in software render; USB-C recess detail remains approximate. Windows native viewer acceptance pending."
+  ]
+}

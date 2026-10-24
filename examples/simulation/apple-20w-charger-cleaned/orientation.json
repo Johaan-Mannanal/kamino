@@ -1,0 +1,50 @@
+{
+  "provider_task_id": "01a16c9c-1679-7385-b5c3-0d755fe59d11",
+  "backend_job_id": "14ec98fd-cda0-4b0c-915f-a70e0805dc66",
+  "raw_sha256": "bf153592c7408a0dd88d7e36f7a51a8d17977af8b671ab10df0661cafa39e25e",
+  "raw_to_simulation_rotation": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      -1.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "mapping": "x=raw x; y=-raw z; z=raw y. Pins point +Z. Rotation +90 degrees about X before scaling.",
+  "oriented_extents_provider_units": [
+    1.4861120581626892,
+    0.8824963867664337,
+    1.899637758731842
+  ],
+  "scale_factors_m_per_provider_unit": [
+    0.028934561000172342,
+    0.030595026115552773,
+    0.03053213684208908
+  ],
+  "relative_scale_spread": 0.05427238758055332,
+  "dimensions_and_mass": "Existing estimates, not specimen measurements. No new physical accuracy claim.",
+  "versions": {
+    "python": "3.13.7",
+    "mujoco": "3.3.7",
+    "trimesh": "5.2.0",
+    "numpy": "2.5.4"
+  }
+}
