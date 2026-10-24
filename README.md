@@ -51,7 +51,7 @@ src/photo2sim/
   assets/             Reconstruction, asset metadata, geometry preparation
   simulation/         MuJoCo export and validation
   integrations/       Gemini, Fetch, and provider adapters
-  web/                API, interface, background jobs, status
+frontend/             Reserved for Atul's interface workspace
 tools/simulation/     Standalone simulation checks and helper commands
 examples/simulation/  Small portable scenes and test fixtures
 hardware/             Capture fixtures and measurements

@@ -35,7 +35,7 @@ The core deliverable is an editable simulation asset. Robot-policy training, phy
 ### Phase 2 — Prepare infrastructure
 
 - [ ] Verify the isolated Python environment and record exact versions.
-- [ ] Establish an API and background job boundary with persistent progress/errors.
+- [x] Establish an API and background job boundary with persistent progress/errors (backend branch).
 - [ ] Build mock reconstruction results and a small labeled synthetic simulation fixture.
 - [ ] Confirm API access/credits before making provider execution a dependency.
 
