@@ -11,6 +11,8 @@ Authoritative Python models: `src/photo2sim/contracts.py`. Backend owns this fil
 - `GET /api/jobs/{id}/files/{path}`: job-relative artifact download, e.g. `reconstruction/mesh.glb` or `uploads/00.png`.
 - `/docs` and `/openapi.json`: generated API documentation once the backend starts.
 
+Phone JPEGs identified as MPO are accepted as JPEG uploads with their original bytes preserved. A provenance-labeled property example for the first real object is at `examples/api/apple-20w-estimated-properties.json`; these are reference-based estimates, not measurements.
+
 State sequence: `queued → reconstructing → awaiting_properties → preparing → validating → completed`; failures use `failed` and `{code, message}`. The initial backend implements reconstruction and property persistence only. `progress` describes reconstruction, not total pipeline completion. A 100% reconstruction job can still await properties.
 
 The provider is configured server-side (`mock` by default). Never accept API keys or arbitrary provider download URLs from the browser. Mock jobs have `synthetic: true`; they produce a known cube and make no claim of photo reconstruction. CORS for local frontend development permits `http://localhost:5173` and `http://127.0.0.1:5173`.
