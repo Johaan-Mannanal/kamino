@@ -14,6 +14,7 @@ import {
 import { addConnectedLink, renameLink, changeJointKind } from './assembly-builder'
 import { validationFindings } from './assembly-diagnostics'
 import { buildCollisionPreviews, type CollisionMode } from './assembly-collision'
+import { createMappingPanel } from './pose-mapping-panel'
 import './assembly.css'
 
 const root = document.querySelector<HTMLDivElement>('#assembly-app')!
@@ -27,7 +28,7 @@ root.innerHTML = `<header><a href="/">Photo2Sim</a><span>Guided assembly review<
 <section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div><details><summary>Add a link and connection</summary><div class="guided-grid"><label>New link name <input id="new-link-name"></label><label>Parent link <select id="new-parent"></select></label><label>New joint name <input id="new-joint-name"></label><label>Connection type <select id="new-kind"><option value="revolute">Revolute hinge</option><option value="fixed">Fixed</option></select></label></div><button id="add-link">Add link and joint</button><p>Assign at least one part to the new link, then review its pivot, mass and joint parameters. A hinge starts on local Z with estimated drive settings.</p></details>
 <h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; limits are radians. Pivot edits change joint frames while preserving source geometry at the reference pose; they do not translate the entire scene. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
 <h2>3. Save and process</h2><button id="save-revision">Save revision to job</button><label>Collision geometry <select id="collision-mode"><option value="box">Box (historical default)</option><option value="convex_mesh">Convex mesh</option></select></label><label><input id="exclude-joint-pairs" type="checkbox"> Exclude direct parent-child collision pairs</label><button id="process">Run preparation, export and validation</button><p>These export settings are recorded per attempt and do not alter the reviewed source project. Save the review before processing. To change a completed result, apply edits, acknowledge the revised inputs and save a new revision. Previous attempts remain available after a revision or failed validation.</p><button id="save">Download project JSON</button><button id="save-package">Download review package</button>
-<details><summary>Advanced: full project / add links and joints</summary><textarea id="full" aria-label="Full project JSON" spellcheck="false"></textarea><button id="apply-full">Apply full project</button></details><details><summary>Provenance and limitations</summary><pre id="notes"></pre></details></section></div></div></main>`
+<div id="mapping-review"></div><details><summary>Advanced: full project / add links and joints</summary><textarea id="full" aria-label="Full project JSON" spellcheck="false"></textarea><button id="apply-full">Apply full project</button></details><details><summary>Provenance and limitations</summary><pre id="notes"></pre></details></section></div></div></main>`
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 let payload: ReviewPackage | undefined,
   job: AssemblyJob | undefined,
@@ -52,7 +53,33 @@ const download = (name: string, data: unknown) => {
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
+const mappingPanel = createMappingPanel(
+  el('mapping-review'),
+  (pose, capture) => {
+    values = { ...pose }
+    const sliders = el('sliders').querySelectorAll<HTMLInputElement>('input[type=range]')
+    payload?.project.joints
+      .filter((j) => j.kind === 'revolute')
+      .forEach((j, i) => {
+        const angle = values[j.name] ?? 0
+        sliders[i].disabled = !!capture
+        // A range input clamps values, so keep candidate truth in the label and values map.
+        sliders[i].value = capture ? '0' : String(angle)
+        sliders[i].hidden = !!capture
+        sliders[i].parentElement!.querySelector('span')!.textContent =
+          `${j.name} · ${angle.toFixed(5)} rad${capture ? ' · capture candidate (unclipped)' : ''}`
+      })
+    updateView?.()
+    message(
+      capture
+        ? `Previewing ${capture}. Unmapped joints display at zero; no physical mapping or accuracy implied.`
+        : 'Capture preview reset.',
+    )
+  },
+  download,
+)
 function beginWorkspace() {
+  mappingPanel.invalidatePending()
   generation += 1
   if (pollTimer) clearTimeout(pollTimer)
   pollTimer = undefined
@@ -431,6 +458,7 @@ function render() {
     sliders.append(label)
   }
   mount()
+  mappingPanel.sync(p, generation)
   renderJob()
 }
 function collisionCaption() {
@@ -840,6 +868,7 @@ el('save-package').onclick = () => {
   if (payload) download(payload.project.name + '-review-package.json', payload)
 }
 window.addEventListener('pagehide', () => {
+  mappingPanel.invalidatePending()
   generation += 1
   dispose?.()
   if (pollTimer) clearTimeout(pollTimer)

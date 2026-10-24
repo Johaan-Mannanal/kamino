@@ -140,3 +140,12 @@ outpace tested evidence. Main remains separate from feature integration.
 Current guided slice: [workflow](GUIDED_ASSEMBLIES.md) and [SO101 evidence](../examples/assemblies/so101-guided/README.md). The workbench supports persistent HTTP jobs and offline review packages; no automatic photo articulation or hardware dynamics validation is claimed.
 
 Simulation-only demo backup: [SO101 action replay](../examples/assemblies/so101-guided/collision-revision/motion-demo/README.md). This remains independent of physical pose mapping. [Live assembly-job acceptance](../examples/assemblies/api-browser-macos/README.md) covers the synthetic fixture.
+
+### Stationary mapping review available
+
+The generic assembly workbench can now compare multiple audited captures using
+one editable mapping, retaining units, signs, offsets, conversion assumptions,
+photos and evidence in a local review file. See [MAPPING_REVIEW.md](MAPPING_REVIEW.md).
+Take 3/take 5 are available as an unverified baseline. Independent joint signs,
+zeros and gripper conversion still require Yash's physical reference evidence;
+this tool does not resolve those unknowns automatically.

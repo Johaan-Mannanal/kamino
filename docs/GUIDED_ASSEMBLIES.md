@@ -110,3 +110,10 @@ for the synthetic import-to-download proof and its limits.
 
 See [hinged-panel browser acceptance](../examples/assemblies/hinged-panel/README.md)
 for mesh upload, failed tracking, guided correction and portable download.
+
+## Compare recorded stationary poses
+
+The workbench now includes a generic [capture mapping review](MAPPING_REVIEW.md):
+source units, signs, offsets and explicit normalized conversions; one candidate
+across multiple poses; unclipped joint-limit findings; and separate downloadable
+user-review evidence. It previews kinematics only and does not command hardware.
