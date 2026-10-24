@@ -1,6 +1,6 @@
 # Yash: actual SO101 API export ready
 
-Continue the stationary photo pairing and hardware joint-mapping work first.
+Take-3 stationary photo pairing is received. Continue hardware joint-mapping work first.
 This additional check is simulation-only; no new motor command, recalibration,
 Meshy job or repeated charger test is requested.
 
@@ -37,3 +37,21 @@ mismatch. Separately return progress on paired photos, joint signs/zeros/gripper
 conversion and measured mounting. A simulation pass does not establish physical
 accuracy. You do not need to rerun the entire browser flow unless useful or a
 Windows-specific API/UI issue appears.
+
+## Take-3 update
+
+Johaan imported all 11 take-3 files from `d07d713` byte-for-byte and rendered a
+[stationary diagnostic comparison](../../examples/so101/comparisons/take3/README.md)
+against the actual API ZIP. No need to repeat this same stationary capture.
+
+The positive-sign/zero-offset baseline resembles the folded posture, but
+`shoulder_lift=-104.175824` degrees exceeds the exported lower limit by 4.175821
+degrees. Review calibration zero convention and model limit provenance before
+motion replay; do not clamp the data or widen limits just to pass. Gripper
+`0.954980` is normalized 0–100; its displayed angle of zero is only a placeholder.
+
+Please confirm photo mirroring, obtain additional distinct operator-associated
+reference poses through the existing operator workflow, and measure jaw opening
+and base/table placement. Keep hardware synchronization unclaimed. The comparison
+does not authorize sending these simulated poses to hardware. Continue the ZIP
+validation above independently; return mapping findings and source evidence.
