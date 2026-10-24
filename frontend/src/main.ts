@@ -329,13 +329,13 @@ function bind() {
       reportPath = ''
       reportError = ''
       render()
-      schedule()
     } catch (e) {
       message = (e as Error).message
     } finally {
       busy = false
       busyAction = null
       render()
+      schedule()
     }
   })
   document.querySelector('#refresh')?.addEventListener('click', refresh)
