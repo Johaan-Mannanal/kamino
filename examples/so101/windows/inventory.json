@@ -1,0 +1,51 @@
+{
+  "python": "3.12.10",
+  "lerobot_version": "0.6.2",
+  "lerobot_commit": "146d8474932c8b566717eb2738ba459337ab71c4",
+  "calibration_association": "Default calibration root from actual installed constants; SO101 follower alias uses name so_follower; history robot.id=hackathon_follower; no calibration_dir override recovered. No hardware read to verify EEPROM.",
+  "files": {
+    "hackathon_follower.json": {
+      "sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+      "bytes": 961
+    },
+    "hackathon_leader.json": {
+      "sha256": "9ea3d1e38a96cc8b3a10e3ca9ba64f774c1bc6d82ee4e26707034541a77e741d",
+      "bytes": 957
+    },
+    "first-demo-info.json": {
+      "sha256": "a7c01f6970769f6a2db4547907b222ee958e31719ab369772e6308b6f9912841",
+      "bytes": 1969
+    }
+  },
+  "recording": {
+    "rows": 600,
+    "columns": [
+      "action",
+      "observation.state",
+      "timestamp",
+      "frame_index",
+      "episode_index",
+      "index",
+      "task_index"
+    ],
+    "source_parquet_sha256": "c2351ee0d2d3ef3386759e7b93ce3997db90225ce90caeec6509a336d17e9b4c",
+    "sample_rows": 95,
+    "first_timestamp_s": 0.0,
+    "last_timestamp_s": 19.96666717529297,
+    "timestamps": "Nominal frame_index / fps per current dataset_writer.py; not wall-clock timestamps.",
+    "matching_arm_images": null,
+    "actually_sent_actions": null,
+    "collection_time_config": "No full config or collection Git SHA persisted. Recovered record command has no use_degrees override; current source default True.",
+    "requested_actions": "Current record loop stores action_values before send_action safety clipping; actual sent action return is not saved."
+  },
+  "joint_order": [
+    "shoulder_pan.pos",
+    "shoulder_lift.pos",
+    "elbow_flex.pos",
+    "wrist_flex.pos",
+    "wrist_roll.pos",
+    "gripper.pos"
+  ],
+  "calibration_procedure": "unknown; old/new midpoint cannot be established from JSON alone",
+  "hardware_connected": false
+}

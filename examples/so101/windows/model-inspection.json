@@ -1,0 +1,166 @@
+{
+  "mujoco_version": "3.17.0",
+  "scene": "scene.xml",
+  "nq": 6,
+  "nv": 6,
+  "nu": 6,
+  "joints": [
+    {
+      "joint_name": "shoulder_pan",
+      "observation_key": "shoulder_pan.pos",
+      "joint_id": 0,
+      "qpos_address": 0,
+      "dof_address": 0,
+      "actuator_id": 0,
+      "joint_range_rad": [
+        -1.91986,
+        1.91986
+      ],
+      "control_range_rad": [
+        -1.91986,
+        1.91986
+      ],
+      "joint_limited": true,
+      "control_limited": true,
+      "hardware_mapping_status": "pending_windows_calibration_and_pose_check"
+    },
+    {
+      "joint_name": "shoulder_lift",
+      "observation_key": "shoulder_lift.pos",
+      "joint_id": 1,
+      "qpos_address": 1,
+      "dof_address": 1,
+      "actuator_id": 1,
+      "joint_range_rad": [
+        -1.7453293,
+        1.7453293
+      ],
+      "control_range_rad": [
+        -1.74533,
+        1.74533
+      ],
+      "joint_limited": true,
+      "control_limited": true,
+      "hardware_mapping_status": "pending_windows_calibration_and_pose_check"
+    },
+    {
+      "joint_name": "elbow_flex",
+      "observation_key": "elbow_flex.pos",
+      "joint_id": 2,
+      "qpos_address": 2,
+      "dof_address": 2,
+      "actuator_id": 2,
+      "joint_range_rad": [
+        -1.69,
+        1.69
+      ],
+      "control_range_rad": [
+        -1.69,
+        1.69
+      ],
+      "joint_limited": true,
+      "control_limited": true,
+      "hardware_mapping_status": "pending_windows_calibration_and_pose_check"
+    },
+    {
+      "joint_name": "wrist_flex",
+      "observation_key": "wrist_flex.pos",
+      "joint_id": 3,
+      "qpos_address": 3,
+      "dof_address": 3,
+      "actuator_id": 3,
+      "joint_range_rad": [
+        -1.658063,
+        1.658063
+      ],
+      "control_range_rad": [
+        -1.65806,
+        1.65806
+      ],
+      "joint_limited": true,
+      "control_limited": true,
+      "hardware_mapping_status": "pending_windows_calibration_and_pose_check"
+    },
+    {
+      "joint_name": "wrist_roll",
+      "observation_key": "wrist_roll.pos",
+      "joint_id": 4,
+      "qpos_address": 4,
+      "dof_address": 4,
+      "actuator_id": 4,
+      "joint_range_rad": [
+        -2.7438473,
+        2.8412063
+      ],
+      "control_range_rad": [
+        -2.74385,
+        2.84121
+      ],
+      "joint_limited": true,
+      "control_limited": true,
+      "hardware_mapping_status": "pending_windows_calibration_and_pose_check"
+    },
+    {
+      "joint_name": "gripper",
+      "observation_key": "gripper.pos",
+      "joint_id": 5,
+      "qpos_address": 5,
+      "dof_address": 5,
+      "actuator_id": 5,
+      "joint_range_rad": [
+        -0.174533,
+        1.7453292
+      ],
+      "control_range_rad": [
+        -0.17453,
+        1.74533
+      ],
+      "joint_limited": true,
+      "control_limited": true,
+      "hardware_mapping_status": "pending_windows_calibration_and_pose_check"
+    }
+  ],
+  "timestep_s": 0.005,
+  "steps": 400,
+  "simulated_duration_s": 1.9999999999999793,
+  "finite_state": true,
+  "warning_count": 0,
+  "python_warnings": [],
+  "max_hold_deviation_rad": 0.000847973112732652,
+  "initial_qpos_rad": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "final_qpos_rad": [
+    8.104007942230762e-14,
+    0.0005742267187471875,
+    0.00048420504198685006,
+    0.00013015519618678884,
+    6.796283740413948e-06,
+    -3.5363577300753062e-06
+  ],
+  "initial_gripperframe_position_m": [
+    0.3913614999999999,
+    -0.0009794652485835562,
+    0.24634517669302677
+  ],
+  "final_gripperframe_position_m": [
+    0.39144568543213526,
+    -0.0009793838618949021,
+    0.24599703635432874
+  ],
+  "numerical_smoke_passed": true,
+  "hardware_mapping_verified": false,
+  "scope": "Standalone simulation load/finite-state check; no hardware or task validation",
+  "inspection_wall_clock_s": 0.1514309999984107,
+  "python_version": "3.12.10",
+  "dependency_versions": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4",
+    "trimesh": "5.2.0"
+  }
+}
