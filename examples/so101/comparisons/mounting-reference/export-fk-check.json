@@ -1,0 +1,24 @@
+{
+  "scope": "Independent MuJoCo FK check of exported face height; not physical mounting validation",
+  "mujoco_version": "3.3.7",
+  "checks": [
+    {
+      "shoulder_pan_rad": 0,
+      "face_height_above_root_m": 0.07239999999999999
+    },
+    {
+      "shoulder_pan_rad": -0.006904599238658886,
+      "face_height_above_root_m": 0.07239999999999999
+    },
+    {
+      "shoulder_pan_rad": -1,
+      "face_height_above_root_m": 0.07239999999999999
+    },
+    {
+      "shoulder_pan_rad": 1,
+      "face_height_above_root_m": 0.07239999999999999
+    }
+  ],
+  "passed": true,
+  "accepted_scene_changed": false
+}

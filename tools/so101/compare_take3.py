@@ -30,6 +30,8 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     audit = audit_capture(SOURCE)
     pairing = json.loads((SOURCE / "pairing.json").read_text())
+    followup_path = SOURCE / "measurement-followup/measurements.json"
+    followup = json.loads(followup_path.read_text())
     for item in pairing["images"]:
         assert digest(SOURCE / item["path"]) == item["sha256"]
     # The archive is the locally reviewed API-produced fixture, not an arbitrary upload.
@@ -76,6 +78,9 @@ def main():
         "bundle_sha256": digest(BUNDLE),
         "scene_sha256": digest(out / "bundle/scene.xml"),
         "pairing_sha256": digest(SOURCE / "pairing.json"),
+        "measurement_followup_sha256": digest(followup_path),
+        "photo_orientation_provenance": followup["camera_provenance_for_original_take3"],
+        "later_jaw_measurement": followup["measurements"]["jaw_opening"],
         "capture_integrity_passed": audit["capture_integrity_passed"],
         "samples": audit["samples"],
         "elapsed_span_s": audit["elapsed_span_s"],
@@ -98,7 +103,8 @@ def main():
             "Gripper zero and range endpoints are display cases, not estimated jaw opening.",
             "Camera angles are illustrative; no intrinsics/extrinsics or pixel alignment fitted.",
             "Photos are resized only for the comparison sheet; not flipped or perspective corrected.",
-            "Possible front-photo mirroring remains unconfirmed; do not infer signs from it.",
+            "Operator confirms both rear-camera originals were not flipped; cameras remain uncalibrated.",
+            "Later 3.18 mm jaw gap is unpaired with take 3 and is not used for gripper conversion.",
             "Base height 0.15 m is the existing free-space test assumption, not tabletop calibration.",
             "CAD structural subset omits servos, camera, wiring and mounting clamps.",
         ],

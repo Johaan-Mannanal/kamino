@@ -1,0 +1,117 @@
+{
+  "scope": "Later operator measurement report and photographs; not an unchanged take-3 pose or new synchronized joint capture",
+  "related_stationary_take": "reference-20261024-take3",
+  "new_hardware_reads": false,
+  "new_motion_command_by_agent": false,
+  "operator_reported_manual_shoulder_repositioning": true,
+  "current_pose_same_as_take3": null,
+  "shoulder_return_to_take3_verified": false,
+  "gripper_opening_unchanged_from_take3": null,
+  "take3_original_pairing_preserved": true,
+  "images": [
+    {
+      "path": "base-reference-overview.png",
+      "dimensions_px": [
+        2160,
+        2880
+      ],
+      "bytes": 7823545,
+      "sha256": "993c0f6d95c95b4f603b640253eca4da4c01822ed03074b9287574a9f7aed583",
+      "capture_time": null,
+      "copied_original_bytes": true
+    },
+    {
+      "path": "base-tape-reading.png",
+      "dimensions_px": [
+        2160,
+        2880
+      ],
+      "bytes": 5035953,
+      "sha256": "bf927abbb0cba10d78b9ebc30cc5ae4dabe8ff215f5e783e833dfb9113985e41",
+      "capture_time": null,
+      "copied_original_bytes": true
+    },
+    {
+      "path": "cad-reference-face.png",
+      "bytes": 135258,
+      "sha256": "f15d45b38a4aed1df2a25b4c0ace45e97b2a2826a718a838f436eb05bedea959",
+      "capture_time": null,
+      "copied_original_bytes": true,
+      "role": "Operator-indicated CAD face used as intended measurement reference; not a physical pose image"
+    }
+  ],
+  "camera_provenance_for_original_take3": {
+    "front_oblique": {
+      "camera": "rear, operator-reported",
+      "view": "front-facing, operator-reported",
+      "orientation": "portrait",
+      "horizontal_flip": "operator_confirmed_no_left_right_flip"
+    },
+    "side_oblique": {
+      "camera": "rear, operator-reported",
+      "view": "left side, operator-reported",
+      "orientation": "landscape",
+      "horizontal_flip": "operator_confirmed_no_left_right_flip"
+    }
+  },
+  "measurements": {
+    "base_reference_height": {
+      "operator_reported_value": 2.97,
+      "operator_reported_unit": "inch",
+      "converted_value_mm": 75.438,
+      "display_value_mm": 75.4,
+      "description": "Reported vertical distance from tabletop to bottom edge of the shown black bar",
+      "bar_top_bottom_or_centre": "bottom edge, operator-confirmed",
+      "reference_bar_identity": "Temporary measurement aid; removed; not part of robot hardware",
+      "source": "operator-measured, approximate; clarified endpoint/value",
+      "uncertainty_mm": null,
+      "model_frame_correspondence_verified": false,
+      "use_as_model_root_height": false,
+      "prior_report": {
+        "operator_reported_value_mm": 77.8,
+        "operator_reported_inches": "3 1/16",
+        "description": "Approximately vertical from tabletop to reference near base clamp; black bar visible in supplied photos",
+        "source": "operator-measured, approximate",
+        "uncertainty_mm": null,
+        "reference_bar_identity": null,
+        "bar_top_bottom_or_centre": null,
+        "model_frame_correspondence_verified": false,
+        "use_as_model_root_height": false
+      },
+      "intended_reference": {
+        "kind": "Operator-selected CAD face",
+        "image": "cad-reference-face.png",
+        "description": "Blue-highlighted planar face on rounded printed part with mounting holes, next to upright structure",
+        "cad_body_face_identifier": null,
+        "model_frame_correspondence_verified": false
+      },
+      "reported_reference_face_height_mm_approx": 75.4,
+      "reference_transfer_note": "Operator identifies this CAD face as the intended reference. Exact measurement-aid offset/transfer uncertainty was not recorded; height remains approximate and not a root-origin measurement."
+    },
+    "jaw_opening": {
+      "operator_reported_value_mm": 3.18,
+      "operator_reported_inches": "1/8",
+      "description": "Shortest distance between closest opposing inner gripping surfaces",
+      "source": "operator-measured, approximate",
+      "uncertainty_mm": null,
+      "measurement_photo_supplied": false,
+      "measured_after_shoulder_repositioning": true,
+      "applies_to_take3_normalized_reading": null,
+      "association_status": "Not accepted as a take-3 calibration point: operator unsure whether jaws stayed unchanged"
+    }
+  },
+  "model_root_height_still_assumed_m": 0.15,
+  "joint_signs_offsets_verified": false,
+  "gripper_conversion_verified": false,
+  "pending_operator_clarifications": [],
+  "pose_unchanged_since_take3": false,
+  "operator_clarifications": {
+    "mirror_response": "No left\u2013right flip for either photo",
+    "height_response": "2.97in from bottom of the bar",
+    "jaw_continuity_response": "Not sure"
+  },
+  "measurement_aid_included_in_hardware_inventory": false,
+  "measurement_aid_included_in_simulation_model": false,
+  "measurement_aid_removed": true,
+  "next_analysis": "Identify the indicated face in the supplied STEP/model coordinates; no further question about the removed measurement aid is needed."
+}

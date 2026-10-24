@@ -50,8 +50,17 @@ degrees. Review calibration zero convention and model limit provenance before
 motion replay; do not clamp the data or widen limits just to pass. Gripper
 `0.954980` is normalized 0–100; its displayed angle of zero is only a placeholder.
 
-Please confirm photo mirroring, obtain additional distinct operator-associated
-reference poses through the existing operator workflow, and measure jaw opening
-and base/table placement. Keep hardware synchronization unclaimed. The comparison
-does not authorize sending these simulated poses to hardware. Continue the ZIP
-validation above independently; return mapping findings and source evidence.
+Follow-up `1ca9a52` confirms both originals were unflipped. Johaan matched the
+highlighted face to the shoulder bracket: nominally 72.4 mm above root. The
+approximate 75.4 mm tabletop-to-face measurement implies a **conditional root Z
+of approximately 3 mm**, assuming level mounting and correct aid-to-face transfer.
+See [reference match](../../examples/so101/comparisons/mounting-reference/README.md).
+It has not been applied to the accepted free-space test scene. Full mounting
+transform and uncertainty remain unknown; do not use 75.4 mm directly as root Z.
+
+Your API ZIP acceptance is received at `1ca9a52`; do not repeat it for the
+unchanged archive. Priority now is additional distinct operator-associated
+reference poses to resolve signs/zeros, and a jaw measurement paired with its
+own observation. The later 3.18 mm jaw measurement does not calibrate take 3.
+Keep hardware synchronization unclaimed. The comparison does not authorize
+sending these simulated poses to hardware. Return mapping findings and evidence.

@@ -75,7 +75,8 @@ See the [two-link proof](../examples/assemblies/two-link-hinge/README.md).
 - [x] Generate a new articulated export; compare frames with the reference separately.
 - [x] Resolve local free-space SO101 tracking with convex hulls and explicit adjacent-pair exclusions.
 - [x] Run the SO101 through persistent browser/API review, export and authenticated ZIP download.
-- [ ] Accept revised scene on Windows and replace assumed clearance with measured physical placement.
+- [x] Accept API-produced revised scene on Windows (reported at `1ca9a52`; archive hash matches).
+- [ ] Replace assumed clearance with a reviewed physical mounting transform.
 See [SO101 API workflow](../examples/assemblies/so101-guided/api-workflow/README.md) and [collision revision](../examples/assemblies/so101-guided/collision-revision/README.md); the original low-root candidate remains a recorded failure.
 CAD may be required for this first demonstration. Photos-only robot conversion
 is not yet proven. Reusing a template must be labeled template-assisted.
@@ -83,6 +84,7 @@ is not yet proven. Reusing a template must be labeled template-assisted.
 ### 6. Compare with the physical arm
 - [x] Audit saved stationary observations/calibration identity without hardware access.
 - [x] Import operator-paired take-3 photos and produce a labeled static mapping-hypothesis comparison.
+- [x] Match operator-selected CAD face and derive a conditional mounting-height estimate (~3 mm root above table).
 - [ ] Match timestamped whole-arm images and joint observations in several poses.
 - [ ] Verify signs/zeros/gripper mapping and measured base/table placement.
 - [ ] Compare observation replay (kinematics) before commanded-motion prediction.
@@ -93,6 +95,9 @@ assembly export. Visual resemblance is not dynamics validation.
 The [take-3 comparison](../examples/so101/comparisons/take3/README.md) broadly matches
 the folded posture, but its direct-angle shoulder reading exceeds the model limit
 by 4.18 degrees. Signs/zeros, jaw conversion and mounting remain unverified.
+The [mounting reference calculation](../examples/so101/comparisons/mounting-reference/README.md)
+uses a nominal face 72.4 mm above root and an approximate measured height of
+75.4 mm. It is a conditional estimate, not an applied or complete mounting transform.
 
 ### 7. Polish, sponsor integrations and submission
 - [x] Add reusable scripted assembly replay and cached generated-SO101 action evidence.

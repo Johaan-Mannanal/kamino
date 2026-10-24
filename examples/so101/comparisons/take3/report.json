@@ -5,6 +5,32 @@
   "bundle_sha256": "aff9c1a3a7690e8cafcae30eaa37ce5b33c82d7b46621dc51741fd05311344b0",
   "scene_sha256": "758e6995c89a3a747e676da2005b6f111e70ddc2deebff15ae1b50d9fd745b74",
   "pairing_sha256": "cf208583644f0c2f4574a09a7655ce30db91355c8b030f3820ef6e36de501db2",
+  "measurement_followup_sha256": "97bf28da46baac3d4a3d9384d235445e7aadd70fc855fa23dddfc8d12e703766",
+  "photo_orientation_provenance": {
+    "front_oblique": {
+      "camera": "rear, operator-reported",
+      "view": "front-facing, operator-reported",
+      "orientation": "portrait",
+      "horizontal_flip": "operator_confirmed_no_left_right_flip"
+    },
+    "side_oblique": {
+      "camera": "rear, operator-reported",
+      "view": "left side, operator-reported",
+      "orientation": "landscape",
+      "horizontal_flip": "operator_confirmed_no_left_right_flip"
+    }
+  },
+  "later_jaw_measurement": {
+    "operator_reported_value_mm": 3.18,
+    "operator_reported_inches": "1/8",
+    "description": "Shortest distance between closest opposing inner gripping surfaces",
+    "source": "operator-measured, approximate",
+    "uncertainty_mm": null,
+    "measurement_photo_supplied": false,
+    "measured_after_shoulder_repositioning": true,
+    "applies_to_take3_normalized_reading": null,
+    "association_status": "Not accepted as a take-3 calibration point: operator unsure whether jaws stayed unchanged"
+  },
   "capture_integrity_passed": true,
   "samples": 599,
   "elapsed_span_s": 119.84362090000286,
@@ -156,7 +182,8 @@
     "Gripper zero and range endpoints are display cases, not estimated jaw opening.",
     "Camera angles are illustrative; no intrinsics/extrinsics or pixel alignment fitted.",
     "Photos are resized only for the comparison sheet; not flipped or perspective corrected.",
-    "Possible front-photo mirroring remains unconfirmed; do not infer signs from it.",
+    "Operator confirms both rear-camera originals were not flipped; cameras remain uncalibrated.",
+    "Later 3.18 mm jaw gap is unpaired with take 3 and is not used for gripper conversion.",
     "Base height 0.15 m is the existing free-space test assumption, not tabletop calibration.",
     "CAD structural subset omits servos, camera, wiring and mounting clamps."
   ],
