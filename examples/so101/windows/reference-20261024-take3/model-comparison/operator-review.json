@@ -1,0 +1,30 @@
+{
+  "capture_take_id": "reference-20261024-take3",
+  "pairing": "operator-confirmed stationary association; not synchronized",
+  "photo_mirroring": {
+    "front_oblique": {
+      "status": "unknown",
+      "evidence": "Background lettering appears reversed; that alone does not distinguish mirrored pixels from reversed lettering/back of sign. Operator camera/flip confirmation pending."
+    },
+    "side_oblique": {
+      "status": "unknown",
+      "evidence": "No reliable unambiguous orientation marker established. Operator camera/flip confirmation pending."
+    }
+  },
+  "photo_directions_used_to_infer_joint_signs": false,
+  "jaw_opening_mm": null,
+  "jaw_measurement_applies_to_take3": null,
+  "base_reference_to_tabletop_m": null,
+  "base_table_reference_endpoints": null,
+  "table_height_m": null,
+  "table_thickness_m": null,
+  "model_difference_observations": [
+    "Physical arm has black servos and wiring; generated CAD structural subset omits these visuals.",
+    "Wrist camera/PCB/lens and projecting bracket visible on physical front-oblique photo; omitted from generated model. Mount dimensions/extrinsics unknown.",
+    "Physical black/orange clamp and real tabletop visible; model root is fixed at assumed Z=0.15 m, not a measured mount."
+  ],
+  "joint_signs_verified": false,
+  "joint_offsets_verified": false,
+  "gripper_conversion_verified": false,
+  "next_operator_evidence": "Confirm each photograph mirror status; provide ruler endpoints and whether physical pose is still take3. Do not move/recreate pose on assistant targets."
+}

@@ -1,0 +1,22 @@
+{
+  "backend_commit": "61d5f3e56819a4905b5d1f4cedb28df0206cae4e",
+  "python": "3.12.10",
+  "versions": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4",
+    "trimesh": "5.2.0",
+    "pydantic": "2.14.1"
+  },
+  "api_archive_sha256": "aff9c1a3a7690e8cafcae30eaa37ce5b33c82d7b46621dc51741fd05311344b0",
+  "api_archive_bytes": 31253228,
+  "native_appearance_inspected": true,
+  "native_convex_hulls_inspected": true,
+  "native_views_scope": "Initial kinematic pose only; dynamic sequence verified by headless validation and separately labeled offscreen replay.",
+  "offscreen_replay_scope": "Eight simulated seconds; no hardware motion",
+  "tests": {
+    "motion_passed": 9,
+    "skipped": 1,
+    "skip_reason": "Windows symlink privileges unavailable"
+  },
+  "physical_accuracy_verified": false
+}

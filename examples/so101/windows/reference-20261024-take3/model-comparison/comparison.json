@@ -1,0 +1,207 @@
+{
+  "scope": "Unverified static candidate render; not physical fit, dynamics or pose calibration",
+  "capture_id": "reference-20261024-take3",
+  "sample_count": 599,
+  "signals": {
+    "shoulder_pan": {
+      "unit": "degrees",
+      "median": -0.3956043956043956,
+      "minimum": -0.3956043956043956,
+      "maximum": -0.3956043956043956,
+      "span": 0.0
+    },
+    "shoulder_lift": {
+      "unit": "degrees",
+      "median": -104.17582417582418,
+      "minimum": -104.17582417582418,
+      "maximum": -104.17582417582418,
+      "span": 0.0
+    },
+    "elbow_flex": {
+      "unit": "degrees",
+      "median": 96.17582417582418,
+      "minimum": 96.17582417582418,
+      "maximum": 96.17582417582418,
+      "span": 0.0
+    },
+    "wrist_flex": {
+      "unit": "degrees",
+      "median": 84.04395604395604,
+      "minimum": 84.04395604395604,
+      "maximum": 84.04395604395604,
+      "span": 0.0
+    },
+    "wrist_roll": {
+      "unit": "degrees",
+      "median": 4.175824175824176,
+      "minimum": 4.175824175824176,
+      "maximum": 4.175824175824176,
+      "span": 0.0
+    },
+    "gripper": {
+      "unit": "normalized_0_100",
+      "median": 0.9549795361527967,
+      "minimum": 0.9549795361527967,
+      "maximum": 0.9549795361527967,
+      "span": 0.0
+    }
+  },
+  "calibration_sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+  "scene_sha256": "758e6995c89a3a747e676da2005b6f111e70ddc2deebff15ae1b50d9fd745b74",
+  "mujoco_version": "3.17.0",
+  "candidates": [
+    {
+      "name": "A_percent_to_model_range",
+      "conversions": {
+        "shoulder_pan": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "shoulder_lift": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "elbow_flex": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "wrist_flex": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "wrist_roll": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "gripper": {
+          "sign": 1,
+          "offset_rad": -0.174533,
+          "radians_per_unit": 0.019198622000000002,
+          "status": "alternative heuristic, not verified"
+        }
+      },
+      "qpos_rad": {
+        "shoulder_pan": -0.006904599238658886,
+        "shoulder_lift": -1.81821113284684,
+        "elbow_flex": 1.6785847926872937,
+        "wrist_flex": 1.4668437493684212,
+        "wrist_roll": 0.07288188085251047,
+        "gripper": -0.15619870886766712
+      },
+      "joint_limit_violations": [
+        {
+          "joint": "shoulder_lift",
+          "candidate_rad": -1.81821113284684,
+          "limits_rad": [
+            -1.7453293,
+            1.7453293
+          ],
+          "outside_by_rad": 0.07288183284683991
+        }
+      ],
+      "renders": [
+        "A_percent_to_model_range-end_on.png",
+        "A_percent_to_model_range-side.png"
+      ],
+      "adopted_for_hardware": false
+    },
+    {
+      "name": "B_percent_number_as_degrees",
+      "conversions": {
+        "shoulder_pan": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "shoulder_lift": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "elbow_flex": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "wrist_flex": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "wrist_roll": {
+          "sign": 1,
+          "offset_rad": 0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "assumed, not verified"
+        },
+        "gripper": {
+          "sign": 1,
+          "offset_rad": 0.0,
+          "radians_per_unit": 0.017453292519943295,
+          "status": "alternative heuristic, not verified"
+        }
+      },
+      "qpos_rad": {
+        "shoulder_pan": -0.006904599238658886,
+        "shoulder_lift": -1.81821113284684,
+        "elbow_flex": 1.6785847926872937,
+        "wrist_flex": 1.4668437493684212,
+        "wrist_roll": 0.07288188085251047,
+        "gripper": 0.016667537195034526
+      },
+      "joint_limit_violations": [
+        {
+          "joint": "shoulder_lift",
+          "candidate_rad": -1.81821113284684,
+          "limits_rad": [
+            -1.7453293,
+            1.7453293
+          ],
+          "outside_by_rad": 0.07288183284683991
+        }
+      ],
+      "renders": [
+        "B_percent_number_as_degrees-end_on.png",
+        "B_percent_number_as_degrees-side.png"
+      ],
+      "adopted_for_hardware": false
+    }
+  ],
+  "photograph_mirror_status": {
+    "front_oblique": "unknown",
+    "side_oblique": "unknown"
+  },
+  "photo_directions_used_to_infer_signs": false,
+  "hardware_mapping_verified": false,
+  "gripper_conversion_verified": false,
+  "root_pose": {
+    "position_m": [
+      0.0,
+      0.0,
+      0.15
+    ],
+    "quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "root_is_measured": false,
+  "jaw_opening_mm": null,
+  "base_table_geometry": null
+}
