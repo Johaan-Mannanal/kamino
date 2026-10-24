@@ -123,3 +123,85 @@ it('loads saved estimates without modifying drafts; failed refresh keeps estimat
   )
   expect(fetch.mock.calls.some(([url]) => url.endsWith('/properties'))).toBe(false)
 })
+it('preserves newer orientation edits when an earlier PATCH completes and keeps processing blocked', async () => {
+  let finishSave!: (response: Response) => void
+  let pending = true
+  const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+    if (url.endsWith('/orientation')) {
+      if (pending)
+        return new Promise<Response>((resolve) => {
+          finishSave = resolve
+        })
+      return json({ ...record, orientation: JSON.parse(init!.body as string) })
+    }
+    if (url.endsWith('/process')) return json({ ...record, status: 'preparing' })
+    return json(record)
+  })
+  await start(fetch)
+  change('x_deg', '90')
+  document
+    .querySelector<HTMLFormElement>('#orientation')!
+    .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+  await vi.waitFor(() => expect(finishSave).toBeTypeOf('function'))
+  change('x_deg', '45')
+  change('z_deg', '10')
+  finishSave(json({ ...record, orientation: { x_deg: 90, y_deg: 0, z_deg: 0 } }))
+  await vi.waitFor(() =>
+    expect(document.querySelector<HTMLButtonElement>('#process')!.disabled).toBe(false),
+  )
+  expect(document.querySelector<HTMLInputElement>('[name="x_deg"]')!.value).toBe('45')
+  expect(document.querySelector<HTMLInputElement>('[name="z_deg"]')!.value).toBe('10')
+  expect(document.body.textContent).toContain('Newer rotation edits remain unsaved')
+  document.querySelector<HTMLButtonElement>('#process')!.click()
+  expect(fetch.mock.calls.some(([url]) => url.endsWith('/process'))).toBe(false)
+  pending = false
+  document
+    .querySelector<HTMLFormElement>('#orientation')!
+    .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+  await vi.waitFor(() => expect(document.body.textContent).toContain('Orientation saved. Review'))
+  document.querySelector<HTMLButtonElement>('#process')!.click()
+  await vi.waitFor(() =>
+    expect(fetch.mock.calls.some(([url]) => url.endsWith('/process'))).toBe(true),
+  )
+  const calls = fetch.mock.calls.filter(([url]) => url.endsWith('/orientation'))
+  expect(JSON.parse(calls[1][1]!.body as string)).toEqual({ x_deg: 45, y_deg: 0, z_deg: 10 })
+})
+it.each(['orientation', 'properties'] as const)(
+  'ignores a GET started before the %s save when it arrives after the PATCH',
+  async (kind) => {
+    let finishRefresh!: (response: Response) => void
+    let gets = 0
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith('/orientation'))
+        return json({ ...record, orientation: JSON.parse(init!.body as string) })
+      if (url.endsWith('/properties'))
+        return json({ ...record, properties: JSON.parse(init!.body as string) })
+      gets++
+      return gets === 1
+        ? json(record)
+        : new Promise<Response>((resolve) => {
+            finishRefresh = resolve
+          })
+    })
+    await start(fetch)
+    document.querySelector<HTMLButtonElement>('#refresh')!.click()
+    await vi.waitFor(() => expect(finishRefresh).toBeTypeOf('function'))
+    change(kind === 'orientation' ? 'x_deg' : 'x', kind === 'orientation' ? '90' : '44')
+    document
+      .querySelector<HTMLFormElement>(kind === 'orientation' ? '#orientation' : '#properties')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await vi.waitFor(() =>
+      expect(document.body.textContent).toContain(
+        kind === 'orientation' ? 'Orientation saved' : 'Properties saved',
+      ),
+    )
+    finishRefresh(json(record))
+    // Let the released Response body and the refresh continuation finish before asserting.
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(
+      document.querySelector<HTMLInputElement>(
+        kind === 'orientation' ? '[name="x_deg"]' : '[name="x"]',
+      )!.value,
+    ).toBe(kind === 'orientation' ? '90' : '44')
+  },
+)

@@ -20,6 +20,7 @@ let validation: ValidationReport | null = null,
   reportError = '',
   reportPath = ''
 let timer: number | undefined
+let jobGeneration = 0
 let draft: Record<string, string> = {}
 let suggestions: Suggestions | null = null,
   suggestionBusy = false,
@@ -197,7 +198,7 @@ function render() {
   <section><h2><span>1</span>Photos</h2><div class="body"><label class="drop" id="drop" for="photos">Drop photos here or choose files <span>1–4 JPEG, PNG, or WebP · 10 MiB each · 25 MP</span></label><input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>${files.map((f, i) => `<div class="selected"><span>${esc(f.name)}</span><button type="button" data-index="${i}" class="remove" aria-label="Remove ${esc(f.name)}">Remove</button></div>`).join('')}${mode === 'mock' ? `<label class="demo">Demo result ${selectScenario()}</label>` : ''}<button class="primary" id="upload" ${busy || !files.length ? 'disabled' : ''}>${busyAction === 'upload' ? '<span class="spinner" aria-hidden="true"></span>' : ''}${job ? 'Start new job' : 'Upload photos'}</button></div></section>
   <section><h2><span>2</span>Object data</h2><div class="body">${editable && !done ? suggestionView(!!canSave) : ''}${done ? propertySummary() : editable ? `<form id="properties"><div class="field-head">Full dimensions <span>millimetres</span></div><div class="grid three">${(['x', 'y', 'z'] as const).map((a) => input(a, a.toUpperCase(), job?.properties ? job.properties.dimensions_m[a] * 1000 : '', !!done, true)).join('')}</div><div class="grid two gap"><label>Dimension source ${select('dimensions_source', job?.properties?.dimensions_m.source || 'measured', !!done)}</label>${input('dimensions_note', 'Note · optional', job?.properties?.dimensions_m.note || '', !!done)}</div><div class="grid two gap">${input('mass', 'Mass · grams', job?.properties ? job.properties.mass_kg.value * 1000 : '', !!done, true)}<label>Mass source ${select('mass_source', job?.properties?.mass_kg.source || 'user_supplied', !!done)}</label></div>${input('mass_note', 'Mass note · optional', job?.properties?.mass_kg.note || '', !!done)}<div class="grid two gap"><label>Sliding friction · blank if unknown<input name="friction" type="number" min="0" step="any" value="${val('friction', job?.properties?.sliding_friction?.value ?? '')}" ${done ? 'disabled' : ''}></label><label>Friction source ${select('friction_source', job?.properties?.sliding_friction?.source || 'estimated', !!done)}</label></div>${input('friction_note', 'Friction note · optional', job?.properties?.sliding_friction?.note || '', !!done)}<div class="form-end"><span>mm → m and g → kg when saved</span>${!done ? `<button class="primary" ${!canSave || busy ? 'disabled' : ''}>${busy ? 'Saving…' : 'Save properties'}</button>` : ''}</div>${!canSave && !done ? `<p class="hint">${job ? 'Enter measurements now. Save after reconstruction.' : 'Upload photos to start.'}</p>` : ''}</form>` : '<p class="empty">Upload photos to add measurements.</p>'}</div></section>
   ${orientationView(!!canSave, !!done)}
-  <section><h2><span>3</span>Process</h2><div class="body"><div class="stages" aria-label="Processing stages">${stages()}</div>${job ? `<div class="jobline"><span>Job ${esc(job.id.slice(0, 8))} · ${esc(job.provider)} · ${job.synthetic ? 'Synthetic' : 'Provider generated'}</span><button id="refresh">Refresh</button></div>` : ''}${job?.status === 'failed' ? `<div class="failure"><strong>${esc(job.error?.code || 'Failed')}</strong><p>${esc(job.error?.message || 'The provider did not finish.')}</p></div>` : ''}${(job?.status === 'awaiting_properties' && job.properties) || canRetry(job) ? `<button class="primary" id="process" ${busy ? 'disabled' : ''}>${canRetry(job) ? 'Retry simulation' : 'Generate simulation'}</button>` : ''}${reportView()}</div></section>
+  <section><h2><span>3</span>Process</h2><div class="body"><div class="stages" aria-label="Processing stages">${stages()}</div>${job ? `<div class="jobline"><span>Job ${esc(job.id.slice(0, 8))} · ${esc(job.provider)} · ${job.synthetic ? 'Synthetic' : 'Provider generated'}</span><button id="refresh" ${busy ? 'disabled' : ''}>Refresh</button></div>` : ''}${job?.status === 'failed' ? `<div class="failure"><strong>${esc(job.error?.code || 'Failed')}</strong><p>${esc(job.error?.message || 'The provider did not finish.')}</p></div>` : ''}${(job?.status === 'awaiting_properties' && job.properties) || canRetry(job) ? `<button class="primary" id="process" ${busy ? 'disabled' : ''}>${canRetry(job) ? 'Retry simulation' : 'Generate simulation'}</button>` : ''}${reportView()}</div></section>
   <section><h2><span>4</span>Files</h2><div class="body">${job?.mesh_path || job?.export_path ? `<div class="files">${job?.mesh_path ? link(job.mesh_path, 'Reconstructed mesh') : ''}${preparedMeshPath(job) ? link(preparedMeshPath(job)!, 'Prepared mesh') : ''}${job?.export_path ? link(job.export_path, canDownloadBundle(job) ? 'MuJoCo scene' : 'Diagnostic scene') : ''}${job?.validation_path ? link(job.validation_path, 'Validation report') : ''}${canDownloadBundle(job) ? link(job!.bundle_path!, 'Simulation ZIP') : ''}</div>` : '<p class="empty">Files appear when available.</p>'}${job?.status === 'completed' && mode === 'mock' ? '<p class="hint">Synthetic UI demo. No geometry or simulation validation was run.</p>' : ''}</div></section></main>`
   bind()
   syncViewer()
@@ -237,17 +238,19 @@ async function loadReport() {
   }
 }
 async function refresh() {
-  if (!job) return
+  if (!job || busy) return
   const id = job.id
+  const generation = ++jobGeneration
   try {
     const updated = await api.get(id)
-    if (job?.id !== id) return
+    if (job?.id !== id || generation !== jobGeneration) return
     job = updated
     message = ''
     render()
     schedule()
     if (job.validation_path && job.validation_path !== reportPath) void loadReport()
   } catch (e) {
+    if (job?.id !== id || generation !== jobGeneration) return
     message = `${(e as Error).message} Inputs are kept. Select Refresh to retry.`
     render()
   }
@@ -306,6 +309,7 @@ function bind() {
       return
     }
     busyAction = 'upload'
+    jobGeneration++
     busy = true
     message = ''
     render()
@@ -408,14 +412,20 @@ function bind() {
       )
       orientationDraft = values
       const orientation = makeOrientation(values)
+      jobGeneration++
       busy = true
       render()
       job = await api.saveOrientation(job.id, orientation)
-      orientationDraft = {}
+      const hasNewerEdits = (['x_deg', 'y_deg', 'z_deg'] as const).some(
+        (axis) => orientationDraft[axis] !== values[axis],
+      )
+      if (!hasNewerEdits) orientationDraft = {}
       validation = null
       reportPath = ''
       reportError = ''
-      message = 'Orientation saved. Review the rotated mesh before processing.'
+      message = hasNewerEdits
+        ? 'Orientation saved. Newer rotation edits remain unsaved; review and save them before processing.'
+        : 'Orientation saved. Review the rotated mesh before processing.'
     } catch (error) {
       message = (error as Error).message
     } finally {
@@ -440,6 +450,7 @@ function bind() {
     try {
       const properties = makeProperties(draft)
       busyAction = 'save'
+      jobGeneration++
       busy = true
       render()
       job = await api.save(job.id, properties)
@@ -464,6 +475,7 @@ function bind() {
       return
     }
     busyAction = 'process'
+    jobGeneration++
     busy = true
     message = ''
     render()
@@ -519,12 +531,16 @@ async function restoreJob() {
   const id = new URL(location.href).searchParams.get('job')
   if (mode !== 'live' || !id) return
   if (!/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(id)) return
+  const generation = ++jobGeneration
   try {
-    job = await api.get(id)
+    const restored = await api.get(id)
+    if (generation !== jobGeneration) return
+    job = restored
     render()
     schedule()
     if (job.validation_path) void loadReport()
   } catch (error) {
+    if (generation !== jobGeneration) return
     message = `${(error as Error).message} Reopen this job after restoring API access.`
     render()
   }

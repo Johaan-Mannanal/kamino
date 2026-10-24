@@ -24,7 +24,7 @@ The application token remains memory-only and must be entered again after a full
 
 ## Acceptance evidence for this revision
 
-Runtime: Node **22.19.0**, project-selected pnpm **11.25.0**, TypeScript **5.9.3**, Vite **7.3.7**, Three **0.180.0**; Python **3.13.7**, MuJoCo **3.3.7**, NumPy **2.5.4**. Full frontend tests: **21 passed**. Production build passes; Vite emits its advisory warning for the approximately 629 kB Three-containing bundle (163 kB gzip).
+Runtime: Node **22.19.0**, project-selected pnpm **11.25.0**, TypeScript **5.9.3**, Vite **7.3.7**, Three **0.180.0**; Python **3.13.7**, MuJoCo **3.3.7**, NumPy **2.5.4**. Full frontend tests: **24 passed**. A deferred orientation PATCH regression verifies that edits made during a save remain unsaved drafts after its response, and processing stays blocked until those edits are saved. Deferred GET/PATCH regressions cover orientation and property saves: older reads cannot overwrite newer saved state; refresh is disabled during mutations. Production build passes; Vite emits its advisory warning for the approximately 629 kB Three-containing bundle (163 kB gzip).
 
 Isolated local data: `/private/tmp/frontend-completion-acceptance`, seeded job `68a8fb91-106f-4fd1-9db1-ff893d06d942`. The seed copied `examples/reconstruction/apple-20w-charger-cleaned/mesh.glb` and its estimated properties into a new job; Gemini GET data was seeded from the checked-in suggestion example. There was **no new photo reconstruction or successful Gemini generation** in this acceptance run. The job's provider label records original Meshy provenance, while this local server was configured `mock` with no provider credentials. Source photos were not reseeded (zero photos in this isolated cache).
 
