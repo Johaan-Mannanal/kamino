@@ -17,7 +17,9 @@ This is the overall project checklist. Update it as verified handoffs arrive; ke
 - **Srijan + his agent:** geometry preparation, scale/orientation, collision proxies, and later Gemini property assistance. Branch: `codex/asset-preparation`.
 - **Atul + his agent:** frontend workflow and later Fetch/ASI:One integration. Branch: `codex/web-workflow`.
 
-The backend branch has working upload/status/property/download endpoints, SQLite persistence, an explicitly synthetic cube provider, and a Meshy adapter. Its 44 tests, local HTTP smoke, and Python 3.12 CI passed; see the [backend evidence](team-notes/2026-10-23-backend-baseline.md). Live Meshy generation and the combined simulation pipeline remain unverified. Other computers' progress is pending their handoffs.
+The backend branch has working upload/status/property/download endpoints, SQLite persistence, an explicitly synthetic cube provider, and a Meshy adapter. Its 44 tests, local HTTP smoke, and Python 3.12 CI passed; see the [backend evidence](team-notes/2026-10-23-backend-baseline.md). Live Meshy generation and the combined simulation pipeline remain unverified.
+
+Yash reported and pushed the Windows simulation baseline on `codex/windows-simulation-setup` at `33393ab`: synthetic cube/cuboid headless, relocation, and native viewer checks. The branch contents were inspected here; those Windows executions have not been rerun on this Mac. His next deliverable is a reusable `export_asset` plus validation beyond the hand-authored fixtures; see [the Windows integration handoff](handoffs/yash-agent.md). Srijan/Atul progress remains pending their reports.
 
 Use [the shared contract](API.md) for module boundaries and units. Agents can start from `origin/codex/backend-pipeline`; work on their own branches and preserve others' changes. Full instructions: [Srijan](handoffs/srijan-agent.md), [Atul](handoffs/atul-agent.md).
 
@@ -56,7 +58,7 @@ The core deliverable is an editable simulation asset. Robot-policy training, phy
 - [ ] Verify the isolated Python environment and record exact versions.
 - [x] Establish an API and background job boundary with persistent progress/errors (backend branch).
 - [x] Build clearly labeled mock reconstruction results (synthetic cube provider).
-- [ ] Build a small labeled synthetic simulation fixture (Windows task).
+- [x] Build a small labeled synthetic simulation fixture (Windows report and pushed evidence at `33393ab`; cube and cuboid).
 - [ ] Confirm API access/credits before making provider execution a dependency.
 
 The interface and simulator can progress independently using mocks and fixtures.
