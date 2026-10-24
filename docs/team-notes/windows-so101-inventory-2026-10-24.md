@@ -171,3 +171,11 @@ revision. Establish per-joint zero/sign and gripper mapping before real-versus-s
 replay. Never send simulated zero to hardware to obtain this evidence.
 
 Verification: tests/test_so101.py — 8 passed (0.44 s); scoped Ruff lint and format checks passed. Git diff whitespace check passed.
+
+## CAD reference follow-up
+
+Yash supplied the full SO101 STEP assembly after this inventory. The original is
+preserved losslessly in `examples/so101/windows/cad/so101-assembly-reference.zip`;
+see its README and inventory.json for SHA-256, provenance, contents and limitations.
+Only header/text inspection has been performed. CAD dimensions and physical
+mounting correspondence remain unverified; no new measurements are claimed.
