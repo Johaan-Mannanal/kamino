@@ -52,7 +52,9 @@ const pack = {
   },
 }
 beforeEach(() => {
+  window.dispatchEvent(new Event('pagehide'))
   vi.resetModules()
+  vi.doUnmock('./assembly-api')
   document.body.innerHTML = '<div id="assembly-app"></div>'
   vi.doMock('three', async () => {
     const actual = await vi.importActual<typeof import('three')>('three')
@@ -99,4 +101,190 @@ it('provides guided numeric fields and applies a pivot edit before acknowledgeme
       .position_m[0],
   ).toBe(0.15)
   expect(document.querySelector('#summary')?.textContent).toContain('0/1 acknowledged')
+})
+it('opens a saved job and downloads its validated result with API authentication', async () => {
+  const file = vi.fn(async () => new Blob(['bundle']))
+  const job = {
+    id: 'test-job',
+    name: 'test',
+    synthetic: true,
+    status: 'completed',
+    revision: 1,
+    project_path: 'revisions/0001/project.json',
+    package_path: 'revisions/0001/package.json',
+    export_generated: true,
+    motion_validation_passed: true,
+    export_path: 'attempts/0001/bundle/scene.xml',
+    validation_path: 'attempts/0001/bundle/validation.json',
+    bundle_path: 'attempts/0001/simulation.zip',
+    error: null,
+    attempts: [
+      {
+        number: 1,
+        revision: 1,
+        status: 'completed',
+        export_generated: true,
+        motion_validation_passed: true,
+        export_path: 'attempts/0001/bundle/scene.xml',
+        validation_path: 'attempts/0001/bundle/validation.json',
+        bundle_path: 'attempts/0001/simulation.zip',
+        error: null,
+        export_config: { collision_mode: 'box', exclude_joint_pairs: false },
+      },
+    ],
+  }
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: { get: vi.fn(async () => job), reviewPackage: vi.fn(async () => pack), file },
+    setAssemblyToken: vi.fn(),
+  }))
+  const create = vi.fn(() => 'blob:test')
+  const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+  Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: create })
+  Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() })
+  await import('./assembly-workbench')
+  document.querySelector<HTMLInputElement>('#job-id')!.value = 'test-job'
+  document.querySelector<HTMLElement>('#open-job')!.click()
+  await vi.waitFor(() =>
+    expect(document.querySelector('#job-status')?.textContent).toContain(
+      'motion validation passed: yes',
+    ),
+  )
+  const button = [...document.querySelectorAll<HTMLButtonElement>('#attempts button')].find(
+    (item) => item.textContent === 'Download Result ZIP',
+  )!
+  expect(button).toBeDefined()
+  button.click()
+  await vi.waitFor(() =>
+    expect(file).toHaveBeenCalledWith('test-job', 'attempts/0001/simulation.zip'),
+  )
+  expect(create).toHaveBeenCalled()
+  expect(click).toHaveBeenCalled()
+  click.mockRestore()
+})
+
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  const promise = new Promise<T>((done) => {
+    resolve = done
+  })
+  return { promise, resolve }
+}
+const pendingJob = (id = 'job-a', status = 'awaiting_review', revision = 1) => ({
+  id,
+  name: 'test',
+  synthetic: true,
+  status,
+  revision,
+  project_path: 'project.json',
+  package_path: 'package.json',
+  attempts: [],
+  export_generated: false,
+  motion_validation_passed: null,
+  error: null,
+})
+async function open(id: string) {
+  document.querySelector<HTMLInputElement>('#job-id')!.value = id
+  document.querySelector<HTMLElement>('#open-job')!.click()
+  await vi.waitFor(() =>
+    expect(document.querySelector('#job-status')?.textContent).toContain(`Job ${id}`),
+  )
+}
+function pivot(value: string) {
+  const field = document.querySelector<HTMLInputElement>('[aria-label="Pivot X (m)"]')!
+  field.value = value
+  field.dispatchEvent(new Event('input'))
+  document.querySelector<HTMLElement>('#apply')!.click()
+}
+it('keeps edits made during a pending save dirty and prevents duplicate saves', async () => {
+  const result = deferred<ReturnType<typeof pendingJob>>()
+  const save = vi.fn(
+    (_id: string, _project: typeof pack.project, _revision: number) => result.promise,
+  )
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: {
+      get: async () => pendingJob(),
+      reviewPackage: async () => structuredClone(pack),
+      save,
+    },
+    setAssemblyToken: vi.fn(),
+  }))
+  await import('./assembly-workbench')
+  await open('job-a')
+  pivot('0.1')
+  document.querySelector<HTMLElement>('#save-revision')!.click()
+  pivot('0.2')
+  document.querySelector<HTMLElement>('#save-revision')!.click()
+  expect(save).toHaveBeenCalledTimes(1)
+  expect(save.mock.calls[0][1].groups[0].frame.position_m[0]).toBe(0.1)
+  result.resolve(pendingJob('job-a', 'awaiting_review', 2))
+  await vi.waitFor(() =>
+    expect(document.querySelector('#job-status')?.textContent).toContain('revision 2'),
+  )
+  expect(document.querySelector('#job-status')?.textContent).toContain('unsaved edits')
+  expect(document.querySelector<HTMLButtonElement>('#process')!.disabled).toBe(true)
+})
+it('ignores a late poll after a different job has been opened', async () => {
+  const result = deferred<ReturnType<typeof pendingJob>>()
+  let count = 0
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: {
+      get: vi.fn((id: string) =>
+        id === 'job-b'
+          ? Promise.resolve(pendingJob(id))
+          : ++count === 1
+            ? Promise.resolve(pendingJob(id, 'validating'))
+            : result.promise,
+      ),
+      reviewPackage: async () => structuredClone(pack),
+    },
+    setAssemblyToken: vi.fn(),
+  }))
+  await import('./assembly-workbench')
+  await open('job-a')
+  await vi.waitFor(() => expect(count).toBe(2), { timeout: 2000 })
+  await open('job-b')
+  result.resolve(pendingJob('job-a', 'completed'))
+  await new Promise((done) => setTimeout(done, 20))
+  expect(document.querySelector('#job-status')?.textContent).toContain('Job job-b')
+})
+it('ignores an older open request when a newer request wins', async () => {
+  const result = deferred<ReturnType<typeof pendingJob>>()
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: {
+      get: (id: string) => (id === 'job-a' ? result.promise : Promise.resolve(pendingJob(id))),
+      reviewPackage: async () => structuredClone(pack),
+    },
+    setAssemblyToken: vi.fn(),
+  }))
+  await import('./assembly-workbench')
+  document.querySelector<HTMLInputElement>('#job-id')!.value = 'job-a'
+  document.querySelector<HTMLElement>('#open-job')!.click()
+  await open('job-b')
+  result.resolve(pendingJob('job-a'))
+  await new Promise((done) => setTimeout(done, 20))
+  expect(document.querySelector('#job-status')?.textContent).toContain('Job job-b')
+})
+
+it('retains unsaved local work when opening another job fails', async () => {
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: {
+      get: async () => {
+        throw Error('Job not found')
+      },
+    },
+    setAssemblyToken: vi.fn(),
+  }))
+  await load()
+  pivot('0.2')
+  document.querySelector<HTMLInputElement>('#job-id')!.value = 'missing'
+  document.querySelector<HTMLElement>('#open-job')!.click()
+  await vi.waitFor(() =>
+    expect(document.querySelector('#message')?.textContent).toContain('Job not found'),
+  )
+  expect(document.querySelector<HTMLElement>('#workspace')!.hidden).toBe(false)
+  expect(
+    JSON.parse(document.querySelector<HTMLTextAreaElement>('#editor')!.value).frame.position_m[0],
+  ).toBe(0.2)
+  document.querySelector<HTMLElement>('#approve')!.click()
+  expect(document.querySelector('#summary')?.textContent).toContain('1/1 acknowledged')
 })
