@@ -17,11 +17,15 @@ This is the overall project checklist. Update it as verified handoffs arrive; ke
 - **Srijan + his agent:** geometry preparation, scale/orientation, collision proxies, and later Gemini property assistance. Branch: `codex/asset-preparation`.
 - **Atul + his agent:** frontend workflow and later Fetch/ASI:One integration. Branch: `codex/web-workflow`.
 
-The backend branch has working upload/status/property/download endpoints, SQLite persistence, an explicitly synthetic cube provider, and a Meshy adapter. Its 44 tests, local HTTP smoke, and Python 3.12 CI passed; see the [backend evidence](team-notes/2026-10-23-backend-baseline.md). Live Meshy generation and the combined simulation pipeline remain unverified. Other computers' progress is pending their handoffs.
+The backend feature branch now connects upload/reconstruction, property persistence, Srijan's preparation, Yash's exporter/validator, and portable ZIP downloads. The merged suite plus integration tests passed on this Intel Mac (158 tests; Python 3.13.7 / MuJoCo 3.3.7). Original and relocated checks passed for the cached real charger model. See the [integration handoff](team-notes/2026-10-23-pipeline-integration.md). Remote CI, native Windows 3.17 charger viewer acceptance, frontend integration and the second object remain separate checks.
+
+Srijan's preparation/Gemini code at `dcfa486` and Yash's simulation code at `6298d6e` are integrated into the backend feature branch. Preparation preserves input axes and may distort proportions by scaling each axis independently; this is documented rather than inferred orientation. Geometry-only simulation copies preserve the richer prepared originals. Gemini remains an optional adapter with no live inference or API/UI connection demonstrated. Atul's frontend handoff is pending.
 
 Use [the shared contract](API.md) for module boundaries and units. Agents can start from `origin/codex/backend-pipeline`; work on their own branches and preserve others' changes. Full instructions: [Srijan](handoffs/srijan-agent.md), [Atul](handoffs/atul-agent.md).
 
-**Next for Johaan:** confirm Meshy API access/credits, capture one simple object's views and reference measurements, then run one real reconstruction through the backend and inspect the saved GLB. This can progress while the other computers build their modules. Do not substitute a mock success for this milestone.
+**Next for Johaan:** coordinate Atul's results screen against the processing/download endpoints, receive Yash's real charger viewer findings, and complete the second object and sponsor integrations. The cached first reconstruction now reaches a validated downloadable simulation bundle.
+
+Meshy and Gemini authentication are verified locally. Approved 1024-pixel JPEG copies completed one real Meshy task through the backend. The downloaded GLB loads, has finite vertices, is watertight, and was inspected in a static geometry preview. Its properties are explicitly estimated at the user's request. The [real reconstruction example](../examples/reconstruction/apple-20w-charger/README.md) now has a [prepared simulation bundle](../examples/simulation/apple-20w-charger/README.md). Headless physics/portability checks passed; visual orientation and real-world fidelity remain unverified. See [environment setup](ENVIRONMENT.md).
 
 ## Prize targets
 
@@ -56,43 +60,43 @@ The core deliverable is an editable simulation asset. Robot-policy training, phy
 - [ ] Verify the isolated Python environment and record exact versions.
 - [x] Establish an API and background job boundary with persistent progress/errors (backend branch).
 - [x] Build clearly labeled mock reconstruction results (synthetic cube provider).
-- [ ] Build a small labeled synthetic simulation fixture (Windows task).
+- [x] Build a small labeled synthetic simulation fixture (Windows report and pushed evidence at `33393ab`; cube and cuboid).
 - [ ] Confirm API access/credits before making provider execution a dependency.
 
 The interface and simulator can progress independently using mocks and fixtures.
 
 ### Phase 3 — Prove photo-to-mesh generation
 
-- [ ] Capture one to four sharp views of the same object.
-- [ ] Submit a Meshy reconstruction job and report its status.
-- [ ] Download and preserve OBJ/GLB outputs before provider URLs expire.
-- [ ] Inspect one usable result before expanding features.
-- [ ] Keep completed results available after downstream failures.
+- [x] Capture one to four views of the same object (first charger; sharpness/fine detail remain limitations).
+- [x] Submit a Meshy reconstruction job and report its status (first charger).
+- [x] Download and preserve GLB output before provider URLs expire (first charger).
+- [x] Inspect one result's geometry before expanding features (loads, watertight, static preview; fine fidelity unverified).
+- [x] Keep completed results available after downstream failures (per-attempt preservation).
 
 ### Phase 4 — Prepare geometry and properties
 
 - [ ] Inspect orientation and apply measured scale.
-- [ ] Create collision geometry separately from the visible mesh, starting with simple convex proxies.
+- [x] Create collision geometry separately from the visible mesh (box proxy).
 - [ ] Confirm mass and label friction/contact assumptions.
-- [ ] Record whether each property is measured, user-supplied, sourced, or estimated.
+- [x] Record whether each property is measured, user-supplied, sourced, or estimated.
 - [ ] Validate AI suggestions deterministically before export.
 
 Unknown values remain explicit. A material label alone does not establish mass or friction between contacting surfaces.
 
 ### Phase 5 — Generate and validate MuJoCo assets
 
-- [ ] Export `scene.xml`, relative-path meshes, and metadata.
-- [ ] Check loading, scale, valid mass/inertia, contact, and settling.
+- [x] Export `scene.xml`, relative-path meshes, and metadata (first charger and synthetic fixtures).
+- [x] Check loading, scale, valid mass/inertia, contact, and settling (headless first charger).
 - [ ] Inspect visual and collision geometry separately in the viewer.
-- [ ] Produce a report that distinguishes headless checks from viewer observations.
-- [ ] Copy the bundle to another directory and verify portability.
+- [x] Produce a report that distinguishes headless checks from viewer observations.
+- [x] Copy the bundle to another directory and verify portability (first charger).
 
 Passing these checks establishes basic simulation usability, not measured real-world accuracy or successful policy training.
 
 ### Phase 6 — Complete the application
 
 - [ ] Connect upload, processing, property confirmation, preview, and download.
-- [ ] Provide actionable errors and retries that retain completed work.
+- [x] Provide backend errors and simulation retries that retain completed work; frontend integration pending.
 - [ ] Run the entire pipeline on two real objects.
 - [ ] Record total processing time, manual edits, and failure causes.
 

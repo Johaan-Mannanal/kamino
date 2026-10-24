@@ -7,15 +7,24 @@ Authoritative Python models: `src/photo2sim/contracts.py`. Backend owns this fil
 - `GET /api/health`: service status and configured reconstruction provider.
 - `POST /api/jobs`: multipart field **`images`**, repeated for 1–4 JPEG/PNG/WebP images, at most 10 MiB and 25 megapixels each. Returns **202** and `JobRecord`.
 - `GET /api/jobs/{id}`: returns `JobRecord`; poll while reconstruction runs.
-- `PATCH /api/jobs/{id}/properties`: JSON `AssetProperties`; accepted only at `awaiting_properties`. Saves confirmed inputs. It does not yet launch preparation or simulation.
+- `PATCH /api/jobs/{id}/properties`: JSON `AssetProperties`; accepted at `awaiting_properties` or after a simulation-stage failure. Saving corrected properties returns to `awaiting_properties` and clears current result pointers while retaining prior attempt files. Saves confirmed inputs. Processing starts with a separate explicit request.
+- `POST /api/jobs/{id}/process`: no body. Requires a reconstructed mesh and saved properties. Returns **202** with status `preparing`, then runs preparation, export and headless validation asynchronously. Duplicate/running/completed requests return **409**. Failed simulation attempts can be retried with this endpoint; existing attempt files are retained. Reconstruction failures require separate diagnosis, not this retry.
 - `GET /api/jobs/{id}/files/{path}`: job-relative artifact download, e.g. `reconstruction/mesh.glb` or `uploads/00.png`.
 - `/docs` and `/openapi.json`: generated API documentation once the backend starts.
 
-State sequence: `queued → reconstructing → awaiting_properties → preparing → validating → completed`; failures use `failed` and `{code, message}`. The initial backend implements reconstruction and property persistence only. `progress` describes reconstruction, not total pipeline completion. A 100% reconstruction job can still await properties.
+Phone JPEGs identified as MPO are accepted as JPEG uploads with their original bytes preserved. A provenance-labeled property example for the first real object is at `examples/api/apple-20w-estimated-properties.json`; these are reference-based estimates, not measurements.
+
+State sequence: `queued → reconstructing → awaiting_properties → preparing → validating → completed`; failures use `failed` and `{code, message}`. Completion requires passing original and relocated scene validation and successful ZIP packaging. `progress` describes reconstruction, not total pipeline completion. A 100% reconstruction job can still await properties.
 
 The provider is configured server-side (`mock` by default). Never accept API keys or arbitrary provider download URLs from the browser. Mock jobs have `synthetic: true`; they produce a known cube and make no claim of photo reconstruction. CORS for local frontend development permits `http://localhost:5173` and `http://127.0.0.1:5173`.
 
-`JobRecord` contains `schema_version`, `id`, `status`, `provider`, `synthetic`, timestamps, `progress`, `source_images`, `provider_task_id`, `mesh_path`, `properties`, `asset`, `export_path`, and `error`. Nullable fields are initially null. Paths in responses are relative to that job's artifact directory, never Windows/Mac absolute paths. Missing jobs/files return 404, invalid properties return 422, and wrong-stage updates return 409.
+`JobRecord` contains `schema_version`, `id`, `status`, `provider`, `synthetic`, timestamps, `progress`, `source_images`, `provider_task_id`, `mesh_path`, `properties`, `asset`, `export_path`, `validation_path`, `bundle_path`, and `error`. Nullable fields are initially null. Top-level paths in responses are relative to that job's artifact directory, never Windows/Mac absolute paths. Missing jobs/files return 404, invalid properties return 422, and wrong-stage updates return 409.
+
+After processing, `export_path` names `attempts/{attempt}/bundle/scene.xml`, `validation_path` names its `validation-report.json`, and `bundle_path` names `attempts/{attempt}/simulation.zip`. Download each using `/api/jobs/{id}/files/{path}`. The ZIP contains `scene.xml` at its root with relative meshes, `asset.json`, `simulation.json` and the actual validation report. Failed validation can expose its diagnostic scene/report but never sets `bundle_path`. Only show a successful download action for `status == completed` and non-null `bundle_path`.
+
+`asset.visual_mesh` is **bundle-relative**, unlike top-level job paths. Once `export_path` exists, its visual mesh's job-relative path is `dirname(export_path) + '/' + asset.visual_mesh`. Reconstruction preview still uses `mesh_path`. Early preparation failures may have `asset` set without an export; do not infer a downloadable mesh from `asset` alone.
+
+Restarting while preparing/validating marks the job `failed` with `processing_interrupted`; retry `/process` to use the cached reconstruction in a new attempt. This never submits another paid generation. Processing errors are sanitized and retain saved artifacts. Unexpected validator exceptions still produce a safe failure report. A failed simulation can be retried directly or have its properties corrected with PATCH first; reconstruction failures cannot use this recovery path. Without the simulation extra, processing fails with `simulation_unavailable` and installation instructions.
 
 ## Property input
 
@@ -31,7 +40,7 @@ Dimensions are **full extents**, in metres, after mesh orientation. Mass is in k
 
 ## Geometry boundary — Srijan
 
-Implement in `src/photo2sim/assets/prepare.py`:
+Implemented in `src/photo2sim/assets/prepare.py`:
 
 ```python
 def prepare_asset(
@@ -39,11 +48,11 @@ def prepare_asset(
 ) -> AssetRecord: ...
 ```
 
-Input is a local reconstructed OBJ or GLB. Normalize orientation explicitly, centre its bounding box at the origin, scale to the confirmed full extents, and copy/export a self-contained mesh into `output_dir`. Return an `AssetRecord` with job-independent `asset_id`, relative `visual_mesh`, unchanged property provenance, a `collision` record, and notes explaining geometry assumptions/distortion. Start with `collision={"kind":"box"}`; a convex collision uses `{"kind":"convex_mesh","mesh_path":"meshes/collision.obj"}`. Box collision is centred at the origin and uses the property dimensions. Export the visual mesh in metres with no remaining scaling transform. Preserve input files. Do not guess missing dimensions or mass. The caller propagates the original job's synthetic flag to the asset; preparation cannot infer whether a generated mesh came from real photos.
+Input is a local reconstructed OBJ or GLB. The implementation preserves input axes and documents that they must match the supplied x/y/z extents; it does not infer upright orientation or automatically convert glTF +Y-up to MuJoCo +Z-up. It centres the bounding box, independently scales each axis to the supplied full extents, and warns about distortion. It returns a self-contained mesh, unchanged property provenance and box collision metadata. The orchestrator propagates `job.synthetic` and preserves textured preparation while supplying a separate geometry-only copy to the first simulation exporter. Source geometry is preserved; dimensions and mass are never inferred during preparation.
 
 ## Simulation boundary — Yash
 
-Future integration target in `src/photo2sim/simulation/export.py`:
+Implemented in `src/photo2sim/simulation/export.py`:
 
 ```python
 def export_asset(asset: AssetRecord, asset_dir: Path, output_dir: Path) -> Path: ...

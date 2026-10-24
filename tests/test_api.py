@@ -206,3 +206,24 @@ def test_server_does_not_trust_upload_filenames(tmp_path):
         job = wait_for(client, result.json()["id"], "awaiting_properties")
         assert job["source_images"] == ["uploads/00.png"]
         assert not Path(tmp_path.parent / "escape.exe").exists()
+
+
+def test_jpeg_with_multi_picture_metadata_is_accepted_and_preserved(tmp_path):
+    stream = BytesIO()
+    Image.new("RGB", (8, 8), "blue").save(
+        stream,
+        format="MPO",
+        save_all=True,
+        append_images=[Image.new("RGB", (8, 8), "red")],
+    )
+    content = stream.getvalue()
+    with Image.open(BytesIO(content)) as image:
+        assert image.format == "MPO"
+    with TestClient(create_app(Settings(data_dir=tmp_path))) as client:
+        response = client.post(
+            "/api/jobs", files=[("images", ("iphone.jpg", content, "image/jpeg"))]
+        )
+        assert response.status_code == 202
+        job = wait_for(client, response.json()["id"], "awaiting_properties")
+        assert job["source_images"] == ["uploads/00.jpg"]
+        assert client.get(f"/api/jobs/{job['id']}/files/uploads/00.jpg").content == content

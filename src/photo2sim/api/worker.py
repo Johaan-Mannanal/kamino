@@ -18,10 +18,34 @@ class JobWorker:
 
     def start(self):
         for job in self.store.active():
-            self.enqueue(job.id)
+            if job.status in ("preparing", "validating"):
+                self.fail(
+                    job.id,
+                    "processing_interrupted",
+                    "Simulation processing was interrupted. Artifacts are retained; retry processing.",
+                )
+            else:
+                self.enqueue(job.id)
 
     def enqueue(self, job_id: UUID):
         self.executor.submit(self.run, job_id)
+
+    def enqueue_processing(self, job_id: UUID):
+        self.executor.submit(self.run_processing, job_id)
+
+    def run_processing(self, job_id: UUID):
+        if self.stopping.is_set():
+            return
+        try:
+            from photo2sim.api.pipeline import process_job
+        except ImportError:
+            self.fail(
+                job_id,
+                "simulation_unavailable",
+                "Install the project simulation extra, restart the server, and retry processing.",
+            )
+            return
+        process_job(self.store, job_id)
 
     def close(self):
         self.stopping.set()

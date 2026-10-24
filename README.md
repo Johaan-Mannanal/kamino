@@ -13,12 +13,13 @@ Turn photos of real objects into editable MuJoCo simulation assets. Built for Ca
 - [Shared Markdown folder](docs/team-notes/): upload context, research, and handoffs.
 - [Working together](CONTRIBUTING.md): branches, interfaces, and cross-computer handoffs.
 - [Shared API and asset contracts](docs/API.md): exact endpoints, units, and integration boundaries.
+- [Team environment setup](docs/ENVIRONMENT.md): which credentials each laptop needs.
 - Agent handoffs: [Srijan](docs/handoffs/srijan-agent.md), [Atul](docs/handoffs/atul-agent.md).
 - [Capture workspace](hardware/README.md): photography and reference measurements.
 
 ## Current status
 
-The backend branch implements image uploads, SQLite-backed jobs, a synthetic mock provider, property confirmation, artifact downloads, and a Meshy adapter. Live Meshy execution still requires verified API access and credits. Geometry preparation, simulation export, the frontend, and sponsor integrations are being built separately. Completed files on a teammate's branch are not automatically part of `main`.
+The backend branch connects image uploads, SQLite-backed jobs, Meshy reconstruction, explicit property confirmation, geometry preparation, MuJoCo export/validation, and portable ZIP downloads. One real charger reconstruction completed through Meshy; its cached mesh also passed the integrated simulation pipeline and relocation checks. Properties remain estimated, collision/inertia are approximate, and native Windows viewer inspection of this real asset remains outstanding. The frontend and sponsor workflow/deployment integrations are separate work. These feature-branch changes are not yet part of `main`.
 
 The Windows handoff reports working wrist-camera capture. Image sharpness at task distances still needs evaluation. Any useful camera may supply object photos; physical arm control is optional. See the [pivot decision](docs/decisions/2026-10-23-photo-to-simulation.md).
 
@@ -77,7 +78,7 @@ py -3.12 -m venv .venv-sim
 .\.venv-sim\Scripts\python.exe -m pip install -e ".[dev,simulation]"
 ```
 
-For backend work, install `.[dev]` instead. Copy `.env.example` to `.env` only if you do not already have local configuration. Export needed variables into your shell; the backend does not automatically load `.env`.
+Use `.[dev,simulation]` for the full pipeline; `.[dev]` alone supports capture/reconstruction without simulation processing. Intel Macs can use Python 3.13 with `mujoco==3.3.7`, which has an Intel wheel; current 3.17 wheels are not available for Intel macOS. Windows/Linux should use the current simulation extra and record their actual versions. Copy `.env.example` to `.env` only if you do not already have local configuration. The backend reads `.env` from the working directory; shell variables take precedence. See [team environment setup](docs/ENVIRONMENT.md) for Gemini/Fetch/Vultr fields and their implementation status.
 
 ## Run the backend
 
@@ -93,7 +94,7 @@ Windows without activating:
 .\.venv-sim\Scripts\python.exe -m uvicorn photo2sim.api.app:create_app --factory --host 127.0.0.1 --port 8000
 ```
 
-Open `http://127.0.0.1:8000/docs` to upload 1–4 images under `images`, poll the returned job ID, download the synthetic cube, and PATCH confirmed properties. The default provider is **mock**: uploaded images do not influence this known synthetic cube. Jobs stop at `awaiting_properties`; preparation/export are not connected yet. See [API details](docs/API.md).
+Open `http://127.0.0.1:8000/docs` to upload 1–4 images under `images`, poll the returned job ID, PATCH confirmed properties, then POST `/api/jobs/{id}/process` with no body. Poll until `completed` or `failed`; successful jobs expose `bundle_path` for ZIP download through the files endpoint. The default provider is **mock**: uploaded images do not influence this known synthetic cube. See [API details](docs/API.md) and the [real charger bundle](examples/simulation/apple-20w-charger/README.md).
 
 Use **one server process/worker** for this in-process job executor. Do not run multiple servers against the same job database. Existing queued jobs resume on startup; saved provider task IDs are polled again. A submission interrupted before its task ID was saved is marked uncertain, with no automatic paid resubmission.
 

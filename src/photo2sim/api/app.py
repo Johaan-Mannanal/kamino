@@ -12,10 +12,26 @@ from fastapi.responses import FileResponse
 from PIL import Image, UnidentifiedImageError
 
 from photo2sim.api.config import Settings
-from photo2sim.api.store import JobStore
+from photo2sim.api.store import JobConflict, JobStore
 from photo2sim.api.worker import JobWorker
 from photo2sim.contracts import AssetProperties, JobRecord, bundle_path
 from photo2sim.integrations.reconstruction import MockProvider, ReconstructionProvider
+
+
+def retryable_processing(job: JobRecord) -> bool:
+    return (
+        job.status == "failed"
+        and job.error is not None
+        and job.error.code
+        in {
+            "preparation_failed",
+            "export_failed",
+            "validation_failed",
+            "packaging_failed",
+            "processing_interrupted",
+            "simulation_unavailable",
+        }
+    )
 
 
 def create_app(
@@ -72,7 +88,9 @@ def create_app(
                 with warnings.catch_warnings():
                     warnings.simplefilter("error", Image.DecompressionBombWarning)
                     with Image.open(BytesIO(content)) as decoded:
-                        extension = {"JPEG": "jpg", "PNG": "png", "WEBP": "webp"}.get(
+                        # Phone JPEGs may carry multi-picture (e.g. gain-map) metadata.
+                        # MPO retains a JPEG primary image; preserve the original bytes.
+                        extension = {"JPEG": "jpg", "MPO": "jpg", "PNG": "png", "WEBP": "webp"}.get(
                             decoded.format
                         )
                         if extension is None or decoded.width * decoded.height > 25_000_000:
@@ -120,9 +138,46 @@ def create_app(
 
     @app.patch("/api/jobs/{job_id}/properties", response_model=JobRecord)
     def save_properties(job_id: UUID, properties: AssetProperties):
-        if get_job(job_id).status != "awaiting_properties":
-            raise HTTPException(409, "Properties can be edited only while awaiting_properties")
-        return store.update(job_id, properties=properties)
+        job = get_job(job_id)
+        if job.status != "awaiting_properties" and not retryable_processing(job):
+            raise HTTPException(409, "Properties require awaiting input or a failed simulation")
+        try:
+            return store.update(
+                job_id,
+                expected_status=(job.status,),
+                properties=properties,
+                status="awaiting_properties",
+                error=None,
+                asset=None,
+                export_path=None,
+                validation_path=None,
+                bundle_path=None,
+            )
+        except JobConflict:
+            raise HTTPException(409, "Job stage changed; reload its current status") from None
+
+    @app.post("/api/jobs/{job_id}/process", response_model=JobRecord, status_code=202)
+    def process(job_id: UUID):
+        job = get_job(job_id)
+        if job.status != "awaiting_properties" and not retryable_processing(job):
+            raise HTTPException(409, "Job is not ready for simulation processing")
+        if job.properties is None or job.mesh_path is None:
+            raise HTTPException(409, "Save confirmed properties and finish reconstruction first")
+        try:
+            claimed = store.update(
+                job_id,
+                expected_status=(job.status,),
+                status="preparing",
+                error=None,
+                asset=None,
+                export_path=None,
+                validation_path=None,
+                bundle_path=None,
+            )
+        except JobConflict:
+            raise HTTPException(409, "Job is already processing; reload its status") from None
+        app.state.worker.enqueue_processing(job_id)
+        return claimed
 
     @app.get("/api/jobs/{job_id}/files/{path:path}")
     def download(job_id: UUID, path: str):
