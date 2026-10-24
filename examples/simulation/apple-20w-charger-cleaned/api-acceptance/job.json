@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "id": "14ec98fd-cda0-4b0c-915f-a70e0805dc66",
+  "status": "completed",
+  "provider": "meshy",
+  "synthetic": false,
+  "created_at": "2026-10-24T06:32:10.427269Z",
+  "updated_at": "2026-10-24T06:55:02.426355Z",
+  "progress": 100,
+  "source_images": [
+    "uploads/00.jpg",
+    "uploads/01.jpg",
+    "uploads/02.jpg",
+    "uploads/03.jpg"
+  ],
+  "provider_task_id": "01a16c9c-1679-7385-b5c3-0d755fe59d11",
+  "mesh_path": "reconstruction/mesh.glb",
+  "properties": {
+    "dimensions_m": {
+      "x": 0.043,
+      "y": 0.027,
+      "z": 0.058,
+      "source": "estimated",
+      "note": "Includes an assumed 16 mm pin allowance. Similar-adapter reference only; exact model unconfirmed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+    },
+    "mass_kg": {
+      "value": 0.059,
+      "source": "estimated",
+      "note": "Rounded from 58.5 g published for a similar adapter, not weighed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+    },
+    "sliding_friction": null
+  },
+  "asset": {
+    "schema_version": "1.0",
+    "asset_id": "16d20bf3-93d2-4c3d-b88c-e161d7a8b437",
+    "visual_mesh": "meshes/visual.obj",
+    "properties": {
+      "dimensions_m": {
+        "x": 0.043,
+        "y": 0.027,
+        "z": 0.058,
+        "source": "estimated",
+        "note": "Includes an assumed 16 mm pin allowance. Similar-adapter reference only; exact model unconfirmed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+      },
+      "mass_kg": {
+        "value": 0.059,
+        "source": "estimated",
+        "note": "Rounded from 58.5 g published for a similar adapter, not weighed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+      },
+      "sliding_friction": null
+    },
+    "collision": {
+      "kind": "box",
+      "mesh_path": null
+    },
+    "synthetic": false,
+    "notes": [
+      "Explicit right-handed rotation before centring and dimension scaling: fixed X=90, Y=0, Z=0 degrees, applied in X then Y then Z order (Rz @ Ry @ Rx). Dimensions refer to the resulting axes. Orientation was not inferred.",
+      "Bounding box centred at the origin; source centre was (-0.000954241, 0.000919238, -0.0010139) in input units.",
+      "Scaled per axis independently from source extents (1.48611, 0.882496, 1.89964) (input units, treated as unknown) to confirmed full extents (0.043, 0.027, 0.058) m.",
+      "Nonuniform distortion: per-axis scale factors differ by up to 5.7% (x:y:z ratio 1.000:1.057:1.055); the mesh's proportions did not match the confirmed dimensions.",
+      "Collision is a box centred at the origin with the confirmed dimensions; mass and friction were passed through unchanged and not inferred from geometry.",
+      "Simulation visual is a geometry-only copy; original reconstruction and prepared materials are retained separately. No texture fidelity is claimed."
+    ],
+    "orientation": {
+      "x_deg": 90.0,
+      "y_deg": 0.0,
+      "z_deg": 0.0
+    }
+  },
+  "export_path": "attempts/3373bbe0-e58f-42d5-91d2-454411eacdad/bundle/scene.xml",
+  "validation_path": "attempts/3373bbe0-e58f-42d5-91d2-454411eacdad/bundle/validation-report.json",
+  "bundle_path": "attempts/3373bbe0-e58f-42d5-91d2-454411eacdad/simulation.zip",
+  "error": null,
+  "orientation": {
+    "x_deg": 90.0,
+    "y_deg": 0.0,
+    "z_deg": 0.0
+  }
+}

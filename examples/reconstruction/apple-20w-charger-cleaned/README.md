@@ -24,5 +24,6 @@ reconstruction just to reproduce this result. `properties.estimated.json` keeps
 the previous 43 × 27 × 58 mm and 59 g estimates; nothing was physically measured.
 
 The oriented, scaled simulation candidate is in
-`../../simulation/apple-20w-charger-cleaned/`. General API/UI orientation editing
-is still outstanding; this correction was applied explicitly to this example.
+`../../simulation/apple-20w-charger-cleaned/`. Its `api-acceptance/` directory now
+demonstrates the saved orientation endpoint and actual backend processing using
+this cached GLB. The frontend orientation control remains outstanding.

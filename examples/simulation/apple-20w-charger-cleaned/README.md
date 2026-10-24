@@ -7,7 +7,7 @@ factors. The raw provider GLB remains unchanged in the reconstruction example.
 
 The full extents are fitted to the existing **estimated** 43 × 27 × 58 mm,
 with estimated mass 59 g and unknown friction. The relative spread in per-axis
-scale factors is 5.427%, versus the previous example's 34.9%; this statistic is
+scale factors is 5.427%, calculated as `(maximum - minimum) / maximum`; this statistic is
 not a measurement of reconstruction error. Independent scaling still changes
 proportions. The USB-C recess remains approximate.
 
@@ -38,6 +38,8 @@ and the USB-C end. Inspect collision separately. Record actual findings,
 versions, a screenshot and a short reset/drop demo. Keep limitations visible;
 do not change validation thresholds to obtain a pass. Send Johaan the results.
 
-The persistent reconstruction job was left at `awaiting_properties`; this
-manually oriented candidate was prepared/exported outside the API job flow.
-The original job, previous charger example and other teammates' work are intact.
+The initial candidate above was prepared/exported outside the API job flow.
+The same persistent job has subsequently completed using the new orientation
+endpoint; see `api-acceptance/`. Its API-exported mesh matches this manual
+candidate's vertices within 1e-8 m. The original GLB remains unchanged, and
+no new provider request was made. The previous charger example is retained.
