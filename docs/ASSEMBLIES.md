@@ -1,8 +1,9 @@
 # Reviewed assembly format and export (assembly-1.0)
 
 This **local library/CLI** is separate from the rigid AssetRecord v1 and its job
-API. Frontend/API integration, optional CAD import/grouping and photo-based part
-inference are future work. The format contains reviewed input data and provenance,
+API. A [local guided workbench and optional STEP import/grouping](GUIDED_ASSEMBLIES.md)
+now precede this exporter. HTTP assembly jobs and photo-based part inference
+remain future work. The format contains reviewed input data and provenance,
 not an assertion that articulation was inferred correctly.
 
 See the [minimal example](../examples/assemblies/two-link-hinge/input/assembly.json)

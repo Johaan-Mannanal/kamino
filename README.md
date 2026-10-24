@@ -142,3 +142,11 @@ git fetch origin
 ```
 
 Preserve uncommitted work and coordinate integration on your existing branch. The scaffold's import name changed from `dummy` to `photo2sim`; update any new imports accordingly.
+
+### Guided articulated assemblies
+
+Open `/assembly.html` in the frontend for local part grouping, pivot/joint review
+and kinematic sliders. See [guided workflow](docs/GUIDED_ASSEMBLIES.md) and
+[SO101 CAD/template candidate](examples/assemblies/so101-guided/README.md).
+This candidate passes template frame checks but fails dynamic tracking; it is
+not a photo-inferred or physically calibrated arm.
