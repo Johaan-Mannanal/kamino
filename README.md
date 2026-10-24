@@ -13,6 +13,7 @@ Turn photos of real objects into editable MuJoCo simulation assets. Built for Ca
 - [Shared Markdown folder](docs/team-notes/): upload context, research, and handoffs.
 - [Working together](CONTRIBUTING.md): branches, interfaces, and cross-computer handoffs.
 - [Shared API and asset contracts](docs/API.md): exact endpoints, units, and integration boundaries.
+- [Team environment setup](docs/ENVIRONMENT.md): which credentials each laptop needs.
 - Agent handoffs: [Srijan](docs/handoffs/srijan-agent.md), [Atul](docs/handoffs/atul-agent.md).
 - [Capture workspace](hardware/README.md): photography and reference measurements.
 
@@ -77,7 +78,7 @@ py -3.12 -m venv .venv-sim
 .\.venv-sim\Scripts\python.exe -m pip install -e ".[dev,simulation]"
 ```
 
-For backend work, install `.[dev]` instead. Copy `.env.example` to `.env` only if you do not already have local configuration. Export needed variables into your shell; the backend does not automatically load `.env`.
+For backend work, install `.[dev]` instead. Copy `.env.example` to `.env` only if you do not already have local configuration. The backend reads `.env` from the working directory; shell variables take precedence. See [team environment setup](docs/ENVIRONMENT.md) for Gemini/Fetch/Vultr fields and their implementation status.
 
 ## Run the backend
 

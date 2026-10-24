@@ -19,11 +19,13 @@ This is the overall project checklist. Update it as verified handoffs arrive; ke
 
 The backend branch has working upload/status/property/download endpoints, SQLite persistence, an explicitly synthetic cube provider, and a Meshy adapter. Its 44 tests, local HTTP smoke, and Python 3.12 CI passed; see the [backend evidence](team-notes/2026-10-23-backend-baseline.md). Live Meshy generation and the combined simulation pipeline remain unverified.
 
-Yash reported and pushed the Windows simulation baseline on `codex/windows-simulation-setup` at `33393ab`: synthetic cube/cuboid headless, relocation, and native viewer checks. The branch contents were inspected here; those Windows executions have not been rerun on this Mac. His next deliverable is a reusable `export_asset` plus validation beyond the hand-authored fixtures; see [the Windows integration handoff](handoffs/yash-agent.md). Srijan/Atul progress remains pending their reports.
+Yash pushed the reusable exporter/validator on `codex/windows-simulation-setup` at `6298d6e`, after merging shared contracts from the backend branch. `export_asset` consumes prepared metre-based, geometry-only OBJ/STL with box collisions; `validate_export` reports loading, contact, settling, timing, and relocation. His Windows report records three passing synthetic cases, native viewer inspection, and 62 passed / 2 skipped tests. Code and handoff were inspected here; Windows executions have not been rerun on this Mac or merged into this backend branch. Next is orchestration integration after Srijan's preparation handoff. Srijan/Atul progress remains pending their reports.
 
 Use [the shared contract](API.md) for module boundaries and units. Agents can start from `origin/codex/backend-pipeline`; work on their own branches and preserve others' changes. Full instructions: [Srijan](handoffs/srijan-agent.md), [Atul](handoffs/atul-agent.md).
 
 **Next for Johaan:** confirm Meshy API access/credits, capture one simple object's views and reference measurements, then run one real reconstruction through the backend and inspect the saved GLB. This can progress while the other computers build their modules. Do not substitute a mock success for this milestone.
+
+Meshy and Gemini authentication are verified locally. The first charger's physical values are explicitly estimated at the user's request. Full-size photo upload timed out; approved 1024-pixel JPEG copies successfully created one real Meshy task, now tracked by the backend. See [environment setup](ENVIRONMENT.md) and the [estimated-property note](team-notes/2026-10-23-charger-estimates.md). Generation completion and mesh inspection must be recorded separately before marking the reconstruction milestone complete.
 
 ## Prize targets
 
