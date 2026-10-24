@@ -8,10 +8,12 @@ The template is shared; actual credentials are not committed. Each role needs on
 | --- | --- | --- |
 | `PHOTO2SIM_PROVIDER` | Backend; `mock` normally, explicitly `meshy` for real reconstruction | Implemented |
 | `PHOTO2SIM_DATA_DIR` | Backend-local job files and SQLite database | Implemented |
+| `PHOTO2SIM_API_TOKEN` | Optional local/private application access token; required in public Compose deployment | Implemented; sent by clients in Authorization header |
+| `PHOTO2SIM_CORS_ORIGINS` | Comma-separated exact allowed frontend origins | Implemented; defaults to localhost:5173 and 127.0.0.1:5173 |
 | `MESHY_API_KEY` | Meshy Developer Platform → API Keys; backend machine only | Implemented |
 | `MESHY_MODEL` | `meshy-6` for the current geometry-only adapter | Implemented |
-| `GEMINI_API_KEY` | Google AI Studio project key; property-assistance service | Read by shared settings; assistant integration is separate |
-| `GEMINI_MODEL` | `gemini-3.8-flash` | Stable model ID verified in Google docs and available to Johaan's key; generation/quota not established by model-list access |
+| `GEMINI_API_KEY` | Google AI Studio project key; property-assistance service | Implemented by explicit cached suggestions API; never confirms properties automatically |
+| `GEMINI_MODEL` | `gemini-3.8-flash` | Real charger suggestion request succeeded through the API on Johaan's key; ongoing quota is account-dependent |
 | `AGENTVERSE_API_KEY` | Agentverse account registration/access key; Atul's agent machine | Reserved; agent adapter not implemented on this branch |
 | `FETCH_AGENT_SEED` | One locally generated, persistent private seed deriving the agent identity | Reserved; Atul must wire it into the adapter |
 | `FETCH_AGENT_ENDPOINT` | Public HTTPS message endpoint for the deployed ACP agent | Reserved; fill after deployment, not a guessed URL |
@@ -20,7 +22,7 @@ The template is shared; actual credentials are not committed. Each role needs on
 
 ## Gemini
 
-Set `GEMINI_MODEL=gemini-3.8-flash`. This model is listed as stable in [Google's model catalog](https://ai.google.dev/gemini-api/docs/models.md) and appeared in the current key's model-list response. The key authenticated successfully. A model listing does not verify inference quota or the unfinished property-assistance implementation.
+Set `GEMINI_MODEL=gemini-3.8-flash`. This model is listed as stable in [Google's model catalog](https://ai.google.dev/gemini-api/docs/models.md) and appeared in the current key's model-list response. A real request through `/api/jobs/{id}/suggestions` returned valid estimated dimensions/mass and questions, while preserving confirmed properties. A model listing alone would not establish this. Suggestions are optional, cached and remain unverified estimates; provider failures leave manual entry available.
 
 ## Fetch / Atul
 
@@ -35,7 +37,7 @@ Set `GEMINI_MODEL=gemini-3.8-flash`. This model is listed as stable in [Google's
 
 Activate the event's Vultr offer and verify the resulting account credits/terms. Choose infrastructure once the pipeline is ready for deployment. An API key is needed for automated provisioning; manual console deployment does not require putting one in the app's `.env`. If automation is used, create the key and configure API access through [Vultr's account API controls](https://docs.vultr.com/platform/other/api).
 
-Application keys such as Meshy/Gemini belong in the deployed backend environment. `VULTR_API_KEY` belongs only with the deployment operator/tools. The Python simulation requires no cloud key for local testing.
+Application keys such as Meshy/Gemini belong in the deployed backend environment. `VULTR_API_KEY` belongs only with the deployment operator/tools. The Python simulation requires no cloud key for local testing. See [deployment instructions](../deploy/README.md) for the Docker/HTTPS package and acceptance checks. `.env.deploy` is private deployment configuration; it is not the frontend configuration.
 
 ## By laptop
 

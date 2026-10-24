@@ -14,12 +14,13 @@ Turn photos of real objects into editable MuJoCo simulation assets. Built for Ca
 - [Working together](CONTRIBUTING.md): branches, interfaces, and cross-computer handoffs.
 - [Shared API and asset contracts](docs/API.md): exact endpoints, units, and integration boundaries.
 - [Team environment setup](docs/ENVIRONMENT.md): which credentials each laptop needs.
+- [Vultr deployment](deploy/README.md): container, HTTPS, access token and persistence checks.
 - Agent handoffs: [Srijan](docs/handoffs/srijan-agent.md), [Atul](docs/handoffs/atul-agent.md).
 - [Capture workspace](hardware/README.md): photography and reference measurements.
 
 ## Current status
 
-The backend branch connects image uploads, SQLite-backed jobs, Meshy reconstruction, explicit property confirmation, geometry preparation, MuJoCo export/validation, and portable ZIP downloads. One real charger reconstruction completed through Meshy; its cached mesh also passed the integrated simulation pipeline and relocation checks. Properties remain estimated, collision/inertia are approximate, and native Windows viewer inspection of this real asset remains outstanding. The frontend and sponsor workflow/deployment integrations are separate work. These feature-branch changes are not yet part of `main`.
+The backend branch connects image uploads, SQLite-backed jobs, Meshy reconstruction, explicit property confirmation, geometry preparation, MuJoCo export/validation, and portable ZIP downloads. One real charger reconstruction completed through Meshy; its cached mesh also passed the integrated simulation pipeline and relocation checks. Properties remain estimated, collision/inertia are approximate, and native Windows viewer inspection of this real asset remains outstanding. Gemini property suggestions are connected and one real charger request succeeded, with caching and manual confirmation kept separate. Docker/HTTPS deployment packaging is present; an actual Vultr deployment still requires account/server access. The frontend and Fetch workflow integration are separate work. These feature-branch changes are not yet part of `main`.
 
 The Windows handoff reports working wrist-camera capture. Image sharpness at task distances still needs evaluation. Any useful camera may supply object photos; physical arm control is optional. See the [pivot decision](docs/decisions/2026-10-23-photo-to-simulation.md).
 

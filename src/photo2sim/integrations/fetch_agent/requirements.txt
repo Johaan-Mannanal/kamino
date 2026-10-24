@@ -1,0 +1,2 @@
+# Optional ACP adapter dependency; install the root project separately.
+uagents-core==0.4.12

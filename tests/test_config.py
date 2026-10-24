@@ -9,6 +9,8 @@ def clear_settings(monkeypatch):
         "MESHY_MODEL",
         "GEMINI_API_KEY",
         "GEMINI_MODEL",
+        "PHOTO2SIM_API_TOKEN",
+        "PHOTO2SIM_CORS_ORIGINS",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -47,3 +49,15 @@ def test_no_config_file_still_runs_without_external_credentials(tmp_path, monkey
     assert result.provider == "mock"
     assert result.meshy_api_key == ""
     assert result.gemini_api_key == ""
+
+
+def test_deployment_access_and_origins_load_without_exposing_token(tmp_path, monkeypatch):
+    clear_settings(monkeypatch)
+    env = tmp_path / ".env"
+    env.write_text(
+        "PHOTO2SIM_API_TOKEN=private-team-token\nPHOTO2SIM_CORS_ORIGINS=https://demo.example.com,http://localhost:5173\n"
+    )
+    result = Settings.from_env(env_file=env)
+    assert result.api_token == "private-team-token"
+    assert result.cors_origins == ("https://demo.example.com", "http://localhost:5173")
+    assert "private-team-token" not in repr(result)

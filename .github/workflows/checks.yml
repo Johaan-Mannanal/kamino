@@ -6,6 +6,25 @@ permissions:
   contents: read
 
 jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - name: Install locked frontend dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Frontend tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -23,3 +42,51 @@ jobs:
         run: python -c "import photo2sim"
       - name: Tests
         run: python -m pytest -q
+  container:
+    runs-on: ubuntu-latest
+    env:
+      PHOTO2SIM_API_TOKEN: ci-only-application-token-not-a-provider-key
+      PHOTO2SIM_PUBLIC_HOST: demo.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HTTP smoke dependencies
+        run: python -m pip install -e .
+      - name: Validate Compose and HTTPS proxy configuration
+        run: |
+          docker compose config --quiet
+          docker run --rm -e PHOTO2SIM_PUBLIC_HOST -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2 caddy validate --config /etc/caddy/Caddyfile
+      - name: Build backend image
+        run: docker build -t photo2sim:ci .
+      - name: Start authenticated mock backend
+        run: |
+          docker run -d --name photo2sim-ci -e PHOTO2SIM_API_TOKEN -e PHOTO2SIM_PROVIDER=mock -v photo2sim-ci-data:/data -p 127.0.0.1:8000:8000 photo2sim:ci
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8000/api/health; then break; fi
+            sleep 1
+          done
+      - name: Check full mock pipeline and portable download
+        run: python tools/deployment/smoke.py --base-url http://127.0.0.1:8000 --mock > /tmp/photo2sim-smoke.json
+      - name: Verify persistence across container restart
+        run: |
+          docker restart photo2sim-ci
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8000/api/health; then break; fi
+            sleep 1
+          done
+          python - <<'PY'
+          import json, os, httpx
+          result = json.load(open('/tmp/photo2sim-smoke.json'))
+          with httpx.Client(base_url='http://127.0.0.1:8000', headers={'Authorization': 'Bearer ' + os.environ['PHOTO2SIM_API_TOKEN']}) as client:
+              response = client.get('/api/jobs/' + result['job_id'])
+              response.raise_for_status()
+              job = response.json()
+              assert job['status'] == 'completed' and job['synthetic']
+              assert client.get('/api/jobs/' + job['id'] + '/files/' + job['bundle_path']).status_code == 200
+          print('Completed job and ZIP survived restart')
+          PY
+      - name: Container diagnostics
+        if: failure()
+        run: docker logs photo2sim-ci

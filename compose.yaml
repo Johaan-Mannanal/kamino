@@ -1,0 +1,37 @@
+name: photo2sim
+services:
+  backend:
+    build: .
+    restart: unless-stopped
+    environment:
+      PHOTO2SIM_PROVIDER: ${PHOTO2SIM_PROVIDER:-mock}
+      PHOTO2SIM_DATA_DIR: /data/jobs
+      PHOTO2SIM_API_TOKEN: ${PHOTO2SIM_API_TOKEN:?Set a private application token}
+      PHOTO2SIM_CORS_ORIGINS: ${PHOTO2SIM_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      MESHY_API_KEY: ${MESHY_API_KEY:-}
+      MESHY_MODEL: ${MESHY_MODEL:-meshy-6}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+    volumes:
+      - jobs:/data
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      PHOTO2SIM_PUBLIC_HOST: ${PHOTO2SIM_PUBLIC_HOST:?Set the public DNS hostname}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  jobs:
+  caddy_data:
+  caddy_config:

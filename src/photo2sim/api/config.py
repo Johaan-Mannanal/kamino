@@ -13,6 +13,8 @@ class Settings:
     meshy_model: str = "meshy-6"
     gemini_api_key: str = field(default="", repr=False)
     gemini_model: str = "gemini-3.8-flash"
+    api_token: str = field(default="", repr=False)
+    cors_origins: tuple[str, ...] = ("http://localhost:5173", "http://127.0.0.1:5173")
     max_image_bytes: int = 10 * 1024 * 1024
     max_asset_bytes: int = 100 * 1024 * 1024
     poll_interval: float = 3
@@ -37,4 +39,15 @@ class Settings:
             meshy_model=values.get("MESHY_MODEL") or "meshy-6",
             gemini_api_key=values.get("GEMINI_API_KEY") or "",
             gemini_model=values.get("GEMINI_MODEL") or "gemini-3.8-flash",
+            api_token=values.get("PHOTO2SIM_API_TOKEN") or "",
+            cors_origins=tuple(
+                origin.strip().rstrip("/")
+                for origin in (
+                    values.get(
+                        "PHOTO2SIM_CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+                    )
+                    or ""
+                ).split(",")
+                if origin.strip()
+            ),
         )
