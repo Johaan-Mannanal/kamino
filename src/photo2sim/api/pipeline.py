@@ -26,7 +26,7 @@ def process_job(store: JobStore, job_id: UUID) -> None:
         attempt = root / "attempts" / str(uuid4())
         attempt.mkdir(parents=True)
         prepared = attempt / "prepared"
-        asset = prepare_asset(source, prepared, job.properties)
+        asset = prepare_asset(source, prepared, job.properties, orientation=job.orientation)
         asset.synthetic = job.synthetic
         (prepared / "asset.json").write_text(
             asset.model_dump_json(indent=2) + "\n", encoding="utf-8"

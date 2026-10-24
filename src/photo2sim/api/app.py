@@ -17,7 +17,7 @@ from photo2sim.api.config import Settings
 from photo2sim.api.store import JobConflict, JobStore
 from photo2sim.api.suggestions import SuggestionRequest, SuggestionsBusy, SuggestionService
 from photo2sim.api.worker import JobWorker
-from photo2sim.contracts import AssetProperties, JobRecord, bundle_path
+from photo2sim.contracts import AssetProperties, JobRecord, Orientation, bundle_path
 from photo2sim.integrations.gemini import PropertySuggestions, Transport
 from photo2sim.integrations.reconstruction import MockProvider, ReconstructionProvider
 
@@ -205,6 +205,26 @@ def create_app(
                 job_id,
                 expected_status=(job.status,),
                 properties=properties,
+                status="awaiting_properties",
+                error=None,
+                asset=None,
+                export_path=None,
+                validation_path=None,
+                bundle_path=None,
+            )
+        except JobConflict:
+            raise HTTPException(409, "Job stage changed; reload its current status") from None
+
+    @app.patch("/api/jobs/{job_id}/orientation", response_model=JobRecord)
+    def save_orientation(job_id: UUID, orientation: Orientation):
+        job = get_job(job_id)
+        if job.status != "awaiting_properties" and not retryable_processing(job):
+            raise HTTPException(409, "Orientation requires awaiting input or a failed simulation")
+        try:
+            return store.update(
+                job_id,
+                expected_status=(job.status,),
+                orientation=orientation,
                 status="awaiting_properties",
                 error=None,
                 asset=None,
