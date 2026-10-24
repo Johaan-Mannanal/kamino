@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "asset_id": "00000000-0000-0000-0000-000000000003",
+  "visual_mesh": "meshes/visual.obj",
+  "properties": {
+    "dimensions_m": {
+      "x": 0.035,
+      "y": 0.045,
+      "z": 0.1,
+      "source": "estimated",
+      "note": "Exact synthetic design; not measured from a real object"
+    },
+    "mass_kg": {
+      "value": 0.12,
+      "source": "estimated",
+      "note": "Synthetic assumed mass; not measured"
+    },
+    "sliding_friction": null
+  },
+  "collision": {
+    "kind": "box",
+    "mesh_path": null
+  },
+  "synthetic": true,
+  "notes": [
+    "Prepared synthetic fixture in metres, centred at origin. Not reconstructed from photos."
+  ]
+}

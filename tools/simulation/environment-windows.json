@@ -21,6 +21,10 @@
       "version": "4.15.1"
     },
     {
+      "name": "certifi",
+      "version": "2026.10.23"
+    },
+    {
       "name": "click",
       "version": "8.5.0"
     },
@@ -47,6 +51,14 @@
     {
       "name": "h11",
       "version": "0.16.0"
+    },
+    {
+      "name": "httpcore",
+      "version": "1.0.9"
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1"
     },
     {
       "name": "idna",
@@ -81,6 +93,10 @@
       "version": "0.0.1"
     },
     {
+      "name": "pillow",
+      "version": "13.0.0"
+    },
+    {
       "name": "pip",
       "version": "25.0.1"
     },
@@ -107,6 +123,10 @@
     {
       "name": "pytest",
       "version": "9.1.1"
+    },
+    {
+      "name": "python-multipart",
+      "version": "0.0.32"
     },
     {
       "name": "ruff",

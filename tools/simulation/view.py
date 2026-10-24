@@ -38,8 +38,8 @@ def main():
     frame_steps = max(1, round(1 / (60 * model.opt.timestep)))
     with mujoco.viewer.launch_passive(model, data) as viewer:
         with viewer.lock():
-            viewer.cam.lookat[:] = [0, 0, 0.43]
-            viewer.cam.distance = 1.1
+            viewer.cam.lookat[:] = model.stat.center
+            viewer.cam.distance = max(0.15, model.stat.extent * 1.5)
             viewer.cam.azimuth = 135
             viewer.cam.elevation = -25
             viewer.opt.geomgroup[2] = not args.collision
@@ -60,6 +60,7 @@ def main():
         "steps": steps,
         "syncs": syncs,
         "simulated_seconds": float(data.time),
+        "timestep_s": float(model.opt.timestep),
         "wall_seconds": time.perf_counter() - started,
         "warning_counts": [int(w.number) for w in data.warning],
         "note": "Window visibility and appearance must be verified separately.",
