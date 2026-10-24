@@ -1,4 +1,26 @@
-import type { Properties, Source } from './types'
+import type { Properties, Source, Suggestions } from './types'
+
+export function applySuggestionToDraft(draft: Record<string, string>, suggestion: Suggestions) {
+  const next = { ...draft }
+  const dimensions = suggestion.dimensions_m
+  if (dimensions) {
+    next.x = String(dimensions.x * 1000)
+    next.y = String(dimensions.y * 1000)
+    next.z = String(dimensions.z * 1000)
+    next.dimensions_source = 'estimated'
+    next.dimensions_note = dimensions.note || 'AI suggestion — unverified'
+  }
+  if (suggestion.mass_kg) {
+    next.mass = String(suggestion.mass_kg.value * 1000)
+    next.mass_source = 'estimated'
+    next.mass_note = suggestion.mass_kg.note || 'AI suggestion — unverified'
+  }
+  const friction = suggestion.sliding_friction
+  next.friction = friction ? String(friction.value) : ''
+  next.friction_source = 'estimated'
+  next.friction_note = friction?.note || (friction ? 'AI suggestion — unverified' : '')
+  return next
+}
 
 export function makeProperties(values: Record<string, string>): Properties {
   const positive = (key: string) => {

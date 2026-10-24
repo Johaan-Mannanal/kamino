@@ -25,6 +25,7 @@ export const mockApi: Api = {
     const id = crypto.randomUUID(),
       now = new Date().toISOString()
     const record: Job = {
+      orientation: { x_deg: 0, y_deg: 0, z_deg: 0 },
       schema_version: '1.0',
       id,
       status: 'queued',
@@ -107,6 +108,25 @@ export const mockApi: Api = {
     item.record.bundle_path = null
     item.record.updated_at = new Date().toISOString()
     return structuredClone(item.record)
+  },
+  async saveOrientation(id, orientation) {
+    const item = jobs.get(id)
+    if (!item || !['awaiting_properties', 'failed'].includes(item.record.status))
+      throw new Error('Orientation cannot be saved at this stage.')
+    item.record.orientation = structuredClone(orientation)
+    item.record.status = 'awaiting_properties'
+    item.record.asset = null
+    item.record.export_path = null
+    item.record.validation_path = null
+    item.record.bundle_path = null
+    item.record.error = null
+    return structuredClone(item.record)
+  },
+  async cachedSuggestions() {
+    throw new Error('No saved suggestions in the standalone UI mock. Manual entry is available.')
+  },
+  async suggestions() {
+    throw new Error('Gemini requests require the live backend. Manual entry is available.')
   },
   async process(id) {
     const item = jobs.get(id)
