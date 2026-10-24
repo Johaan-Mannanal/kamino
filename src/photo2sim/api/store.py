@@ -7,6 +7,10 @@ from uuid import UUID
 from photo2sim.contracts import JobRecord
 
 
+class JobConflict(ValueError):
+    """Another operation has already moved this job to a different stage."""
+
+
 class JobStore:
     """Each operation owns its connection, including transactions between threads."""
 
@@ -42,7 +46,7 @@ class JobStore:
             raise KeyError(str(job_id))
         return JobRecord.model_validate_json(row[0])
 
-    def update(self, job_id: UUID, **changes) -> JobRecord:
+    def update(self, job_id: UUID, *, expected_status: tuple[str, ...] | None = None, **changes):
         with self.connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             row = connection.execute(
@@ -51,6 +55,8 @@ class JobStore:
             if row is None:
                 raise KeyError(str(job_id))
             values = JobRecord.model_validate_json(row[0]).model_dump()
+            if expected_status is not None and values["status"] not in expected_status:
+                raise JobConflict("Job stage changed; reload its current status")
             values.update(changes, updated_at=datetime.now(UTC))
             result = JobRecord.model_validate(values)
             connection.execute(
@@ -62,7 +68,11 @@ class JobStore:
         with self.connect() as connection:
             rows = connection.execute("SELECT record FROM jobs").fetchall()
         records = [JobRecord.model_validate_json(row[0]) for row in rows]
-        return [job for job in records if job.status in ("queued", "reconstructing")]
+        return [
+            job
+            for job in records
+            if job.status in ("queued", "reconstructing", "preparing", "validating")
+        ]
 
     def job_dir(self, job_id: UUID) -> Path:
         return self.data_dir / str(job_id)

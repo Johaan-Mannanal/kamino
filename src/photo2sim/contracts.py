@@ -116,4 +116,6 @@ class JobRecord(Contract):
     properties: AssetProperties | None = None
     asset: AssetRecord | None = None
     export_path: str | None = None
+    validation_path: str | None = None
+    bundle_path: str | None = None
     error: JobError | None = None
