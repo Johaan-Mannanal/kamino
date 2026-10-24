@@ -97,3 +97,41 @@ and collision transforms in addition to the existing motion limits.
 [MuJoCo collision filtering and convex hulls](https://mujoco.readthedocs.io/en/3.3.7/computation/index.html#collision-detection).
 A passing free-space motion test does not prove mounting clearance or hardware
 accuracy; the environment must match the intended physical comparison.
+
+## Scripted simulation replay
+A portable export can be exercised without the frontend or hardware:
+
+```sh
+python -m photo2sim.assemblies.motion PATH/scene.xml actions.json --output-dir outputs/new-replay --render
+```
+
+`actions.json` is a list of phases, for example for the synthetic hinge:
+
+```json
+[
+  {"duration_s": 2, "targets_rad": {"hinge": 0.4}},
+  {"duration_s": 2, "targets_rad": {"hinge": -0.4}},
+  {"duration_s": 2, "targets_rad": {"hinge": 0.0}}
+]
+```
+
+Every phase must specify every driven joint. Names and radians follow the reviewed
+assembly. Out-of-limit targets are rejected, never clipped. Durations must be
+positive; total requested duration is limited to 60 seconds. Each duration rounds
+up to simulation timesteps, recorded in the trace. Targets are piecewise constant,
+not a trajectory planner, and are never sent to physical motors.
+
+The scene first passes existing motion/model validation. A fresh simulation then
+runs actual actuator dynamics, storing `trace.json` (time, targets, observed joint
+positions), `report.json` (phase-end tracking, limits, warnings and assumptions),
+`actions.json` and `preflight.json`. A missed target yields exit 1 and retains the
+trace/report. Invalid input or failed preflight does not start the requested action.
+Existing output directories and symlinks are preserved. Source exports must stay
+unchanged during execution. The record's original property provenance is preserved
+in its source bundle; this report is additional demo evidence, not a replacement.
+
+`--render` also saves `replay.gif`; omit it for machines without graphics support.
+A rendering failure retains a failed report. The GIF is an offscreen simulation
+with approximate timing; JSON timestamps are authoritative. Looping restarts the
+recorded simulation. Physical accuracy, collision fidelity and hardware mapping
+are not established by tracking success. This module is independent of HTTP jobs.

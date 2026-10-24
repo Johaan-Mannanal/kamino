@@ -1,0 +1,17 @@
+{
+  "source_branch": "codex/assembly-job-api",
+  "source_commit": "01a6af5f6b62285217c43e90abffb4f67cc12355",
+  "job_id": "05f33257-77b8-4cff-a194-4bf32ca43daf",
+  "revision": 2,
+  "status": "completed",
+  "synthetic": true,
+  "export_generated": true,
+  "motion_validation_passed": true,
+  "archive_sha256": "2d0af975c85ec739ba7545a73c44783b4a334375dc2994d435269d7f87cc007e",
+  "archive_bytes": 7137,
+  "browser_download_matches_server": true,
+  "extracted_and_relocated_validation_passed": true,
+  "python": "3.13.7",
+  "unauthenticated_download_status": 401,
+  "browser_console_errors_or_warnings": 0
+}

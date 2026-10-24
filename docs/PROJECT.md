@@ -25,7 +25,8 @@ not become confirmed measurements automatically.
 | Articulated assembly format and generated two-link proof | Local CLI/library implemented; Mac motion/reset/relocation checks pass; Windows viewer pending |
 | Photo part segmentation / joint inference | Not implemented |
 | CAD application import / rigid-link grouping | Local STEP importer and source-preserving grouping implemented |
-| Assembly review UI / articulated job API | Local browser workbench implemented; HTTP jobs pending |
+| SO101 through persistent assembly jobs | Browser import/review/save/process/download, relocation and restart passed on Mac; Windows acceptance pending |
+| Assembly review UI / articulated job API | Persistent import/revision/process/download integrated; synthetic live browser acceptance passed on Mac |
 | Imported SO101 reference model | Loads and runs; nominal CAD dimensions closely agree |
 | Combined reference robot/charger/table | Mac validation; Windows native/reset/relocation acceptance reported at 74cf11a |
 | Physical joint mapping / real motion comparison | Take-2 capture imported and offline-audited (599 samples); photo pairing and mapping unverified |
@@ -60,10 +61,12 @@ See the [two-link proof](../examples/assemblies/two-link-hinge/README.md).
 
 ### 4. Build guided assembly preparation and review — local slice implemented
 - [x] Import optional CAD component geometry; group components into rigid links.
-- [ ] Add photo-based part proposals or user-provided part meshes.
+- [x] Accept user-provided component meshes with source hashes and provenance.
+- [ ] Add photo-based part proposals.
 - [x] Show link connections, joint axes and motion sliders; permit corrections.
 - [x] Save/revise reviewed records, then regenerate without repeating reconstruction.
-- [ ] Expose articulated processing through API and UI, retaining failure artifacts.
+- [x] Expose articulated processing through API and UI, retaining failure artifacts.
+- [x] Verify synthetic browser import/review/save/process/download and relocated ZIP.
 
 ### 5. Apply the same workflow to the SO101 — CAD/template candidate generated
 - [x] Process 11 supplied CAD components through reusable assembly tools.
@@ -71,8 +74,9 @@ See the [two-link proof](../examples/assemblies/two-link-hinge/README.md).
 - [x] Record which data came from photos, CAD, measurements or imported reference.
 - [x] Generate a new articulated export; compare frames with the reference separately.
 - [x] Resolve local free-space SO101 tracking with convex hulls and explicit adjacent-pair exclusions.
+- [x] Run the SO101 through persistent browser/API review, export and authenticated ZIP download.
 - [ ] Accept revised scene on Windows and replace assumed clearance with measured physical placement.
-See [collision revision](../examples/assemblies/so101-guided/collision-revision/README.md); the original low-root candidate remains a recorded failure.
+See [SO101 API workflow](../examples/assemblies/so101-guided/api-workflow/README.md) and [collision revision](../examples/assemblies/so101-guided/collision-revision/README.md); the original low-root candidate remains a recorded failure.
 CAD may be required for this first demonstration. Photos-only robot conversion
 is not yet proven. Reusing a template must be labeled template-assisted.
 
@@ -87,7 +91,8 @@ Physical calibration is demo evidence, not a prerequisite for developing generic
 assembly export. Visual resemblance is not dynamics validation.
 
 ### 7. Polish, sponsor integrations and submission
-- [ ] Package an end-to-end demo, cached backup and explicit supported scope.
+- [x] Add reusable scripted assembly replay and cached generated-SO101 action evidence.
+- [ ] Package full end-to-end demo and physical comparison; keep supported scope explicit.
 - [ ] Document processing effort, manual interventions and remaining uncertainty.
 - [ ] Complete Fetch public integration if feasible; revisit Vultr when accessible.
 - [ ] Verify sponsor eligibility and submit actual implemented integrations.
@@ -98,9 +103,10 @@ See [sponsor checklist](SPONSORS.md). No new eligibility verification is claimed
 ## Work allocation now
 - **Johaan + this agent:** product integration, assembly schema/export and synthetic
   proof, guided review and SO101 free-space motion implemented locally. Next:
-  physical mapping integration and complete assembly HTTP processing.
-- **Atul, proposed handoff:** assembly jobs/API and frontend wiring; see
-  [scoped instructions](handoffs/atul-assembly-jobs.md). Assignment is pending Johaan sending it.
+  physical mapping integration and live comparison; SO101 saved-job workflow now passes locally.
+- **Atul:** assembly jobs/API and frontend wiring delivered at `01a6af5`; integrated
+  with regression fixes and browser evidence. Windows retest instructions are in
+  [the integration handoff](team-notes/2026-10-24-assembly-api-integration.md).
 - **Yash + Windows agent:** physical reference evidence and independent Windows
   acceptance. Follow [updated instructions](handoffs/yash-articulated-demo.md).
 - No repeat Meshy job, charger drop test or broad reference-model rewrite is needed.
@@ -108,7 +114,7 @@ See [sponsor checklist](SPONSORS.md). No new eligibility verification is claimed
 ## Infrastructure and evidence discipline
 Keep FastAPI, Pydantic, SQLite/local artifacts, Meshy, Gemini, trimesh/NumPy and
 MuJoCo. The current rigid AssetRecord/API stays compatible; articulated records
-are separate until a deliberate API integration. Python simulation dependencies
+use separate HTTP endpoints and retain their own contracts. Python simulation dependencies
 remain separate from LeRobot. Optional CAD dependencies remain isolated.
 
 Preserve historical handoffs, source branches and examples. Clearly label
@@ -116,4 +122,6 @@ synthetic fixtures, generated exports, imported reference models, observations,
 and estimates. Keep secrets/raw large captures out of Git. No scope claim should
 outpace tested evidence. Main remains separate from feature integration.
 
-Current guided slice: [workflow](GUIDED_ASSEMBLIES.md) and [SO101 evidence](../examples/assemblies/so101-guided/README.md). The workbench is local-file based; no automatic photo articulation or hardware dynamics validation is claimed.
+Current guided slice: [workflow](GUIDED_ASSEMBLIES.md) and [SO101 evidence](../examples/assemblies/so101-guided/README.md). The workbench supports persistent HTTP jobs and offline review packages; no automatic photo articulation or hardware dynamics validation is claimed.
+
+Simulation-only demo backup: [SO101 action replay](../examples/assemblies/so101-guided/collision-revision/motion-demo/README.md). This remains independent of physical pose mapping. [Live assembly-job acceptance](../examples/assemblies/api-browser-macos/README.md) covers the synthetic fixture.

@@ -1,2 +1,3 @@
-# Preserve exact upstream bytes required by SOURCE.json hashes.
+# Pinned upstream files are verified byte-for-byte against SOURCE.json.
+# Preserve original bytes on Windows; do not relax manifest hashes.
 * -text

@@ -1,0 +1,137 @@
+{
+  "scope": "Scripted simulation replay; not hardware observation or physical accuracy",
+  "passed": true,
+  "physical_accuracy_verified": false,
+  "mujoco_version": "3.3.7",
+  "synthetic": false,
+  "scene_sha256": "55f15351c14326cb2dedb6475966117f9aa59173b8b60b48db177c556b01b2be",
+  "source_mesh_hashes": {
+    "base": "18fc714e589560218443583edb354af54a07167f963e142d1bb6cd3224827995",
+    "shoulder": "915ce146305873f46b90387c1dcfc97595ad1d06cc75f8c90bdffac6d212d38a",
+    "upper_arm": "7a79b042b6577442cab4d098f6de8012439074b69d88b80887403c0970077a89",
+    "lower_arm": "48ea1cb109572b0d3569bb72aa49f18d22cfe472356c331f3758502bcd55176a",
+    "wrist": "2838e38d673fa1402837ea9a94931d4ed186732771555e9ea3dca824ce159da0",
+    "gripper": "7ebcd9437859edbaa0487fdf7e8ead68f4fae467502e39c19dbac054be773d21",
+    "moving_jaw_so101_v1": "6ca98fc2b3c9deefb8f5915e22ce3b95f0f01f3b3900a92447ce1ee637165ded"
+  },
+  "root_pose": {
+    "position_m": [
+      0.0,
+      0.0,
+      0.15
+    ],
+    "quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "assumptions": [
+    "CAD subset with imported reference-model articulation template. NOT photos-only reconstruction.",
+    "Eleven nominal structural components from supplied STEP; 259 other leaves omitted, including 11 empty leaves. Servos, fasteners, electronics and camera geometry are not represented.",
+    "All part placements and joint pivots at reference q=0 come from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc. Original STEP placements are preserved in inventory.json.",
+    "Grouping is an explicit template proposal. CAD/source correspondence uses the earlier nominal local-frame comparison; there is no fitted scale or geometry deformation.",
+    "Root clearance +0.05 m is assumed. Hardware zeros/signs, gripper 0-100 conversion, mounting, mass distribution and servo dynamics remain unverified.",
+    "Masses are sourced full-link estimates including hardware whose visuals are omitted. Box collisions and uniform-box inertia remain approximations; generated dynamics may fail validation.",
+    "Joint sliders and FK comparison verify conversion consistency with the same template, not independent physical accuracy.",
+    "Guided grouping; review acknowledgements are engineering decisions, not physical measurement or accuracy certification.",
+    "Collision revision: per-link visual-mesh convex hull; fills concavities and does not model exact CAD surface contact.",
+    "Direct joint-connected body pairs explicitly excluded, including the fixed base/shoulder. Other self and ground contacts remain enabled.",
+    "Free-space motion validation scenario: root height 0.15 m, increased from assumed 0.05 m. Not measured mounting geometry. Original ideal half-limit sweep put gripper 0.01693 m below ground; this scenario adds 0.10 m clearance. Physical setup must use measured placement."
+  ],
+  "collision_policy": "per-link convex hull of visual mesh; concavities filled",
+  "tracking_tolerance_rad": 0.03,
+  "timestep_s": 0.001,
+  "phases": [
+    {
+      "duration_s": 2.0,
+      "targets_rad": {
+        "shoulder_pan": 0.45,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "observed_rad": {
+        "shoulder_pan": 0.44999999999999996,
+        "shoulder_lift": 0.0005001165018757859,
+        "elbow_flex": 0.00042207963666415505,
+        "wrist_flex": 0.00013156153210517354,
+        "wrist_roll": -1.7207011711443594e-06,
+        "gripper": -4.240302612254469e-06
+      },
+      "final_max_error_rad": 0.0005001165018757859,
+      "end_time_s": 1.9999999999998905
+    },
+    {
+      "duration_s": 2.0,
+      "targets_rad": {
+        "shoulder_pan": -0.45,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "observed_rad": {
+        "shoulder_pan": -0.45000000000000007,
+        "shoulder_lift": 0.0005001165018474283,
+        "elbow_flex": 0.00042207963664374457,
+        "wrist_flex": 0.00013156153209755586,
+        "wrist_roll": -1.7207011710447138e-06,
+        "gripper": -4.240302611983657e-06
+      },
+      "final_max_error_rad": 0.0005001165018474283,
+      "end_time_s": 3.9999999999996705
+    },
+    {
+      "duration_s": 2.0,
+      "targets_rad": {
+        "shoulder_pan": 0,
+        "shoulder_lift": -0.35,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "observed_rad": {
+        "shoulder_pan": -2.5246565794170824e-15,
+        "shoulder_lift": -0.3496625108405796,
+        "elbow_flex": 0.00039171340951270025,
+        "wrist_flex": 0.00012306643893356925,
+        "wrist_roll": -1.6168829415571346e-06,
+        "gripper": -4.031016517908026e-06
+      },
+      "final_max_error_rad": 0.00039171340951270025,
+      "end_time_s": 6.000000000000338
+    },
+    {
+      "duration_s": 2.0,
+      "targets_rad": {
+        "shoulder_pan": 0,
+        "shoulder_lift": 0,
+        "elbow_flex": 0,
+        "wrist_flex": 0,
+        "wrist_roll": 0,
+        "gripper": 0
+      },
+      "observed_rad": {
+        "shoulder_pan": 3.08561920274048e-15,
+        "shoulder_lift": 0.000500116502431499,
+        "elbow_flex": 0.0004220796370640463,
+        "wrist_flex": 0.00013156153225442045,
+        "wrist_roll": -1.7207011730977358e-06,
+        "gripper": -4.240302617559246e-06
+      },
+      "final_max_error_rad": 0.000500116502431499,
+      "end_time_s": 8.000000000001005
+    }
+  ],
+  "warning_count": 0,
+  "python_warnings": [],
+  "max_joint_limit_violation_rad": 0.0,
+  "replay": "replay.gif",
+  "replay_timing": "Approximate GIF timing (10 ms resolution), with reset on loop"
+}

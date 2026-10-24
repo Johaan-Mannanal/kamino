@@ -115,6 +115,50 @@ Own `frontend/`, independent of the Python backend directory. Use the HTTP inter
 
 ## Articulated assets
 
-The new [assembly format](ASSEMBLIES.md) is a separate local library/CLI. These
-HTTP endpoints still process rigid AssetRecord v1 only; do not POST assembly JSON
-to them. Guided assembly UI/API integration is a later milestone.
+The [assembly format](ASSEMBLIES.md) has a library/CLI and persistent HTTP jobs.
+The rigid `/api/jobs` endpoints still process `AssetRecord` v1 only. Guided
+assemblies use separate endpoints and the same optional application token. The
+assembly endpoints require the `simulation` optional dependencies; without them,
+the rigid API still starts and serves its existing routes:
+
+- `POST /api/assembly-jobs`: multipart `project` (`assembly-review-1.0` JSON)
+  plus repeated `meshes` files. Upload exactly one mesh per distinct relative
+  `part.mesh` path, using that path as the multipart filename. Every declared
+  SHA-256 must match. Project limit: 2 MiB; individual mesh limit: configured
+  `max_asset_bytes` (100 MiB default); total mesh limit: 200 MiB. Returns 202.
+  Only individual OBJ/STL files are accepted; archives are rejected and never
+  expanded or executed. Uploaded paths are checked and saved as regular files.
+- `GET /api/assembly-jobs/{id}`: persisted job. `status` is
+  `awaiting_review`, `preparing`, `exporting`, `validating`, `completed`, or
+  `failed`. Poll while processing.
+- `PUT /api/assembly-jobs/{id}/revisions`: JSON
+  `{ "expected_revision": 1, "project": { ...ReviewProject } }`. Returns 201
+  and the next revision. Source part IDs, paths, hashes, poses and provenance
+  are immutable; import a new job when these change. Old revisions remain.
+- `POST /api/assembly-jobs/{id}/process`: JSON
+  `{ "expected_revision": 2, "collision_mode": "box", "exclude_joint_pairs": false }`.
+  The last two fields are optional export settings; `box` and `false` preserve
+  historical behavior. `collision_mode` may also be `convex_mesh`. They are
+  recorded per attempt and in `simulation.json`, never in the review project.
+  The API does not alter the imported root height. The SO101 free-space height
+  of 0.15 m is a separate explicitly assumed example, not an import default.
+  Requires current review acknowledgements and verified source hashes. Returns
+  202 and processes in the background. A stale revision or active/completed job
+  returns 409. A failed attempt may be retried; each attempt remains available.
+- `GET /api/assembly-jobs/{id}/files/{path}`: authenticated job-relative
+  download. The job exposes `project_path`, `package_path`, `export_path`,
+  `validation_path`, and `bundle_path` when available. Fetch with the Bearer
+  header; do not use an unauthenticated anchor link.
+
+The job and each entry in `attempts` expose `export_generated` and nullable
+`motion_validation_passed` independently. Validation failures retain the scene
+and report; `bundle_path` is only set after validation passes. The ZIP includes
+the scene, validation report, prepared review/audit files, and original source
+meshes. Server restart marks in-progress jobs failed with
+`processing_interrupted`; retry preserves the prior attempt directory.
+
+Revision publication uses `job.json` as the commit point. New files are staged
+before publication; retry preserves an unreferenced numbered revision under
+`interrupted-revisions/` and recreates that revision number. Published revisions
+and attempts are never overwritten. This filesystem store runs in one server
+process; do not run multiple backend workers against the same data directory.
