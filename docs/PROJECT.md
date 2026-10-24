@@ -25,6 +25,7 @@ not become confirmed measurements automatically.
 | Articulated assembly format and generated two-link proof | Local CLI/library implemented; Mac motion/reset/relocation checks pass; Windows viewer pending |
 | Photo part segmentation / joint inference | Not implemented |
 | CAD application import / rigid-link grouping | Local STEP importer and source-preserving grouping implemented |
+| SO101 through persistent assembly jobs | Browser import/review/save/process/download, relocation and restart passed on Mac; Windows acceptance pending |
 | Assembly review UI / articulated job API | Persistent import/revision/process/download integrated; synthetic live browser acceptance passed on Mac |
 | Imported SO101 reference model | Loads and runs; nominal CAD dimensions closely agree |
 | Combined reference robot/charger/table | Mac validation; Windows native/reset/relocation acceptance reported at 74cf11a |
@@ -73,8 +74,9 @@ See the [two-link proof](../examples/assemblies/two-link-hinge/README.md).
 - [x] Record which data came from photos, CAD, measurements or imported reference.
 - [x] Generate a new articulated export; compare frames with the reference separately.
 - [x] Resolve local free-space SO101 tracking with convex hulls and explicit adjacent-pair exclusions.
+- [x] Run the SO101 through persistent browser/API review, export and authenticated ZIP download.
 - [ ] Accept revised scene on Windows and replace assumed clearance with measured physical placement.
-See [collision revision](../examples/assemblies/so101-guided/collision-revision/README.md); the original low-root candidate remains a recorded failure.
+See [SO101 API workflow](../examples/assemblies/so101-guided/api-workflow/README.md) and [collision revision](../examples/assemblies/so101-guided/collision-revision/README.md); the original low-root candidate remains a recorded failure.
 CAD may be required for this first demonstration. Photos-only robot conversion
 is not yet proven. Reusing a template must be labeled template-assisted.
 
@@ -101,7 +103,7 @@ See [sponsor checklist](SPONSORS.md). No new eligibility verification is claimed
 ## Work allocation now
 - **Johaan + this agent:** product integration, assembly schema/export and synthetic
   proof, guided review and SO101 free-space motion implemented locally. Next:
-  physical mapping integration and SO101 acceptance through the assembly job workflow.
+  physical mapping integration and live comparison; SO101 saved-job workflow now passes locally.
 - **Atul:** assembly jobs/API and frontend wiring delivered at `01a6af5`; integrated
   with regression fixes and browser evidence. Windows retest instructions are in
   [the integration handoff](team-notes/2026-10-24-assembly-api-integration.md).
