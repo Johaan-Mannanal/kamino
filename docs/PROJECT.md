@@ -8,6 +8,25 @@ Turn photos of a real object into an editable MuJoCo simulation asset, with conf
 
 Photos → generated mesh → scale and property confirmation → collision geometry → simulation validation → downloadable scene.
 
+## Current status and coordination
+
+This is the overall project checklist. Update it as verified handoffs arrive; keep the phase order and do not add an hourly schedule.
+
+- **Johaan + this agent:** shared contracts, backend, Meshy integration, final integration, and later Vultr deployment. Branch: `codex/backend-pipeline`.
+- **Yash + Windows agent:** MuJoCo export, physics checks, native viewer, and portable simulation bundles. Branch: `codex/windows-simulation-setup`.
+- **Srijan + his agent:** geometry preparation, scale/orientation, collision proxies, and later Gemini property assistance. Branch: `codex/asset-preparation`.
+- **Atul + his agent:** frontend workflow and later Fetch/ASI:One integration. Branch: `codex/web-workflow`.
+
+The backend branch has working upload/status/property/download endpoints, SQLite persistence, an explicitly synthetic cube provider, and a Meshy adapter. Its 44 tests, local HTTP smoke, and Python 3.12 CI passed; see the [backend evidence](team-notes/2026-10-23-backend-baseline.md). Live Meshy generation and the combined simulation pipeline remain unverified. Other computers' progress is pending their handoffs.
+
+Use [the shared contract](API.md) for module boundaries and units. Agents can start from `origin/codex/backend-pipeline`; work on their own branches and preserve others' changes. Full instructions: [Srijan](handoffs/srijan-agent.md), [Atul](handoffs/atul-agent.md).
+
+**Next for Johaan:** confirm Meshy API access/credits, capture one simple object's views and reference measurements, then run one real reconstruction through the backend and inspect the saved GLB. This can progress while the other computers build their modules. Do not substitute a mock success for this milestone.
+
+## Prize targets
+
+Sponsor targets are **Fetch.ai, Vultr, and Gemini API**. Regular targets are **Overall, Most Technically Advanced, and Most Creative Project**. Meaningful integrations and eligibility requirements are tracked in [the sponsor checklist](SPONSORS.md).
+
 ## Basic infrastructure
 
 - Reconstruction: Meshy multi-image API, subject to confirmed access and credits.
@@ -19,7 +38,7 @@ Photos → generated mesh → scale and property confirmation → collision geom
 - Sponsor services: Fetch exposes the same application workflow; Vultr may host actual backend or processing jobs.
 - Environment: Python 3.12 in a separate `.venv-sim`; preserve the Windows LeRobot environment.
 
-These are planned components. A folder or dependency declaration does not mean the component is implemented.
+This list describes the intended full stack; only the components identified above have verified implementation evidence here.
 
 ## Ordered phases
 
@@ -27,7 +46,7 @@ These are planned components. A folder or dependency declaration does not mean t
 
 - [ ] Select two opaque, rigid, mostly convex objects.
 - [ ] Record available dimensions and mass, with measuring methods and units.
-- [ ] Agree on a shared asset record: mesh paths, dimensions in metres, mass in kilograms, collision representation, friction assumptions, and provenance for each value.
+- [x] Publish shared asset/job contracts: mesh paths, dimensions in metres, mass in kilograms, collision representation, friction assumptions, and provenance for each value (backend branch; coordinate revisions).
 - [ ] Set acceptance criteria for a usable export and document unsupported shapes.
 
 The core deliverable is an editable simulation asset. Robot-policy training, physical deployment, and automated arm scanning are stretch goals.
@@ -36,7 +55,8 @@ The core deliverable is an editable simulation asset. Robot-policy training, phy
 
 - [ ] Verify the isolated Python environment and record exact versions.
 - [x] Establish an API and background job boundary with persistent progress/errors (backend branch).
-- [ ] Build mock reconstruction results and a small labeled synthetic simulation fixture.
+- [x] Build clearly labeled mock reconstruction results (synthetic cube provider).
+- [ ] Build a small labeled synthetic simulation fixture (Windows task).
 - [ ] Confirm API access/credits before making provider execution a dependency.
 
 The interface and simulator can progress independently using mocks and fixtures.
