@@ -43,8 +43,19 @@ def local_mesh(root: Path, relative: str):
     return path, mesh
 
 
-def export_assembly(record: AssemblyRecord, asset_dir: Path, output_dir: Path) -> Path:
+def export_assembly(
+    record: AssemblyRecord,
+    asset_dir: Path,
+    output_dir: Path,
+    *,
+    collision_mode: str = "box",
+    exclude_joint_pairs: bool = False,
+) -> Path:
     """Generate a new fixed-root tree; preserve local mesh frames and reviewed inputs."""
+    if collision_mode not in {"box", "convex_mesh"}:
+        raise ValueError("Collision mode must be box or convex_mesh")
+    if not isinstance(exclude_joint_pairs, bool):
+        raise ValueError("exclude_joint_pairs must be boolean")
     # Revalidate even if a caller has mutated a nested Pydantic object.
     record = AssemblyRecord.model_validate(record.model_dump())
     output = Path(output_dir).absolute()
@@ -55,7 +66,16 @@ def export_assembly(record: AssemblyRecord, asset_dir: Path, output_dir: Path) -
         raise ValueError("Output cannot contain the source directory")
     prepared = {link.name: local_mesh(source_root, link.visual_mesh) for link in record.links}
     assumptions = {
-        "collision": "per-link axis-aligned bounding boxes",
+        "collision": (
+            "per-link axis-aligned bounding boxes"
+            if collision_mode == "box"
+            else "per-link convex hull of visual mesh; concavities filled"
+        ),
+        "collision_mode": collision_mode,
+        "exclude_joint_pairs": exclude_joint_pairs,
+        "excluded_joint_pairs": [[j.parent, j.child] for j in record.joints]
+        if exclude_joint_pairs
+        else [],
         "inertia": "uniform solid cuboid at each mesh bounding-box centre; approximation",
         "root": "fixed to world at reviewed root_pose",
         "gravity_m_s2": [0, 0, -9.81],
@@ -64,7 +84,11 @@ def export_assembly(record: AssemblyRecord, asset_dir: Path, output_dir: Path) -
         "torsional_friction": 0.005,
         "rolling_friction": 0.0001,
         "contact_solref": [0.02, 1],
-        "parent_child_collision": "MuJoCo default filtering; adjacent links are not contact-tested",
+        "parent_child_collision": (
+            "Explicitly exclude directly joint-connected pairs, including fixed-root children; other contacts enabled"
+            if exclude_joint_pairs
+            else "MuJoCo native filtering; static-root children may collide with the root"
+        ),
         "status": "load_checked_only; run articulated motion validation separately",
         "links": {},
     }
@@ -85,6 +109,10 @@ def export_assembly(record: AssemblyRecord, asset_dir: Path, output_dir: Path) -
         rgba=".3 .33 .36 1",
         friction=".8 .005 .0001",
     )
+    if exclude_joint_pairs:
+        contact = ET.SubElement(root, "contact")
+        for j in record.joints:
+            ET.SubElement(contact, "exclude", body1=j.parent, body2=j.child)
     actuators = ET.SubElement(root, "actuator")
     links = {link.name: link for link in record.links}
     children = {name: [] for name in links}
@@ -161,9 +189,11 @@ def export_assembly(record: AssemblyRecord, asset_dir: Path, output_dir: Path) -
             body,
             "geom",
             name=f"collision_{name}",
-            type="box",
-            pos=numbers(centre),
-            size=numbers(sides / 2),
+            **(
+                {"type": "box", "pos": numbers(centre), "size": numbers(sides / 2)}
+                if collision_mode == "box"
+                else {"type": "mesh", "mesh": f"mesh_{name}"}
+            ),
             group="3",
             friction=numbers([friction, 0.005, 0.0001]),
             solref=".02 1",

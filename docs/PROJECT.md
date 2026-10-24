@@ -70,7 +70,9 @@ See the [two-link proof](../examples/assemblies/two-link-hinge/README.md).
 - [ ] Review joint frames, limits, gripper relationship and physical assumptions.
 - [x] Record which data came from photos, CAD, measurements or imported reference.
 - [x] Generate a new articulated export; compare frames with the reference separately.
-- [ ] Resolve failed SO101 dynamic tracking; template FK passes, motion validation fails.
+- [x] Resolve local free-space SO101 tracking with convex hulls and explicit adjacent-pair exclusions.
+- [ ] Accept revised scene on Windows and replace assumed clearance with measured physical placement.
+See [collision revision](../examples/assemblies/so101-guided/collision-revision/README.md); the original low-root candidate remains a recorded failure.
 CAD may be required for this first demonstration. Photos-only robot conversion
 is not yet proven. Reusing a template must be labeled template-assisted.
 
@@ -94,9 +96,10 @@ See [sponsor checklist](SPONSORS.md). No new eligibility verification is claimed
 
 ## Work allocation now
 - **Johaan + this agent:** product integration, assembly schema/export and synthetic
-  proof and guided preparation/review implemented locally. Next: fix SO101
-  collision proxies/dynamic tracking and connect assembly HTTP processing.
-  Srijan/Atul work is taken over here.
+  proof, guided review and SO101 free-space motion implemented locally. Next:
+  physical mapping integration and complete assembly HTTP processing.
+- **Atul, proposed handoff:** assembly jobs/API and frontend wiring; see
+  [scoped instructions](handoffs/atul-assembly-jobs.md). Assignment is pending Johaan sending it.
 - **Yash + Windows agent:** physical reference evidence and independent Windows
   acceptance. Follow [updated instructions](handoffs/yash-articulated-demo.md).
 - No repeat Meshy job, charger drop test or broad reference-model rewrite is needed.
