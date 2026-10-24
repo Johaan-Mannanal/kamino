@@ -1,0 +1,37 @@
+{
+  "job_id": "61ab2c04-72b7-492a-b20c-3a93dfcb18d5",
+  "provider": "meshy",
+  "provider_task_id": "01a16bf0-45a6-765b-aeb2-7dbc822968b8",
+  "synthetic": false,
+  "bytes": 4736848,
+  "sha256": "08e476d661aacc171fdca806743b022ecee0259334452ea1d38e6b66fdfc868c",
+  "geometries": 1,
+  "vertices": 131480,
+  "faces": 263192,
+  "finite_vertices": true,
+  "raw_bounds": [
+    [
+      -0.9508557915687561,
+      -0.5083885788917542,
+      -0.9508461952209473
+    ],
+    [
+      0.9489560127258301,
+      0.5063555240631104,
+      0.9489539265632629
+    ]
+  ],
+  "raw_extents": [
+    1.8998118042945862,
+    1.0147441029548645,
+    1.8998001217842102
+  ],
+  "raw_units": "Provider coordinates; real scale not yet applied.",
+  "watertight": true,
+  "winding_consistent": true,
+  "physical_properties": "User-approved reference-based estimates saved separately; no real measurements.",
+  "simulation_validated": false,
+  "viewer_inspected": false,
+  "geometry_preview_inspected": true,
+  "preview_note": "Static triangle-subsampled rendering shows a charger-like rounded body and two pins. Not a MuJoCo/native viewer inspection; fine geometric fidelity unverified."
+}

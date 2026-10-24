@@ -1,0 +1,15 @@
+{
+  "dimensions_m": {
+    "x": 0.043,
+    "y": 0.027,
+    "z": 0.058,
+    "source": "estimated",
+    "note": "Includes an assumed 16 mm pin allowance. Similar-adapter reference only; exact model unconfirmed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+  },
+  "mass_kg": {
+    "value": 0.059,
+    "source": "estimated",
+    "note": "Rounded from 58.5 g published for a similar adapter, not weighed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+  },
+  "sliding_friction": null
+}

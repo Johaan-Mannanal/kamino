@@ -23,9 +23,9 @@ Yash pushed the reusable exporter/validator on `codex/windows-simulation-setup` 
 
 Use [the shared contract](API.md) for module boundaries and units. Agents can start from `origin/codex/backend-pipeline`; work on their own branches and preserve others' changes. Full instructions: [Srijan](handoffs/srijan-agent.md), [Atul](handoffs/atul-agent.md).
 
-**Next for Johaan:** confirm Meshy API access/credits, capture one simple object's views and reference measurements, then run one real reconstruction through the backend and inspect the saved GLB. This can progress while the other computers build their modules. Do not substitute a mock success for this milestone.
+**Next for Johaan:** integrate Srijan's preparation with Yash's exporter/validator, persist validation reports and failure artifacts, and return a portable bundle to Atul's UI. The first real photo-to-mesh milestone is complete; the full simulation pipeline and second object remain outstanding.
 
-Meshy and Gemini authentication are verified locally. The first charger's physical values are explicitly estimated at the user's request. Full-size photo upload timed out; approved 1024-pixel JPEG copies successfully created one real Meshy task, now tracked by the backend. See [environment setup](ENVIRONMENT.md) and the [estimated-property note](team-notes/2026-10-23-charger-estimates.md). Generation completion and mesh inspection must be recorded separately before marking the reconstruction milestone complete.
+Meshy and Gemini authentication are verified locally. Approved 1024-pixel JPEG copies completed one real Meshy task through the backend. The downloaded GLB loads, has finite vertices, is watertight, and was inspected in a static geometry preview. Its properties are explicitly estimated at the user's request. The [real reconstruction example](../examples/reconstruction/apple-20w-charger/README.md) is ready for Srijan; no orientation/scale preparation or simulation acceptance is claimed yet. See [environment setup](ENVIRONMENT.md).
 
 ## Prize targets
 
@@ -67,10 +67,10 @@ The interface and simulator can progress independently using mocks and fixtures.
 
 ### Phase 3 — Prove photo-to-mesh generation
 
-- [ ] Capture one to four sharp views of the same object.
-- [ ] Submit a Meshy reconstruction job and report its status.
-- [ ] Download and preserve OBJ/GLB outputs before provider URLs expire.
-- [ ] Inspect one usable result before expanding features.
+- [x] Capture one to four views of the same object (first charger; sharpness/fine detail remain limitations).
+- [x] Submit a Meshy reconstruction job and report its status (first charger).
+- [x] Download and preserve GLB output before provider URLs expire (first charger).
+- [x] Inspect one result's geometry before expanding features (loads, watertight, static preview; fine fidelity unverified).
 - [ ] Keep completed results available after downstream failures.
 
 ### Phase 4 — Prepare geometry and properties
