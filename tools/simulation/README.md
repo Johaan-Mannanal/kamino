@@ -17,7 +17,8 @@ python -m venv .venv-sim
 ```
 
 The Windows snapshot pins the three requested packages and their installed required dependencies.
-No Isaac Sim, CUDA tooling, reconstruction models, or application dependencies are installed.
+The standalone snapshot contains no Isaac Sim, CUDA tooling, reconstruction models, or application
+dependencies. The full editable project setup additionally installs its app and dev dependencies.
 `.venv-sim` is already ignored by the repository's `.venv-*/` rule. `outputs/` is also ignored.
 Do not install these into the working LeRobot environment.
 
@@ -30,3 +31,8 @@ Failures produce a JSON report and a nonzero exit. The headless checks require n
 with simulation stepping and display sync. It supports `--scene`, `--collision`, `--seconds`,
 and an optional `--report` path. Viewer reports are telemetry, not substitutes for visual inspection.
 See the [fixture](../../examples/simulation/synthetic-box/README.md) for units, assumptions and evidence.
+
+For the full editable project and dev tools, install `.[dev,simulation]` as documented in the
+root README. `environment-windows.json` records exact installed versions from the isolated
+setup worktree. The exact cube variant is in `examples/simulation/synthetic-cube`; validate it
+with `--bundle examples/simulation/synthetic-cube` and open its `scene.xml` with `--scene`.

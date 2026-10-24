@@ -1,0 +1,19 @@
+{
+  "scene": "scene.xml",
+  "native_viewer_loop_completed": true,
+  "collision_view": false,
+  "steps": 854811,
+  "syncs": 2567,
+  "simulated_seconds": 42.74055000085707,
+  "wall_seconds": 45.00759960000869,
+  "warning_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "note": "Window visibility and appearance must be verified separately."
+}
