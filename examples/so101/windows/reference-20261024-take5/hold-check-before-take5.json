@@ -1,0 +1,56 @@
+{
+  "utc_start": "2026-10-24T14:16:06.166798+00:00",
+  "teleop_disable_torque_on_disconnect": false,
+  "servo_writes_by_check": false,
+  "calibration_matches": true,
+  "torque_enabled_before": {
+    "shoulder_pan": 1,
+    "shoulder_lift": 1,
+    "elbow_flex": 1,
+    "wrist_flex": 1,
+    "wrist_roll": 1,
+    "gripper": 1
+  },
+  "goal_register_readback": {
+    "shoulder_pan": 0.21978021978021978,
+    "shoulder_lift": -61.62637362637363,
+    "elbow_flex": 95.91208791208791,
+    "wrist_flex": 1.3186813186813187,
+    "wrist_roll": -4.527472527472527,
+    "gripper": 0.4092769440654843
+  },
+  "position_first": {
+    "shoulder_pan": 0.13186813186813187,
+    "shoulder_lift": -61.18681318681319,
+    "elbow_flex": 95.47252747252747,
+    "wrist_flex": 1.2307692307692308,
+    "wrist_roll": -4.527472527472527,
+    "gripper": 0.8185538881309686
+  },
+  "position_last": {
+    "shoulder_pan": 0.21978021978021978,
+    "shoulder_lift": -61.18681318681319,
+    "elbow_flex": 95.47252747252747,
+    "wrist_flex": 1.2307692307692308,
+    "wrist_roll": -4.527472527472527,
+    "gripper": 0.8185538881309686
+  },
+  "position_spans": {
+    "shoulder_pan": 0.3516483516483516,
+    "shoulder_lift": 0.0,
+    "elbow_flex": 0.0,
+    "wrist_flex": 0.0,
+    "wrist_roll": 0.0,
+    "gripper": 0.0
+  },
+  "torque_enabled_after": {
+    "shoulder_pan": 1,
+    "shoulder_lift": 1,
+    "elbow_flex": 1,
+    "wrist_flex": 1,
+    "wrist_roll": 1,
+    "gripper": 1
+  },
+  "all_six_torque_enabled": true,
+  "utc_end": "2026-10-24T14:16:09.433624+00:00"
+}

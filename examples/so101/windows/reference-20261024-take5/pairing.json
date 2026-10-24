@@ -1,0 +1,23 @@
+{
+  "take_id": "reference-20261024-take5",
+  "association": "operator-confirmed stationary association; not hardware synchronized",
+  "operator_confirmation": "they are unchanged",
+  "scope": "Arm and jaw opening unchanged during capture and front/side photos, in response to explicit confirmation request",
+  "image_exposure_times": "unknown",
+  "jaw_measurement": {
+    "reported_inches": 0.125,
+    "approximate_mm": 3.175,
+    "status": "operator approximate measurement; ruler photograph before capture; continuity supported by operator confirmation, no synchronized measurement",
+    "uncertainty_mm": "unknown"
+  },
+  "hardware": {
+    "teleop": "Operator-selected pose via leader before capture; then stopped with disable_torque_on_disconnect=false",
+    "capture": "read-only; no targets or torque changes",
+    "torque": "all six enabled in earlier hold check; capture preserves torque"
+  },
+  "limitations": [
+    "Multiple joints changed; does not independently establish each sign or zero.",
+    "Single jaw opening does not establish full gripper conversion.",
+    "No new model mapping selected or calibration modified."
+  ]
+}
