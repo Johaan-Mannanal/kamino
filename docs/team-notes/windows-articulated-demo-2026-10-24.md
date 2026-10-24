@@ -151,3 +151,14 @@ signs/zeros; gripper angle conversion and CAD/physical match remain unverified.
 Next: receive original photos and measurement endpoint descriptions, associate
 stationary views honestly, then Johaan can use them alongside his CAD review.
 Assembly acceptance is complete; physical reference pairing is not complete.
+
+## Operator-requested stationary repeat (take 2)
+
+Yash requested a repeat after the initial handoff. Reused the same read-only helper,
+COM5 and existing calibration for another 120-second capture. Saved 599 observations
+under `examples/so101/windows/reference-20261024-take2/`; exact UTC/Pacific interval,
+measured sample rate and ranges are in summary.json. Calibration readback again
+matched the source JSON; no error was reported. Port closed without torque changes.
+No operator controls, trajectory, calibration or additional simulation tests were run.
+Original take remains preserved. Photos and operator confirmation of unchanged pose
+and photo timing are pending; do not pair later images with either take by assumption.
