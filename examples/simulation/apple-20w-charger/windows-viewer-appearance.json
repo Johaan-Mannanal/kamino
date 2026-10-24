@@ -1,0 +1,23 @@
+{
+  "scene": "scene.xml",
+  "native_viewer_loop_completed": true,
+  "collision_view": false,
+  "body_axes": true,
+  "initial_camera_azimuth": 270.0,
+  "initial_camera_elevation": -20.0,
+  "steps": 478622,
+  "syncs": 2866,
+  "simulated_seconds": 47.86220000046533,
+  "timestep_s": 0.0001,
+  "wall_seconds": 50.00657389999833,
+  "warning_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "note": "Window visibility and appearance must be verified separately."
+}

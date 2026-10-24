@@ -1,0 +1,53 @@
+{
+  "source_backend_commit": "43ad99e",
+  "archive_sha256": "7965d7bbccaa11ab682ba5b5a95195a07a79525ed91db155dc6c6d655c7c4777",
+  "archive_payload_unchanged": true,
+  "environment": {
+    "python": "3.12.10",
+    "mujoco": "3.17.0",
+    "trimesh": "5.2.0",
+    "numpy": "2.5.4"
+  },
+  "asset_id": "a6ce3258-b218-4a2f-8d0d-2c5a76ae6f6b",
+  "synthetic": false,
+  "dimensions_m": [
+    0.043,
+    0.027,
+    0.058
+  ],
+  "mass_kg": 0.059,
+  "property_provenance": "estimated, not measured",
+  "box_half_extents_m": [
+    0.0215,
+    0.0135,
+    0.029
+  ],
+  "final_position_m": [
+    3.779620233994302e-09,
+    -3.2726374116107368e-09,
+    0.028999426379252895
+  ],
+  "final_quaternion_wxyz": [
+    1.0,
+    -9.640884369192314e-18,
+    -1.0729012524338323e-12,
+    3.9321111562734753e-13
+  ],
+  "appearance_observation": "Rounded charger-like body and protruding pin-like geometry rendered; uniform blue geometry-only material, surface detail not compared to unavailable source photos.",
+  "orientation_observation": "Body tall direction follows Z; pin protrusions follow horizontal Y direction in side view. Input axes were preserved. Dimension-to-axis mapping and intended resting pose remain unconfirmed.",
+  "collision_observation": "One full box spans body, pins and empty space; no separate pin or pin-gap collisions.",
+  "problems": [
+    "Estimated Z=58 mm is described as including pin allowance, but pin protrusions appear along Y; confirm dimension-axis mapping before claiming physical scale fidelity.",
+    "Documented 34.9% spread in scale factors distorts proportions.",
+    "Mass, dimensions, inertia and friction lack specimen measurements/calibration."
+  ],
+  "native_viewer_evidence": [
+    "windows-viewer-appearance.json",
+    "windows-viewer-appearance-close.json",
+    "windows-viewer-side.json",
+    "windows-viewer-collision.json"
+  ],
+  "demo_kind": "offscreen-rendered slow-motion replay, not native screen recording",
+  "thresholds_changed": false,
+  "scene_or_mesh_changed": false
+}

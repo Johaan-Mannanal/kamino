@@ -30,6 +30,14 @@ def main():
         type=Path,
         help="Optional viewer-loop telemetry; visual verification still requires observation",
     )
+    parser.add_argument("--azimuth", type=float, default=135, help="Initial orbit angle in degrees")
+    parser.add_argument(
+        "--elevation", type=float, default=-25, help="Initial camera elevation in degrees"
+    )
+    parser.add_argument(
+        "--body-axes", action="store_true", help="Show body axes: X red, Y green, Z blue"
+    )
+    parser.add_argument("--distance", type=float, help="Initial camera distance in metres")
     args = parser.parse_args()
     model = mujoco.MjModel.from_xml_path(str(args.scene.resolve()))
     data = mujoco.MjData(model)
@@ -39,9 +47,13 @@ def main():
     with mujoco.viewer.launch_passive(model, data) as viewer:
         with viewer.lock():
             viewer.cam.lookat[:] = model.stat.center
-            viewer.cam.distance = max(0.15, model.stat.extent * 1.5)
-            viewer.cam.azimuth = 135
-            viewer.cam.elevation = -25
+            viewer.cam.distance = (
+                args.distance if args.distance is not None else max(0.15, model.stat.extent * 1.5)
+            )
+            viewer.cam.azimuth = args.azimuth
+            viewer.cam.elevation = args.elevation
+            if args.body_axes:
+                viewer.opt.frame = mujoco.mjtFrame.mjFRAME_BODY
             viewer.opt.geomgroup[2] = not args.collision
             viewer.opt.geomgroup[3] = args.collision
         while viewer.is_running():
@@ -57,6 +69,12 @@ def main():
         "scene": args.scene.name,
         "native_viewer_loop_completed": True,
         "collision_view": args.collision,
+        "body_axes": args.body_axes,
+        "initial_camera_azimuth": args.azimuth,
+        "initial_camera_elevation": args.elevation,
+        "initial_camera_distance_m": float(
+            args.distance if args.distance is not None else max(0.15, model.stat.extent * 1.5)
+        ),
         "steps": steps,
         "syncs": syncs,
         "simulated_seconds": float(data.time),
