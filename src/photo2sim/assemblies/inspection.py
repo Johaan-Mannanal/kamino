@@ -45,6 +45,28 @@ def inspect_model(model, record, root, assumptions, scene):
             assumptions["exported_meshes"][link.name] == link.visual_mesh,
             "Export mesh manifest disagrees with reviewed record",
         )
+    mode = assumptions.get("collision_mode", "box")
+    require(mode in {"box", "convex_mesh"}, "Unsupported collision mode")
+    exclude = assumptions.get("exclude_joint_pairs", False)
+    require(isinstance(exclude, bool), "Invalid collision policy")
+    expected_pairs = [[j.parent, j.child] for j in record.joints] if exclude else []
+    require(
+        assumptions.get("excluded_joint_pairs", []) == expected_pairs,
+        "Collision policy manifest mismatch",
+    )
+    actual_pairs = [[e.get("body1"), e.get("body2")] for e in xml.findall("./contact/exclude")]
+    require(actual_pairs == expected_pairs, "Unexpected collision exclusions")
+    require(not xml.findall("./contact/pair"), "Explicit contact overrides unsupported")
+    require(int(m.opt.disableflags) == 0, "Simulation features disabled")
+    require(m.ngeom == 2 * len(record.links) + 1, "Unexpected collision/visual geometry count")
+    ground = m.geom("ground")
+    require(
+        int(ground.type[0]) == mujoco.mjtGeom.mjGEOM_PLANE and int(ground.bodyid[0]) == 0,
+        "Invalid ground",
+    )
+    require(int(ground.contype[0]) == int(ground.conaffinity[0]) == 1, "Ground contact disabled")
+    close(ground.pos, [0, 0, 0], "Ground position")
+    close(abs(float(ground.quat[0])), 1, "Ground orientation")
     hinges = [j for j in record.joints if j.kind == "revolute"]
     require(m.nq == m.nv == m.nu == len(hinges), "Unexpected joint or actuator count")
     require(m.nbody == len(record.links) + 1, "Unexpected link count")
@@ -77,14 +99,25 @@ def inspect_model(model, record, root, assumptions, scene):
         close(body.inertia, inertia, "Link inertia", atol=1e-14)
         collision = m.geom(f"collision_{link.name}")
         require(int(collision.bodyid[0]) == body.id, "Collision belongs to wrong link")
-        require(int(collision.type[0]) == mujoco.mjtGeom.mjGEOM_BOX, "Expected box collision")
+        expected_type = mujoco.mjtGeom.mjGEOM_BOX if mode == "box" else mujoco.mjtGeom.mjGEOM_MESH
+        require(int(collision.type[0]) == expected_type, "Collision type disagrees with policy")
         require(
-            int(collision.contype[0]) != 0 and int(collision.conaffinity[0]) != 0,
+            int(collision.contype[0]) == int(collision.conaffinity[0]) == 1,
             "Collision disabled",
         )
-        close(collision.pos, centre, "Collision centre")
-        close(abs(float(collision.quat[0])), 1, "Collision orientation")
-        close(collision.size, sides / 2, "Collision dimensions")
+        if mode == "box":
+            close(collision.pos, centre, "Collision centre")
+            close(abs(float(collision.quat[0])), 1, "Collision orientation")
+            close(collision.size, sides / 2, "Collision dimensions")
+        else:
+            visual_mesh = m.geom(f"visual_{link.name}")
+            require(
+                int(collision.dataid[0]) == int(visual_mesh.dataid[0]),
+                "Collision must use visual mesh hull",
+            )
+            close(collision.pos, visual_mesh.pos, "Collision mesh position")
+            close(abs(np.dot(collision.quat, visual_mesh.quat)), 1, "Collision mesh orientation")
+        close(collision.solref, [0.02, 1], "Collision contact settings")
         friction = link.sliding_friction.value if link.sliding_friction is not None else 0.8
         close(collision.friction, [friction, 0.005, 0.0001], "Friction")
         visual = m.geom(f"visual_{link.name}")
@@ -96,6 +129,11 @@ def inspect_model(model, record, root, assumptions, scene):
         )
         mesh_id = int(visual.dataid[0])
         require(mesh_id == m.mesh(f"mesh_{link.name}").id, "Compiled visual uses wrong mesh")
+        # Generated geoms have identity local placement. Only MuJoCo's internal
+        # mesh centring/alignment may appear in the compiled transform. Bounds
+        # alone cannot detect rotations of asymmetric hulls about their centre.
+        close(visual.pos, m.mesh_pos[mesh_id], "Visual mesh position")
+        close(abs(np.dot(visual.quat, m.mesh_quat[mesh_id])), 1, "Visual mesh orientation")
         start, count = int(m.mesh_vertadr[mesh_id]), int(m.mesh_vertnum[mesh_id])
         # MuJoCo centres/rotates its internal mesh representation. Undo the
         # compiled geom/world transforms to check vertices in original link space.

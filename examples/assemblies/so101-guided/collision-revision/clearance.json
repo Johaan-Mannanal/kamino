@@ -1,0 +1,12 @@
+{
+  "original_root_height_m": 0.05,
+  "sampled_minimum_z_m": -0.016926482610228222,
+  "worst": {
+    "joint": "shoulder_lift",
+    "angle_rad": 0.87266465,
+    "geom": "collision_gripper"
+  },
+  "method": "101 kinematic samples per half-limit sweep; geometric screening, not continuous clearance proof",
+  "proposed_free_space_root_height_m": 0.15,
+  "added_clearance_m": 0.1
+}

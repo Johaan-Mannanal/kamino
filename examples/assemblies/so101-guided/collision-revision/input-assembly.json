@@ -1,0 +1,366 @@
+{
+  "schema_version": "assembly-1.0",
+  "name": "so101_cad_template",
+  "synthetic": false,
+  "root_link": "base",
+  "root_pose": {
+    "position_m": [
+      0.0,
+      0.0,
+      0.15
+    ],
+    "quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "links": [
+    {
+      "name": "base",
+      "visual_mesh": "meshes/base.obj",
+      "geometry_source": "sourced",
+      "geometry_note": "Grouped without deformation. part_0007 (sourced): Nominal STEP component: Base_08p v18; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used. | part_0000 (sourced): Nominal STEP component: Base_SO101 v12; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used. | part_0268 (sourced): Nominal STEP component: WaveShare_Mounting_Plate_SO101 v4; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used.",
+      "mass_kg": {
+        "value": 0.147,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc full-link mass; includes omitted servo geometry; unmeasured."
+      },
+      "sliding_friction": null
+    },
+    {
+      "name": "shoulder",
+      "visual_mesh": "meshes/shoulder.obj",
+      "geometry_source": "sourced",
+      "geometry_note": "Grouped without deformation. part_0011 (sourced): Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used. | part_0001 (sourced): Nominal STEP component: Rotation_Pitch_SO101 v8; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used.",
+      "mass_kg": {
+        "value": 0.100006,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc full-link mass; includes omitted servo geometry; unmeasured."
+      },
+      "sliding_friction": null
+    },
+    {
+      "name": "upper_arm",
+      "visual_mesh": "meshes/upper_arm.obj",
+      "geometry_source": "sourced",
+      "geometry_note": "Grouped without deformation. part_0004 (sourced): Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used.",
+      "mass_kg": {
+        "value": 0.103,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc full-link mass; includes omitted servo geometry; unmeasured."
+      },
+      "sliding_friction": null
+    },
+    {
+      "name": "lower_arm",
+      "visual_mesh": "meshes/lower_arm.obj",
+      "geometry_source": "sourced",
+      "geometry_note": "Grouped without deformation. part_0006 (sourced): Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used. | part_0014 (sourced): Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used.",
+      "mass_kg": {
+        "value": 0.104,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc full-link mass; includes omitted servo geometry; unmeasured."
+      },
+      "sliding_friction": null
+    },
+    {
+      "name": "wrist",
+      "visual_mesh": "meshes/wrist.obj",
+      "geometry_source": "sourced",
+      "geometry_note": "Grouped without deformation. part_0016 (sourced): Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used.",
+      "mass_kg": {
+        "value": 0.079,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc full-link mass; includes omitted servo geometry; unmeasured."
+      },
+      "sliding_friction": null
+    },
+    {
+      "name": "gripper",
+      "visual_mesh": "meshes/gripper.obj",
+      "geometry_source": "sourced",
+      "geometry_note": "Grouped without deformation. part_0019 (sourced): Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used.",
+      "mass_kg": {
+        "value": 0.087,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc full-link mass; includes omitted servo geometry; unmeasured."
+      },
+      "sliding_friction": null
+    },
+    {
+      "name": "moving_jaw_so101_v1",
+      "visual_mesh": "meshes/moving_jaw_so101_v1.obj",
+      "geometry_source": "sourced",
+      "geometry_note": "Grouped without deformation. part_0020 (sourced): Nominal STEP component: Moving_Jaw_SO101 v3; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d; placement/group from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc; saved CAD pose not used.",
+      "mass_kg": {
+        "value": 0.012,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc full-link mass; includes omitted servo geometry; unmeasured."
+      },
+      "sliding_friction": null
+    }
+  ],
+  "joints": [
+    {
+      "name": "shoulder_pan",
+      "parent": "base",
+      "child": "shoulder",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          0.0388353,
+          0.0,
+          0.0624
+        ],
+        "quaternion_wxyz": [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -1.91986,
+        1.91986
+      ],
+      "damping": {
+        "value": 0.6,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc joint damping only; omitted armature/frictionloss/velocity gain."
+      },
+      "drive": {
+        "kp": 998.22,
+        "force_limit_nm": 2.94,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc position/torque parameters; reduced actuator model, not identified hardware dynamics."
+      },
+      "source": "sourced",
+      "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc frame/axis/limits; hardware signs and zero unverified. Review: Johaan agent engineering review: reference-tree, unit axis, ordered limits and template frames checked. Hardware sign/zero and dynamics not verified."
+    },
+    {
+      "name": "shoulder_lift",
+      "parent": "shoulder",
+      "child": "upper_arm",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          -0.0303992,
+          -0.0182778,
+          -0.0542
+        ],
+        "quaternion_wxyz": [
+          0.4999999999999997,
+          -0.5,
+          -0.4999999999999997,
+          -0.5
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -1.7453293,
+        1.7453293
+      ],
+      "damping": {
+        "value": 0.6,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc joint damping only; omitted armature/frictionloss/velocity gain."
+      },
+      "drive": {
+        "kp": 998.22,
+        "force_limit_nm": 2.94,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc position/torque parameters; reduced actuator model, not identified hardware dynamics."
+      },
+      "source": "sourced",
+      "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc frame/axis/limits; hardware signs and zero unverified. Review: Johaan agent engineering review: reference-tree, unit axis, ordered limits and template frames checked. Hardware sign/zero and dynamics not verified."
+    },
+    {
+      "name": "elbow_flex",
+      "parent": "upper_arm",
+      "child": "lower_arm",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          -0.11257000000000005,
+          -0.02800000000000004,
+          -1.0408340855860843e-17
+        ],
+        "quaternion_wxyz": [
+          0.7071067811865475,
+          9.5074626964439e-17,
+          1.3529404314570808e-16,
+          0.7071067811865475
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -1.69,
+        1.69
+      ],
+      "damping": {
+        "value": 0.6,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc joint damping only; omitted armature/frictionloss/velocity gain."
+      },
+      "drive": {
+        "kp": 998.22,
+        "force_limit_nm": 2.94,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc position/torque parameters; reduced actuator model, not identified hardware dynamics."
+      },
+      "source": "sourced",
+      "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc frame/axis/limits; hardware signs and zero unverified. Review: Johaan agent engineering review: reference-tree, unit axis, ordered limits and template frames checked. Hardware sign/zero and dynamics not verified."
+    },
+    {
+      "name": "wrist_flex",
+      "parent": "lower_arm",
+      "child": "wrist",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          -0.1349,
+          0.005199999999999937,
+          2.42861286636753e-17
+        ],
+        "quaternion_wxyz": [
+          0.7071067811865474,
+          -9.507462696443899e-17,
+          -5.3691609559970426e-17,
+          -0.7071067811865476
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -1.658063,
+        1.658063
+      ],
+      "damping": {
+        "value": 0.6,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc joint damping only; omitted armature/frictionloss/velocity gain."
+      },
+      "drive": {
+        "kp": 998.22,
+        "force_limit_nm": 2.94,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc position/torque parameters; reduced actuator model, not identified hardware dynamics."
+      },
+      "source": "sourced",
+      "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc frame/axis/limits; hardware signs and zero unverified. Review: Johaan agent engineering review: reference-tree, unit axis, ordered limits and template frames checked. Hardware sign/zero and dynamics not verified."
+    },
+    {
+      "name": "wrist_roll",
+      "parent": "wrist",
+      "child": "gripper",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          5.845308126417596e-17,
+          -0.06110000000000004,
+          0.018100000000000005
+        ],
+        "quaternion_wxyz": [
+          0.017209108230570928,
+          -0.017209108230571223,
+          0.7068973380865908,
+          0.706897338086591
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -2.7438473,
+        2.8412063
+      ],
+      "damping": {
+        "value": 0.6,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc joint damping only; omitted armature/frictionloss/velocity gain."
+      },
+      "drive": {
+        "kp": 998.22,
+        "force_limit_nm": 2.94,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc position/torque parameters; reduced actuator model, not identified hardware dynamics."
+      },
+      "source": "sourced",
+      "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc frame/axis/limits; hardware signs and zero unverified. Review: Johaan agent engineering review: reference-tree, unit axis, ordered limits and template frames checked. Hardware sign/zero and dynamics not verified."
+    },
+    {
+      "name": "gripper",
+      "parent": "gripper",
+      "child": "moving_jaw_so101_v1",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          0.020200000000000072,
+          0.018800000000000025,
+          -0.023400000000000032
+        ],
+        "quaternion_wxyz": [
+          0.7071067811865478,
+          0.7071067811865472,
+          1.1102230246251565e-16,
+          2.061508408003581e-16
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -0.174533,
+        1.7453292
+      ],
+      "damping": {
+        "value": 0.6,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc joint damping only; omitted armature/frictionloss/velocity gain."
+      },
+      "drive": {
+        "kp": 998.22,
+        "force_limit_nm": 2.94,
+        "source": "sourced",
+        "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc position/torque parameters; reduced actuator model, not identified hardware dynamics."
+      },
+      "source": "sourced",
+      "note": "Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc frame/axis/limits; hardware signs and zero unverified. Review: Johaan agent engineering review: reference-tree, unit axis, ordered limits and template frames checked. Hardware sign/zero and dynamics not verified."
+    }
+  ],
+  "notes": [
+    "CAD subset with imported reference-model articulation template. NOT photos-only reconstruction.",
+    "Eleven nominal structural components from supplied STEP; 259 other leaves omitted, including 11 empty leaves. Servos, fasteners, electronics and camera geometry are not represented.",
+    "All part placements and joint pivots at reference q=0 come from Pinned Menagerie SO101 f3b6013629c7b94f8ee93fd977b161fa8350f9bc. Original STEP placements are preserved in inventory.json.",
+    "Grouping is an explicit template proposal. CAD/source correspondence uses the earlier nominal local-frame comparison; there is no fitted scale or geometry deformation.",
+    "Root clearance +0.05 m is assumed. Hardware zeros/signs, gripper 0-100 conversion, mounting, mass distribution and servo dynamics remain unverified.",
+    "Masses are sourced full-link estimates including hardware whose visuals are omitted. Box collisions and uniform-box inertia remain approximations; generated dynamics may fail validation.",
+    "Joint sliders and FK comparison verify conversion consistency with the same template, not independent physical accuracy.",
+    "Guided grouping; review acknowledgements are engineering decisions, not physical measurement or accuracy certification.",
+    "Collision revision: per-link visual-mesh convex hull; fills concavities and does not model exact CAD surface contact.",
+    "Direct joint-connected body pairs explicitly excluded, including the fixed base/shoulder. Other self and ground contacts remain enabled.",
+    "Free-space motion validation scenario: root height 0.15 m, increased from assumed 0.05 m. Not measured mounting geometry. Original ideal half-limit sweep put gripper 0.01693 m below ground; this scenario adds 0.10 m clearance. Physical setup must use measured placement."
+  ]
+}

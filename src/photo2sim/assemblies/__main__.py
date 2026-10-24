@@ -18,6 +18,8 @@ def main():
     )
     export.add_argument("record", type=Path)
     export.add_argument("--output-dir", type=Path, required=True)
+    export.add_argument("--collision-mode", choices=["box", "convex_mesh"], default="box")
+    export.add_argument("--exclude-joint-pairs", action="store_true")
     validate = commands.add_parser("validate", help="Repeat motion and relocated-folder checks")
     validate.add_argument("scene", type=Path)
     validate.add_argument("--report", type=Path, required=True)
@@ -42,7 +44,13 @@ def main():
         return 0
     if args.command == "export":
         record = AssemblyRecord.model_validate_json(args.record.read_text(encoding="utf-8"))
-        scene = export_assembly(record, args.record.parent, args.output_dir)
+        scene = export_assembly(
+            record,
+            args.record.parent,
+            args.output_dir,
+            collision_mode=args.collision_mode,
+            exclude_joint_pairs=args.exclude_joint_pairs,
+        )
         destination = scene.parent / "validation.json"
     else:
         scene = args.scene

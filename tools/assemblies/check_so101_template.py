@@ -10,7 +10,10 @@ import numpy as np
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("scene", type=Path)
 parser.add_argument("--report", type=Path, required=True)
+parser.add_argument("--root-z-offset", type=float, default=0.05)
 args = parser.parse_args()
+if not np.isfinite(args.root_z_offset):
+    parser.error("--root-z-offset must be finite")
 root = Path(__file__).resolve().parents[2]
 reference = mujoco.MjModel.from_xml_path(str(root / "third_party/robotstudio_so101/so101.xml"))
 model = mujoco.MjModel.from_xml_path(str(args.scene))
@@ -29,7 +32,8 @@ for pose in poses:
     for name in bodies:
         a, b = model.body(name).id, reference.body(name).id
         worst_position = max(
-            worst_position, float(np.max(np.abs(data.xpos[a] - rdata.xpos[b] - [0, 0, 0.05])))
+            worst_position,
+            float(np.max(np.abs(data.xpos[a] - rdata.xpos[b] - [0, 0, args.root_z_offset]))),
         )
         worst_rotation = max(worst_rotation, float(np.max(np.abs(data.xmat[a] - rdata.xmat[b]))))
     for name in joints:
@@ -38,7 +42,7 @@ for pose in poses:
 result = {
     "scope": "Template conversion consistency only; same source frames; not independent physical validation",
     "poses_rad": poses,
-    "root_translation_difference_m": [0, 0, 0.05],
+    "root_translation_difference_m": [0, 0, args.root_z_offset],
     "max_position_error_m": worst_position,
     "max_rotation_element_error": worst_rotation,
     "max_axis_element_error": worst_axis,

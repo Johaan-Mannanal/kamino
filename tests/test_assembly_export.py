@@ -312,3 +312,88 @@ def test_validation_rejects_substituted_mesh_with_same_bounds(prepared, tmp_path
     tree.find("./asset/mesh[@name='mesh_arm']").set("file", "meshes/impostor.obj")
     tree.write(scene)
     assert not validate(scene, check_portability=False)["passed"]
+
+
+def test_convex_collision_and_explicit_joint_exclusion(prepared, tmp_path):
+    from photo2sim.assemblies.export import export_assembly
+
+    a, src = prepared
+    # Deliberately overlapping joint-adjacent housings at a fixed root.
+    a.joints[0].origin.position_m = (0, 0, 0)
+    scene = export_assembly(
+        a, src, tmp_path / "convex", collision_mode="convex_mesh", exclude_joint_pairs=True
+    )
+    m = mujoco.MjModel.from_xml_path(str(scene))
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    assert d.ncon == 0
+    assert m.geom("collision_arm").type[0] == mujoco.mjtGeom.mjGEOM_MESH
+    assert m.geom("collision_arm").contype[0] == 1
+    assert m.geom("ground").contype[0] == 1
+    assert validate(scene)["passed"]
+    # A separate grounded scenario must still produce real contacts.
+    a.root_pose.position_m = (0, 0, 0)
+    low = export_assembly(
+        a, src, tmp_path / "low", collision_mode="convex_mesh", exclude_joint_pairs=True
+    )
+    lm = mujoco.MjModel.from_xml_path(str(low))
+    ld = mujoco.MjData(lm)
+    mujoco.mj_forward(lm, ld)
+    ground = lm.geom("ground").id
+    assert any(ground in (c.geom1, c.geom2) for c in ld.contact)
+
+
+@pytest.mark.parametrize(
+    "tamper", ["extra_exclusion", "disabled_ground", "disabled_contacts", "collision_transform"]
+)
+def test_convex_policy_cannot_hide_contacts(prepared, tmp_path, tamper):
+    from photo2sim.assemblies.export import export_assembly
+
+    a, src = prepared
+    scene = export_assembly(
+        a, src, tmp_path / tamper, collision_mode="convex_mesh", exclude_joint_pairs=True
+    )
+    tree = ET.parse(scene)
+    if tamper == "extra_exclusion":
+        ET.SubElement(tree.getroot().find("contact"), "exclude", body1="world", body2="arm")
+    elif tamper == "disabled_ground":
+        tree.find(".//geom[@name='ground']").set("contype", "0")
+        tree.find(".//geom[@name='ground']").set("conaffinity", "0")
+    elif tamper == "disabled_contacts":
+        ET.SubElement(tree.find("option"), "flag", contact="disable")
+    else:
+        tree.find(".//geom[@name='collision_arm']").set("pos", "1 0 0")
+    tree.write(scene)
+    assert not validate(scene, check_portability=False)["passed"]
+
+
+def test_convex_rejects_shared_transform_preserving_bounds(prepared, tmp_path):
+    from photo2sim.assemblies.export import export_assembly
+
+    a, src = prepared
+    mesh = trimesh.Trimesh(
+        vertices=[
+            [0, -0.0125, -0.0125],
+            [0.2, -0.0125, -0.0125],
+            [0, 0.0125, -0.0125],
+            [0, -0.0125, 0.0125],
+        ],
+        faces=[[0, 2, 1], [0, 1, 3], [0, 3, 2], [1, 2, 3]],
+    )
+    mesh.export(src / "meshes/arm.obj")
+    scene = export_assembly(
+        a,
+        src,
+        tmp_path / "shared-transform",
+        collision_mode="convex_mesh",
+        exclude_joint_pairs=True,
+    )
+    tree = ET.parse(scene)
+    # Rotation about the AABB centre preserves bounds but changes this hull.
+    for name in ("visual_arm", "collision_arm"):
+        geom = tree.find(f".//geom[@name='{name}']")
+        geom.set("quat", "0 0 0 1")
+        geom.set("pos", ".2 0 0")
+    tree.write(scene)
+    report = validate(scene, check_portability=False)
+    assert not report["passed"]
