@@ -1,0 +1,191 @@
+{
+  "object": "USB-C charger; exact model unconfirmed",
+  "photos": [
+    {
+      "image_number": 1,
+      "file": "originals/01-codex-clipboard-be118d6b-b735-4d81-9925-76bfd7a655eb.png",
+      "supplied_filename": "codex-clipboard-be118d6b-b735-4d81-9925-76bfd7a655eb.png",
+      "sha256": "30a6a1c692e0a5cf29d8175216a208139c206f6e1e9e3fb634385d85091153ab",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 14367128,
+      "view_note": "Oblique pin face; entire charger against dark fabric; pins seen edge-on.",
+      "exceeds_app_10_MiB_limit": true,
+      "use": "candidate_requires_preprocessing_review"
+    },
+    {
+      "image_number": 2,
+      "file": "originals/02-codex-clipboard-d01331cc-f9fb-45f0-ad5f-0467c8385c1c.png",
+      "supplied_filename": "codex-clipboard-d01331cc-f9fb-45f0-ad5f-0467c8385c1c.png",
+      "sha256": "9b13a3d7349b37e600e37971910c8455c2851facacc5fa501c371cdf8ebbb88c",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 9730734,
+      "view_note": "Oblique pin face and narrow side; pin holes visible; unrelated background at upper edge.",
+      "exceeds_app_10_MiB_limit": false,
+      "use": "candidate_requires_preprocessing_review"
+    },
+    {
+      "image_number": 3,
+      "file": "originals/03-codex-clipboard-b83b584b-7d09-47a5-832c-00c74746a787.png",
+      "supplied_filename": "codex-clipboard-b83b584b-7d09-47a5-832c-00c74746a787.png",
+      "sha256": "8c1aa434a91f0e6d0074db636747ce05bc5cb5042562ba6c8231de6cd0d1db23",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 10535826,
+      "view_note": "Low narrow-side view; pins overlap in projection; clutter/people in background.",
+      "exceeds_app_10_MiB_limit": true,
+      "use": "candidate_requires_preprocessing_review"
+    },
+    {
+      "image_number": 4,
+      "file": "originals/04-codex-clipboard-9ea7e873-aa3f-4ee2-95c1-316c7a7f7143.png",
+      "supplied_filename": "codex-clipboard-9ea7e873-aa3f-4ee2-95c1-316c7a7f7143.png",
+      "sha256": "856a1cea0e70c9834b81e0152dcf4c9a0fd0d39c1bb26e78df895ecaf66a07d8",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 9644521,
+      "view_note": "Low broad-side view with both pins; clutter/people behind object.",
+      "exceeds_app_10_MiB_limit": false,
+      "use": "candidate_requires_preprocessing_review"
+    },
+    {
+      "image_number": 5,
+      "file": "originals/05-codex-clipboard-c62fd5ab-3122-475c-a8ba-89b7b526ef73.png",
+      "supplied_filename": "codex-clipboard-c62fd5ab-3122-475c-a8ba-89b7b526ef73.png",
+      "sha256": "5ce7d87263c387b49f844f664b0fd81a646117d87a4d4fb8197b1a38d0ce9e86",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 14137420,
+      "view_note": "Broad side and pin silhouette; dark fabric background.",
+      "exceeds_app_10_MiB_limit": true,
+      "use": "candidate_requires_preprocessing_review"
+    },
+    {
+      "image_number": 6,
+      "file": "originals/06-codex-clipboard-2aadb1d5-5510-4d09-a7e6-9c488b31d7ff.png",
+      "supplied_filename": "codex-clipboard-2aadb1d5-5510-4d09-a7e6-9c488b31d7ff.png",
+      "sha256": "3f0a9218c54806bd247da055acaba68a8c03a94923abf16954d5b6290ad2496a",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 15195295,
+      "view_note": "Narrow side and pin silhouette; dark fabric background.",
+      "exceeds_app_10_MiB_limit": true,
+      "use": "candidate_requires_preprocessing_review"
+    },
+    {
+      "image_number": 7,
+      "file": "originals/07-codex-clipboard-38fb7f47-f7c7-415a-86c2-a3db23986c85.png",
+      "supplied_filename": "codex-clipboard-38fb7f47-f7c7-415a-86c2-a3db23986c85.png",
+      "sha256": "67c332c4af8e5f56a3889091fdd7d0e2d96c0f97ca793d94adc650e91227bb4d",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 8652245,
+      "view_note": "USB-C face; port and curved edges visible but fine detail soft; unrelated background.",
+      "exceeds_app_10_MiB_limit": false,
+      "use": "candidate_requires_preprocessing_review"
+    },
+    {
+      "image_number": 8,
+      "file": "originals/08-codex-clipboard-4c1b8a94-5612-4391-a5ce-55b9b44e8341.png",
+      "supplied_filename": "codex-clipboard-4c1b8a94-5612-4391-a5ce-55b9b44e8341.png",
+      "sha256": "2b7394f38cc9f305fd9df26c71515e1c2e6f43c646e00ceadad3ab091c68ca8d",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 8849083,
+      "view_note": "Second similar USB-C face; soft port detail; unrelated background.",
+      "exceeds_app_10_MiB_limit": false,
+      "use": "candidate_requires_preprocessing_review"
+    },
+    {
+      "image_number": 9,
+      "file": "originals/09-codex-clipboard-386529b8-d173-4717-8ccb-7b97955acbfb.png",
+      "supplied_filename": "codex-clipboard-386529b8-d173-4717-8ccb-7b97955acbfb.png",
+      "sha256": "65a7e4971a1301368b4b5379edf14b2e19c7bc36df3e729d9cc006e99916c627",
+      "pixel_dimensions": [
+        2268,
+        4032
+      ],
+      "format": "PNG",
+      "bytes": 8872063,
+      "view_note": "Hand-held reference only: hand touches/occludes body and pin bases; exclude from reconstruction inputs.",
+      "exceeds_app_10_MiB_limit": false,
+      "use": "reference_only_exclude_from_reconstruction"
+    }
+  ],
+  "measurements": {
+    "body_width": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "method": null,
+      "photo_reference": null
+    },
+    "body_thickness": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "method": null,
+      "photo_reference": null
+    },
+    "body_length_excluding_pins": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "method": null,
+      "photo_reference": null
+    },
+    "total_length_including_pins": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "method": null,
+      "photo_reference": null
+    },
+    "mass": {
+      "value": null,
+      "unit": "g",
+      "status": "unknown",
+      "method": null,
+      "photo_reference": null
+    }
+  },
+  "axis_mapping": "Not assigned; describe measured faces and use photo references before choosing simulation axes.",
+  "notes": [
+    "No previous reference-based estimates are treated as measurements.",
+    "Preserve original photo files. Do not include tablets, cases, hands or recognizable supporting objects in the object silhouette.",
+    "Capture USB-C face, pin face, and two distinct oblique side views against a plain contrasting background."
+  ],
+  "capture_source": "Nine user-supplied clipboard PNG attachments. These exact supplied files are preserved; original phone JPEG/HEIC files and camera metadata are not established.",
+  "recommended_candidate_image_numbers": [
+    2,
+    5,
+    6,
+    7
+  ],
+  "recommendation_note": "Provisional coverage set only. Johaan owns final selection/cropping/masking. USB-C detail is soft; do not claim reconstruction suitability proven."
+}
