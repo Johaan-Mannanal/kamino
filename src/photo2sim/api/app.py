@@ -72,7 +72,9 @@ def create_app(
                 with warnings.catch_warnings():
                     warnings.simplefilter("error", Image.DecompressionBombWarning)
                     with Image.open(BytesIO(content)) as decoded:
-                        extension = {"JPEG": "jpg", "PNG": "png", "WEBP": "webp"}.get(
+                        # Phone JPEGs may carry multi-picture (e.g. gain-map) metadata.
+                        # MPO retains a JPEG primary image; preserve the original bytes.
+                        extension = {"JPEG": "jpg", "MPO": "jpg", "PNG": "png", "WEBP": "webp"}.get(
                             decoded.format
                         )
                         if extension is None or decoded.width * decoded.height > 25_000_000:
