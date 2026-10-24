@@ -71,6 +71,22 @@ The workbench also offers visual-mesh convex hull collision and explicit exclusi
 of directly joint-connected pairs; each attempt records the selected policy.
 These remain approximations, and detailed assemblies can fail motion checks.
 
+Enable **Show collision approximation** to overlay orange collision geometry on
+colored visual parts. Boxes enclose all assigned parts in each link's local frame;
+convex mode fills concavities and gaps. The overlay follows sliders and reset.
+It reflects the current draft and selected export policy, not a historical attempt.
+It does not detect collisions, demonstrate clearance or simulate contacts. Empty,
+degenerate or overly large hull previews show a warning; convex previews are
+omitted above 100,000 source vertices per link. MuJoCo compiles its own hull during
+export; inspect that result for final acceptance. Direct parent-child exclusion is
+shown in the caption and remains an explicit export choice.
+
+New rigid and assembly exports include `README.md`, `ASSUMPTIONS.md`,
+`environment.json`, `requirements.txt` and `run_simulation.py`. The runner requires
+only MuJoCo and its dependencies, and resolves the scene beside itself. Headless
+mode is a zero-control smoke check, distinct from saved pipeline validation.
+See [portable acceptance](../examples/assemblies/portable-review/README.md).
+
 ## Optional STEP import
 Use an isolated CadQuery/OCP environment; it is not a normal app dependency.
 The tested importer uses CadQuery 2.8.0 and OCP 7.9.3.1.1. With this repository's

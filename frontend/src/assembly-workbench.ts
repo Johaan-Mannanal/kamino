@@ -13,6 +13,7 @@ import {
 } from './assembly-review'
 import { addConnectedLink, renameLink, changeJointKind } from './assembly-builder'
 import { validationFindings } from './assembly-diagnostics'
+import { buildCollisionPreviews, type CollisionMode } from './assembly-collision'
 import './assembly.css'
 
 const root = document.querySelector<HTMLDivElement>('#assembly-app')!
@@ -22,7 +23,7 @@ root.innerHTML = `<header><a href="/">Photo2Sim</a><span>Guided assembly review<
 <section class="job-controls"><h2>Start from component meshes</h2><p>Upload separate geometry-only OBJ/STL parts in a shared reference frame. Choose their units; positions are preserved. Define links and joints below. No project JSON is needed.</p><div class="guided-grid"><label>Assembly name <input id="draft-name" value="my_assembly" maxlength="64"></label><label>Source units <select id="draft-units"><option value="">Choose units</option><option value="m">Metres</option><option value="mm">Millimetres</option></select></label><label>Component meshes <input id="draft-meshes" type="file" accept=".obj,.stl" multiple></label><label><input id="draft-synthetic" type="checkbox"> Synthetic example geometry</label></div><button id="create-draft">Create assembly draft</button><p>Starting masses and drive settings are estimates to review. Original files are retained. STEP conversion is available through the optional CAD tool.</p><details><summary>Import an existing source project</summary><h2>Import source project</h2><label>Review project JSON <input id="import-project" type="file" accept=".json,application/json"></label><label>Source meshes (select all files) <input id="import-meshes" type="file" accept=".obj,.stl" multiple></label><button id="import">Import and open review</button><p>Mesh filenames must match the paths in the project. For nested paths, select a folder below.</p><label>Source mesh folder <input id="import-folder" type="file" webkitdirectory multiple></label></details><h2>Open existing job</h2><label>Job ID <input id="job-id" type="text" autocomplete="off"></label><button id="open-job">Open job</button><p id="job-status"></p><div id="attempts"></div></section>
 <label class="load">Open review package <input id="load" type="file" accept=".json,application/json"></label>
 <p id="message" role="status">Import a project and its meshes, open a saved job, or load an offline review package.</p>
-<div id="workspace" hidden><div class="layout"><section class="stage"><div id="viewer"></div><button id="reset">Reset preview pose</button><p id="summary"></p><div id="sliders"></div></section>
+<div id="workspace" hidden><div class="layout"><section class="stage"><div id="viewer"></div><button id="reset">Reset preview pose</button><label><input id="show-collision" type="checkbox"> Show collision approximation</label><p id="collision-preview-note"></p><p id="collision-preview-warning" role="status"></p><p id="summary"></p><div id="sliders"></div></section>
 <section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div><details><summary>Add a link and connection</summary><div class="guided-grid"><label>New link name <input id="new-link-name"></label><label>Parent link <select id="new-parent"></select></label><label>New joint name <input id="new-joint-name"></label><label>Connection type <select id="new-kind"><option value="revolute">Revolute hinge</option><option value="fixed">Fixed</option></select></label></div><button id="add-link">Add link and joint</button><p>Assign at least one part to the new link, then review its pivot, mass and joint parameters. A hinge starts on local Z with estimated drive settings.</p></details>
 <h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; limits are radians. Pivot edits change joint frames while preserving source geometry at the reference pose; they do not translate the entire scene. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
 <h2>3. Save and process</h2><button id="save-revision">Save revision to job</button><label>Collision geometry <select id="collision-mode"><option value="box">Box (historical default)</option><option value="convex_mesh">Convex mesh</option></select></label><label><input id="exclude-joint-pairs" type="checkbox"> Exclude direct parent-child collision pairs</label><button id="process">Run preparation, export and validation</button><p>These export settings are recorded per attempt and do not alter the reviewed source project. Save the review before processing. To change a completed result, apply edits, acknowledge the revised inputs and save a new revision. Previous attempts remain available after a revision or failed validation.</p><button id="save">Download project JSON</button><button id="save-package">Download review package</button>
@@ -432,7 +433,25 @@ function render() {
   mount()
   renderJob()
 }
+function collisionCaption() {
+  const enabled = el<HTMLInputElement>('show-collision').checked
+  const mode = el<HTMLSelectElement>('collision-mode').value
+  el('collision-preview-note').textContent =
+    (enabled
+      ? 'Orange = collision; colored parts = visual geometry. '
+      : 'Collision overlay hidden. ') +
+    'Preview of current draft and selected export settings, not a saved attempt. ' +
+    (mode === 'box'
+      ? 'One link-local bounding box per link; empty spaces are filled. '
+      : 'One convex hull per link; concavities and gaps are filled. MuJoCo compiles its own hull. ') +
+    (el<HTMLInputElement>('exclude-joint-pairs').checked
+      ? 'Direct parent-child collision pairs will be excluded. '
+      : 'Native parent-child filtering selected. ') +
+    'Sliders move the geometry only; this view does not detect or resolve contacts.'
+}
 function mount() {
+  collisionCaption()
+  el('collision-preview-warning').textContent = ''
   dispose?.()
   dispose = undefined
   updateView = undefined
@@ -448,6 +467,7 @@ function mount() {
     const camera = new THREE.PerspectiveCamera(40, 1, 0.001, 100)
     camera.up.set(0, 0, 1)
     const orbit = new OrbitControls(camera, renderer.domElement)
+    const collisionMeshes: { link: string; mesh: THREE.Mesh; edges: THREE.LineSegments }[] = []
     const meshes: THREE.Mesh[] = [],
       axes: THREE.AxesHelper[] = [],
       arrows: THREE.ArrowHelper[] = []
@@ -471,6 +491,41 @@ function mount() {
       mesh.matrixAutoUpdate = false
       scene.add(mesh)
       meshes.push(mesh)
+    }
+    if (el<HTMLInputElement>('show-collision').checked) {
+      const preview = buildCollisionPreviews(
+        payload!,
+        el<HTMLSelectElement>('collision-mode').value as CollisionMode,
+      )
+      el('collision-preview-warning').textContent = preview.warnings.join(' ')
+      for (const proxy of preview.proxies) {
+        const mesh = new THREE.Mesh(
+          proxy.geometry,
+          new THREE.MeshBasicMaterial({
+            color: '#ff8a3d',
+            transparent: true,
+            opacity: 0.18,
+            depthWrite: false,
+            depthTest: false,
+            side: THREE.DoubleSide,
+          }),
+        )
+        const edges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(proxy.geometry),
+          new THREE.LineBasicMaterial({
+            color: '#ff8a3d',
+            transparent: true,
+            opacity: 0.9,
+            depthTest: false,
+          }),
+        )
+        mesh.add(edges)
+        mesh.matrixAutoUpdate = false
+        mesh.renderOrder = 2
+        edges.renderOrder = 3
+        scene.add(mesh)
+        collisionMeshes.push({ link: proxy.link, mesh, edges })
+      }
     }
     for (const g of p.groups) {
       const a = new THREE.AxesHelper(0.025)
@@ -507,6 +562,10 @@ function mount() {
             : matrix(part.pose)
           meshes[i].matrix.copy(t)
           meshes[i].matrixWorldNeedsUpdate = true
+        })
+        collisionMeshes.forEach(({ link, mesh }) => {
+          mesh.matrix.copy(transforms[link])
+          mesh.matrixWorldNeedsUpdate = true
         })
         p.groups.forEach((g, i) => {
           axes[i].matrix.copy(transforms[g.name])
@@ -557,6 +616,12 @@ function mount() {
         m.geometry.dispose()
         ;(m.material as THREE.Material).dispose()
       })
+      collisionMeshes.forEach(({ mesh, edges }) => {
+        mesh.geometry.dispose()
+        ;(mesh.material as THREE.Material).dispose()
+        edges.geometry.dispose()
+        ;(edges.material as THREE.Material).dispose()
+      })
       axes.forEach((a) => a.dispose())
       arrows.forEach((a) => a.dispose())
       renderer.dispose()
@@ -566,6 +631,13 @@ function mount() {
     host.textContent = '3D preview unavailable. ' + String(e)
   }
 }
+el<HTMLInputElement>('show-collision').onchange = () => {
+  if (payload) mount()
+}
+el<HTMLSelectElement>('collision-mode').onchange = () => {
+  if (payload) mount()
+}
+el<HTMLInputElement>('exclude-joint-pairs').onchange = collisionCaption
 el<HTMLInputElement>('load').onchange = async () => {
   const f = el<HTMLInputElement>('load').files?.[0]
   if (!f) return

@@ -480,3 +480,23 @@ it('does not show an old validation response after changing jobs', async () => {
   await new Promise((resolve) => setTimeout(resolve, 0))
   expect(document.querySelector('#attempts')!.textContent).not.toContain('old failure')
 })
+
+it('previews current collision policy without changing review acknowledgements', async () => {
+  await load()
+  ;(document.querySelector('#approve') as HTMLElement).click()
+  const overlay = document.querySelector<HTMLInputElement>('#show-collision')
+  expect(overlay).not.toBeNull()
+  overlay!.checked = true
+  overlay!.dispatchEvent(new Event('change'))
+  expect(document.querySelector('#collision-preview-note')?.textContent).toContain('box')
+  const mode = document.querySelector<HTMLSelectElement>('#collision-mode')!
+  mode.value = 'convex_mesh'
+  mode.dispatchEvent(new Event('change'))
+  const exclude = document.querySelector<HTMLInputElement>('#exclude-joint-pairs')!
+  exclude.checked = true
+  exclude.dispatchEvent(new Event('change'))
+  expect(document.querySelector('#collision-preview-note')?.textContent).toContain('concavities')
+  expect(document.querySelector('#collision-preview-note')?.textContent).toContain('excluded')
+  expect(document.querySelector('#collision-preview-note')?.textContent).toContain('current draft')
+  expect(document.querySelector('#summary')?.textContent).toContain('1/1 acknowledged')
+})

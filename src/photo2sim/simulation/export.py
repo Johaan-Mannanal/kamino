@@ -11,6 +11,7 @@ import numpy as np
 import trimesh
 
 from photo2sim.contracts import AssetRecord, bundle_path
+from photo2sim.simulation.portable import write_portable_files
 
 # Numerical smoke-test assumptions, not inferred or measured object properties.
 TIMESTEP_S = 0.0001
@@ -196,6 +197,7 @@ def export_asset(asset: AssetRecord, asset_dir: Path, output_dir: Path) -> Path:
             json.dumps(assumptions, indent=2) + "\n", encoding="utf-8"
         )
         _write_scene(asset, stage, assumptions)
+        write_portable_files(stage, asset.model_dump(mode="json"), assumptions)
         mujoco.MjModel.from_xml_path(str(stage / "scene.xml"))
         if output.exists() or output.is_symlink():
             raise FileExistsError("Output appeared during export; nothing was overwritten")

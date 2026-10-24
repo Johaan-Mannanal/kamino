@@ -40,7 +40,9 @@ A [reviewed assembly format](docs/ASSEMBLIES.md) and
 [synthetic two-link export](examples/assemblies/two-link-hinge/README.md) now
 provide the articulated-conversion foundation. The workbench supports component
 mesh uploads, link grouping/naming, joint review, saved revisions, readable
-validation failures and authenticated portable downloads. A second
+validation failures, collision overlays and authenticated portable downloads.
+New exports include standalone launch instructions, a MuJoCo version pin, a runner
+and a readable assumptions summary. A second
 [hinged-panel example](examples/assemblies/hinged-panel/README.md) verifies this
 workflow without hand-written project JSON. Photo part/joint inference remains
 future work. See [the plan](docs/PROJECT.md).

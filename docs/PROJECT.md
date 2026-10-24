@@ -64,6 +64,8 @@ See the [two-link proof](../examples/assemblies/two-link-hinge/README.md).
 - [x] Accept component meshes directly in metres or millimetres, preserving originals and hashes.
 - [x] Create/name connected links and fixed/revolute joints without authoring project JSON.
 - [x] Inspect per-attempt failures and navigate to the affected joint.
+- [x] Preview per-link box/convex collision approximations alongside visual meshes.
+- [x] Include standalone runner, version pin and readable assumptions in new exports.
 - [x] Prove correction/revalidation/download on a second synthetic hinged-panel assembly.
 - [ ] Add photo-based part proposals.
 - [x] Show link connections, joint axes and motion sliders; permit corrections.
