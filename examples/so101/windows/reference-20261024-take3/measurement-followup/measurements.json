@@ -37,26 +37,39 @@
       "camera": "rear, operator-reported",
       "view": "front-facing, operator-reported",
       "orientation": "portrait",
-      "horizontal_flip": "unknown; rear camera and orientation alone are not proof"
+      "horizontal_flip": "operator_confirmed_no_left_right_flip"
     },
     "side_oblique": {
       "camera": "rear, operator-reported",
       "view": "left side, operator-reported",
       "orientation": "landscape",
-      "horizontal_flip": "unknown; rear camera and orientation alone are not proof"
+      "horizontal_flip": "operator_confirmed_no_left_right_flip"
     }
   },
   "measurements": {
     "base_reference_height": {
-      "operator_reported_value_mm": 77.8,
-      "operator_reported_inches": "3 1/16",
-      "description": "Approximately vertical from tabletop to reference near base clamp; black bar visible in supplied photos",
-      "source": "operator-measured, approximate",
-      "uncertainty_mm": null,
+      "operator_reported_value": 2.97,
+      "operator_reported_unit": "inch",
+      "converted_value_mm": 75.438,
+      "display_value_mm": 75.4,
+      "description": "Reported vertical distance from tabletop to bottom edge of the shown black bar",
+      "bar_top_bottom_or_centre": "bottom edge, operator-confirmed",
       "reference_bar_identity": null,
-      "bar_top_bottom_or_centre": null,
+      "source": "operator-measured, approximate; clarified endpoint/value",
+      "uncertainty_mm": null,
       "model_frame_correspondence_verified": false,
-      "use_as_model_root_height": false
+      "use_as_model_root_height": false,
+      "prior_report": {
+        "operator_reported_value_mm": 77.8,
+        "operator_reported_inches": "3 1/16",
+        "description": "Approximately vertical from tabletop to reference near base clamp; black bar visible in supplied photos",
+        "source": "operator-measured, approximate",
+        "uncertainty_mm": null,
+        "reference_bar_identity": null,
+        "bar_top_bottom_or_centre": null,
+        "model_frame_correspondence_verified": false,
+        "use_as_model_root_height": false
+      }
     },
     "jaw_opening": {
       "operator_reported_value_mm": 3.18,
@@ -66,16 +79,20 @@
       "uncertainty_mm": null,
       "measurement_photo_supplied": false,
       "measured_after_shoulder_repositioning": true,
-      "applies_to_take3_normalized_reading": null
+      "applies_to_take3_normalized_reading": null,
+      "association_status": "Not accepted as a take-3 calibration point: operator unsure whether jaws stayed unchanged"
     }
   },
   "model_root_height_still_assumed_m": 0.15,
   "joint_signs_offsets_verified": false,
   "gripper_conversion_verified": false,
   "pending_operator_clarifications": [
-    "Whether either original take-3 image was flipped left-right",
-    "Which black-bar edge/centre was the measured endpoint and what the bar attaches to",
-    "Whether gripper jaws themselves stayed unchanged while shoulder was manually moved"
+    "What the black bar is and what it attaches to; needed to identify a fixed CAD/model reference"
   ],
-  "pose_unchanged_since_take3": false
+  "pose_unchanged_since_take3": false,
+  "operator_clarifications": {
+    "mirror_response": "No left\u2013right flip for either photo",
+    "height_response": "2.97in from bottom of the bar",
+    "jaw_continuity_response": "Not sure"
+  }
 }
