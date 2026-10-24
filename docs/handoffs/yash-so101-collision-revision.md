@@ -31,3 +31,27 @@ Return branch/full SHA, versions, reports and viewer evidence. Separately report
 progress on joint signs/zeros, gripper conversion, timestamped pose observations
 and measured base/table geometry. No physical accuracy claim follows from this
 numerical pass alone. Do not modify shared exporter/validator without coordination.
+
+## Update after stationary take 2 (efa71da)
+Johaan fetched and audited the four take-2 files without merging unrelated Windows
+branch work. Recorded calibration/hash, 599 complete observations and timestamp
+ordering pass offline checks. Pose/photo association and hardware mapping remain
+incomplete. The offline audit is available in the same example directory.
+
+Priority order:
+1. Complete the front/side photos and operator confirmation for take 2 **only if
+   the arm genuinely remained unchanged**. Preserve the original capture and
+   summary; add a separate pairing.json recording image paths, capture/take ID,
+   image times if known, operator confirmation and the association method. Do not
+   label separate photographs hardware-synchronized. If the pose changed or is
+   uncertain, retain take 2 as unpaired and pair a fresh capture with photographs
+   using the established workflow. Do not run more unpaired captures.
+2. Run the revised generated-SO101 Windows checks above while hardware is idle.
+   This does not require new robot motion.
+3. Report measured mounting/table placement and jaw opening where available.
+   For additional distinct poses, use the human operator's established controls;
+   preserve each pose's observation/photo association. Never send simulation zero
+   or guessed signs/offsets to hardware. One stationary pose cannot resolve them.
+
+Return paired evidence or explicit missing items, plus revision validation/viewer
+results. Continue preserving calibration and requested-versus-sent distinctions.

@@ -28,7 +28,7 @@ not become confirmed measurements automatically.
 | Assembly review UI / articulated job API | Local browser workbench implemented; HTTP jobs pending |
 | Imported SO101 reference model | Loads and runs; nominal CAD dimensions closely agree |
 | Combined reference robot/charger/table | Mac validation; Windows native/reset/relocation acceptance reported at 74cf11a |
-| Physical joint mapping / real motion comparison | Unverified; reference evidence needed |
+| Physical joint mapping / real motion comparison | Take-2 capture imported and offline-audited (599 samples); photo pairing and mapping unverified |
 | Fetch public integration / Vultr deployment | Incomplete / deferred |
 
 See [example taxonomy](../examples/README.md), [CAD review](../examples/so101/cad-review/README.md),
@@ -77,6 +77,7 @@ CAD may be required for this first demonstration. Photos-only robot conversion
 is not yet proven. Reusing a template must be labeled template-assisted.
 
 ### 6. Compare with the physical arm
+- [x] Audit saved stationary observations/calibration identity without hardware access.
 - [ ] Match timestamped whole-arm images and joint observations in several poses.
 - [ ] Verify signs/zeros/gripper mapping and measured base/table placement.
 - [ ] Compare observation replay (kinematics) before commanded-motion prediction.
