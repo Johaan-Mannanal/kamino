@@ -1,0 +1,81 @@
+{
+  "passed": true,
+  "configuration_matches": true,
+  "configuration_checks": {
+    "degrees_of_freedom": true,
+    "mass": true,
+    "inertia": true,
+    "box_dimensions": true,
+    "collision_enabled": true,
+    "timestep": true,
+    "gravity": true,
+    "friction": true,
+    "contact_settings": true,
+    "table_position": true,
+    "table_size": true,
+    "initial_object_position": true,
+    "reset_targets": true,
+    "asset_record": true
+  },
+  "scope": "Offline robot hold and object drop/reset only; no manipulation or physical validation",
+  "portability_checked": false,
+  "portability_note": "This report checks one directory; validate a relocated copy separately",
+  "environment": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4"
+  },
+  "timestep_s": 0.0001,
+  "total_wall_clock_s": 2.5212326000000758,
+  "thresholds": {
+    "maximum_penetration_m": 0.001,
+    "final_bottom_error_m": 0.0002,
+    "settling_window_s": 0.5,
+    "maximum_settled_linear_speed_m_s": 0.001,
+    "maximum_settled_angular_speed_rad_s": 0.01,
+    "maximum_hold_deviation_rad": 0.02
+  },
+  "hardware_mapping_verified": false,
+  "manipulation_tested": false,
+  "reset_reproducible": true,
+  "runs": [
+    {
+      "passed": true,
+      "steps": 30000,
+      "simulated_duration_s": 3.0000000000019065,
+      "finite_state": true,
+      "warning_count": 0,
+      "table_contact": true,
+      "object_robot_contact_count": 0,
+      "maximum_penetration_m": 0.0004560602119521688,
+      "final_bottom_error_m": -1.093026150075782e-06,
+      "maximum_hold_deviation_rad": 0.0008243720614578973,
+      "maximum_settled_linear_speed_m_s": 1.600919480002938e-12,
+      "maximum_settled_angular_speed_rad_s": 0.0,
+      "final_object_position_m": [
+        0.3,
+        0.1,
+        0.028998906973849926
+      ]
+    },
+    {
+      "passed": true,
+      "steps": 30000,
+      "simulated_duration_s": 3.0000000000019065,
+      "finite_state": true,
+      "warning_count": 0,
+      "table_contact": true,
+      "object_robot_contact_count": 0,
+      "maximum_penetration_m": 0.0004560602119521688,
+      "final_bottom_error_m": -1.093026150075782e-06,
+      "maximum_hold_deviation_rad": 0.0008243720614578973,
+      "maximum_settled_linear_speed_m_s": 1.600919480002938e-12,
+      "maximum_settled_angular_speed_rad_s": 0.0,
+      "final_object_position_m": [
+        0.3,
+        0.1,
+        0.028998906973849926
+      ]
+    }
+  ],
+  "python_warnings": []
+}

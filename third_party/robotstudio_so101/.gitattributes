@@ -1,0 +1,2 @@
+# Preserve exact upstream bytes required by SOURCE.json hashes.
+* -text
