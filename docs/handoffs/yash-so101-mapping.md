@@ -7,7 +7,7 @@ Meshy reconstruction is needed. Keep its estimated properties and single-box
 collision limitations documented.
 
 Next, focus on the following SO101 inventory. Johaan has pushed the model setup
-at `3ca9c3e` and is integrating the frontend separately. We need the following
+at `3ca9c3e`; integrated frontend/evidence are published through `cc9e247`. We need the following
 Windows evidence before matching real and simulated arm motion.
 
 ## 1. Synchronize without losing work
@@ -84,6 +84,11 @@ Inspect the model against our physical arm: link layout, gripper, wrist-camera
 mount and base orientation. Save native screenshots, report actual differences,
 and record MuJoCo version. This opens a simulated model only. The inspector's
 success establishes numerical loading/holding, not hardware calibration.
+
+The backend branch also has a [combined robot/charger/table scene](../../examples/so101/WORKSPACE.md)
+with a resettable viewer. After the inventory, follow those commands to inspect
+the combined scene and record native reset evidence. This uses the accepted API
+ZIP, so no new Meshy job or repeated standalone charger acceptance is needed.
 
 ## 5. Return a portable handoff
 

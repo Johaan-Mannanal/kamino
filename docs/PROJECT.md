@@ -19,7 +19,7 @@ This is the overall project checklist. Update it as verified handoffs arrive; ke
   and the SO101 model/joint mapping. Vultr remains deferred.
 - **GPT-6.1-sol frontend agent:** completed GLB preview, saved orientation,
   Gemini suggestions and real cached-object browser acceptance. Integrated
-  locally on `codex/backend-pipeline`; remote publication is pending.
+  and published on `codex/backend-pipeline` through `cc9e247`.
 - **Yash + Windows agent:** native simulation acceptance and the actual SO101
   environment/calibration/recording inventory. Branch: `codex/windows-simulation-setup`.
 - **Srijan and Atul:** no active implementation dependency; their remaining work
@@ -51,6 +51,11 @@ reference poses before action replay. The pinned robot model and offline
 inspection are in [SO101 setup](../examples/so101/README.md); the Windows evidence
 request is [here](handoffs/yash-so101-mapping.md). A matching observation replay
 establishes kinematic alignment, not a predictive dynamics model.
+
+The [combined SO101/charger/table workspace](../examples/so101/WORKSPACE.md) now
+passes original and relocated offline hold/drop/reset trials. Layout and servo
+dynamics remain assumed; Windows combined-viewer acceptance and real-arm mapping
+are pending. No physical arm commands or manipulation trials have been run here.
 
 Use [the shared contract](API.md) for application boundaries. Preserve source
 branches and uncommitted work; `main` remains separate from feature integration.
@@ -123,7 +128,7 @@ Passing these checks establishes basic simulation usability, not measured real-w
 
 ### Phase 6 — Complete the application
 
-- [x] Connect upload, processing, property confirmation, preview, and download (local integration; remote publication pending).
+- [x] Connect upload, processing, property confirmation, preview, and download (published backend-branch integration through `cc9e247`).
 - [x] Provide errors and simulation retries that retain completed work, with frontend controls.
 - [ ] Run the entire pipeline on two real objects.
 - [ ] Record total processing time, manual edits, and failure causes.

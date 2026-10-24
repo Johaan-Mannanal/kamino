@@ -1,4 +1,4 @@
-# Core frontend integrated locally
+# Core frontend integrated and published
 
 Integrated into `codex/backend-pipeline` after SO101 bootstrap `3ca9c3e`:
 
@@ -40,8 +40,7 @@ This Windows result concerns the accepted charger bundle; the worker's separate
 browser test deliberately applied different estimated Gemini draft values and
 does not inherit Windows/native acceptance for its downloaded bundle.
 
-Frontend commits and these coordination updates are local. Automatic approval
-review rejected the worker's remote push because it could not establish explicit
-authorization for the destination and captured-evidence payload. The parent
-completed the requested local integration without retrying that remote write.
-The already-published SO101 bootstrap remains available to Yash at `3ca9c3e`.
+The user subsequently explicitly authorized publication of the integrated
+frontend and captured evidence. The parent pushed `codex/backend-pipeline` through
+`cc9e2476199c61f438b646b8adeaad32551171a6` and verified the remote SHA. The earlier
+worker push block is resolved. Main is unchanged.
