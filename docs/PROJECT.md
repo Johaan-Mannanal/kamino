@@ -19,7 +19,7 @@ This is the overall project checklist. Update it as verified handoffs arrive; ke
 
 The backend feature branch now connects upload/reconstruction, property persistence, Srijan's preparation, Yash's exporter/validator, and portable ZIP downloads. The merged suite plus integration tests passed on this Intel Mac (158 tests; Python 3.13.7 / MuJoCo 3.3.7). Original and relocated checks passed for the cached real charger model. See the [integration handoff](team-notes/2026-10-23-pipeline-integration.md). Remote CI, native Windows 3.17 charger viewer acceptance, frontend integration and the second object remain separate checks.
 
-Srijan's preparation/Gemini code at `dcfa486` and Yash's simulation code at `6298d6e` are integrated into the backend feature branch. Preparation preserves input axes and may distort proportions by scaling each axis independently; this is documented rather than inferred orientation. Geometry-only simulation copies preserve the richer prepared originals. Gemini remains an optional adapter with no live inference or API/UI connection demonstrated. Atul's frontend handoff is pending.
+Srijan's preparation/Gemini code at `dcfa486` and Yash's simulation code at `6298d6e` are integrated into the backend feature branch. Preparation preserves input axes and may distort proportions by scaling each axis independently; this is documented rather than inferred orientation. Geometry-only simulation copies preserve the richer prepared originals. Gemini now has explicit cached API endpoints; one real charger request succeeded, returning estimated values and preserving confirmed properties. Its frontend connection remains outstanding. Atul's frontend handoff is pending.
 
 Use [the shared contract](API.md) for module boundaries and units. Agents can start from `origin/codex/backend-pipeline`; work on their own branches and preserve others' changes. Full instructions: [Srijan](handoffs/srijan-agent.md), [Atul](handoffs/atul-agent.md).
 
@@ -104,7 +104,7 @@ Passing these checks establishes basic simulation usability, not measured real-w
 
 - [ ] Fetch: expose the primary workflow through ASI:One, register the agent, implement its chat protocol, and complete submission requirements.
 - [ ] Vultr: deploy actual backend or processing jobs if access is available.
-- [ ] Gemini: use it for the property-assistance workflow and document its contribution.
+- [x] Gemini: connect the property-assistance API and verify a real request; frontend adoption and sponsor submission remain pending.
 - [ ] Verify final eligibility and submission requirements using [the sponsor checklist](SPONSORS.md).
 
 ### Phase 8 — Validate, polish, and submit

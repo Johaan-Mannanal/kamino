@@ -3,18 +3,22 @@ import warnings
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from io import BytesIO
+from secrets import compare_digest
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.security import HTTPBearer
 from PIL import Image, UnidentifiedImageError
 
 from photo2sim.api.config import Settings
 from photo2sim.api.store import JobConflict, JobStore
+from photo2sim.api.suggestions import SuggestionRequest, SuggestionsBusy, SuggestionService
 from photo2sim.api.worker import JobWorker
 from photo2sim.contracts import AssetProperties, JobRecord, bundle_path
+from photo2sim.integrations.gemini import PropertySuggestions, Transport
 from photo2sim.integrations.reconstruction import MockProvider, ReconstructionProvider
 
 
@@ -35,7 +39,10 @@ def retryable_processing(job: JobRecord) -> bool:
 
 
 def create_app(
-    settings: Settings | None = None, provider: ReconstructionProvider | None = None
+    settings: Settings | None = None,
+    provider: ReconstructionProvider | None = None,
+    *,
+    gemini_transport: Transport | None = None,
 ) -> FastAPI:
     settings = settings or Settings.from_env()
     if provider is None:
@@ -48,6 +55,7 @@ def create_app(
     if provider.name != settings.provider:
         raise ValueError("Provider implementation does not match configured provider")
     store = JobStore(settings.data_dir)
+    suggestions = SuggestionService(store, settings, gemini_transport)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -59,12 +67,37 @@ def create_app(
         finally:
             worker.close()
 
-    app = FastAPI(title="Photo2Sim", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title="Photo2Sim",
+        version="0.1.0",
+        lifespan=lifespan,
+        dependencies=[Depends(HTTPBearer(auto_error=False))] if settings.api_token else [],
+    )
+    if settings.api_token:
+
+        @app.middleware("http")
+        async def application_access(request, call_next):
+            if (
+                request.method != "OPTIONS"
+                and request.url.path.startswith("/api/")
+                and request.url.path != "/api/health"
+            ):
+                scheme, _, token = request.headers.get("Authorization", "").partition(" ")
+                if scheme.lower() != "bearer" or not compare_digest(
+                    token.encode("utf-8"), settings.api_token.encode("utf-8")
+                ):
+                    return JSONResponse(
+                        status_code=401,
+                        content={"detail": "Application access token required"},
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+            return await call_next(request)
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_origins=list(settings.cors_origins),
         allow_methods=["GET", "POST", "PATCH"],
-        allow_headers=["Content-Type"],
+        allow_headers=["Content-Type", "Authorization"],
     )
 
     def get_job(job_id: UUID) -> JobRecord:
@@ -135,6 +168,32 @@ def create_app(
     @app.get("/api/jobs/{job_id}", response_model=JobRecord)
     def job_status(job_id: UUID):
         return get_job(job_id)
+
+    @app.get("/api/jobs/{job_id}/suggestions", response_model=PropertySuggestions)
+    def cached_suggestions(job_id: UUID):
+        get_job(job_id)
+        cached = suggestions.cached(job_id)
+        if cached is None:
+            raise HTTPException(404, "No saved suggestions for this job")
+        return PropertySuggestions.model_validate(cached["suggestions"])
+
+    @app.post("/api/jobs/{job_id}/suggestions", response_model=PropertySuggestions)
+    def property_suggestions(job_id: UUID, request: SuggestionRequest | None = None):
+        get_job(job_id)
+        try:
+            return suggestions.generate(job_id, request or SuggestionRequest())
+        except SuggestionsBusy:
+            raise HTTPException(
+                429, "Gemini is busy; retry shortly", headers={"Retry-After": "5"}
+            ) from None
+        except (ValueError, OSError):
+            raise HTTPException(
+                422, "Job images are unavailable or invalid; manual entry remains available"
+            ) from None
+        except Exception:
+            raise HTTPException(
+                503, "Gemini suggestions are unavailable; continue with manual properties"
+            ) from None
 
     @app.patch("/api/jobs/{job_id}/properties", response_model=JobRecord)
     def save_properties(job_id: UUID, properties: AssetProperties):

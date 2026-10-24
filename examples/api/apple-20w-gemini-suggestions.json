@@ -1,0 +1,26 @@
+{
+  "dimensions_m": {
+    "x": 0.042,
+    "y": 0.027,
+    "z": 0.058,
+    "source": "estimated",
+    "note": "AI suggestion \u2014 unverified"
+  },
+  "mass_kg": {
+    "value": 0.058,
+    "source": "estimated",
+    "note": "AI suggestion \u2014 unverified"
+  },
+  "sliding_friction": null,
+  "clarifying_questions": [
+    "What specific surface material is the adapter in contact with to estimate sliding friction?",
+    "Should bounding box dimensions include or exclude the extended AC prongs?",
+    "What is the sliding friction coefficient for the contacting surfaces?"
+  ],
+  "notes": [
+    "AI suggestion \u2014 unverified",
+    "Identified as an Apple 20W USB-C Power Adapter (US plug style) based on form factor and the '20W' label visible between the prongs.",
+    "Height (z-dimension) includes the extended prongs (~16 mm); the main plastic housing height alone is approximately 0.042 m.",
+    "Mass is estimated based on standard production specifications (~55 to 58 grams)."
+  ]
+}

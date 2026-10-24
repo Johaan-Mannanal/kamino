@@ -7,6 +7,8 @@ Authoritative Python models: `src/photo2sim/contracts.py`. Backend owns this fil
 - `GET /api/health`: service status and configured reconstruction provider.
 - `POST /api/jobs`: multipart field **`images`**, repeated for 1–4 JPEG/PNG/WebP images, at most 10 MiB and 25 megapixels each. Returns **202** and `JobRecord`.
 - `GET /api/jobs/{id}`: returns `JobRecord`; poll while reconstruction runs.
+- `POST /api/jobs/{id}/suggestions`: optional JSON `{object_hint, refresh}`; asks Gemini for unverified `PropertySuggestions` from the saved photos. Same hint/model uses cache unless `refresh: true`. No automatic calls, confirmation, processing or property changes.
+- `GET /api/jobs/{id}/suggestions`: returns saved suggestions, or 404 when absent. Survives server restart.
 - `PATCH /api/jobs/{id}/properties`: JSON `AssetProperties`; accepted at `awaiting_properties` or after a simulation-stage failure. Saving corrected properties returns to `awaiting_properties` and clears current result pointers while retaining prior attempt files. Saves confirmed inputs. Processing starts with a separate explicit request.
 - `POST /api/jobs/{id}/process`: no body. Requires a reconstructed mesh and saved properties. Returns **202** with status `preparing`, then runs preparation, export and headless validation asynchronously. Duplicate/running/completed requests return **409**. Failed simulation attempts can be retried with this endpoint; existing attempt files are retained. Reconstruction failures require separate diagnosis, not this retry.
 - `GET /api/jobs/{id}/files/{path}`: job-relative artifact download, e.g. `reconstruction/mesh.glb` or `uploads/00.png`.
@@ -16,7 +18,7 @@ Phone JPEGs identified as MPO are accepted as JPEG uploads with their original b
 
 State sequence: `queued → reconstructing → awaiting_properties → preparing → validating → completed`; failures use `failed` and `{code, message}`. Completion requires passing original and relocated scene validation and successful ZIP packaging. `progress` describes reconstruction, not total pipeline completion. A 100% reconstruction job can still await properties.
 
-The provider is configured server-side (`mock` by default). Never accept API keys or arbitrary provider download URLs from the browser. Mock jobs have `synthetic: true`; they produce a known cube and make no claim of photo reconstruction. CORS for local frontend development permits `http://localhost:5173` and `http://127.0.0.1:5173`.
+The provider is configured server-side (`mock` by default). Never accept API keys or arbitrary provider download URLs from the browser. Mock jobs have `synthetic: true`; they produce a known cube and make no claim of photo reconstruction. CORS defaults to `http://localhost:5173` and `http://127.0.0.1:5173`; override exact origins with comma-separated `PHOTO2SIM_CORS_ORIGINS`. Authorization and Content-Type headers are permitted.
 
 `JobRecord` contains `schema_version`, `id`, `status`, `provider`, `synthetic`, timestamps, `progress`, `source_images`, `provider_task_id`, `mesh_path`, `properties`, `asset`, `export_path`, `validation_path`, `bundle_path`, and `error`. Nullable fields are initially null. Top-level paths in responses are relative to that job's artifact directory, never Windows/Mac absolute paths. Missing jobs/files return 404, invalid properties return 422, and wrong-stage updates return 409.
 
@@ -25,6 +27,20 @@ After processing, `export_path` names `attempts/{attempt}/bundle/scene.xml`, `va
 `asset.visual_mesh` is **bundle-relative**, unlike top-level job paths. Once `export_path` exists, its visual mesh's job-relative path is `dirname(export_path) + '/' + asset.visual_mesh`. Reconstruction preview still uses `mesh_path`. Early preparation failures may have `asset` set without an export; do not infer a downloadable mesh from `asset` alone.
 
 Restarting while preparing/validating marks the job `failed` with `processing_interrupted`; retry `/process` to use the cached reconstruction in a new attempt. This never submits another paid generation. Processing errors are sanitized and retain saved artifacts. Unexpected validator exceptions still produce a safe failure report. A failed simulation can be retried directly or have its properties corrected with PATCH first; reconstruction failures cannot use this recovery path. Without the simulation extra, processing fails with `simulation_unavailable` and installation instructions.
+
+## Optional Gemini suggestions
+
+POST with `{"object_hint": "Apple USB-C adapter"}` or no body. The response has nullable `dimensions_m`, `mass_kg`, `sliding_friction`, plus `clarifying_questions` and `notes`. Property shapes match the existing contract, but every suggested property remains `source: estimated` with an unverified note. Null means unknown; display the questions and allow manual input. The real charger response is at `examples/api/apple-20w-gemini-suggestions.json`.
+
+The endpoint sends EXIF-corrected RGB JPEG copies, at most 1024 pixels on the longest side, from the job's saved source images. Originals are preserved. Suggestions/model/hint/timestamp are cached under `suggestions/gemini.json`, separately from confirmed properties. A successful refresh replaces this cache; a failed refresh preserves it. Only one uncached Gemini request runs at once per server; busy requests return 429 with Retry-After. Missing credentials, quota/provider/malformed-response failures return 503 and leave manual entry available; invalid local images return 422. Missing jobs return 404.
+
+Applying a suggestion requires an explicit PATCH to `/properties`; the server does not do this automatically. A repeat GET or cached POST makes no new provider request. A changed hint/model or explicit refresh can make another request.
+
+## Deployment access
+
+When `PHOTO2SIM_API_TOKEN` is set, every `/api/` route except `/api/health` requires `Authorization: Bearer <application-token>`. Missing/wrong credentials return 401 with WWW-Authenticate: Bearer. Docs/OpenAPI remain readable and Swagger provides an Authorize control. OPTIONS preflight does not require a token. Local development with a blank token remains unchanged; Compose requires one for public deployment.
+
+This application token is distinct from Gemini/Meshy/Agentverse/Vultr keys. Never put provider keys in browser code. Team-demo clients need the app token through private configuration, user entry or a server-side proxy; do not bundle it into a public frontend. File downloads also require authorization: fetch them with headers and create a local Blob download, rather than relying on an unauthenticated anchor URL.
 
 ## Property input
 
