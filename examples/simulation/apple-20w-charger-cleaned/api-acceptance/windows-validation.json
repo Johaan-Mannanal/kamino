@@ -1,0 +1,93 @@
+{
+  "scope": "Upright box-proxy smoke test only, not real-world physical accuracy",
+  "viewer_inspected": false,
+  "environment": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4"
+  },
+  "original": {
+    "passed": true,
+    "thresholds": {
+      "maximum_penetration_m": 0.001,
+      "final_bottom_error_m": 0.0002,
+      "settling_window_s": 0.5,
+      "maximum_settled_linear_speed_m_s": 0.001,
+      "maximum_settled_angular_speed_rad_s": 0.01
+    },
+    "requested_simulated_duration_s": 3.0,
+    "checks": {
+      "fell": true,
+      "ground_contact": true,
+      "penetration": true,
+      "resting_height": true,
+      "settled_linear": true,
+      "settled_angular": true,
+      "no_warnings": true
+    },
+    "timestep_s": 0.0001,
+    "steps": 30000,
+    "simulated_duration_s": 3.0000000000019065,
+    "simulation_wall_clock_s": 0.9222994000001563,
+    "initial_bottom_height_m": 0.02,
+    "final_bottom_height_m": -5.736207471067345e-07,
+    "first_ground_contact_s": 0.0639000000000008,
+    "final_ground_contacts": 4,
+    "maximum_penetration_m": 0.00045150731583386283,
+    "maximum_settled_linear_speed_m_s": 1.9313617972759802e-11,
+    "maximum_settled_angular_speed_rad_s": 2.9255408995130063e-10,
+    "rendered_dimensions_m": [
+      0.04300000269735792,
+      0.027000000891217145,
+      0.058000000447480424
+    ],
+    "mujoco_warning_counts": {},
+    "python_warnings": [],
+    "asset_id": "16d20bf3-93d2-4c3d-b88c-e161d7a8b437",
+    "synthetic": false,
+    "total_wall_clock_s": 1.487997500000347
+  },
+  "relocated": {
+    "passed": true,
+    "thresholds": {
+      "maximum_penetration_m": 0.001,
+      "final_bottom_error_m": 0.0002,
+      "settling_window_s": 0.5,
+      "maximum_settled_linear_speed_m_s": 0.001,
+      "maximum_settled_angular_speed_rad_s": 0.01
+    },
+    "requested_simulated_duration_s": 3.0,
+    "checks": {
+      "fell": true,
+      "ground_contact": true,
+      "penetration": true,
+      "resting_height": true,
+      "settled_linear": true,
+      "settled_angular": true,
+      "no_warnings": true
+    },
+    "timestep_s": 0.0001,
+    "steps": 30000,
+    "simulated_duration_s": 3.0000000000019065,
+    "simulation_wall_clock_s": 0.9747206000001825,
+    "initial_bottom_height_m": 0.02,
+    "final_bottom_height_m": -5.736207471067345e-07,
+    "first_ground_contact_s": 0.0639000000000008,
+    "final_ground_contacts": 4,
+    "maximum_penetration_m": 0.00045150731583386283,
+    "maximum_settled_linear_speed_m_s": 1.9313617972759802e-11,
+    "maximum_settled_angular_speed_rad_s": 2.9255408995130063e-10,
+    "rendered_dimensions_m": [
+      0.04300000269735792,
+      0.027000000891217145,
+      0.058000000447480424
+    ],
+    "mujoco_warning_counts": {},
+    "python_warnings": [],
+    "asset_id": "16d20bf3-93d2-4c3d-b88c-e161d7a8b437",
+    "synthetic": false,
+    "total_wall_clock_s": 1.5646681999996872
+  },
+  "portability_passed": true,
+  "passed": true,
+  "total_wall_clock_s": 3.0672992999998314
+}

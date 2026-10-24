@@ -20,7 +20,8 @@ passed. Exact evidence is in `acceptance.json`, `job.json` and
 
 `simulation.zip` is the actual API download. Yash can validate and view this
 archive using the parent README's commands with this ZIP path substituted.
-Windows/native viewer acceptance remains separate. Box collision, approximate
+Windows validation and brief native inspection now pass for the accepted coarse-box scope;
+see [WINDOWS.md](WINDOWS.md) for actual evidence. Box collision, approximate
 inertia, estimated dimensions/mass and unknown friction remain unchanged.
 
 Atul's frontend still needs an orientation control. Save all three angles before

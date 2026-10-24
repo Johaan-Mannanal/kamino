@@ -1,0 +1,28 @@
+{
+  "source_backend_commit": "2ceb12176287c9ab26cc35d6b548160506937573",
+  "environment": {
+    "python": "3.12.10",
+    "mujoco": "3.17.0",
+    "trimesh": "5.2.0",
+    "numpy": "2.5.4"
+  },
+  "api_zip_sha256": "8d3165f06b7e9ca7464b8a93210e491ffb7a4a753936ff436c50372aa4ba20e9",
+  "extracted_payload_unchanged": true,
+  "mesh_vertex_max_abs_difference_m": 1.0191500421363742e-17,
+  "comparison_tolerance_m": 1e-08,
+  "face_indices_identical": true,
+  "box_mass_inertia_contact_parameters_match_accepted_candidate": true,
+  "saved_orientation": {
+    "x_deg": 90.0,
+    "y_deg": 0.0,
+    "z_deg": 0.0
+  },
+  "dimensions_and_mass_provenance": "estimated",
+  "collision": "single bounding box",
+  "new_meshy_job_submitted": false,
+  "repeat_demo_required": false,
+  "repeat_demo_reason": "Geometry and box dynamics match the previously accepted candidate; existing demo remains applicable.",
+  "zip_hash_matches_backend_acceptance": true,
+  "native_viewer_inspected": true,
+  "native_visual_matches_accepted_candidate": true
+}
