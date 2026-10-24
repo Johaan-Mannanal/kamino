@@ -68,6 +68,11 @@ No hardware converter or hardware-control path is implemented in this bootstrap.
 
 ## Acceptance still needed
 
+The [nominal CAD comparison](cad-review/README.md) confirms close agreement for
+11 major parts, with bounding dimensions within 0.006 mm. Keep the pinned model
+geometry. Saved CAD servo placements have small axis tilts; they do not establish
+hardware calibration. Camera geometry and physical scene placement remain unverified.
+
 1. Windows source/config/calibration inventory and native model viewer review:
    [Yash instructions](../../docs/handoffs/yash-so101-mapping.md).
 2. Match a photographed, timestamped observed arm pose to the model. Check each

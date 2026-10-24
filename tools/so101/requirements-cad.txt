@@ -1,0 +1,10 @@
+# Optional offline inspection only; keep separate from the application/LeRobot env.
+# Verified with Python 3.13.7 on Intel macOS.
+cadquery==2.8.0
+cadquery-ocp==7.9.3.1.1
+numba==0.62.1
+numpy==2.3.5
+trimesh==5.2.0
+scipy==1.18.1
+rtree==1.4.1
+matplotlib==3.11.2

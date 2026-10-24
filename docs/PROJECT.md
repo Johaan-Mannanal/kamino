@@ -57,6 +57,12 @@ passes original and relocated offline hold/drop/reset trials. Layout and servo
 dynamics remain assumed; Windows combined-viewer acceptance and real-arm mapping
 are pending. No physical arm commands or manipulation trials have been run here.
 
+The [SO101 CAD review](../examples/so101/cad-review/README.md) resolved the STEP
+geometry units to millimetres and compared 11 major components. Nominal bounding
+dimensions agree within 0.006 mm, so the pinned robot geometry is retained.
+Saved assembly axis tilts do not establish hardware zeros; reference poses,
+gripper mapping and measured mounting/table/object placement remain required.
+
 Use [the shared contract](API.md) for application boundaries. Preserve source
 branches and uncommitted work; `main` remains separate from feature integration.
 
