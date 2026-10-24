@@ -30,6 +30,14 @@
       "sha256": "bf927abbb0cba10d78b9ebc30cc5ae4dabe8ff215f5e783e833dfb9113985e41",
       "capture_time": null,
       "copied_original_bytes": true
+    },
+    {
+      "path": "cad-reference-face.png",
+      "bytes": 135258,
+      "sha256": "f15d45b38a4aed1df2a25b4c0ace45e97b2a2826a718a838f436eb05bedea959",
+      "capture_time": null,
+      "copied_original_bytes": true,
+      "role": "Operator-indicated CAD face used as intended measurement reference; not a physical pose image"
     }
   ],
   "camera_provenance_for_original_take3": {
@@ -54,7 +62,7 @@
       "display_value_mm": 75.4,
       "description": "Reported vertical distance from tabletop to bottom edge of the shown black bar",
       "bar_top_bottom_or_centre": "bottom edge, operator-confirmed",
-      "reference_bar_identity": null,
+      "reference_bar_identity": "Temporary measurement aid; removed; not part of robot hardware",
       "source": "operator-measured, approximate; clarified endpoint/value",
       "uncertainty_mm": null,
       "model_frame_correspondence_verified": false,
@@ -69,7 +77,16 @@
         "bar_top_bottom_or_centre": null,
         "model_frame_correspondence_verified": false,
         "use_as_model_root_height": false
-      }
+      },
+      "intended_reference": {
+        "kind": "Operator-selected CAD face",
+        "image": "cad-reference-face.png",
+        "description": "Blue-highlighted planar face on rounded printed part with mounting holes, next to upright structure",
+        "cad_body_face_identifier": null,
+        "model_frame_correspondence_verified": false
+      },
+      "reported_reference_face_height_mm_approx": 75.4,
+      "reference_transfer_note": "Operator identifies this CAD face as the intended reference. Exact measurement-aid offset/transfer uncertainty was not recorded; height remains approximate and not a root-origin measurement."
     },
     "jaw_opening": {
       "operator_reported_value_mm": 3.18,
@@ -86,13 +103,15 @@
   "model_root_height_still_assumed_m": 0.15,
   "joint_signs_offsets_verified": false,
   "gripper_conversion_verified": false,
-  "pending_operator_clarifications": [
-    "What the black bar is and what it attaches to; needed to identify a fixed CAD/model reference"
-  ],
+  "pending_operator_clarifications": [],
   "pose_unchanged_since_take3": false,
   "operator_clarifications": {
     "mirror_response": "No left\u2013right flip for either photo",
     "height_response": "2.97in from bottom of the bar",
     "jaw_continuity_response": "Not sure"
-  }
+  },
+  "measurement_aid_included_in_hardware_inventory": false,
+  "measurement_aid_included_in_simulation_model": false,
+  "measurement_aid_removed": true,
+  "next_analysis": "Identify the indicated face in the supplied STEP/model coordinates; no further question about the removed measurement aid is needed."
 }

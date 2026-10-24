@@ -1,63 +1,55 @@
-# Operator measurement/camera follow-up — 2026-10-24
+# Operator measurement/reference clarification — 2026-10-24
 
-This packet supplements take 3 without altering its original data/photos or
-operator-confirmed stationary pairing. No new motor reads, commands, torque
-changes or recalibration occurred.
+The intended measurement reference is the BLUE-HIGHLIGHTED CAD FACE in
+`cad-reference-face.png`, supplied by Yash. The image is preserved unchanged.
+The temporary measuring aid is removed and is **not part of the robot, hardware
+modifications or simulation model**. No further identification of that aid is
+needed. The physical base clamp shown in earlier photos is a separate item.
 
-## Camera clarification
+Reported height: **2.97 inches = approximately 75.4 mm**, intended as tabletop to
+the indicated face, using the temporary aid. The original 77.8 mm report and the
+clarified bottom-edge reading remain recorded as measurement history in
+measurements.json. Neither decimal precision nor a known measurement uncertainty
+is claimed. Exact aid-to-face transfer offset was not recorded, so this is a coarse
+operator measurement, not independently verified metrology.
 
-Yash confirms BOTH original take-3 images used the REAR camera and neither was
-flipped left-to-right in the camera or editing app. Front-facing image is portrait;
-left-side image is landscape. This resolves mirror history by OPERATOR REPORT,
-not independent optical calibration. Portrait/landscape is unrelated to mirroring.
-Original images were not transformed. Joint signs/zeros are still unverified.
-Earlier candidate render comparison.json records mirror status at generation time
-as unknown; model-comparison/operator-review.json and this packet supply the later
-operator confirmation. No simulated candidate was fitted or selected because of it.
+The selected planar face is on a rounded printed part with mounting holes next
+to an upright structure. The operator's CAD screenshot identifies the intended
+face visually; its precise STEP body/face identifier and model coordinates have
+not yet been established. Johaan can now match that face in CAD and account for
+its offset from the model origin. **75.4 mm is not automatically root Z**, and the
+0.15 m simulation test placement remains an explicit assumption. No simulator or
+hardware parameters were changed.
 
-## Measurements and endpoint clarification
+## Camera and pose provenance
 
-Initial report was 77.8 mm (3 1/16 inches) to an unspecified reference near the base.
-Yash then clarified **2.97 inches from tabletop to the BOTTOM of the black bar**.
-This converts to 75.438 mm, sensibly reported as **approximately 75.4 mm**. This
-arithmetic does not establish 0.001 mm measurement accuracy. Uncertainty unknown.
-The initial report is retained in measurements.json as prior_report; it is not
-used to infer bar thickness or a model offset.
+Both original take-3 photographs used the REAR camera and are explicitly confirmed
+by the operator to have NO left-right flip. Front-facing image is portrait;
+left-side image is landscape. This confirms reported image history, not calibrated
+camera intrinsics/extrinsics or joint signs/zeros. Original images are unchanged.
 
-The bar's identity/attachment is still unknown. A tabletop-to-bar height is not
-yet a tabletop-to-model-root height. Identify the bar and its exact fixed CAD/model
-point before converting this measurement. If the bar is an unmodeled clamp rail
-or separate tool, it is not automatically an arm reference. A marked point on the
-fixed printed base or a clearly identifiable screw/horn centre can work; a joint
-axis is not mandatory when another fixed CAD point is known. No further arm
-movement is needed simply to identify a visible reference.
+The original take-3 observation/photo pairing remains operator-confirmed stationary
+association, not synchronization. These later measurement photographs and CAD
+screenshot do not replace that pair. The operator temporarily moved the shoulder
+manually to measure the gap; whether it returned exactly is unknown. No agent
+motor command or fresh hardware reading was performed.
 
 Reported jaw gap: approximately **3.18 mm (1/8 inch)** between closest opposing
-inner gripping faces (about 3.2 mm). No jaw measurement photo was supplied.
+inner gripping faces. The operator is **not sure** whether the jaws themselves
+stayed unchanged. Keep this as a later unpaired measurement; do not fit it to
+take-3 normalized gripper=0.95497954 or use it to select a conversion candidate.
+No jaw-gap measurement photo or uncertainty was supplied.
 
-## Pose continuity and calibration use
+## Evidence and remaining work
 
-Yash manually moved the shoulder temporarily to access the gripper. No code moved
-it, but continuity of the complete take-3 pose is nevertheless broken. Whether it
-returned exactly is unknown. These follow-up photos are NOT paired with the old
-joint values. The earlier original take-3 association remains valid as reported
-for that earlier interval; it was not relabeled synchronized.
+measurements.json holds original image hashes, camera/endpoint clarifications,
+raw reported values, measurement history and the selected-face reference.
+base-reference-overview.png and base-tape-reading.png preserve the measurement
+context; cad-reference-face.png identifies the face to map in CAD. The removed
+aid must not become geometry, a permanent mounting change or an independent robot
+reference body in the model.
 
-When asked whether the jaws themselves stayed unchanged, Yash answered **'Not
-sure'**. Therefore the 3.18 mm gap is a later, unpaired measurement and MUST NOT be
-used as a calibration point for take-3 gripper=0.95497954. It does not select either
-candidate gripper conversion. Joint signs/zeros, gripper conversion, metric camera
-mounting and full base/world transform remain unverified.
-
-Two original measurement PNGs are preserved byte-for-byte, with hashes/dimensions
-in measurements.json. The overview supplies clamp/bar context and the second image
-shows the tape. Zero alignment, parallax and exact endpoint were not independently
-measured from pixels; values are operator-measured approximate reports.
-
-## Remaining limitation
-
-The only remaining endpoint clarification is what the bar is attached to and
-whether a corresponding fixed CAD point exists. Even a mapped vertical height
-alone does not supply base XY, yaw or full table plane orientation. The **0.15 m
-simulation root remains an assumed free-space test placement**. It was not changed
-to 0.0754 m, and no simulator/hardware parameters were changed.
+Still unresolved: face-to-model coordinate correspondence, full base/table
+translation/orientation, camera mounting/extrinsics, joint signs/zeros and gripper
+conversion. A single approximate face height does not establish these. No new
+capture, trajectory, calibration or model target is requested here.

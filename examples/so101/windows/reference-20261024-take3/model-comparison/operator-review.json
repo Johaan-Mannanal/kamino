@@ -15,7 +15,7 @@
   "jaw_opening_mm": null,
   "jaw_measurement_applies_to_take3": null,
   "base_reference_to_tabletop_m": null,
-  "base_table_reference_endpoints": "Tabletop to bottom edge of black bar; bar CAD/model identity unknown",
+  "base_table_reference_endpoints": "Tabletop to operator-indicated CAD face in ../measurement-followup/cad-reference-face.png, using temporary measurement aid; approximate 75.4 mm, CAD/model frame correspondence not yet established",
   "table_height_m": null,
   "table_thickness_m": null,
   "model_difference_observations": [
@@ -26,9 +26,11 @@
   "joint_signs_verified": false,
   "joint_offsets_verified": false,
   "gripper_conversion_verified": false,
-  "next_operator_evidence": "Identify bar attachment/fixed CAD reference; further operator-coordinated distinct poses and paired jaw measurements would be needed to resolve mappings.",
+  "next_operator_evidence": "Reference face is now indicated; Johaan can match it to CAD coordinates. Joint mapping and paired jaw measurements remain unresolved; no new motion requested.",
   "measurement_followup": "../measurement-followup/measurements.json",
   "later_reported_jaw_gap_mm": 3.18,
   "later_jaw_measurement_caveat": "Shoulder manually repositioned; jaw continuity unknown. Do not fit to take-3 observations.",
-  "reported_tabletop_to_bar_bottom_mm": 75.4
+  "reported_tabletop_to_bar_bottom_mm": 75.4,
+  "reported_tabletop_to_indicated_face_mm_approx": 75.4,
+  "temporary_measurement_aid_is_robot_component": false
 }
