@@ -1,3 +1,3 @@
 # Tests
 
-Add meaningful tests as implementations arrive: invalid physical values, unit conversion, failed reconstruction jobs, missing mesh files, scene loading, and portable export bundles. Use synthetic fixtures for independent development and label them. Provider execution, viewer inspection, and measured real-world comparisons require separate evidence. There are no automated tests yet.
+Run `python -m pytest -q`. Current tests cover shared contracts, the persistent local API, mock reconstruction, and Meshy HTTP-transport behavior. No live Meshy generation, real-object accuracy, or MuJoCo validation is implied by these backend tests. Add geometry and simulation tests alongside those implementations.

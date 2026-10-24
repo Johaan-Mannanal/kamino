@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "id": "e40f8313-437d-4b06-a781-ad2cf7562eca",
+  "status": "awaiting_properties",
+  "provider": "mock",
+  "synthetic": true,
+  "created_at": "2026-10-23T19:00:00Z",
+  "updated_at": "2026-10-23T19:00:01Z",
+  "progress": 100,
+  "source_images": ["uploads/00.png"],
+  "provider_task_id": "mock-example-task",
+  "mesh_path": "reconstruction/mesh.obj",
+  "properties": null,
+  "asset": null,
+  "export_path": null,
+  "error": null
+}
