@@ -1,0 +1,19 @@
+{
+  "capture_take_id": "reference-20261024-take2",
+  "capture_commit": "efa71da80f64be707209fff8396ad0e2171d88fd",
+  "status": "unpaired",
+  "images": [],
+  "image_capture_times": null,
+  "operator_confirmation": {
+    "pose_unchanged_through_photos": null,
+    "photo_times_match_capture": null,
+    "response": "Operator is unsure and requested clearer instructions."
+  },
+  "association_method": null,
+  "hardware_synchronized": false,
+  "jaw_opening_mm": null,
+  "base_table_geometry": null,
+  "joint_signs_and_zeros": "unverified",
+  "gripper_angle_conversion": "unverified; source remains normalized_0_100",
+  "next_action": "Wait for operator ready with phone; coordinate stationary readings with whole-arm front/side photos. No further unpaired captures."
+}

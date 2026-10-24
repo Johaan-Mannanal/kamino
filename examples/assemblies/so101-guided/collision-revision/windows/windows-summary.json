@@ -1,0 +1,28 @@
+{
+  "backend_commit": "60e60f956c2336910b6bd50fdfb903d7a39c9485",
+  "python": "3.12.10",
+  "versions": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4",
+    "trimesh": "5.2.0",
+    "pydantic": "2.14.1"
+  },
+  "viewer_inspected": true,
+  "native_motion_completed_phase_count": 36,
+  "native_phase_targets_and_actuals_exactly_match_validator": true,
+  "native_R_reset_verified": true,
+  "visual_groups": {
+    "visual_meshes": 2,
+    "convex_collision": 3,
+    "convex_hull_visualization_flag": true
+  },
+  "tests": {
+    "convex_regressions_passed": 6
+  },
+  "root_height_assumed_m": 0.15,
+  "physical_mounting_validated": false,
+  "hardware_mapping_verified": false,
+  "new_hardware_capture": false,
+  "shared_exporter_or_validator_changed": false,
+  "no_video_recording": true
+}

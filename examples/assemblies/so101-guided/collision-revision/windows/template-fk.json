@@ -1,0 +1,39 @@
+{
+  "scope": "Template conversion consistency only; same source frames; not independent physical validation",
+  "poses_rad": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0.3,
+      -0.4,
+      0.5,
+      -0.2,
+      0.6,
+      0.4
+    ],
+    [
+      -0.5,
+      0.3,
+      -0.4,
+      0.2,
+      -0.7,
+      0.8
+    ]
+  ],
+  "root_translation_difference_m": [
+    0,
+    0,
+    0.15
+  ],
+  "max_position_error_m": 2.7755575615628914e-16,
+  "max_rotation_element_error": 1.7763568394002505e-15,
+  "max_axis_element_error": 1.9984014443252818e-15,
+  "mujoco_version": "3.17.0",
+  "passed": true
+}

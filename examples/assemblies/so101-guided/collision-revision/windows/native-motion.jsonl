@@ -1,0 +1,79 @@
+{"event": "initial", "simulated_time_s": 0.0, "qpos": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "ctrl": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"event": "restart", "simulated_time_s": 0.0}
+{"event": "reset", "simulated_time_s": 0.0, "qpos": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "ctrl": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"event": "phase_start", "simulated_time_s": 0.0, "trial": 0, "joint": "shoulder_pan", "target_rad": 0.95993}
+{"event": "phase_end", "simulated_time_s": 1.9999999999998905, "trial": 0, "joint": "shoulder_pan", "target_rad": 0.95993, "actual_rad": 0.9599299999999998, "max_tracking_error_rad": 0.0005001165018271455, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 1.9999999999998905, "trial": 0, "joint": "shoulder_pan", "target_rad": -0.95993}
+{"event": "phase_end", "simulated_time_s": 3.9999999999996705, "trial": 0, "joint": "shoulder_pan", "target_rad": -0.95993, "actual_rad": -0.9599300000000034, "max_tracking_error_rad": 0.000500116501238667, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 3.9999999999996705, "trial": 0, "joint": "shoulder_pan", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 6.000000000000338, "trial": 0, "joint": "shoulder_pan", "target_rad": 0.0, "actual_rad": -1.773507994137843e-16, "max_tracking_error_rad": 0.0005001165018299088, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 6.000000000000338, "trial": 0, "joint": "shoulder_lift", "target_rad": 0.87266465}
+{"event": "phase_end", "simulated_time_s": 8.000000000001005, "trial": 0, "joint": "shoulder_lift", "target_rad": 0.87266465, "actual_rad": 0.8732815232167135, "max_tracking_error_rad": 0.0006168732167134428, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 8.000000000001005, "trial": 0, "joint": "shoulder_lift", "target_rad": -0.87266465}
+{"event": "phase_end", "simulated_time_s": 9.999999999999897, "trial": 0, "joint": "shoulder_lift", "target_rad": -0.87266465, "actual_rad": -0.8726389109948829, "max_tracking_error_rad": 0.00026048890105151125, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 9.999999999999897, "trial": 0, "joint": "shoulder_lift", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 11.999999999998789, "trial": 0, "joint": "shoulder_lift", "target_rad": 0.0, "actual_rad": 0.0005001165023830919, "max_tracking_error_rad": 0.0005001165023830919, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 11.999999999998789, "trial": 0, "joint": "elbow_flex", "target_rad": 0.845}
+{"event": "phase_end", "simulated_time_s": 13.99999999999768, "trial": 0, "joint": "elbow_flex", "target_rad": 0.845, "actual_rad": 0.8452905844893307, "max_tracking_error_rad": 0.0003685724536865798, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 13.99999999999768, "trial": 0, "joint": "elbow_flex", "target_rad": -0.845}
+{"event": "phase_end", "simulated_time_s": 15.999999999996572, "trial": 0, "joint": "elbow_flex", "target_rad": -0.845, "actual_rad": -0.8447303063464301, "max_tracking_error_rad": 0.000347675051902993, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 15.999999999996572, "trial": 0, "joint": "elbow_flex", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 17.999999999999016, "trial": 0, "joint": "elbow_flex", "target_rad": 0.0, "actual_rad": 0.0004220796364607946, "max_tracking_error_rad": 0.0005001165015933078, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 17.999999999999016, "trial": 0, "joint": "wrist_flex", "target_rad": 0.8290315}
+{"event": "phase_end", "simulated_time_s": 20.00000000000146, "trial": 0, "joint": "wrist_flex", "target_rad": 0.8290315, "actual_rad": 0.8291214891472453, "max_tracking_error_rad": 0.0004585276282578247, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 20.00000000000146, "trial": 0, "joint": "wrist_flex", "target_rad": -0.8290315}
+{"event": "phase_end", "simulated_time_s": 22.000000000003904, "trial": 0, "joint": "wrist_flex", "target_rad": -0.8290315, "actual_rad": -0.8289437267031405, "max_tracking_error_rad": 0.00045631090320373286, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 22.000000000003904, "trial": 0, "joint": "wrist_flex", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 24.00000000000635, "trial": 0, "joint": "wrist_flex", "target_rad": 0.0, "actual_rad": 0.0001315615318996224, "max_tracking_error_rad": 0.000500116501110488, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 24.00000000000635, "trial": 0, "joint": "wrist_roll", "target_rad": 1.42060315}
+{"event": "phase_end", "simulated_time_s": 26.000000000008793, "trial": 0, "joint": "wrist_roll", "target_rad": 1.42060315, "actual_rad": 1.4206028329430096, "max_tracking_error_rad": 0.0005001183498929922, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 26.000000000008793, "trial": 0, "joint": "wrist_roll", "target_rad": -1.37192365}
+{"event": "phase_end", "simulated_time_s": 28.000000000011237, "trial": 0, "joint": "wrist_roll", "target_rad": -1.37192365, "actual_rad": -1.3719239308698485, "max_tracking_error_rad": 0.0005001147752024039, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 28.000000000011237, "trial": 0, "joint": "wrist_roll", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 30.00000000001368, "trial": 0, "joint": "wrist_roll", "target_rad": 0.0, "actual_rad": -1.7207011709616553e-06, "max_tracking_error_rad": 0.0005001165018238171, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 30.00000000001368, "trial": 0, "joint": "gripper", "target_rad": 0.8726646}
+{"event": "phase_end", "simulated_time_s": 32.00000000001612, "trial": 0, "joint": "gripper", "target_rad": 0.8726646, "actual_rad": 0.8726617671581441, "max_tracking_error_rad": 0.000498706797777708, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 32.00000000001612, "trial": 0, "joint": "gripper", "target_rad": -0.0872665}
+{"event": "phase_end", "simulated_time_s": 34.00000000001146, "trial": 0, "joint": "gripper", "target_rad": -0.0872665, "actual_rad": -0.08727071196528623, "max_tracking_error_rad": 0.0005000881204388183, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 34.00000000001146, "trial": 0, "joint": "gripper", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 36.0000000000068, "trial": 0, "joint": "gripper", "target_rad": 0.0, "actual_rad": -4.240302612176164e-06, "max_tracking_error_rad": 0.0005001165018675902, "warnings": 0}
+{"event": "trial_reset", "simulated_time_s": 0.0, "qpos": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "ctrl": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"event": "phase_start", "simulated_time_s": 0.0, "trial": 1, "joint": "shoulder_pan", "target_rad": 0.95993}
+{"event": "phase_end", "simulated_time_s": 1.9999999999998905, "trial": 1, "joint": "shoulder_pan", "target_rad": 0.95993, "actual_rad": 0.9599299999999998, "max_tracking_error_rad": 0.0005001165018271455, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 1.9999999999998905, "trial": 1, "joint": "shoulder_pan", "target_rad": -0.95993}
+{"event": "phase_end", "simulated_time_s": 3.9999999999996705, "trial": 1, "joint": "shoulder_pan", "target_rad": -0.95993, "actual_rad": -0.9599300000000034, "max_tracking_error_rad": 0.000500116501238667, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 3.9999999999996705, "trial": 1, "joint": "shoulder_pan", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 6.000000000000338, "trial": 1, "joint": "shoulder_pan", "target_rad": 0.0, "actual_rad": -1.773507994137843e-16, "max_tracking_error_rad": 0.0005001165018299088, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 6.000000000000338, "trial": 1, "joint": "shoulder_lift", "target_rad": 0.87266465}
+{"event": "phase_end", "simulated_time_s": 8.000000000001005, "trial": 1, "joint": "shoulder_lift", "target_rad": 0.87266465, "actual_rad": 0.8732815232167135, "max_tracking_error_rad": 0.0006168732167134428, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 8.000000000001005, "trial": 1, "joint": "shoulder_lift", "target_rad": -0.87266465}
+{"event": "phase_end", "simulated_time_s": 9.999999999999897, "trial": 1, "joint": "shoulder_lift", "target_rad": -0.87266465, "actual_rad": -0.8726389109948829, "max_tracking_error_rad": 0.00026048890105151125, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 9.999999999999897, "trial": 1, "joint": "shoulder_lift", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 11.999999999998789, "trial": 1, "joint": "shoulder_lift", "target_rad": 0.0, "actual_rad": 0.0005001165023830919, "max_tracking_error_rad": 0.0005001165023830919, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 11.999999999998789, "trial": 1, "joint": "elbow_flex", "target_rad": 0.845}
+{"event": "phase_end", "simulated_time_s": 13.99999999999768, "trial": 1, "joint": "elbow_flex", "target_rad": 0.845, "actual_rad": 0.8452905844893307, "max_tracking_error_rad": 0.0003685724536865798, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 13.99999999999768, "trial": 1, "joint": "elbow_flex", "target_rad": -0.845}
+{"event": "phase_end", "simulated_time_s": 15.999999999996572, "trial": 1, "joint": "elbow_flex", "target_rad": -0.845, "actual_rad": -0.8447303063464301, "max_tracking_error_rad": 0.000347675051902993, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 15.999999999996572, "trial": 1, "joint": "elbow_flex", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 17.999999999999016, "trial": 1, "joint": "elbow_flex", "target_rad": 0.0, "actual_rad": 0.0004220796364607946, "max_tracking_error_rad": 0.0005001165015933078, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 17.999999999999016, "trial": 1, "joint": "wrist_flex", "target_rad": 0.8290315}
+{"event": "phase_end", "simulated_time_s": 20.00000000000146, "trial": 1, "joint": "wrist_flex", "target_rad": 0.8290315, "actual_rad": 0.8291214891472453, "max_tracking_error_rad": 0.0004585276282578247, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 20.00000000000146, "trial": 1, "joint": "wrist_flex", "target_rad": -0.8290315}
+{"event": "phase_end", "simulated_time_s": 22.000000000003904, "trial": 1, "joint": "wrist_flex", "target_rad": -0.8290315, "actual_rad": -0.8289437267031405, "max_tracking_error_rad": 0.00045631090320373286, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 22.000000000003904, "trial": 1, "joint": "wrist_flex", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 24.00000000000635, "trial": 1, "joint": "wrist_flex", "target_rad": 0.0, "actual_rad": 0.0001315615318996224, "max_tracking_error_rad": 0.000500116501110488, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 24.00000000000635, "trial": 1, "joint": "wrist_roll", "target_rad": 1.42060315}
+{"event": "phase_end", "simulated_time_s": 26.000000000008793, "trial": 1, "joint": "wrist_roll", "target_rad": 1.42060315, "actual_rad": 1.4206028329430096, "max_tracking_error_rad": 0.0005001183498929922, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 26.000000000008793, "trial": 1, "joint": "wrist_roll", "target_rad": -1.37192365}
+{"event": "phase_end", "simulated_time_s": 28.000000000011237, "trial": 1, "joint": "wrist_roll", "target_rad": -1.37192365, "actual_rad": -1.3719239308698485, "max_tracking_error_rad": 0.0005001147752024039, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 28.000000000011237, "trial": 1, "joint": "wrist_roll", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 30.00000000001368, "trial": 1, "joint": "wrist_roll", "target_rad": 0.0, "actual_rad": -1.7207011709616553e-06, "max_tracking_error_rad": 0.0005001165018238171, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 30.00000000001368, "trial": 1, "joint": "gripper", "target_rad": 0.8726646}
+{"event": "phase_end", "simulated_time_s": 32.00000000001612, "trial": 1, "joint": "gripper", "target_rad": 0.8726646, "actual_rad": 0.8726617671581441, "max_tracking_error_rad": 0.000498706797777708, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 32.00000000001612, "trial": 1, "joint": "gripper", "target_rad": -0.0872665}
+{"event": "phase_end", "simulated_time_s": 34.00000000001146, "trial": 1, "joint": "gripper", "target_rad": -0.0872665, "actual_rad": -0.08727071196528623, "max_tracking_error_rad": 0.0005000881204388183, "warnings": 0}
+{"event": "phase_start", "simulated_time_s": 34.00000000001146, "trial": 1, "joint": "gripper", "target_rad": 0.0}
+{"event": "phase_end", "simulated_time_s": 36.0000000000068, "trial": 1, "joint": "gripper", "target_rad": 0.0, "actual_rad": -4.240302612176164e-06, "max_tracking_error_rad": 0.0005001165018675902, "warnings": 0}
+{"event": "complete", "simulated_time_s": 36.0000000000068, "qpos": [3.398002136778793e-17, 0.0005001165018675902, 0.00042207963665825656, 0.00013156153210297213, -1.7207011711155414e-06, -4.240302612176164e-06], "ctrl": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+{"event": "R_reset_requested", "simulated_time_s": 36.0000000000068}
+{"event": "reset", "simulated_time_s": 0.0, "qpos": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "ctrl": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}

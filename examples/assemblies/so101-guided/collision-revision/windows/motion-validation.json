@@ -1,0 +1,579 @@
+{
+  "scope": "Fixed-root assembly motion smoke check; not calibrated dynamics or reconstruction accuracy",
+  "viewer_inspected": false,
+  "environment": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4"
+  },
+  "tracking_tolerance_rad": 0.03,
+  "phase_duration_s": 2.0,
+  "original": {
+    "passed": true,
+    "checks": {
+      "reviewed_model_consistency": true,
+      "actual_joint_motion": true,
+      "tracking": true,
+      "joint_limits": true,
+      "reset_repeatable": true,
+      "no_warnings": true
+    },
+    "trials": [
+      {
+        "phases": [
+          {
+            "joint": "shoulder_pan",
+            "target_rad": 0.95993,
+            "actual_rad": 0.9599299999999998,
+            "max_all_joint_tracking_error_rad": 0.0005001165018271455,
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "shoulder_pan",
+            "target_rad": -0.95993,
+            "actual_rad": -0.9599300000000034,
+            "max_all_joint_tracking_error_rad": 0.000500116501238667,
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "shoulder_pan",
+            "target_rad": 0.0,
+            "actual_rad": -1.773507994137843e-16,
+            "max_all_joint_tracking_error_rad": 0.0005001165018299088,
+            "simulated_time_s": 6.000000000000338
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": 0.87266465,
+            "actual_rad": 0.8732815232167135,
+            "max_all_joint_tracking_error_rad": 0.0006168732167134428,
+            "simulated_time_s": 8.000000000001005
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": -0.87266465,
+            "actual_rad": -0.8726389109948829,
+            "max_all_joint_tracking_error_rad": 0.00026048890105151125,
+            "simulated_time_s": 9.999999999999897
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": 0.0,
+            "actual_rad": 0.0005001165023830919,
+            "max_all_joint_tracking_error_rad": 0.0005001165023830919,
+            "simulated_time_s": 11.999999999998789
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": 0.845,
+            "actual_rad": 0.8452905844893307,
+            "max_all_joint_tracking_error_rad": 0.0003685724536865798,
+            "simulated_time_s": 13.99999999999768
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": -0.845,
+            "actual_rad": -0.8447303063464301,
+            "max_all_joint_tracking_error_rad": 0.000347675051902993,
+            "simulated_time_s": 15.999999999996572
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": 0.0,
+            "actual_rad": 0.0004220796364607946,
+            "max_all_joint_tracking_error_rad": 0.0005001165015933078,
+            "simulated_time_s": 17.999999999999016
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": 0.8290315,
+            "actual_rad": 0.8291214891472453,
+            "max_all_joint_tracking_error_rad": 0.0004585276282578247,
+            "simulated_time_s": 20.00000000000146
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": -0.8290315,
+            "actual_rad": -0.8289437267031405,
+            "max_all_joint_tracking_error_rad": 0.00045631090320373286,
+            "simulated_time_s": 22.000000000003904
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": 0.0,
+            "actual_rad": 0.0001315615318996224,
+            "max_all_joint_tracking_error_rad": 0.000500116501110488,
+            "simulated_time_s": 24.00000000000635
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": 1.42060315,
+            "actual_rad": 1.4206028329430096,
+            "max_all_joint_tracking_error_rad": 0.0005001183498929922,
+            "simulated_time_s": 26.000000000008793
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": -1.37192365,
+            "actual_rad": -1.3719239308698485,
+            "max_all_joint_tracking_error_rad": 0.0005001147752024039,
+            "simulated_time_s": 28.000000000011237
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": 0.0,
+            "actual_rad": -1.7207011709616553e-06,
+            "max_all_joint_tracking_error_rad": 0.0005001165018238171,
+            "simulated_time_s": 30.00000000001368
+          },
+          {
+            "joint": "gripper",
+            "target_rad": 0.8726646,
+            "actual_rad": 0.8726617671581441,
+            "max_all_joint_tracking_error_rad": 0.000498706797777708,
+            "simulated_time_s": 32.00000000001612
+          },
+          {
+            "joint": "gripper",
+            "target_rad": -0.0872665,
+            "actual_rad": -0.08727071196528623,
+            "max_all_joint_tracking_error_rad": 0.0005000881204388183,
+            "simulated_time_s": 34.00000000001146
+          },
+          {
+            "joint": "gripper",
+            "target_rad": 0.0,
+            "actual_rad": -4.240302612176164e-06,
+            "max_all_joint_tracking_error_rad": 0.0005001165018675902,
+            "simulated_time_s": 36.0000000000068
+          }
+        ],
+        "simulated_duration_s": 36.0000000000068
+      },
+      {
+        "phases": [
+          {
+            "joint": "shoulder_pan",
+            "target_rad": 0.95993,
+            "actual_rad": 0.9599299999999998,
+            "max_all_joint_tracking_error_rad": 0.0005001165018271455,
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "shoulder_pan",
+            "target_rad": -0.95993,
+            "actual_rad": -0.9599300000000034,
+            "max_all_joint_tracking_error_rad": 0.000500116501238667,
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "shoulder_pan",
+            "target_rad": 0.0,
+            "actual_rad": -1.773507994137843e-16,
+            "max_all_joint_tracking_error_rad": 0.0005001165018299088,
+            "simulated_time_s": 6.000000000000338
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": 0.87266465,
+            "actual_rad": 0.8732815232167135,
+            "max_all_joint_tracking_error_rad": 0.0006168732167134428,
+            "simulated_time_s": 8.000000000001005
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": -0.87266465,
+            "actual_rad": -0.8726389109948829,
+            "max_all_joint_tracking_error_rad": 0.00026048890105151125,
+            "simulated_time_s": 9.999999999999897
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": 0.0,
+            "actual_rad": 0.0005001165023830919,
+            "max_all_joint_tracking_error_rad": 0.0005001165023830919,
+            "simulated_time_s": 11.999999999998789
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": 0.845,
+            "actual_rad": 0.8452905844893307,
+            "max_all_joint_tracking_error_rad": 0.0003685724536865798,
+            "simulated_time_s": 13.99999999999768
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": -0.845,
+            "actual_rad": -0.8447303063464301,
+            "max_all_joint_tracking_error_rad": 0.000347675051902993,
+            "simulated_time_s": 15.999999999996572
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": 0.0,
+            "actual_rad": 0.0004220796364607946,
+            "max_all_joint_tracking_error_rad": 0.0005001165015933078,
+            "simulated_time_s": 17.999999999999016
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": 0.8290315,
+            "actual_rad": 0.8291214891472453,
+            "max_all_joint_tracking_error_rad": 0.0004585276282578247,
+            "simulated_time_s": 20.00000000000146
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": -0.8290315,
+            "actual_rad": -0.8289437267031405,
+            "max_all_joint_tracking_error_rad": 0.00045631090320373286,
+            "simulated_time_s": 22.000000000003904
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": 0.0,
+            "actual_rad": 0.0001315615318996224,
+            "max_all_joint_tracking_error_rad": 0.000500116501110488,
+            "simulated_time_s": 24.00000000000635
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": 1.42060315,
+            "actual_rad": 1.4206028329430096,
+            "max_all_joint_tracking_error_rad": 0.0005001183498929922,
+            "simulated_time_s": 26.000000000008793
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": -1.37192365,
+            "actual_rad": -1.3719239308698485,
+            "max_all_joint_tracking_error_rad": 0.0005001147752024039,
+            "simulated_time_s": 28.000000000011237
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": 0.0,
+            "actual_rad": -1.7207011709616553e-06,
+            "max_all_joint_tracking_error_rad": 0.0005001165018238171,
+            "simulated_time_s": 30.00000000001368
+          },
+          {
+            "joint": "gripper",
+            "target_rad": 0.8726646,
+            "actual_rad": 0.8726617671581441,
+            "max_all_joint_tracking_error_rad": 0.000498706797777708,
+            "simulated_time_s": 32.00000000001612
+          },
+          {
+            "joint": "gripper",
+            "target_rad": -0.0872665,
+            "actual_rad": -0.08727071196528623,
+            "max_all_joint_tracking_error_rad": 0.0005000881204388183,
+            "simulated_time_s": 34.00000000001146
+          },
+          {
+            "joint": "gripper",
+            "target_rad": 0.0,
+            "actual_rad": -4.240302612176164e-06,
+            "max_all_joint_tracking_error_rad": 0.0005001165018675902,
+            "simulated_time_s": 36.0000000000068
+          }
+        ],
+        "simulated_duration_s": 36.0000000000068
+      }
+    ],
+    "reset_repeatable": true,
+    "warnings": 0,
+    "python_warnings": [],
+    "max_tracking_error_rad": 0.0006168732167134428,
+    "max_limit_violation_rad": 0.0,
+    "timestep_s": 0.001,
+    "steps_per_phase": 2000,
+    "synthetic": false,
+    "wall_time_s": 7.372158899997885
+  },
+  "relocated": {
+    "passed": true,
+    "checks": {
+      "reviewed_model_consistency": true,
+      "actual_joint_motion": true,
+      "tracking": true,
+      "joint_limits": true,
+      "reset_repeatable": true,
+      "no_warnings": true
+    },
+    "trials": [
+      {
+        "phases": [
+          {
+            "joint": "shoulder_pan",
+            "target_rad": 0.95993,
+            "actual_rad": 0.9599299999999998,
+            "max_all_joint_tracking_error_rad": 0.0005001165018271455,
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "shoulder_pan",
+            "target_rad": -0.95993,
+            "actual_rad": -0.9599300000000034,
+            "max_all_joint_tracking_error_rad": 0.000500116501238667,
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "shoulder_pan",
+            "target_rad": 0.0,
+            "actual_rad": -1.773507994137843e-16,
+            "max_all_joint_tracking_error_rad": 0.0005001165018299088,
+            "simulated_time_s": 6.000000000000338
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": 0.87266465,
+            "actual_rad": 0.8732815232167135,
+            "max_all_joint_tracking_error_rad": 0.0006168732167134428,
+            "simulated_time_s": 8.000000000001005
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": -0.87266465,
+            "actual_rad": -0.8726389109948829,
+            "max_all_joint_tracking_error_rad": 0.00026048890105151125,
+            "simulated_time_s": 9.999999999999897
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": 0.0,
+            "actual_rad": 0.0005001165023830919,
+            "max_all_joint_tracking_error_rad": 0.0005001165023830919,
+            "simulated_time_s": 11.999999999998789
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": 0.845,
+            "actual_rad": 0.8452905844893307,
+            "max_all_joint_tracking_error_rad": 0.0003685724536865798,
+            "simulated_time_s": 13.99999999999768
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": -0.845,
+            "actual_rad": -0.8447303063464301,
+            "max_all_joint_tracking_error_rad": 0.000347675051902993,
+            "simulated_time_s": 15.999999999996572
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": 0.0,
+            "actual_rad": 0.0004220796364607946,
+            "max_all_joint_tracking_error_rad": 0.0005001165015933078,
+            "simulated_time_s": 17.999999999999016
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": 0.8290315,
+            "actual_rad": 0.8291214891472453,
+            "max_all_joint_tracking_error_rad": 0.0004585276282578247,
+            "simulated_time_s": 20.00000000000146
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": -0.8290315,
+            "actual_rad": -0.8289437267031405,
+            "max_all_joint_tracking_error_rad": 0.00045631090320373286,
+            "simulated_time_s": 22.000000000003904
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": 0.0,
+            "actual_rad": 0.0001315615318996224,
+            "max_all_joint_tracking_error_rad": 0.000500116501110488,
+            "simulated_time_s": 24.00000000000635
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": 1.42060315,
+            "actual_rad": 1.4206028329430096,
+            "max_all_joint_tracking_error_rad": 0.0005001183498929922,
+            "simulated_time_s": 26.000000000008793
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": -1.37192365,
+            "actual_rad": -1.3719239308698485,
+            "max_all_joint_tracking_error_rad": 0.0005001147752024039,
+            "simulated_time_s": 28.000000000011237
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": 0.0,
+            "actual_rad": -1.7207011709616553e-06,
+            "max_all_joint_tracking_error_rad": 0.0005001165018238171,
+            "simulated_time_s": 30.00000000001368
+          },
+          {
+            "joint": "gripper",
+            "target_rad": 0.8726646,
+            "actual_rad": 0.8726617671581441,
+            "max_all_joint_tracking_error_rad": 0.000498706797777708,
+            "simulated_time_s": 32.00000000001612
+          },
+          {
+            "joint": "gripper",
+            "target_rad": -0.0872665,
+            "actual_rad": -0.08727071196528623,
+            "max_all_joint_tracking_error_rad": 0.0005000881204388183,
+            "simulated_time_s": 34.00000000001146
+          },
+          {
+            "joint": "gripper",
+            "target_rad": 0.0,
+            "actual_rad": -4.240302612176164e-06,
+            "max_all_joint_tracking_error_rad": 0.0005001165018675902,
+            "simulated_time_s": 36.0000000000068
+          }
+        ],
+        "simulated_duration_s": 36.0000000000068
+      },
+      {
+        "phases": [
+          {
+            "joint": "shoulder_pan",
+            "target_rad": 0.95993,
+            "actual_rad": 0.9599299999999998,
+            "max_all_joint_tracking_error_rad": 0.0005001165018271455,
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "shoulder_pan",
+            "target_rad": -0.95993,
+            "actual_rad": -0.9599300000000034,
+            "max_all_joint_tracking_error_rad": 0.000500116501238667,
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "shoulder_pan",
+            "target_rad": 0.0,
+            "actual_rad": -1.773507994137843e-16,
+            "max_all_joint_tracking_error_rad": 0.0005001165018299088,
+            "simulated_time_s": 6.000000000000338
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": 0.87266465,
+            "actual_rad": 0.8732815232167135,
+            "max_all_joint_tracking_error_rad": 0.0006168732167134428,
+            "simulated_time_s": 8.000000000001005
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": -0.87266465,
+            "actual_rad": -0.8726389109948829,
+            "max_all_joint_tracking_error_rad": 0.00026048890105151125,
+            "simulated_time_s": 9.999999999999897
+          },
+          {
+            "joint": "shoulder_lift",
+            "target_rad": 0.0,
+            "actual_rad": 0.0005001165023830919,
+            "max_all_joint_tracking_error_rad": 0.0005001165023830919,
+            "simulated_time_s": 11.999999999998789
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": 0.845,
+            "actual_rad": 0.8452905844893307,
+            "max_all_joint_tracking_error_rad": 0.0003685724536865798,
+            "simulated_time_s": 13.99999999999768
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": -0.845,
+            "actual_rad": -0.8447303063464301,
+            "max_all_joint_tracking_error_rad": 0.000347675051902993,
+            "simulated_time_s": 15.999999999996572
+          },
+          {
+            "joint": "elbow_flex",
+            "target_rad": 0.0,
+            "actual_rad": 0.0004220796364607946,
+            "max_all_joint_tracking_error_rad": 0.0005001165015933078,
+            "simulated_time_s": 17.999999999999016
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": 0.8290315,
+            "actual_rad": 0.8291214891472453,
+            "max_all_joint_tracking_error_rad": 0.0004585276282578247,
+            "simulated_time_s": 20.00000000000146
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": -0.8290315,
+            "actual_rad": -0.8289437267031405,
+            "max_all_joint_tracking_error_rad": 0.00045631090320373286,
+            "simulated_time_s": 22.000000000003904
+          },
+          {
+            "joint": "wrist_flex",
+            "target_rad": 0.0,
+            "actual_rad": 0.0001315615318996224,
+            "max_all_joint_tracking_error_rad": 0.000500116501110488,
+            "simulated_time_s": 24.00000000000635
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": 1.42060315,
+            "actual_rad": 1.4206028329430096,
+            "max_all_joint_tracking_error_rad": 0.0005001183498929922,
+            "simulated_time_s": 26.000000000008793
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": -1.37192365,
+            "actual_rad": -1.3719239308698485,
+            "max_all_joint_tracking_error_rad": 0.0005001147752024039,
+            "simulated_time_s": 28.000000000011237
+          },
+          {
+            "joint": "wrist_roll",
+            "target_rad": 0.0,
+            "actual_rad": -1.7207011709616553e-06,
+            "max_all_joint_tracking_error_rad": 0.0005001165018238171,
+            "simulated_time_s": 30.00000000001368
+          },
+          {
+            "joint": "gripper",
+            "target_rad": 0.8726646,
+            "actual_rad": 0.8726617671581441,
+            "max_all_joint_tracking_error_rad": 0.000498706797777708,
+            "simulated_time_s": 32.00000000001612
+          },
+          {
+            "joint": "gripper",
+            "target_rad": -0.0872665,
+            "actual_rad": -0.08727071196528623,
+            "max_all_joint_tracking_error_rad": 0.0005000881204388183,
+            "simulated_time_s": 34.00000000001146
+          },
+          {
+            "joint": "gripper",
+            "target_rad": 0.0,
+            "actual_rad": -4.240302612176164e-06,
+            "max_all_joint_tracking_error_rad": 0.0005001165018675902,
+            "simulated_time_s": 36.0000000000068
+          }
+        ],
+        "simulated_duration_s": 36.0000000000068
+      }
+    ],
+    "reset_repeatable": true,
+    "warnings": 0,
+    "python_warnings": [],
+    "max_tracking_error_rad": 0.0006168732167134428,
+    "max_limit_violation_rad": 0.0,
+    "timestep_s": 0.001,
+    "steps_per_phase": 2000,
+    "synthetic": false,
+    "wall_time_s": 7.5225774999998976
+  },
+  "passed": true
+}

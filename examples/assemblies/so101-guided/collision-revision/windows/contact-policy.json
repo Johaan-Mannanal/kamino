@@ -1,0 +1,115 @@
+{
+  "scope": "Compiled model/XML policy check, not all-configuration contact proof",
+  "root_position_m": [
+    0.0,
+    0.0,
+    0.15
+  ],
+  "disableflags": 0,
+  "excluded_pairs": [
+    [
+      "base",
+      "shoulder"
+    ],
+    [
+      "gripper",
+      "moving_jaw_so101_v1"
+    ],
+    [
+      "gripper",
+      "wrist"
+    ],
+    [
+      "lower_arm",
+      "upper_arm"
+    ],
+    [
+      "lower_arm",
+      "wrist"
+    ],
+    [
+      "shoulder",
+      "upper_arm"
+    ]
+  ],
+  "exactly_joint_adjacent_exclusions": true,
+  "compiled_exclusions_count": 6,
+  "nonadjacent_explicitly_excluded": false,
+  "collision_geoms": [
+    {
+      "name": "ground",
+      "type": 0,
+      "body": "world",
+      "contype": 1,
+      "conaffinity": 1,
+      "group": 0,
+      "mesh_graphadr": null
+    },
+    {
+      "name": "collision_base",
+      "type": 7,
+      "body": "base",
+      "contype": 1,
+      "conaffinity": 1,
+      "group": 3,
+      "mesh_graphadr": 0
+    },
+    {
+      "name": "collision_shoulder",
+      "type": 7,
+      "body": "shoulder",
+      "contype": 1,
+      "conaffinity": 1,
+      "group": 3,
+      "mesh_graphadr": 24608
+    },
+    {
+      "name": "collision_upper_arm",
+      "type": 7,
+      "body": "upper_arm",
+      "contype": 1,
+      "conaffinity": 1,
+      "group": 3,
+      "mesh_graphadr": 127786
+    },
+    {
+      "name": "collision_lower_arm",
+      "type": 7,
+      "body": "lower_arm",
+      "contype": 1,
+      "conaffinity": 1,
+      "group": 3,
+      "mesh_graphadr": 277704
+    },
+    {
+      "name": "collision_wrist",
+      "type": 7,
+      "body": "wrist",
+      "contype": 1,
+      "conaffinity": 1,
+      "group": 3,
+      "mesh_graphadr": 381497
+    },
+    {
+      "name": "collision_gripper",
+      "type": 7,
+      "body": "gripper",
+      "contype": 1,
+      "conaffinity": 1,
+      "group": 3,
+      "mesh_graphadr": 539905
+    },
+    {
+      "name": "collision_moving_jaw_so101_v1",
+      "type": 7,
+      "body": "moving_jaw_so101_v1",
+      "contype": 1,
+      "conaffinity": 1,
+      "group": 3,
+      "mesh_graphadr": 614268
+    }
+  ],
+  "ground_and_collision_masks_enabled": true,
+  "all_link_collisions_mesh_hulls": true,
+  "archive_sha256": "ec1b90f25740e806c24ad1e871c1bb364abc33584f58b1de74d8e8900e175eda"
+}
