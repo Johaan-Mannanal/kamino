@@ -3,18 +3,20 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dummy-assembly"
+name = "photo2sim"
 version = "0.0.1"
-description = "DUMMY: an SO-101 robotic assembly assistant"
+description = "Photo2Sim: photos to editable MuJoCo simulation assets"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["fastapi", "uvicorn", "pydantic>=2,<3"]
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
+simulation = ["mujoco", "trimesh", "numpy"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["photo2sim*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,74 +1,101 @@
-# DUMMY
+# Photo2Sim
 
-A robotic assembly assistant built with an SO-101 leader/follower arm for Cal Hacks 13.0.
+Turn photos of real objects into editable MuJoCo simulation assets. Built for Cal Hacks 13.0.
 
-**Goal:** describe a supported assembly, validate the plan, and assemble purpose-designed 3D-printed parts using reusable robot skills.
+**Goal:** demonstrate two objects going from photos to downloadable simulation scenes, with confirmed dimensions, documented physical assumptions, collision geometry, and basic simulation checks.
+
+**Workflow:** Photos → generated mesh → scale and property confirmation → collision geometry → simulation validation → downloadable scene.
 
 ## Start here
 
-- **Share Markdown files:** upload them to [docs/team-notes/](docs/team-notes/). Use GitHub's **Add file → Upload files**, or commit locally.
-- **Build scope and milestones:** [Project plan](docs/PROJECT.md).
-- **Ownership and collaboration:** [Contributing](CONTRIBUTING.md).
-- **Physical designs:** [Hardware workspace](hardware/README.md).
+- [Ordered project phases](docs/PROJECT.md): scope, task list, and acceptance criteria.
+- [Sponsor targets](docs/SPONSORS.md): Fetch.ai, Vultr, and Gemini API.
+- [Shared Markdown folder](docs/team-notes/): upload context, research, and handoffs.
+- [Working together](CONTRIBUTING.md): branches, interfaces, and cross-computer handoffs.
+- [Capture workspace](hardware/README.md): photography and reference measurements.
 
 ## Current status
 
-Reported working on the hardware laptop: calibration, teleoperation, demonstration recording, and trajectory replay. These have not been verified from this repository.
+The shared repository is a scaffold. Reconstruction, simulation export, the application, and sponsor integrations still need implementation. Completed files on a teammate's branch are not automatically part of `main`.
 
-This repository provides the shared structure and Python package scaffold. The planner, validator, robot executor, web interface, and Fetch integration are not implemented yet.
+The Windows handoff reports working wrist-camera capture. Image sharpness at task distances still needs evaluation. Any useful camera may supply object photos; physical arm control is optional. See the [pivot decision](docs/decisions/2026-10-23-photo-to-simulation.md).
+
+## Basic infrastructure
+
+| Component | Planned tool / responsibility |
+| --- | --- |
+| Reconstruction | Meshy multi-image API; API access and credits must be confirmed |
+| Geometry | trimesh and NumPy: inspection, orientation, scaling, collision proxies |
+| Simulation | MuJoCo Python and its native viewer |
+| Backend | FastAPI and Pydantic, with a background job worker |
+| Storage | Local asset files and SQLite for job state initially |
+| Interface | Uploads, progress, editable properties, preview, export |
+| AI assistance | Gemini: suggestions and requests for missing measurements |
+| Agent / hosting | Fetch workflow integration; Vultr for actual hosting or processing |
+
+Geometry generation does not establish physical accuracy. Measured values and assumptions must be distinguishable. A scene passing loading/contact checks is not proof of successful policy training or transfer to hardware.
 
 ## Layout
 
 ```text
 docs/
-  PROJECT.md          Scope, ownership, integration contract, milestones
-  team-notes/         Upload Markdown context, research, and handoffs here
-  decisions/          Short records of agreed decisions
-hardware/
-  cad/                Editable CAD sources
-  prints/             STL/3MF exports and print notes
-src/dummy/
-  planning/           World model, planner, validation — Johaan
-  robot/              LeRobot adapter, skills, motion execution — Srijan
-  web/                API, interface, execution status — Atul
-tests/                Planner, validation, integration tests as code arrives
+  PROJECT.md          Ordered phases and acceptance criteria
+  SPONSORS.md         Sponsor integrations and regular award targets
+  team-notes/         Shared Markdown uploads and handoffs
+  decisions/          Agreed changes in direction
+src/photo2sim/
+  assets/             Reconstruction, asset metadata, geometry preparation
+  simulation/         MuJoCo export and validation
+  integrations/       Gemini, Fetch, and provider adapters
+  web/                API, interface, background jobs, status
+tools/simulation/     Standalone simulation checks and helper commands
+examples/simulation/  Small portable scenes and test fixtures
+hardware/             Capture fixtures and measurements
+tests/                Automated checks as implementation arrives
 ```
 
 ## Python setup
 
-Use **Python 3.12**, matching the reported working hardware environment.
+Use **Python 3.12** in a dedicated `.venv-sim`. Preserve the working Windows LeRobot environment separately.
 
 macOS/Linux:
 
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e '.[dev]'
-cp .env.example .env
+python3.12 -m venv .venv-sim
+source .venv-sim/bin/activate
+python -m pip install -e '.[dev,simulation]'
 ```
 
 Windows PowerShell:
 
 ```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
-Copy-Item .env.example .env
+py -3.12 -m venv .venv-sim
+.\.venv-sim\Scripts\python.exe -m pip install -e ".[dev,simulation]"
 ```
 
-The starter dependencies are FastAPI, Uvicorn, and Pydantic; development tools are pytest and Ruff. There is no runnable server yet. Environment variables are placeholders; loading `.env` will need to be implemented with the application.
-
-**Hardware laptop:** keep the working LeRobot environment. Record its Python version, LeRobot commit, and installed dependencies before changing it. LeRobot is intentionally not installed by this scaffold. Srijan owns connecting the executor to that environment.
+For backend/docs-only work, install `.[dev]` instead. Copy `.env.example` to `.env` only if you do not already have a local configuration. The configuration keys are planned placeholders; there is no runnable server or automatic `.env` loader yet.
 
 ## Checks
 
-After installing the development tools:
+Run with the active environment, or use `.\.venv-sim\Scripts\python.exe` explicitly on Windows:
 
 ```bash
 python -m ruff check .
 python -m ruff format --check .
-python -m pytest
+python -c "import photo2sim"
 ```
 
-No tests exist yet; pytest will report no tests until the first implementation lands. CI runs lint and format checks for now.
+Once implementation tests exist, run `python -m pytest`. There are no automated tests yet; CI currently checks lint, formatting, and package import on Python 3.12.
 
-Keep API keys in your local `.env`. Keep recordings, checkpoints, and videos outside Git; share their locations in team notes.
+Keep API keys in `.env`. Store generated assets, large captures, and local databases under ignored `artifacts/`, `outputs/`, or `data/`. Commit only small intentional example fixtures with their provenance.
+
+## Existing clones after the rename
+
+The GitHub repository is now `Johaan-Mannanal/photo2sim`. Your existing local directory can retain its name, including the Windows `calhacks-arm` directory.
+
+```bash
+git remote set-url origin https://github.com/Johaan-Mannanal/photo2sim.git
+git fetch origin
+```
+
+Preserve uncommitted work and coordinate integration on your existing branch. The scaffold's import name changed from `dummy` to `photo2sim`; update any new imports accordingly.

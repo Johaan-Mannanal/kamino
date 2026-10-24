@@ -1,15 +1,8 @@
 # Working together
 
-## Ownership
+## Coordination
 
-| Person | Primary ownership |
-| --- | --- |
-| Yash | `hardware/`: CAD, printing, fixtures, hardware reliability |
-| Srijan | `src/dummy/robot/`: LeRobot integration, skills, transitions, stop behavior |
-| Johaan | `src/dummy/planning/`: world model, planner, validator, Fetch integration |
-| Atul | `src/dummy/web/`: API, interface, execution status, integration and trial logging |
-
-Ownership coordinates work; tell the owner before changing a shared interface. Preserve other people's work.
+Choose a scoped task from [the ordered phases](docs/PROJECT.md) and announce the files you are changing. Coordinate shared interfaces and preserve other people's work. Responsibilities are intentionally unassigned for now.
 
 ## Share context
 
@@ -20,12 +13,16 @@ Keep agreed decisions in `docs/decisions/`. Summarize relevant changes in `docs/
 ## Code workflow
 
 1. Pull the latest `main` before starting; do not discard local changes.
-2. Use a short branch such as `codex/planner`, `robot/skills`, or `hardware/fixture`.
+2. Use a short branch such as `codex/reconstruction`, `codex/simulation`, or `codex/upload-ui`.
 3. Keep commits focused. Open a PR with the behavior changed and checks performed.
-4. Coordinate shared changes to `pyproject.toml`, the action contract, and the README.
+4. Coordinate shared changes to `pyproject.toml`, the asset schema, and the README.
 
-Test planning with a mock executor. Only Srijan's executor should command the arm; the LLM must not produce raw servo commands. Test physical motion with someone present and a clear way to stop it.
+Use mock reconstruction jobs and small synthetic fixtures to develop independently. Label synthetic fixtures and cached outputs. Verify API failures, unit conversion, invalid property values, scene loading, and portable exports as their implementations arrive.
+
+Use `.venv-sim` for simulation development. Keep the existing LeRobot environment intact. Generated assets and job databases belong under ignored directories; small deliberate examples belong in `examples/simulation/`.
 
 ## Handoff
 
-Leave a team note with your branch, what works, the exact run command, blockers, and the next action. For physical trials, record configuration, attempts, successes, and failure causes. Distinguish simulated, operator-confirmed, and physically verified results.
+Leave a team note with your branch, full commit SHA, push status, environment versions, changed files, exact run commands, results, blockers, and next action. Report headless simulation and viewer checks separately. Record measurements separately from AI suggestions and assumptions.
+
+A local file path does not transfer a file to another computer. Push needed code and small fixtures, and explicitly share larger artifacts. After the repository rename, update `origin` to `https://github.com/Johaan-Mannanal/photo2sim.git`; the local folder name may stay unchanged.

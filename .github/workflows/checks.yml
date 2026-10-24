@@ -19,3 +19,5 @@ jobs:
         run: python -m ruff check .
       - name: Format
         run: python -m ruff format --check .
+      - name: Verify package import
+        run: python -c "import photo2sim"
