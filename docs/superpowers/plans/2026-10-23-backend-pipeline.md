@@ -1,0 +1,57 @@
+# Backend Pipeline Implementation Plan
+
+> **For agentic workers:** Execute inline in this chat using the agreed project scope and test-first implementation.
+
+**Goal:** Publish shared contracts and deliver persistent photo-upload/reconstruction jobs that teammates can build against.
+
+**Architecture:** FastAPI exposes typed job endpoints. SQLite persists records; job-relative local files preserve uploads and downloaded meshes. A bounded in-process executor runs either an explicitly synthetic mock provider or the Meshy adapter. Asset preparation and export stay at documented integration boundaries until teammate implementations arrive.
+
+**Tech Stack:** Python 3.12+, FastAPI, Pydantic, SQLite, HTTPX, Pillow, pytest.
+
+**Spec:** `docs/PROJECT.md` and `docs/API.md`; user authorized implementation here and separate teammate branches.
+
+## Global constraints
+
+- Preserve other branches, camera work, and the Windows LeRobot environment.
+- Dimensions use metres/full extents; mass uses kilograms; properties retain provenance.
+- Default to mock; real Meshy execution requires an explicit provider setting and key.
+- Scope: shared contracts, upload/jobs/properties API, reconstruction adapters, documentation and handoffs. No premature integration of unfinished geometry/export/UI work.
+
+## Review focus
+
+- Malformed/oversized uploads produce no queued job.
+- Job IDs and file paths cannot escape the artifact directory.
+- Restart recovery never silently resubmits a possibly paid generation.
+- Provider failures do not expose credentials or discard saved uploads/task IDs.
+- Unknown properties and synthetic data remain visibly identified.
+
+### Task 1: Shared contracts and teammate handoffs
+
+Files: `src/photo2sim/contracts.py`, `tests/test_contracts.py`, `docs/API.md`, `docs/handoffs/`.
+
+Produces: AssetProperties, AssetRecord, JobRecord and the exact boundaries in API.md.
+
+- [ ] Write and run failing tests for property validation, portable paths, and provenance.
+- [ ] Implement models and publish contracts plus separate teammate instructions on the backend branch.
+- [ ] Run contract tests, lint, formatting; commit and push.
+
+### Task 2: Persistent mock backend
+
+Files: `src/photo2sim/api/{app,config,store,worker}.py`, `src/photo2sim/integrations/reconstruction.py`, `tests/test_api.py`.
+
+Consumes: shared models. Produces: create_app(settings, provider), HTTP routes in API.md, SQLite job records and preserved artifacts.
+
+- [ ] Write and run failing tests covering upload→mesh→properties, invalid inputs, file confinement, provider failure, and restart persistence.
+- [ ] Implement bounded worker execution and safe recovery without automatic paid resubmission.
+- [ ] Run the suite and commit the mock backend.
+
+### Task 3: Meshy adapter and runnable handoff
+
+Files: `src/photo2sim/integrations/meshy.py`, `tests/test_meshy.py`, README, configuration and CI.
+
+Consumes: provider submit/poll/download boundary. Produces: saved self-contained GLB, persistent task ID, actionable sanitized errors.
+
+- [ ] Write failing HTTP-transport tests using the official Meshy multi-image endpoint/payload.
+- [ ] Implement bounded polling, anonymous asset download, and preservation on failure.
+- [ ] Run all tests, lint, format, package install, and a local HTTP smoke test.
+- [ ] Publish the backend branch; report live provider execution separately from transport tests.
