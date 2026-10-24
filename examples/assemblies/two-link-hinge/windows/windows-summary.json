@@ -1,0 +1,41 @@
+{
+  "backend_commit": "d8305777ded0d762d2ecc1d1044c0c9bb26ca39f",
+  "python": "3.12.10",
+  "versions": {
+    "mujoco": "3.17.0",
+    "numpy": "2.5.4",
+    "trimesh": "5.2.0",
+    "pydantic": "2.14.1",
+    "pytest": "9.1.1"
+  },
+  "tests": {
+    "passed": 51,
+    "skipped": 1,
+    "skip_reason": "Symlink privileges unavailable"
+  },
+  "bundle_sha256": {
+    "assembly.json": "12b1d3fc6f6e899e035bbc738012dbdd1aa041c85a717411a166d23e5d89837c",
+    "scene.xml": "a95a661b31c14862d2b1d3fe670259a4775fc6a12927f74df01f8e4bc795183e",
+    "simulation.json": "52b1403b659f5eb018546c2089219918249caf124a813dd6e9eaf8343efb8485",
+    "validation.json": "eb8005ec8b1f4cb69bc369902f4da321c8830d893628eb4334f2ed427a0617b7",
+    "meshes/arm.obj": "bd90b97e8db71552f35ec7c909f58f419d3c0f0453e672f7979c57579fd3be6e",
+    "meshes/base.obj": "52e557f12cd0530f649b130c95236bca6d5ddeb060795cea5a08daac0bb546d0"
+  },
+  "separate_relocated_copy_byte_identical": true,
+  "viewer_original": {
+    "positive_drive_rad": 0.4,
+    "negative_drive_rad": -0.4,
+    "backspace_reset_drive_rad": 0,
+    "motion_visually_observed": true,
+    "collision_groups_inspected": true
+  },
+  "viewer_relocated": {
+    "positive_drive_rad": 0.4,
+    "negative_drive_rad": -0.4,
+    "backspace_reset_drive_rad": 0,
+    "motion_visually_observed": true,
+    "collision_groups_inspected": true
+  },
+  "synthetic": true,
+  "so101_reconstruction": false
+}

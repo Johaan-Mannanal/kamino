@@ -1,0 +1,4 @@
+# Preserve byte identity of archived source metadata and calibration evidence.
+hackathon_*.json -text whitespace=cr-at-eol
+first-demo-info.json -text whitespace=cr-at-eol
+reference-*/calibration.json -text whitespace=cr-at-eol
