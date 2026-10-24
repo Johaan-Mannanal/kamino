@@ -1,0 +1,42 @@
+{
+  ".gitattributes": {
+    "bytes": 30,
+    "sha256": "f06202a408fef9b9ea69bb6b1cb8160dbb0378c5bb67a444d510d231813824c8"
+  },
+  "calibration.json": {
+    "bytes": 961,
+    "sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237"
+  },
+  "capture.json": {
+    "bytes": 1691,
+    "sha256": "af32817618b4fcf3c8642daca6406aa5788c17a700c309c10cabb0f91f61fc27"
+  },
+  "hold-check-before-take5.json": {
+    "bytes": 1581,
+    "sha256": "964b5d15e5a3f0bae33c4f9b78cbd1d52a8ccddf79ab0e67de723f52b0e3fd35"
+  },
+  "observations.jsonl": {
+    "bytes": 342668,
+    "sha256": "142c56729d038dd5b69933bc09d5417e1b0eab68e72becab965b9f8b527d9c27"
+  },
+  "pairing.json": {
+    "bytes": 1165,
+    "sha256": "ff56d6774943a0865e319351fd352f8ab764e7cecc49e8eab7fbfd80c9b0637e"
+  },
+  "summary.json": {
+    "bytes": 1589,
+    "sha256": "1e377070174a3ee784236ca50c767c51a2e887e5a8f7d6a0e0bbdc9919f10fbe"
+  },
+  "photos/front.png": {
+    "bytes": 4309411,
+    "sha256": "f4f656fc76534f83d6fe8e04bea78c6f33ddb296fbff8b8c5285ec2c5f53fa7b"
+  },
+  "photos/jaw-ruler.png": {
+    "bytes": 4746255,
+    "sha256": "684100d37b06f87ac393e8ef4baebbdf325d1b5a7a68ec594993c755d01e977f"
+  },
+  "photos/side.png": {
+    "bytes": 4741468,
+    "sha256": "645a09cab4456ec9e2ac4a733f8d986b161e3f50f479b2da584fd8ac54d960e3"
+  }
+}
