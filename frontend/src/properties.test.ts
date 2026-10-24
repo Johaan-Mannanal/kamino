@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { makeProperties } from './properties'
+import { applySuggestionToDraft, makeProperties } from './properties'
 
 const values = {
   x: '40',
@@ -22,5 +22,28 @@ describe('property conversion', () => {
   it('rejects invalid physical inputs', () => {
     expect(() => makeProperties({ ...values, x: '0' })).toThrow()
     expect(() => makeProperties({ ...values, friction: '-0.1' })).toThrow()
+  })
+})
+
+describe('Gemini suggestion drafts', () => {
+  it('only changes a draft when the operator explicitly applies a suggestion', () => {
+    const original = { x: '41', dimensions_source: 'measured', mass: '61' }
+    const result = applySuggestionToDraft(original, {
+      dimensions_m: { x: 0.042, y: 0.027, z: 0.058, source: 'estimated', note: 'AI suggestion' },
+      mass_kg: { value: 0.058, source: 'estimated', note: 'AI suggestion' },
+      sliding_friction: null,
+      clarifying_questions: ['Confirm the pins.'],
+      notes: ['Unverified.'],
+    })
+    expect(original).toEqual({ x: '41', dimensions_source: 'measured', mass: '61' })
+    expect(result).toMatchObject({
+      x: '42',
+      y: '27',
+      z: '58',
+      dimensions_source: 'estimated',
+      mass: '58',
+      mass_source: 'estimated',
+      friction: '',
+    })
   })
 })

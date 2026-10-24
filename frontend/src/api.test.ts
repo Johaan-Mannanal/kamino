@@ -27,6 +27,32 @@ describe('shared HTTP contract', () => {
     expect(fetch.mock.calls[0][1].method).toBe('POST')
     expect(fetch.mock.calls[0][1].body).toBeUndefined()
   })
+  it('persists all fixed-axis orientation angles before processing', async () => {
+    const fetch = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(new Response('{}', { status: 200 })))
+    vi.stubGlobal('fetch', fetch)
+    await liveApi.saveOrientation('job-id', { x_deg: 90, y_deg: 0, z_deg: -15 })
+    expect(fetch.mock.calls[0][0]).toMatch(/\/api\/jobs\/job-id\/orientation$/)
+    expect(fetch.mock.calls[0][1]).toMatchObject({ method: 'PATCH' })
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ x_deg: 90, y_deg: 0, z_deg: -15 })
+  })
+  it('requests cached Gemini suggestions without applying them to properties', async () => {
+    const fetch = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(new Response('{}', { status: 200 })))
+    vi.stubGlobal('fetch', fetch)
+    await liveApi.suggestions('job-id', { object_hint: 'Apple USB-C adapter', refresh: true })
+    expect(fetch.mock.calls[0][0]).toMatch(/\/api\/jobs\/job-id\/suggestions$/)
+    expect(fetch.mock.calls[0][1]).toMatchObject({ method: 'POST' })
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({
+      object_hint: 'Apple USB-C adapter',
+      refresh: true,
+    })
+    await liveApi.cachedSuggestions('job-id')
+    expect(fetch.mock.calls[1][0]).toMatch(/\/api\/jobs\/job-id\/suggestions$/)
+    expect(fetch.mock.calls[1][1].method).toBeUndefined()
+  })
   it('adds the private application token to artifact fetches', async () => {
     const fetch = vi.fn().mockResolvedValue(new Response('zip'))
     vi.stubGlobal('fetch', fetch)

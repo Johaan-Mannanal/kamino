@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { Job } from './types'
 
 const record: Job = {
+  orientation: { x_deg: 0, y_deg: 0, z_deg: 0 },
   schema_version: '1.0',
   id: 'd415d0ce-07af-4eae-9a1d-cf81ebb227a0',
   status: 'awaiting_properties',
@@ -46,6 +47,7 @@ afterEach(() => {
 })
 
 async function selectImage() {
+  vi.doMock('./viewer', () => ({ mountViewer: () => () => {} }))
   await import('./main')
   const input = document.querySelector<HTMLInputElement>('#photos')!
   Object.defineProperty(input, 'files', {

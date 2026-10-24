@@ -1,10 +1,16 @@
-import type { Job, Properties, ValidationReport } from './types'
+import type { Job, Orientation, Properties, Suggestions, ValidationReport } from './types'
 
 export type Api = {
   health(): Promise<{ status: string; provider: string }>
   create(files: File[]): Promise<Job>
   get(id: string): Promise<Job>
   save(id: string, properties: Properties): Promise<Job>
+  saveOrientation(id: string, orientation: Orientation): Promise<Job>
+  cachedSuggestions(id: string): Promise<Suggestions>
+  suggestions(
+    id: string,
+    request: { object_hint?: string; refresh?: boolean },
+  ): Promise<Suggestions>
   process(id: string): Promise<Job>
   report(id: string, path: string): Promise<ValidationReport>
   file(id: string, path: string): Promise<Blob>
@@ -78,6 +84,19 @@ export const liveApi: Api = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(properties),
+    }),
+  saveOrientation: (id, orientation) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/orientation`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orientation),
+    }),
+  cachedSuggestions: (id) => request(`/api/jobs/${encodeURIComponent(id)}/suggestions`),
+  suggestions: (id, suggestion) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/suggestions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(suggestion),
     }),
   process: (id) => request(`/api/jobs/${encodeURIComponent(id)}/process`, { method: 'POST' }),
   report: (id, path) =>
