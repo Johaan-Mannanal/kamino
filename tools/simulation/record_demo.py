@@ -14,6 +14,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scene", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--replays",
+        type=int,
+        default=1,
+        choices=range(1, 6),
+        help="Drop cycles; each additional cycle resets the same scene state",
+    )
     args = parser.parse_args()
     if args.output.exists():
         parser.error("Choose a new GIF path; existing evidence is preserved")
@@ -33,33 +40,57 @@ def main():
     options.geomgroup[3] = False
     frame_steps = max(1, round(1 / (30 * model.opt.timestep)))
     frames = []
+    durations = []
+    reset_events = []
+    replay_durations = []
+    replay_warnings = []
     with mujoco.Renderer(model, height=480, width=640) as renderer:
-        for index in range(31):
-            if index:
-                mujoco.mj_step(model, data, nstep=frame_steps)
+        for replay in range(args.replays):
+            if replay:
+                previous_time = float(data.time)
+                mujoco.mj_resetData(model, data)
                 mujoco.mj_forward(model, data)
-            renderer.update_scene(data, camera=camera, scene_option=options)
-            image = Image.fromarray(renderer.render())
-            draw = ImageDraw.Draw(image)
-            draw.rectangle((0, 0, 640, 42), fill=(20, 20, 20))
-            draw.text(
-                (10, 5),
-                "MuJoCo offscreen replay | approx. 4x slow motion | BOX collision",
-                fill="white",
-            )
-            draw.text(
-                (10, 23),
-                f"Simulated time: {data.time:.4f} s | properties estimated, not measured",
-                fill="white",
-            )
-            frames.append(image)
+                assert data.time == 0 and all(a == b for a, b in zip(data.qpos, model.qpos0))
+                reset_events.append(
+                    {
+                        "previous_simulated_time_s": previous_time,
+                        "reset_time_s": float(data.time),
+                        "reset_qpos": data.qpos.tolist(),
+                    }
+                )
+            for index in range(31):
+                if index:
+                    mujoco.mj_step(model, data, nstep=frame_steps)
+                    mujoco.mj_forward(model, data)
+                renderer.update_scene(data, camera=camera, scene_option=options)
+                image = Image.fromarray(renderer.render())
+                draw = ImageDraw.Draw(image)
+                draw.rectangle((0, 0, 640, 42), fill=(20, 20, 20))
+                draw.text(
+                    (10, 5),
+                    "MuJoCo offscreen replay | approx. 4x slow motion | BOX collision",
+                    fill="white",
+                )
+                draw.text(
+                    (10, 23),
+                    f"Drop {replay + 1}/{args.replays} | t={data.time:.4f} s | properties estimated, not measured",
+                    fill="white",
+                )
+                frames.append(image)
+                durations.append(800 if index == 0 else 130)
+            replay_durations.append(float(data.time))
+            replay_warnings.append([int(w.number) for w in data.warning])
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    durations = [800] + [130] * (len(frames) - 1)
     frames[0].save(args.output, save_all=True, append_images=frames[1:], duration=durations, loop=0)
     report = {
         "kind": "offscreen_rendered_replay_not_native_screen_recording",
         "scene": args.scene.name,
         "frames": len(frames),
+        "replay_count": args.replays,
+        "reset_events": reset_events,
+        "per_replay_simulated_duration_s": replay_durations,
+        "total_advanced_simulated_s": math.fsum(replay_durations),
+        "warning_counts_by_replay": replay_warnings,
         "image_dimensions": [640, 480],
         "timestep_s": float(model.opt.timestep),
         "simulated_duration_s": float(data.time),

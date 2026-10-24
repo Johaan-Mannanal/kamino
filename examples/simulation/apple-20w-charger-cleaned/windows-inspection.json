@@ -1,0 +1,47 @@
+{
+  "source_backend_commit": "e2e8ce8ba4e99b897817952225555ccde4556658",
+  "archive_sha256": "f4be83e685078e094b00f14e59ab2de95cd7fe82b4c9a3eaebd4e8603202b0a5",
+  "extracted_archive_payload_unchanged": true,
+  "environment": {
+    "python": "3.12.10",
+    "mujoco": "3.17.0",
+    "trimesh": "5.2.0",
+    "numpy": "2.5.4"
+  },
+  "synthetic": false,
+  "dimensions_m": [
+    0.043,
+    0.027,
+    0.058
+  ],
+  "mass_kg": 0.059,
+  "property_provenance": "estimated, not specimen measurements",
+  "visual_smoke_acceptance": {
+    "charger_body_plausible": true,
+    "two_pins_point_upward": true,
+    "old_surrounding_slab_absent": true,
+    "usbc_end_feature_present": true,
+    "usbc_fine_detail_verified": false
+  },
+  "orientation_mapping": "Explicit +90 deg X before preparation: x=raw x, y=-raw z, z=raw y; upward pins confirmed in native view.",
+  "collision_observation": "Single box, no individual pins, no empty pin-gap collision, no USB-C contact recess",
+  "collision_half_extents_m": [
+    0.0215,
+    0.0135,
+    0.029
+  ],
+  "final_quaternion_wxyz": [
+    1.0,
+    -9.640884369192314e-18,
+    -1.0729012524338323e-12,
+    3.9321111562734753e-13
+  ],
+  "physics_or_thresholds_changed": false,
+  "acceptance_scope": "Pass for coarse-box Windows visual/dynamics demo; not measured digital twin or insertion/manipulation certification",
+  "limitations": [
+    "Independent axis scaling still alters proportions; 5.427% spread normalized by max scale versus 5.7% normalized by min scale.",
+    "Geometry-only blue surface; fine port depth/shape and material fidelity unverified.",
+    "Manually oriented candidate exported outside persistent API job flow; no claim the original job completed."
+  ],
+  "next_action": "Carry explicit orientation/dimension mapping into preparation and persistent job integration; retain estimated provenance and coarse collision labels."
+}

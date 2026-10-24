@@ -38,6 +38,11 @@ def main():
         "--body-axes", action="store_true", help="Show body axes: X red, Y green, Z blue"
     )
     parser.add_argument("--distance", type=float, help="Initial camera distance in metres")
+    parser.add_argument(
+        "--hide-ground",
+        action="store_true",
+        help="Hide render group 0 (ground in exported scenes), without disabling contacts",
+    )
     args = parser.parse_args()
     model = mujoco.MjModel.from_xml_path(str(args.scene.resolve()))
     data = mujoco.MjData(model)
@@ -56,6 +61,8 @@ def main():
                 viewer.opt.frame = mujoco.mjtFrame.mjFRAME_BODY
             viewer.opt.geomgroup[2] = not args.collision
             viewer.opt.geomgroup[3] = args.collision
+            if args.hide_ground:
+                viewer.opt.geomgroup[0] = False
         while viewer.is_running():
             tick = time.perf_counter()
             if args.seconds and tick - started >= args.seconds:
@@ -70,6 +77,7 @@ def main():
         "native_viewer_loop_completed": True,
         "collision_view": args.collision,
         "body_axes": args.body_axes,
+        "ground_render_hidden": args.hide_ground,
         "initial_camera_azimuth": args.azimuth,
         "initial_camera_elevation": args.elevation,
         "initial_camera_distance_m": float(

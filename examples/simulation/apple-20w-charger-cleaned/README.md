@@ -5,7 +5,7 @@ Before preparation, an explicit +90-degree rotation about X maps raw +Y pins
 to simulation +Z. `orientation.json` records the matrix, source hash and scale
 factors. The raw provider GLB remains unchanged in the reconstruction example.
 
-The full extents are fitted to the existing **estimated** 43 × 27 × 58 mm,
+The full extents are fitted to the existing **estimated** 43 Ã— 27 Ã— 58 mm,
 with estimated mass 59 g and unknown friction. The relative spread in per-axis
 scale factors is 5.427%, versus the previous example's 34.9%; this statistic is
 not a measurement of reconstruction error. Independent scaling still changes
@@ -18,8 +18,8 @@ trimesh 5.2.0, NumPy 2.5.4. See `bundle/validation-report.json`.
 
 The scene still uses one box collision proxy, uniform-box inertia and documented
 contact defaults. It does not model contact between individual pins. This is a
-drop smoke test, not a real-world accuracy certificate. Native viewer acceptance
-and Windows MuJoCo 3.17 verification are pending.
+drop smoke test, not a real-world accuracy certificate. Windows MuJoCo 3.17.0 validation and native visual/coarse-box demo acceptance are recorded
+in [WINDOWS.md](WINDOWS.md); estimated-property and contact limitations remain.
 
 ## Yash next
 

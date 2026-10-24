@@ -1,0 +1,69 @@
+{
+  "kind": "offscreen_rendered_replay_not_native_screen_recording",
+  "scene": "scene.xml",
+  "frames": 62,
+  "replay_count": 2,
+  "reset_events": [
+    {
+      "previous_simulated_time_s": 0.9989999999999063,
+      "reset_time_s": 0.0,
+      "reset_qpos": [
+        0.0,
+        0.0,
+        0.049,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "per_replay_simulated_duration_s": [
+    0.9989999999999063,
+    0.9989999999999063
+  ],
+  "total_advanced_simulated_s": 1.9979999999998126,
+  "warning_counts_by_replay": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "image_dimensions": [
+    640,
+    480
+  ],
+  "timestep_s": 0.0001,
+  "simulated_duration_s": 0.9989999999999063,
+  "playback_duration_s": 9.4,
+  "wall_clock_generation_s": 2.0970474000005197,
+  "warning_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "camera": {
+    "azimuth": 45,
+    "elevation": -20,
+    "distance_m": 0.18
+  },
+  "note": "Visual replay only. Separate native screenshots and headless reports establish those checks."
+}
