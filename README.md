@@ -9,11 +9,12 @@ articulation, then a runnable simulator export that can be iterated.
 **Workflow:** Inputs → geometry/part proposals → user corrections to scale,
 properties and joints → simulation export → validation and refinement.
 
-The rigid-object workflow is working. Guided articulated conversion is now the
-next milestone; automatic photos-to-robot conversion is not yet implemented.
+The rigid-object workflow and guided component-mesh assembly workflow are working.
+Automatic photo-based part segmentation and joint inference are not implemented.
 
 ## Start here
 
+- [Local demo startup](docs/DEMO.md): repeatable assembly workflow without provider calls.
 - [Ordered project phases](docs/PROJECT.md): scope, task list, and acceptance criteria.
 - [Sponsor targets](docs/SPONSORS.md): Fetch.ai, Vultr, and Gemini API.
 - [Shared Markdown folder](docs/team-notes/): upload context, research, and handoffs.
@@ -37,14 +38,18 @@ was reported by Yash at `74cf11a`. Physical mapping remains unverified.
 
 A [reviewed assembly format](docs/ASSEMBLIES.md) and
 [synthetic two-link export](examples/assemblies/two-link-hinge/README.md) now
-provide the local articulated-conversion foundation. CAD grouping, photo part/joint inference and assembly UI/API
-integration remain future work. See [the plan](docs/PROJECT.md).
+provide the articulated-conversion foundation. The workbench supports component
+mesh uploads, link grouping/naming, joint review, saved revisions, readable
+validation failures and authenticated portable downloads. A second
+[hinged-panel example](examples/assemblies/hinged-panel/README.md) verifies this
+workflow without hand-written project JSON. Photo part/joint inference remains
+future work. See [the plan](docs/PROJECT.md).
 
 ## Basic infrastructure
 
 | Component | Planned tool / responsibility |
 | --- | --- |
-| Reconstruction | Meshy multi-image API; API access and credits must be confirmed |
+| Reconstruction | Meshy multi-image API; real charger generation demonstrated |
 | Geometry | trimesh and NumPy: inspection, orientation, scaling, collision proxies |
 | Simulation | MuJoCo Python and its native viewer |
 | Backend | FastAPI and Pydantic, with a background job worker |
@@ -148,5 +153,6 @@ Preserve uncommitted work and coordinate integration on your existing branch. Th
 Open `/assembly.html` in the frontend for local part grouping, pivot/joint review
 and kinematic sliders. See [guided workflow](docs/GUIDED_ASSEMBLIES.md) and
 [SO101 CAD/template candidate](examples/assemblies/so101-guided/README.md).
-This candidate passes template frame checks but fails dynamic tracking; it is
-not a photo-inferred or physically calibrated arm.
+The revised candidate passes free-space motion checks with documented collision
+approximations; the original failing candidate is retained. It is CAD/template
+assisted, and physical mapping/dynamics remain unverified.

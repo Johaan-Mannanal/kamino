@@ -22,21 +22,21 @@ not become confirmed measurements automatically.
 | --- | --- |
 | Rigid photo reconstruction, editable properties/orientation, preview and ZIP | Working with cleaned charger; properties estimated |
 | Gemini suggestions | Live backend request verified; explicit frontend adoption |
-| Articulated assembly format and generated two-link proof | Local CLI/library implemented; Mac motion/reset/relocation checks pass; Windows viewer pending |
+| Articulated assembly format and generated two-link proof | CLI/library and browser workflows implemented; two-link and hinged-panel Mac checks pass |
 | Photo part segmentation / joint inference | Not implemented |
 | CAD application import / rigid-link grouping | Local STEP importer and source-preserving grouping implemented |
-| SO101 through persistent assembly jobs | Browser import/review/save/process/download, relocation and restart passed on Mac; Windows acceptance pending |
-| Assembly review UI / articulated job API | Persistent import/revision/process/download integrated; synthetic live browser acceptance passed on Mac |
+| SO101 through persistent assembly jobs | Browser/API flow passed on Mac; revised ZIP Windows acceptance reported at 1ca9a52 |
+| Assembly review UI / articulated job API | Component-mesh entry, guided links/joints, readable failures and revisions integrated; hinged-panel browser acceptance passed |
 | Imported SO101 reference model | Loads and runs; nominal CAD dimensions closely agree |
 | Combined reference robot/charger/table | Mac validation; Windows native/reset/relocation acceptance reported at 74cf11a |
-| Physical joint mapping / real motion comparison | Take-2 capture imported and offline-audited (599 samples); photo pairing and mapping unverified |
+| Physical joint mapping / real motion comparison | Take-3 operator-paired photos/599 observations imported; mapping and dynamics unverified |
 | Fetch public integration / Vultr deployment | Incomplete / deferred |
 
 See [example taxonomy](../examples/README.md), [CAD review](../examples/so101/cad-review/README.md),
 [reference workspace](../examples/so101/WORKSPACE.md), and
 [implementation plan](superpowers/plans/2026-10-24-articulated-export.md).
-Windows 74cf11a is a teammate-reported result; the current checkout need not
-contain its evidence files. No measured physical accuracy follows from it.
+Windows results are teammate reports with retained evidence. No measured physical
+accuracy follows from simulator acceptance.
 
 ## Ordered phases and acceptance
 
@@ -61,7 +61,10 @@ See the [two-link proof](../examples/assemblies/two-link-hinge/README.md).
 
 ### 4. Build guided assembly preparation and review — local slice implemented
 - [x] Import optional CAD component geometry; group components into rigid links.
-- [x] Accept user-provided component meshes with source hashes and provenance.
+- [x] Accept component meshes directly in metres or millimetres, preserving originals and hashes.
+- [x] Create/name connected links and fixed/revolute joints without authoring project JSON.
+- [x] Inspect per-attempt failures and navigate to the affected joint.
+- [x] Prove correction/revalidation/download on a second synthetic hinged-panel assembly.
 - [ ] Add photo-based part proposals.
 - [x] Show link connections, joint axes and motion sliders; permit corrections.
 - [x] Save/revise reviewed records, then regenerate without repeating reconstruction.
@@ -112,7 +115,8 @@ See [sponsor checklist](SPONSORS.md). No new eligibility verification is claimed
 ## Work allocation now
 - **Johaan + this agent:** product integration, assembly schema/export and synthetic
   proof, guided review and SO101 free-space motion implemented locally. Next:
-  physical mapping integration and live comparison; SO101 saved-job workflow now passes locally.
+  physical mapping integration and live comparison. Generic mesh entry, diagnostics,
+  non-SO101 acceptance and local startup are complete; see [demo guide](DEMO.md).
 - **Atul:** assembly jobs/API and frontend wiring delivered at `01a6af5`; integrated
   with regression fixes and browser evidence. Windows retest instructions are in
   [the integration handoff](team-notes/2026-10-24-assembly-api-integration.md).

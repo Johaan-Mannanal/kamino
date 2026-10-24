@@ -12,11 +12,12 @@ from secrets import compare_digest
 from typing import Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from photo2sim.assemblies.contracts import AssemblyRecord
+from photo2sim.assemblies.draft import draft_from_meshes
 from photo2sim.assemblies.export import export_assembly
 from photo2sim.assemblies.review import (
     ReviewProject,
@@ -86,11 +87,20 @@ class AssemblyJobs:
             self.write(job)
             return job
 
-    def create(self, project: ReviewProject, uploads: dict[str, bytes]):
+    def create(
+        self,
+        project: ReviewProject,
+        uploads: dict[str, bytes],
+        originals: dict[str, bytes] | None = None,
+    ):
         job_id = uuid4()
         root = self.directory(job_id)
         root.mkdir(parents=True)
         try:
+            for name, data in (originals or {}).items():
+                target = root / "originals" / bundle_path(name)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(data)
             for name, data in uploads.items():
                 target = root / "sources" / name
                 target.parent.mkdir(parents=True, exist_ok=True)
@@ -275,6 +285,7 @@ class AssemblyJobs:
                     (folder / "bundle", ""),
                     (folder / "prepared", "prepared"),
                     (root / "sources", "sources"),
+                    (root / "originals", "originals"),
                 ):
                     for path in tree.rglob("*"):
                         if path.is_file():
@@ -324,6 +335,31 @@ def assembly_router(service: AssemblyJobs, api_token: str, max_bytes: int):
             return service.get(job_id)
         except KeyError:
             raise HTTPException(404, "Assembly job not found") from None
+
+    @router.post("/from-meshes", status_code=202)
+    async def from_meshes(
+        name: str = Form(...),
+        units: Literal["m", "mm"] = Form(...),
+        synthetic: bool = Form(False),
+        meshes: list[UploadFile] = File(...),
+    ):
+        if not 1 <= len(meshes) <= 128:
+            raise HTTPException(422, "Select between 1 and 128 component meshes")
+        uploads, total = {}, 0
+        try:
+            for mesh in meshes:
+                filename = mesh.filename or ""
+                if filename.casefold() in {n.casefold() for n in uploads}:
+                    raise ValueError("Duplicate mesh filenames; give each part a unique filename")
+                data = await mesh.read(max_bytes + 1)
+                total += len(data)
+                if len(data) > max_bytes or total > 200 * 1024 * 1024:
+                    raise HTTPException(413, "Mesh upload limit exceeded")
+                uploads[filename] = data
+            project, normalized = draft_from_meshes(name, uploads, units, synthetic)
+            return service.create(project, normalized, originals=uploads)
+        except (ValueError, OSError) as exc:
+            raise HTTPException(422, str(exc)) from None
 
     @router.post("", status_code=202)
     async def create(project: UploadFile = File(...), meshes: list[UploadFile] = File(...)):

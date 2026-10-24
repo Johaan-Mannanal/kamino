@@ -11,17 +11,19 @@ import {
   acknowledge,
   type ReviewPackage,
 } from './assembly-review'
+import { addConnectedLink, renameLink, changeJointKind } from './assembly-builder'
+import { validationFindings } from './assembly-diagnostics'
 import './assembly.css'
 
 const root = document.querySelector<HTMLDivElement>('#assembly-app')!
 root.innerHTML = `<header><a href="/">Photo2Sim</a><span>Guided assembly review</span></header>
 <main><h1>From parts to a moving assembly.</h1><p>Group rigid parts, review pivots and joint limits, then prepare a simulator export. This preview is kinematic; it does not test forces, collisions or hardware accuracy.</p>
 <details><summary>API access</summary><label>Application token <input id="api-token" type="password" autocomplete="off"></label><button id="set-token">Set token for this session</button></details>
-<section class="job-controls"><h2>Import source project</h2><label>Review project JSON <input id="import-project" type="file" accept=".json,application/json"></label><label>Source meshes (select all files) <input id="import-meshes" type="file" accept=".obj,.stl" multiple></label><button id="import">Import and open review</button><p>Mesh filenames must match the paths in the project. For nested paths, select a folder below.</p><label>Source mesh folder <input id="import-folder" type="file" webkitdirectory multiple></label><h2>Open existing job</h2><label>Job ID <input id="job-id" type="text" autocomplete="off"></label><button id="open-job">Open job</button><p id="job-status"></p><div id="attempts"></div></section>
+<section class="job-controls"><h2>Start from component meshes</h2><p>Upload separate geometry-only OBJ/STL parts in a shared reference frame. Choose their units; positions are preserved. Define links and joints below. No project JSON is needed.</p><div class="guided-grid"><label>Assembly name <input id="draft-name" value="my_assembly" maxlength="64"></label><label>Source units <select id="draft-units"><option value="">Choose units</option><option value="m">Metres</option><option value="mm">Millimetres</option></select></label><label>Component meshes <input id="draft-meshes" type="file" accept=".obj,.stl" multiple></label><label><input id="draft-synthetic" type="checkbox"> Synthetic example geometry</label></div><button id="create-draft">Create assembly draft</button><p>Starting masses and drive settings are estimates to review. Original files are retained. STEP conversion is available through the optional CAD tool.</p><details><summary>Import an existing source project</summary><h2>Import source project</h2><label>Review project JSON <input id="import-project" type="file" accept=".json,application/json"></label><label>Source meshes (select all files) <input id="import-meshes" type="file" accept=".obj,.stl" multiple></label><button id="import">Import and open review</button><p>Mesh filenames must match the paths in the project. For nested paths, select a folder below.</p><label>Source mesh folder <input id="import-folder" type="file" webkitdirectory multiple></label></details><h2>Open existing job</h2><label>Job ID <input id="job-id" type="text" autocomplete="off"></label><button id="open-job">Open job</button><p id="job-status"></p><div id="attempts"></div></section>
 <label class="load">Open review package <input id="load" type="file" accept=".json,application/json"></label>
 <p id="message" role="status">Import a project and its meshes, open a saved job, or load an offline review package.</p>
 <div id="workspace" hidden><div class="layout"><section class="stage"><div id="viewer"></div><button id="reset">Reset preview pose</button><p id="summary"></p><div id="sliders"></div></section>
-<section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div>
+<section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div><details><summary>Add a link and connection</summary><div class="guided-grid"><label>New link name <input id="new-link-name"></label><label>Parent link <select id="new-parent"></select></label><label>New joint name <input id="new-joint-name"></label><label>Connection type <select id="new-kind"><option value="revolute">Revolute hinge</option><option value="fixed">Fixed</option></select></label></div><button id="add-link">Add link and joint</button><p>Assign at least one part to the new link, then review its pivot, mass and joint parameters. A hinge starts on local Z with estimated drive settings.</p></details>
 <h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; limits are radians. Pivot edits change joint frames while preserving source geometry at the reference pose; they do not translate the entire scene. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
 <h2>3. Save and process</h2><button id="save-revision">Save revision to job</button><label>Collision geometry <select id="collision-mode"><option value="box">Box (historical default)</option><option value="convex_mesh">Convex mesh</option></select></label><label><input id="exclude-joint-pairs" type="checkbox"> Exclude direct parent-child collision pairs</label><button id="process">Run preparation, export and validation</button><p>These export settings are recorded per attempt and do not alter the reviewed source project. Save the review before processing. To change a completed result, apply edits, acknowledge the revised inputs and save a new revision. Previous attempts remain available after a revision or failed validation.</p><button id="save">Download project JSON</button><button id="save-package">Download review package</button>
 <details><summary>Advanced: full project / add links and joints</summary><textarea id="full" aria-label="Full project JSON" spellcheck="false"></textarea><button id="apply-full">Apply full project</button></details><details><summary>Provenance and limitations</summary><pre id="notes"></pre></details></section></div></div></main>`
@@ -102,6 +104,61 @@ function renderJob() {
     const label = document.createElement('p')
     label.textContent = `Attempt ${attempt.number} · revision ${attempt.revision} · ${attempt.status} · ${attempt.export_config?.collision_mode || 'box'} collision · adjacent pairs ${attempt.export_config?.exclude_joint_pairs ? 'excluded' : 'native'} · export generated: ${attempt.export_generated ? 'yes' : 'no'} · motion validation passed: ${attempt.motion_validation_passed === null ? 'pending' : attempt.motion_validation_passed ? 'yes' : 'no'}${attempt.error ? ' · ' + attempt.error.message : ''}`
     row.append(label)
+    if (attempt.validation_path) {
+      const inspect = document.createElement('button')
+      inspect.textContent = 'Inspect validation'
+      const details = document.createElement('div')
+      details.className = 'validation-details'
+      details.setAttribute('aria-live', 'polite')
+      inspect.onclick = async () => {
+        if (!job) return
+        const active = generation,
+          id = job.id
+        inspect.disabled = true
+        details.textContent = 'Loading validation report…'
+        try {
+          const blob = await assemblyApi.file(id, attempt.validation_path!)
+          const report = JSON.parse(await blob.text())
+          if (active !== generation || job?.id !== id || !details.isConnected) return
+          details.replaceChildren()
+          const context = document.createElement('p')
+          context.textContent = `Report for attempt ${attempt.number}, revision ${attempt.revision}. Review buttons open the current draft; changing it does not alter this report.`
+          details.append(context)
+          for (const finding of validationFindings(report)) {
+            const line = document.createElement('p')
+            line.textContent = `${finding.section}: ${finding.message}`
+            details.append(line)
+            const index = payload?.project.joints.findIndex((j) => j.name === finding.joint) ?? -1
+            if (index >= 0) {
+              const review = document.createElement('button')
+              review.textContent = `Review ${finding.joint}`
+              review.onclick = () => {
+                if (
+                  el<HTMLTextAreaElement>('editor').value !== JSON.stringify(selection(), null, 2)
+                ) {
+                  message('Apply the current field edits before switching review items.')
+                  return
+                }
+                el<HTMLSelectElement>('selection').value = `joint:${index}`
+                select()
+                el('fields').scrollIntoView?.({ block: 'center' })
+                message(
+                  `Reviewing ${finding.joint} in the current draft. Historical report remains unchanged.`,
+                )
+              }
+              details.append(review)
+            }
+          }
+        } catch {
+          if (active === generation && details.isConnected)
+            details.textContent =
+              'Could not read the validation report. Retry or download it for inspection.'
+        } finally {
+          inspect.disabled = false
+        }
+      }
+      row.append(inspect, details)
+    }
     for (const [title, path] of [
       ['Export', attempt.export_path],
       ['Validation report', attempt.validation_path],
@@ -155,8 +212,8 @@ function selection() {
   const [kind, n] = el<HTMLSelectElement>('selection').value.split(':')
   return kind === 'group' ? payload!.project.groups[+n] : payload!.project.joints[+n]
 }
-function select() {
-  const item = structuredClone(selection())
+function select(draft = selection()) {
+  const item = structuredClone(draft)
   const editor = el<HTMLTextAreaElement>('editor')
   editor.value = JSON.stringify(item, null, 2)
   const fields = el('fields')
@@ -196,6 +253,9 @@ function select() {
     fields.append(row)
   }
   if ('frame' in item) {
+    input('Link name', item.name, (v) => {
+      item.name = v
+    })
     ;['X', 'Y', 'Z'].forEach((axis, i) =>
       input(`Pivot ${axis} (m)`, item.frame.position_m[i], (v) => {
         item.frame.position_m[i] = Number(v)
@@ -236,6 +296,19 @@ function select() {
       if (item.sliding_friction) item.sliding_friction.note = v
     })
   } else {
+    input('Joint name', item.name, (v) => {
+      item.name = v
+    })
+    const kindLabel = document.createElement('label')
+    kindLabel.textContent = 'Joint type'
+    const kind = document.createElement('select')
+    kind.setAttribute('aria-label', 'Joint type')
+    kind.add(new Option('Fixed', 'fixed'))
+    kind.add(new Option('Revolute hinge', 'revolute'))
+    kind.value = item.kind
+    kind.onchange = () => select(changeJointKind(item, kind.value as 'fixed' | 'revolute'))
+    kindLabel.append(kind)
+    fields.append(kindLabel)
     input('Parent link', item.parent, (v) => {
       item.parent = v
     })
@@ -283,6 +356,10 @@ function render() {
     `${p.name} · ${p.parts.length} parts · ${p.groups.length} links · ${p.joints.length} joints · ${p.synthetic ? 'Synthetic' : 'Source-assisted'} · ${[...p.groups, ...p.joints].filter((x) => x.reviewed).length}/${p.groups.length + p.joints.length} acknowledged`
   el('notes').textContent = p.notes.join('\n\n')
   el<HTMLTextAreaElement>('full').value = JSON.stringify(p, null, 2)
+  const parents = el<HTMLSelectElement>('new-parent')
+  const previousParent = parents.value
+  parents.replaceChildren(...p.groups.map((g) => new Option(g.name, g.name)))
+  parents.value = p.groups.some((g) => g.name === previousParent) ? previousParent : p.root_link
   const parts = el('parts')
   parts.replaceChildren()
   p.parts.forEach((part) => {
@@ -507,6 +584,51 @@ el<HTMLInputElement>('load').onchange = async () => {
     workspaceError(active, e)
   }
 }
+el('add-link').onclick = () => {
+  if (!payload) return
+  try {
+    const next = structuredClone(payload)
+    next.project = addConnectedLink(
+      next.project,
+      el<HTMLInputElement>('new-link-name').value.trim(),
+      el<HTMLSelectElement>('new-parent').value,
+      el<HTMLInputElement>('new-joint-name').value.trim(),
+      el<HTMLSelectElement>('new-kind').value as 'fixed' | 'revolute',
+    )
+    payload = parsePackage(JSON.stringify(next))
+    render()
+    el<HTMLSelectElement>('selection').value = `group:${payload.project.groups.length - 1}`
+    select()
+    message('Link and joint added. Assign parts and review the starting assumptions before export.')
+  } catch (e) {
+    error(e)
+  }
+}
+el('create-draft').onclick = async () => {
+  if (mutationPending) return
+  const active = beginWorkspace()
+  const button = el<HTMLButtonElement>('create-draft')
+  button.disabled = true
+  try {
+    const units = el<HTMLSelectElement>('draft-units').value
+    const files = Array.from(el<HTMLInputElement>('draft-meshes').files || [])
+    const name = el<HTMLInputElement>('draft-name').value.trim()
+    if (units !== 'm' && units !== 'mm') throw Error('Choose the mesh source units.')
+    if (!files.length) throw Error('Select component OBJ/STL meshes.')
+    message('Importing meshes and preparing an unreviewed draft…')
+    const created = await assemblyApi.fromMeshes(
+      name,
+      units,
+      el<HTMLInputElement>('draft-synthetic').checked,
+      files,
+    )
+    if (active === generation) await openJob(created.id, active)
+  } catch (e) {
+    workspaceError(active, e)
+  } finally {
+    button.disabled = false
+  }
+}
 el('set-token').onclick = () => {
   setAssemblyToken(el<HTMLInputElement>('api-token').value)
   message('Application token set for this browser session.')
@@ -592,15 +714,18 @@ el('process').onclick = async () => {
     }
   }
 }
-el('selection').onchange = select
+el('selection').onchange = () => select()
 el('apply').onclick = () => {
   if (!payload) return
   try {
     const next = structuredClone(payload)
     const [kind, n] = el<HTMLSelectElement>('selection').value.split(':')
     const item = JSON.parse(el<HTMLTextAreaElement>('editor').value)
-    if (kind === 'group') next.project.groups[+n] = item
-    else next.project.joints[+n] = item
+    if (kind === 'group') {
+      const oldName = next.project.groups[+n].name
+      if (oldName !== item.name) next.project = renameLink(next.project, oldName, item.name)
+      next.project.groups[+n] = item
+    } else next.project.joints[+n] = item
     invalidateReview(next.project)
     payload = parsePackage(JSON.stringify(next))
     render()

@@ -103,6 +103,10 @@ def test_real_motion_failure_corrected_revision_preserves_history(tmp_path):
         assert failed["export_generated"] and not failed["bundle_path"]
         failure = client.get(base + "/files/" + failed["validation_path"])
         assert failure.json()["original"]["checks"]["tracking"] is False
+        assert (
+            failure.json()["original"]["trials"][0]["phases"][0]["tracking_errors_rad"]["hinge"]
+            > 0.03
+        )
 
         corrected = project()
         corrected["joints"][0]["limits_rad"] = [-0.6, 0.6]

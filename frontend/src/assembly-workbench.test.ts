@@ -320,3 +320,163 @@ it('retains unsaved local work when opening another job fails', async () => {
   document.querySelector<HTMLElement>('#approve')!.click()
   expect(document.querySelector('#summary')?.textContent).toContain('1/1 acknowledged')
 })
+
+it('creates a connected link, groups a part and renames references without JSON', async () => {
+  await load()
+  const fill = (id: string, value: string) => {
+    const field = document.querySelector<HTMLInputElement>(id)!
+    expect(field).not.toBeNull()
+    field.value = value
+    field.dispatchEvent(new Event('input'))
+  }
+  fill('#new-link-name', 'panel')
+  fill('#new-joint-name', 'hinge')
+  document.querySelector<HTMLElement>('#add-link')!.click()
+  const group = document.querySelector<HTMLSelectElement>('#parts select')!
+  group.value = 'panel'
+  group.dispatchEvent(new Event('change'))
+  const selector = document.querySelector<HTMLSelectElement>('#selection')!
+  selector.value = 'group:1'
+  selector.dispatchEvent(new Event('change'))
+  fill('[aria-label="Link name"]', 'door')
+  document.querySelector<HTMLElement>('#apply')!.click()
+  const p = JSON.parse(document.querySelector<HTMLTextAreaElement>('#full')!.value)
+  expect(p.parts[0].group).toBe('door')
+  expect(p.joints[0].child).toBe('door')
+  expect(p.groups[1].name).toBe('door')
+  expect(p.groups.every((g: { reviewed: boolean }) => !g.reviewed)).toBe(true)
+})
+
+it('creates a draft from files and declared units without a project JSON', async () => {
+  const fromMeshes = vi.fn(async (name, units, synthetic, files) => {
+    expect([name, units, synthetic, files[0].name]).toEqual(['panel', 'mm', true, 'part.stl'])
+    return pendingJob()
+  })
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: {
+      fromMeshes,
+      get: async () => pendingJob(),
+      reviewPackage: async () => structuredClone(pack),
+    },
+    setAssemblyToken: vi.fn(),
+  }))
+  await import('./assembly-workbench')
+  const field = document.querySelector<HTMLInputElement>('#draft-meshes')!
+  expect(field).not.toBeNull()
+  Object.defineProperty(field, 'files', { value: [new File(['mesh'], 'part.stl')] })
+  document.querySelector<HTMLInputElement>('#draft-name')!.value = 'panel'
+  document.querySelector<HTMLSelectElement>('#draft-units')!.value = 'mm'
+  document.querySelector<HTMLInputElement>('#draft-synthetic')!.checked = true
+  document.querySelector<HTMLElement>('#create-draft')!.click()
+  await vi.waitFor(() =>
+    expect(document.querySelector('#job-status')?.textContent).toContain('Job job-a'),
+  )
+  expect(document.querySelector('#summary')?.textContent).toContain('1 parts')
+})
+
+it('shows retained validation failures and navigates to the joint without changing inputs', async () => {
+  const { addConnectedLink } = await import('./assembly-builder')
+  const withJoint = structuredClone(pack)
+  withJoint.project = addConnectedLink(
+    withJoint.project as never,
+    'panel',
+    'base',
+    'hinge',
+    'revolute',
+  ) as never
+  const failure = {
+    ...pendingJob('failed', 'failed'),
+    attempts: [
+      {
+        number: 1,
+        revision: 1,
+        status: 'failed',
+        export_generated: true,
+        motion_validation_passed: false,
+        export_path: 'scene.xml',
+        validation_path: 'validation.json',
+        bundle_path: null,
+        error: null,
+        export_config: { collision_mode: 'box', exclude_joint_pairs: false },
+      },
+    ],
+  }
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: {
+      get: async () => failure,
+      reviewPackage: async () => withJoint,
+      file: async () => ({
+        text: async () =>
+          JSON.stringify({
+            passed: false,
+            tracking_tolerance_rad: 0.03,
+            original: {
+              passed: false,
+              checks: { tracking: false },
+              trials: [{ phases: [{ tracking_errors_rad: { hinge: 0.4 } }] }],
+            },
+          }),
+      }),
+    },
+    setAssemblyToken: vi.fn(),
+  }))
+  await import('./assembly-workbench')
+  await open('failed')
+  const button = [...document.querySelectorAll<HTMLButtonElement>('#attempts button')].find(
+    (b) => b.textContent === 'Inspect validation',
+  )
+  expect(button).toBeDefined()
+  button!.click()
+  await vi.waitFor(() =>
+    expect(document.querySelector('#attempts')!.textContent).toContain('Tracking failed'),
+  )
+  const review = [...document.querySelectorAll<HTMLButtonElement>('#attempts button')].find(
+    (b) => b.textContent === 'Review hinge',
+  )!
+  expect(review).toBeDefined()
+  review.click()
+  expect(document.querySelector<HTMLSelectElement>('#selection')!.value).toBe('joint:0')
+  expect(
+    document.querySelector<HTMLInputElement>('[aria-label="Position gain (Nm/rad)"]')!.value,
+  ).toBe('5')
+})
+
+it('does not show an old validation response after changing jobs', async () => {
+  const result = deferred<{ text: () => Promise<string> }>()
+  const old = {
+    ...pendingJob('old', 'failed'),
+    attempts: [
+      {
+        number: 1,
+        revision: 1,
+        status: 'failed',
+        export_generated: true,
+        motion_validation_passed: false,
+        validation_path: 'validation.json',
+        export_path: null,
+        bundle_path: null,
+        error: null,
+        export_config: { collision_mode: 'box', exclude_joint_pairs: false },
+      },
+    ],
+  }
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: {
+      get: async (id: string) => (id === 'old' ? old : pendingJob('new')),
+      reviewPackage: async () => structuredClone(pack),
+      file: () => result.promise,
+    },
+    setAssemblyToken: vi.fn(),
+  }))
+  await import('./assembly-workbench')
+  await open('old')
+  const button = [...document.querySelectorAll<HTMLButtonElement>('#attempts button')].find(
+    (b) => b.textContent === 'Inspect validation',
+  )
+  expect(button).toBeDefined()
+  button!.click()
+  await open('new')
+  result.resolve({ text: async () => JSON.stringify({ passed: false, error: 'old failure' }) })
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  expect(document.querySelector('#attempts')!.textContent).not.toContain('old failure')
+})

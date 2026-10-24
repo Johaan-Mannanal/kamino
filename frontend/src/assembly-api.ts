@@ -65,6 +65,19 @@ const json = (body: unknown): RequestInit => ({
   body: JSON.stringify(body),
 })
 export const assemblyApi = {
+  async fromMeshes(
+    name: string,
+    units: 'm' | 'mm',
+    synthetic: boolean,
+    meshes: File[],
+  ): Promise<AssemblyJob> {
+    const form = new FormData()
+    form.append('name', name)
+    form.append('units', units)
+    form.append('synthetic', String(synthetic))
+    meshes.forEach((file) => form.append('meshes', file, file.name))
+    return (await request('/api/assembly-jobs/from-meshes', { method: 'POST', body: form })).json()
+  },
   async create(project: File, meshes: { path: string; file: File }[]): Promise<AssemblyJob> {
     const form = new FormData()
     form.append('project', project)
