@@ -1,0 +1,7 @@
+{$PHOTO2SIM_PUBLIC_HOST} {
+	encode zstd gzip
+	request_body {
+		max_size 45MB
+	}
+	reverse_proxy backend:8000
+}

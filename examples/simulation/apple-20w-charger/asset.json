@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "asset_id": "a6ce3258-b218-4a2f-8d0d-2c5a76ae6f6b",
+  "visual_mesh": "meshes/visual.obj",
+  "properties": {
+    "dimensions_m": {
+      "x": 0.043,
+      "y": 0.027,
+      "z": 0.058,
+      "source": "estimated",
+      "note": "Includes an assumed 16 mm pin allowance. Similar-adapter reference only; exact model unconfirmed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+    },
+    "mass_kg": {
+      "value": 0.059,
+      "source": "estimated",
+      "note": "Rounded from 58.5 g published for a similar adapter, not weighed. https://www.chargerlab.com/review-of-new-apple-20w-charger-for-iphone-15-a2940"
+    },
+    "sliding_friction": null
+  },
+  "collision": {
+    "kind": "box",
+    "mesh_path": null
+  },
+  "synthetic": false,
+  "notes": [
+    "Orientation: the input mesh axes are assumed to already match the requested x/y/z dimension axes; no rotation or axis permutation was applied. The GLB was read in its native glTF frame (+Y up) without conversion.",
+    "Bounding box centred at the origin; source centre was (-0.000949889, -0.00101653, -0.000946134) in input units.",
+    "Scaled per axis independently from source extents (1.89981, 1.01474, 1.8998) (input units, treated as unknown) to confirmed full extents (0.043, 0.027, 0.058) m.",
+    "Nonuniform distortion: per-axis scale factors differ by up to 34.9% (x:y:z ratio 1.000:1.176:1.349); the mesh's proportions did not match the confirmed dimensions.",
+    "Collision is a box centred at the origin with the confirmed dimensions; mass and friction were passed through unchanged and not inferred from geometry.",
+    "Simulation visual is a geometry-only copy; original reconstruction and prepared materials are retained separately. No texture fidelity is claimed."
+  ]
+}
