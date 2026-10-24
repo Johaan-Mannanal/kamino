@@ -1,0 +1,90 @@
+{
+  "collision": "per-link axis-aligned bounding boxes",
+  "inertia": "uniform solid cuboid at each mesh bounding-box centre; approximation",
+  "root": "fixed to world at reviewed root_pose",
+  "gravity_m_s2": [
+    0,
+    0,
+    -9.81
+  ],
+  "timestep_s": 0.001,
+  "default_sliding_friction": 0.8,
+  "torsional_friction": 0.005,
+  "rolling_friction": 0.0001,
+  "contact_solref": [
+    0.02,
+    1
+  ],
+  "parent_child_collision": "MuJoCo default filtering; adjacent links are not contact-tested",
+  "status": "load_checked_only; run articulated motion validation separately",
+  "links": {
+    "base": {
+      "bounds_m": [
+        [
+          -0.03,
+          -0.03,
+          -0.04
+        ],
+        [
+          0.03,
+          0.03,
+          0.04
+        ]
+      ],
+      "mass_kg": 0.5,
+      "inertia_kg_m2": [
+        0.00041666666666666675,
+        0.00041666666666666675,
+        0.00030000000000000003
+      ],
+      "inertia_centre_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "friction": [
+        0.8,
+        0.005,
+        0.0001
+      ],
+      "sliding_friction_defaulted": true,
+      "source_mesh_sha256": "52e557f12cd0530f649b130c95236bca6d5ddeb060795cea5a08daac0bb546d0"
+    },
+    "arm": {
+      "bounds_m": [
+        [
+          0.0,
+          -0.0125,
+          -0.0125
+        ],
+        [
+          0.2,
+          0.0125,
+          0.0125
+        ]
+      ],
+      "mass_kg": 0.1,
+      "inertia_kg_m2": [
+        1.0416666666666676e-05,
+        0.00033854166666666673,
+        0.00033854166666666673
+      ],
+      "inertia_centre_m": [
+        0.1,
+        0.0,
+        0.0
+      ],
+      "friction": [
+        0.8,
+        0.005,
+        0.0001
+      ],
+      "sliding_friction_defaulted": true,
+      "source_mesh_sha256": "bd90b97e8db71552f35ec7c909f58f419d3c0f0453e672f7979c57579fd3be6e"
+    }
+  },
+  "exported_meshes": {
+    "base": "meshes/base.obj",
+    "arm": "meshes/arm.obj"
+  }
+}

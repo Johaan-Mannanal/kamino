@@ -1,5 +1,9 @@
 # Yash: SO101 inventory for live real-versus-simulation comparison
 
+> Historical handoff. Current scope and responsibilities are in [PROJECT.md](../PROJECT.md);
+> current Windows work is in [yash-articulated-demo.md](yash-articulated-demo.md).
+> Preserve this note as context, not a new task assignment.
+
 Your API-produced charger ZIP acceptance is complete, reported at
 `eaa705cef28083abdd2b0af9f570e7659f5ae836`. Original/relocated validation, native
 appearance and saved +90° X orientation passed. No repeated charger demo or

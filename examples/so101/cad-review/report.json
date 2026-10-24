@@ -1,0 +1,523 @@
+{
+  "source_sha256": "f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+  "source_branch_commit": "e6ab5589dc3d6bd8c9b80379abaed0bfc1109a81",
+  "model_commit": "f3b6013629c7b94f8ee93fd977b161fa8350f9bc",
+  "units": "millimetres; all 215 geometry contexts; metre declaration is used in derived properties",
+  "leaf_instances": 270,
+  "empty_leaf_instances": 11,
+  "environment": {
+    "cadquery": "2.8.0",
+    "cadquery-ocp": "7.9.3.1.1",
+    "numpy": "2.3.5",
+    "trimesh": "5.2.0",
+    "scipy": "1.18.1",
+    "rtree": "1.4.1"
+  },
+  "method": {
+    "bounding_boxes": "OpenCASCADE AddOptimal, triangulation and shape tolerance disabled",
+    "surface_comparison": "2000 area-weighted samples per direction, seeds 101/102, nearest triangles",
+    "cad_tessellation": {
+      "linear_tolerance_mm": 0.03,
+      "angular_tolerance_rad": 0.05
+    },
+    "alignment": "original local part coordinates; no registration, deformation or fitted scaling; STL metres converted to mm"
+  },
+  "comparisons": [
+    {
+      "cad_component": "Base_SO101 v12",
+      "cad_path": "/SO101 Assembly v4[1]/Base_SO101 v12:1/Base_SO101 v12",
+      "model_mesh": "base_so101_v2.stl",
+      "cad_bounds_mm": [
+        [
+          -55.46249999999992,
+          2.926651976320468e-13,
+          -16.000000102591002
+        ],
+        [
+          55.4625000000002,
+          72.00000010000029,
+          71.00000010000016
+        ]
+      ],
+      "cad_size_mm": [
+        110.92500000000013,
+        72.0000001,
+        87.00000020259117
+      ],
+      "model_size_mm": [
+        110.92499643564224,
+        71.99999690055817,
+        87.00000308454037
+      ],
+      "size_delta_mm": [
+        -3.564357882623881e-06,
+        -3.199441820811444e-06,
+        2.8819492001730396e-06
+      ],
+      "cad_volume_mm3": 122707.15098532071,
+      "model_volume_mm3": 122707.6958931155,
+      "volume_difference_percent": 0.0004440717516538953,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.011889332317629071,
+        "max_sampled": 0.29797095192976525
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.014789584900285533,
+        "max_sampled": 0.29999999412143735
+      }
+    },
+    {
+      "cad_component": "Rotation_Pitch_SO101 v8",
+      "cad_path": "/SO101 Assembly v4[2]/Rotation_Pitch_SO101 v8:1/Rotation_Pitch_SO101 v8",
+      "model_mesh": "rotation_pitch_so101_v1.stl",
+      "cad_bounds_mm": [
+        [
+          -59.800000100000005,
+          0.199999899999998,
+          -23.00000010000001
+        ],
+        [
+          1e-07,
+          84.40000010000001,
+          23.000000100000005
+        ]
+      ],
+      "cad_size_mm": [
+        59.80000020000001,
+        84.20000020000002,
+        46.00000020000002
+      ],
+      "model_size_mm": [
+        59.79999899864197,
+        84.19999819307122,
+        46.00000008940697
+      ],
+      "size_delta_mm": [
+        -1.2013580388270384e-06,
+        -2.006928795594831e-06,
+        -1.1059304938498826e-07
+      ],
+      "cad_volume_mm3": 68811.49449208575,
+      "model_volume_mm3": 68803.05194634419,
+      "volume_difference_percent": -0.012269092255414784,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.003160053689120964,
+        "max_sampled": 0.012257778350744946
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.0037492757639161016,
+        "max_sampled": 0.012570695242675619
+      }
+    },
+    {
+      "cad_component": "Upper_arm_SO101 v9",
+      "cad_path": "/SO101 Assembly v4[3]/Upper_arm_SO101 v9:1/Upper_arm_SO101 v9[3]/=>[0:1:1:7]/SOLID",
+      "model_mesh": "upper_arm_so101_v1.stl",
+      "cad_bounds_mm": [
+        [
+          -65.08498911788121,
+          -1e-07,
+          -35.600000100000024
+        ],
+        [
+          77.08498921788119,
+          24.500000000000007,
+          31.7000001
+        ]
+      ],
+      "cad_size_mm": [
+        142.16997833576238,
+        24.50000010000001,
+        67.30000020000003
+      ],
+      "model_size_mm": [
+        142.16997474431992,
+        24.499999359250236,
+        67.29999929666519
+      ],
+      "size_delta_mm": [
+        -3.591442464312422e-06,
+        -7.407497726319434e-07,
+        -9.033348362663673e-07
+      ],
+      "cad_volume_mm3": 117417.0736861034,
+      "model_volume_mm3": 117402.07614021063,
+      "volume_difference_percent": -0.01277288338224071,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.004414822503232708,
+        "max_sampled": 0.012037257801824583
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.004496632251082822,
+        "max_sampled": 0.014101353026683467
+      }
+    },
+    {
+      "cad_component": "Under_arm_SO101 v12",
+      "cad_path": "/SO101 Assembly v4[4]/Under_arm_SO101 v12:1/Under_arm_SO101 v12[2]/=>[0:1:1:10]/SOLID",
+      "model_mesh": "under_arm_so101_v1.stl",
+      "cad_bounds_mm": [
+        [
+          -53.84990743660741,
+          -44.00000010000001,
+          -34.200000100000004
+        ],
+        [
+          76.8499074366074,
+          -19.999999899999988,
+          30.2000001
+        ]
+      ],
+      "cad_size_mm": [
+        130.6998148732148,
+        24.00000020000002,
+        64.40000020000001
+      ],
+      "model_size_mm": [
+        130.69981336593628,
+        24.000000208616257,
+        64.40000236034393
+      ],
+      "size_delta_mm": [
+        -1.5072785117808962e-06,
+        8.616236613079309e-09,
+        2.1603439250839074e-06
+      ],
+      "cad_volume_mm3": 92963.3595519915,
+      "model_volume_mm3": 92949.10467887584,
+      "volume_difference_percent": -0.015333861840141825,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.004478369320496265,
+        "max_sampled": 0.015402358081798856
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.004482467432588541,
+        "max_sampled": 0.011271365290791669
+      }
+    },
+    {
+      "cad_component": "Base_08p v18",
+      "cad_path": "/SO101 Assembly v4[5]/Base_08p v18:1/Base_08p v18",
+      "model_mesh": "base_motor_holder_so101_v1.stl",
+      "cad_bounds_mm": [
+        [
+          -22.350000100000003,
+          38.09999989999999,
+          -20.800000100000005
+        ],
+        [
+          25.2978028935357,
+          69.50000010000001,
+          59.4000000999999
+        ]
+      ],
+      "cad_size_mm": [
+        47.647802993535706,
+        31.400000200000015,
+        80.2000001999999
+      ],
+      "model_size_mm": [
+        47.64743335545063,
+        31.39999881386757,
+        80.19999973475933
+      ],
+      "size_delta_mm": [
+        -0.00036963808507550766,
+        -1.3861324461572622e-06,
+        -4.652405749538957e-07
+      ],
+      "cad_volume_mm3": 23717.252520641785,
+      "model_volume_mm3": 23716.181540458598,
+      "volume_difference_percent": -0.004515616563322834,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.0008684224296776227,
+        "max_sampled": 0.005049466194030727
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.0008884009133195435,
+        "max_sampled": 0.004406570755644774
+      }
+    },
+    {
+      "cad_component": "Motor_holder_SO101_Base v6",
+      "cad_path": "/SO101 Assembly v4[6]/Motor_holder_SO101_Base v6:1/Motor_holder_SO101_Base v6[4]/=>[0:1:1:16]/SOLID",
+      "model_mesh": "motor_holder_so101_base_v1.stl",
+      "cad_bounds_mm": [
+        [
+          -53.8499074366074,
+          -55.0970562748477,
+          -28.880443932947802
+        ],
+        [
+          -25.849907236607397,
+          -16.99999989999999,
+          26.2000001
+        ]
+      ],
+      "cad_size_mm": [
+        28.000000200000006,
+        38.09705637484771,
+        55.0804440329478
+      ],
+      "model_size_mm": [
+        27.9999990016222,
+        38.09705376625061,
+        55.08044362068176
+      ],
+      "size_delta_mm": [
+        -1.1983778058777261e-06,
+        -2.6085971001066355e-06,
+        -4.1226603997301936e-07
+      ],
+      "cad_volume_mm3": 13314.275912388863,
+      "model_volume_mm3": 13310.384943856856,
+      "volume_difference_percent": -0.02922403409400795,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.004046394684447744,
+        "max_sampled": 0.008051926683731378
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.0045457464463215065,
+        "max_sampled": 0.007593961460197482
+      }
+    },
+    {
+      "cad_component": "Motor_holder_SO101_Wrist v8",
+      "cad_path": "/SO101 Assembly v4[7]/Motor_holder_SO101_Wrist v8:1/Motor_holder_SO101_Wrist v8[3]/=>[0:1:1:20]/SOLID",
+      "model_mesh": "motor_holder_so101_wrist_v1.stl",
+      "cad_bounds_mm": [
+        [
+          -53.8499074366074,
+          -53.900000000000105,
+          -30.1909655896632
+        ],
+        [
+          -25.849907236607397,
+          -16.99999989999999,
+          26.2000001
+        ]
+      ],
+      "cad_size_mm": [
+        28.000000200000006,
+        36.90000010000011,
+        56.390965689663204
+      ],
+      "model_size_mm": [
+        27.9999990016222,
+        36.89999878406525,
+        56.39096535742283
+      ],
+      "size_delta_mm": [
+        -1.1983778058777261e-06,
+        -1.3159348668523307e-06,
+        -3.322403756556014e-07
+      ],
+      "cad_volume_mm3": 13880.539857894682,
+      "model_volume_mm3": 13875.561225524209,
+      "volume_difference_percent": -0.035867714234776096,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.0051570780662791825,
+        "max_sampled": 0.007419337501333082
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.005418571773679473,
+        "max_sampled": 0.012054908909195637
+      }
+    },
+    {
+      "cad_component": "Wrist_Roll_Pitch_SO100 v15",
+      "cad_path": "/SO101 Assembly v4[8]/Wrist_Roll_Pitch_SO100 v15:1/Wrist_Roll_Pitch_SO100 v15[2]/=>[0:1:1:23]/SOLID",
+      "model_mesh": "wrist_roll_pitch_so101_v2.stl",
+      "cad_bounds_mm": [
+        [
+          -27.10000010000001,
+          -20.0000000999999,
+          -37.8285886296096
+        ],
+        [
+          35.2000001000001,
+          15.660093001520531,
+          40.00000010000002
+        ]
+      ],
+      "cad_size_mm": [
+        62.30000020000011,
+        35.66009310152043,
+        77.82858872960962
+      ],
+      "model_size_mm": [
+        62.300000339746475,
+        35.659750923514366,
+        77.82606407999992
+      ],
+      "size_delta_mm": [
+        1.397463620378403e-07,
+        -0.0003421780060648416,
+        -0.002524649609696894
+      ],
+      "cad_volume_mm3": 32273.290770946685,
+      "model_volume_mm3": 32291.441969839245,
+      "volume_difference_percent": 0.05624216948120981,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.014622760572585306,
+        "max_sampled": 1.106251316020595
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.017685440812370865,
+        "max_sampled": 1.5724285391943686
+      }
+    },
+    {
+      "cad_component": "Wrist_Roll_Follower_SO101 v10",
+      "cad_path": "/SO101 Assembly v4[9]/Wrist_Roll_Follower_SO101 v10:1/Wrist_Roll_Follower_SO101 v10[2]/=>[0:1:1:28]/SOLID",
+      "model_mesh": "wrist_roll_follower_so101_v1.stl",
+      "cad_bounds_mm": [
+        [
+          -35.20000010000002,
+          -24.21821457935485,
+          -0.050293646521412716
+        ],
+        [
+          29.9999994294477,
+          27.781785620646406,
+          105.375000413425
+        ]
+      ],
+      "cad_size_mm": [
+        65.19999952944772,
+        52.00000020000125,
+        105.42529405994641
+      ],
+      "model_size_mm": [
+        65.19999913871288,
+        52.000001072883606,
+        105.42529289159575
+      ],
+      "size_delta_mm": [
+        -3.90734840038931e-07,
+        8.728823530645968e-07,
+        -1.1683506642157226e-06
+      ],
+      "cad_volume_mm3": 56619.549497569955,
+      "model_volume_mm3": 56639.10130167903,
+      "volume_difference_percent": 0.03453189628418974,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.009838555802345049,
+        "max_sampled": 0.048517375236931656
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.0087057310620085,
+        "max_sampled": 0.04911986573274299
+      }
+    },
+    {
+      "cad_component": "Moving_Jaw_SO101 v3",
+      "cad_path": "/SO101 Assembly v4[10]/Moving_Jaw_SO101 v3:1/Moving_Jaw_SO101 v3",
+      "model_mesh": "moving_jaw_so101_v1.stl",
+      "cad_bounds_mm": [
+        [
+          -12.300000100495923,
+          -82.0000001115231,
+          -24.0000017494106
+        ],
+        [
+          10.0000001,
+          10.0,
+          24.000001749181703
+        ]
+      ],
+      "cad_size_mm": [
+        22.300000200495923,
+        92.0000001115231,
+        48.00000349859231
+      ],
+      "model_size_mm": [
+        22.297976538538933,
+        91.99466649442911,
+        48.00000041723251
+      ],
+      "size_delta_mm": [
+        -0.002023661956989997,
+        -0.005333617093981502,
+        -3.0813597931000913e-06
+      ],
+      "cad_volume_mm3": 20691.456722274048,
+      "model_volume_mm3": 20699.45603978922,
+      "volume_difference_percent": 0.03866000167383577,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.011920509275205928,
+        "max_sampled": 0.052022567790750526
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.012154358115804577,
+        "max_sampled": 0.05361298738763339
+      }
+    },
+    {
+      "cad_component": "WaveShare_Mounting_Plate_SO101 v4",
+      "cad_path": "/SO101 Assembly v4[96]/WaveShare_Mounting_Plate_SO101 v4:1/WaveShare_Mounting_Plate_SO101 v4",
+      "model_mesh": "waveshare_mounting_plate_so101_v2.stl",
+      "cad_bounds_mm": [
+        [
+          -25.5,
+          -21.0,
+          0.0
+        ],
+        [
+          25.5,
+          21.0,
+          7.6000000000000005
+        ]
+      ],
+      "cad_size_mm": [
+        51.0,
+        42.0,
+        7.6000000000000005
+      ],
+      "model_size_mm": [
+        50.999999046325684,
+        41.999999433755875,
+        7.600000128149986
+      ],
+      "size_delta_mm": [
+        -9.5367431640625e-07,
+        -5.662441253662109e-07,
+        1.281499857341828e-07
+      ],
+      "cad_volume_mm3": 9097.225479793908,
+      "model_volume_mm3": 9092.820122332512,
+      "volume_difference_percent": -0.04842528605210737,
+      "model_to_cad_surface_distance_mm": {
+        "p95": 0.0019015967888549922,
+        "max_sampled": 0.04982670077421503
+      },
+      "cad_to_model_surface_distance_mm": {
+        "p95": 0.0018577628461989826,
+        "max_sampled": 0.04982670077421503
+      }
+    }
+  ],
+  "servo_axis_angles": [
+    {
+      "servo_instances": [
+        2,
+        3
+      ],
+      "acute_axis_angle_deg": 0.49999999999840455
+    },
+    {
+      "servo_instances": [
+        3,
+        4
+      ],
+      "acute_axis_angle_deg": 0.7070888325228627
+    }
+  ],
+  "scope": "nominal CAD geometry only; neither physical measurements nor hardware joint calibration",
+  "limitations": [
+    "Sample maxima are not exhaustive Hausdorff distances",
+    "Servo-axis angles come from the saved CAD assembly placements, not measured hardware",
+    "No identifiable camera assembly was matched; compare actual bracket separately",
+    "No simulator geometry, joint frames, limits, gains or collision settings changed"
+  ]
+}
