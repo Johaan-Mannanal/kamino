@@ -1,0 +1,219 @@
+{
+  "scope": "Static geometry audit; source photographs unavailable in this checkout",
+  "production_behavior_changed": false,
+  "raw_sha256": "08e476d661aacc171fdca806743b022ecee0259334452ea1d38e6b66fdfc868c",
+  "simulation_zip_sha256": "7965d7bbccaa11ab682ba5b5a95195a07a79525ed91db155dc6c6d655c7c4777",
+  "raw_extents_provider_units": [
+    1.8998118042945862,
+    1.0147441029548645,
+    1.8998001217842102
+  ],
+  "prepared_extents_m": [
+    0.043,
+    0.027,
+    0.058
+  ],
+  "prepared_bbox_centre_m": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "raw_vertex_count": 131480,
+  "prepared_vertex_count": 131480,
+  "face_indices_equal": true,
+  "maximum_vertex_error_from_documented_preparation_m": 5.204170427930421e-18,
+  "current_scale_factors": [
+    0.022633820835725467,
+    0.026607693428695837,
+    0.03052952746709423
+  ],
+  "current_scale_spread_percent": 34.88455037563121,
+  "axis_permutations": [
+    {
+      "source_axes_for_output_xyz": "XYZ",
+      "scale_factors": [
+        0.022633820835725467,
+        0.026607693428695837,
+        0.03052952746709423
+      ],
+      "scale_spread_percent": 34.88455037563121
+    },
+    {
+      "source_axes_for_output_xyz": "XZY",
+      "scale_factors": [
+        0.022633820835725467,
+        0.014212021407095588,
+        0.05715726736534662
+      ],
+      "scale_spread_percent": 302.17549445014134
+    },
+    {
+      "source_axes_for_output_xyz": "YXZ",
+      "scale_factors": [
+        0.04237521546051559,
+        0.014211934013129946,
+        0.03052952746709423
+      ],
+      "scale_spread_percent": 198.16642422745915
+    },
+    {
+      "source_axes_for_output_xyz": "YZX",
+      "scale_factors": [
+        0.04237521546051559,
+        0.014212021407095588,
+        0.030529339731908772
+      ],
+      "scale_spread_percent": 198.16459071303578
+    },
+    {
+      "source_axes_for_output_xyz": "ZXY",
+      "scale_factors": [
+        0.022633960018707787,
+        0.014211934013129946,
+        0.05715726736534662
+      ],
+      "scale_spread_percent": 302.17796756261936
+    },
+    {
+      "source_axes_for_output_xyz": "ZYX",
+      "scale_factors": [
+        0.022633960018707787,
+        0.026607693428695837,
+        0.030529339731908772
+      ],
+      "scale_spread_percent": 34.882891489934465
+    }
+  ],
+  "raw_y_slices": [
+    {
+      "raw_y_interval": [
+        -0.5083885788917542,
+        -0.4069141685962677
+      ],
+      "vertex_count": 92477,
+      "raw_xyz_extents": [
+        1.8996371626853943,
+        0.10145872831344604,
+        1.8995466232299805
+      ]
+    },
+    {
+      "raw_y_interval": [
+        -0.4069141685962677,
+        -0.30543975830078124
+      ],
+      "vertex_count": 5479,
+      "raw_xyz_extents": [
+        1.899612545967102,
+        0.1014564037322998,
+        1.8995593190193176
+      ]
+    },
+    {
+      "raw_y_interval": [
+        -0.30543975830078124,
+        -0.20396534800529476
+      ],
+      "vertex_count": 5502,
+      "raw_xyz_extents": [
+        1.899633526802063,
+        0.1014586091041565,
+        1.8995805382728577
+      ]
+    },
+    {
+      "raw_y_interval": [
+        -0.20396534800529476,
+        -0.10249093770980833
+      ],
+      "vertex_count": 11816,
+      "raw_xyz_extents": [
+        1.8998118042945862,
+        0.10140277445316315,
+        1.8998001217842102
+      ]
+    },
+    {
+      "raw_y_interval": [
+        -0.10249093770980833,
+        -0.0010165274143218994
+      ],
+      "vertex_count": 1338,
+      "raw_xyz_extents": [
+        0.7768938839435577,
+        0.10141249280422926,
+        0.6099987924098969
+      ]
+    },
+    {
+      "raw_y_interval": [
+        -0.0010165274143218994,
+        0.10045788288116464
+      ],
+      "vertex_count": 1160,
+      "raw_xyz_extents": [
+        0.7768888473510742,
+        0.10138919099699706,
+        0.6099812686443329
+      ]
+    },
+    {
+      "raw_y_interval": [
+        0.10045788288116464,
+        0.20193229317665107
+      ],
+      "vertex_count": 1092,
+      "raw_xyz_extents": [
+        0.7768896222114563,
+        0.10137230157852173,
+        0.6081271171569824
+      ]
+    },
+    {
+      "raw_y_interval": [
+        0.20193229317665107,
+        0.3034067034721375
+      ],
+      "vertex_count": 9223,
+      "raw_xyz_extents": [
+        0.7768524587154388,
+        0.10128092765808105,
+        0.6080984473228455
+      ]
+    },
+    {
+      "raw_y_interval": [
+        0.3034067034721375,
+        0.4048811137676239
+      ],
+      "vertex_count": 1422,
+      "raw_xyz_extents": [
+        0.2950988709926605,
+        0.10136613249778748,
+        0.13112742453813553
+      ]
+    },
+    {
+      "raw_y_interval": [
+        0.4048811137676239,
+        0.5063555240631104
+      ],
+      "vertex_count": 1971,
+      "raw_xyz_extents": [
+        0.29531267285346985,
+        0.10143572092056274,
+        0.13112175464630127
+      ]
+    }
+  ],
+  "interpretation": [
+    "Static projections show pins extending along raw +Y, preserved as prepared +Y.",
+    "The 58 mm dimension documented as including pins was applied along Z, not Y.",
+    "The raw mesh contains a broad square slab behind a smaller pin-bearing rise.",
+    "Slab identity cannot be confirmed without source photos; do not auto-segment it.",
+    "No pure axis permutation makes these estimated dimensions uniformly fit this mesh.",
+    "Scale-spread minimization alone would choose the semantically wrong pin direction."
+  ],
+  "source_photos_reviewed": false,
+  "native_viewer_inspected": false
+}

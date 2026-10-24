@@ -4,10 +4,9 @@
 - Date: 2026-10-23 (America/Los_Angeles)
 - Branch: `codex/asset-preparation`
 - Implementation commit: `e0d922d60347465014498400032e288c9fe6906b`
-- Push status: not pushed. Automatic approval review rejected publication to
-  `https://github.com/Johaan-Mannanal/photo2sim.git` pending explicit user approval.
-  After approval: `git push -u origin codex/asset-preparation` (tracking currently
-  points to backend-pipeline; do not push to that branch).
+- Push status: pushed to `https://github.com/Johaan-Mannanal/photo2sim.git` after
+  explicit user approval. `git push -u origin codex/asset-preparation` succeeded;
+  tracking now correctly points to `origin/codex/asset-preparation`.
 
 ## Confirmed / tested
 
@@ -104,7 +103,7 @@ properties, and let missing credits fall back to manual entry.
 
 ## Questions / blockers
 
-Push requires explicit user approval after automatic review rejected publication.
+Push approved by the user and completed successfully.
 No geometry blocker. Orientation is assumed, not inferred: x/y/z must already
 match the confirmed dimensions; native glTF +Y-up is not converted. Nonuniform
 scaling can distort geometry. Box collision is an approximation. This does not
