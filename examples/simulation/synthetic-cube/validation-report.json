@@ -1,0 +1,102 @@
+{
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows",
+    "mujoco": "3.17.0",
+    "trimesh": "5.2.0",
+    "numpy": "2.5.4"
+  },
+  "scope": "Synthetic fixture only. No reconstructed object or measured real-world fidelity.",
+  "original": {
+    "mesh": {
+      "watertight": true,
+      "convex": true,
+      "vertices": 8,
+      "faces": 12,
+      "dimensions_m": [
+        0.06,
+        0.06,
+        0.06
+      ]
+    },
+    "scenes": [
+      {
+        "scene": "primitive.xml",
+        "passed": true,
+        "steps": 100000,
+        "simulated_seconds": 4.999999999995016,
+        "initial_centre_z_m": 0.7,
+        "final_centre_z_m": 0.42999976540525825,
+        "expected_final_centre_z_m": 0.43000000000000005,
+        "first_contact_s": 0.23459999999998232,
+        "max_object_table_contacts": 4,
+        "maximum_contact_penetration_m": 0.0007539776036459307,
+        "maximum_settling_window_generalized_speed": 0.0004713667122568386,
+        "mujoco_warning_counts": {},
+        "python_warnings": []
+      },
+      {
+        "scene": "scene.xml",
+        "passed": true,
+        "steps": 100000,
+        "simulated_seconds": 4.999999999995016,
+        "initial_centre_z_m": 0.7,
+        "final_centre_z_m": 0.42999976540525825,
+        "expected_final_centre_z_m": 0.43000000000000005,
+        "first_contact_s": 0.23459999999998232,
+        "max_object_table_contacts": 4,
+        "maximum_contact_penetration_m": 0.0007539776036459307,
+        "maximum_settling_window_generalized_speed": 0.0004713667122568386,
+        "mujoco_warning_counts": {},
+        "python_warnings": []
+      }
+    ]
+  },
+  "relocated": {
+    "mesh": {
+      "watertight": true,
+      "convex": true,
+      "vertices": 8,
+      "faces": 12,
+      "dimensions_m": [
+        0.06,
+        0.06,
+        0.06
+      ]
+    },
+    "scenes": [
+      {
+        "scene": "primitive.xml",
+        "passed": true,
+        "steps": 100000,
+        "simulated_seconds": 4.999999999995016,
+        "initial_centre_z_m": 0.7,
+        "final_centre_z_m": 0.42999976540525825,
+        "expected_final_centre_z_m": 0.43000000000000005,
+        "first_contact_s": 0.23459999999998232,
+        "max_object_table_contacts": 4,
+        "maximum_contact_penetration_m": 0.0007539776036459307,
+        "maximum_settling_window_generalized_speed": 0.0004713667122568386,
+        "mujoco_warning_counts": {},
+        "python_warnings": []
+      },
+      {
+        "scene": "scene.xml",
+        "passed": true,
+        "steps": 100000,
+        "simulated_seconds": 4.999999999995016,
+        "initial_centre_z_m": 0.7,
+        "final_centre_z_m": 0.42999976540525825,
+        "expected_final_centre_z_m": 0.43000000000000005,
+        "first_contact_s": 0.23459999999998232,
+        "max_object_table_contacts": 4,
+        "maximum_contact_penetration_m": 0.0007539776036459307,
+        "maximum_settling_window_generalized_speed": 0.0004713667122568386,
+        "mujoco_warning_counts": {},
+        "python_warnings": []
+      }
+    ]
+  },
+  "portability_passed": true,
+  "passed": true
+}

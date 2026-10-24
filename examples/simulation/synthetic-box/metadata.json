@@ -1,0 +1,19 @@
+{
+  "fixture": "synthetic-box",
+  "provenance": "Synthetic convex cuboid, hand-authored for simulator setup. Not reconstructed from photos.",
+  "units": {"scene_length": "m", "mesh_vertex_length": "mm", "mass": "kg", "inertia": "kg*m^2", "time": "s"},
+  "dimensions_m": [0.08, 0.06, 0.04],
+  "dimensions_source": "Exact synthetic design, not a real-object measurement",
+  "mass_kg": 0.2,
+  "mass_source": "Assumed synthetic mass, not measured",
+  "diagonal_inertia_kg_m2": [0.00008666666666666667, 0.00013333333333333334, 0.0001666666666666667],
+  "inertia_source": "Analytic uniform cuboid: mass*(other_side_1^2+other_side_2^2)/12; centre of mass at origin",
+  "visual_mesh": "meshes/synthetic_box_mm.obj",
+  "mesh_scale_to_m": [0.001, 0.001, 0.001],
+  "collision": {"type": "box", "half_extents_m": [0.04, 0.03, 0.02], "source": "Exact synthetic box proxy; separate from non-colliding visual mesh"},
+  "contact_assumptions": {"friction": [0.8, 0.005, 0.0001], "solref": [0.001, 1], "timestep_s": 0.0002, "note": "Illustrative MuJoCo settings for this fixture, not calibrated material properties"},
+  "table_top_m": 0.4,
+  "initial_object_centre_m": [0, 0, 0.7],
+  "validation": {"duration_s": 5.0, "settling_window_s": 0.5, "max_settled_speed": 0.001, "max_penetration_m": 0.001, "final_height_tolerance_m": 0.0002},
+  "limitations": ["One simple convex rigid body", "No photo-to-3D generation", "No measured real-world dynamics", "No training or robot connection"]
+}
