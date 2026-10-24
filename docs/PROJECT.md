@@ -24,11 +24,11 @@ not become confirmed measurements automatically.
 | Gemini suggestions | Live backend request verified; explicit frontend adoption |
 | Articulated assembly format and generated two-link proof | Local CLI/library implemented; Mac motion/reset/relocation checks pass; Windows viewer pending |
 | Photo part segmentation / joint inference | Not implemented |
-| CAD application import / rigid-link grouping | Not implemented; offline CAD inspection only |
-| Assembly review UI / articulated job API | Not implemented |
+| CAD application import / rigid-link grouping | Local STEP importer and source-preserving grouping implemented |
+| Assembly review UI / articulated job API | Local browser workbench implemented; HTTP jobs pending |
 | Imported SO101 reference model | Loads and runs; nominal CAD dimensions closely agree |
 | Combined reference robot/charger/table | Mac validation; Windows native/reset/relocation acceptance reported at 74cf11a |
-| Physical joint mapping / real motion comparison | Unverified; reference evidence needed |
+| Physical joint mapping / real motion comparison | Take-2 capture imported and offline-audited (599 samples); photo pairing and mapping unverified |
 | Fetch public integration / Vultr deployment | Incomplete / deferred |
 
 See [example taxonomy](../examples/README.md), [CAD review](../examples/so101/cad-review/README.md),
@@ -58,22 +58,26 @@ contain its evidence files. No measured physical accuracy follows from it.
 Windows native-viewer acceptance of the new generated fixture remains pending.
 See the [two-link proof](../examples/assemblies/two-link-hinge/README.md).
 
-### 4. Build guided assembly preparation and review — next
-- [ ] Import optional CAD component geometry; group components into rigid links.
+### 4. Build guided assembly preparation and review — local slice implemented
+- [x] Import optional CAD component geometry; group components into rigid links.
 - [ ] Add photo-based part proposals or user-provided part meshes.
-- [ ] Show link hierarchy, joint axes and motion sliders; permit corrections.
-- [ ] Save/revise reviewed records, then regenerate without repeating reconstruction.
+- [x] Show link connections, joint axes and motion sliders; permit corrections.
+- [x] Save/revise reviewed records, then regenerate without repeating reconstruction.
 - [ ] Expose articulated processing through API and UI, retaining failure artifacts.
 
-### 5. Apply the same workflow to the SO101
-- [ ] Process supplied arm geometry through reusable assembly tools.
+### 5. Apply the same workflow to the SO101 — CAD/template candidate generated
+- [x] Process 11 supplied CAD components through reusable assembly tools.
 - [ ] Review joint frames, limits, gripper relationship and physical assumptions.
-- [ ] Record which data came from photos, CAD, measurements or imported reference.
-- [ ] Generate a new articulated export; compare with the reference separately.
+- [x] Record which data came from photos, CAD, measurements or imported reference.
+- [x] Generate a new articulated export; compare frames with the reference separately.
+- [x] Resolve local free-space SO101 tracking with convex hulls and explicit adjacent-pair exclusions.
+- [ ] Accept revised scene on Windows and replace assumed clearance with measured physical placement.
+See [collision revision](../examples/assemblies/so101-guided/collision-revision/README.md); the original low-root candidate remains a recorded failure.
 CAD may be required for this first demonstration. Photos-only robot conversion
 is not yet proven. Reusing a template must be labeled template-assisted.
 
 ### 6. Compare with the physical arm
+- [x] Audit saved stationary observations/calibration identity without hardware access.
 - [ ] Match timestamped whole-arm images and joint observations in several poses.
 - [ ] Verify signs/zeros/gripper mapping and measured base/table placement.
 - [ ] Compare observation replay (kinematics) before commanded-motion prediction.
@@ -93,7 +97,10 @@ See [sponsor checklist](SPONSORS.md). No new eligibility verification is claimed
 
 ## Work allocation now
 - **Johaan + this agent:** product integration, assembly schema/export and synthetic
-  proof, then guided preparation/review. Srijan/Atul work is taken over here.
+  proof, guided review and SO101 free-space motion implemented locally. Next:
+  physical mapping integration and complete assembly HTTP processing.
+- **Atul, proposed handoff:** assembly jobs/API and frontend wiring; see
+  [scoped instructions](handoffs/atul-assembly-jobs.md). Assignment is pending Johaan sending it.
 - **Yash + Windows agent:** physical reference evidence and independent Windows
   acceptance. Follow [updated instructions](handoffs/yash-articulated-demo.md).
 - No repeat Meshy job, charger drop test or broad reference-model rewrite is needed.
@@ -108,3 +115,5 @@ Preserve historical handoffs, source branches and examples. Clearly label
 synthetic fixtures, generated exports, imported reference models, observations,
 and estimates. Keep secrets/raw large captures out of Git. No scope claim should
 outpace tested evidence. Main remains separate from feature integration.
+
+Current guided slice: [workflow](GUIDED_ASSEMBLIES.md) and [SO101 evidence](../examples/assemblies/so101-guided/README.md). The workbench is local-file based; no automatic photo articulation or hardware dynamics validation is claimed.
