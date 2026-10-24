@@ -1,0 +1,10 @@
+{
+  "job_id": "d415d0ce-07af-4eae-9a1d-cf81ebb227a0",
+  "status": "completed",
+  "synthetic": true,
+  "download_bytes": 3218,
+  "sha256": "e679f1e7341ceb6d8fab4fd9d506f4530cc13ff9acfbf2d36ff70cd2c28f1b99",
+  "unauthenticated_download_status": 401,
+  "validation_passed": true,
+  "portability_passed": true
+}

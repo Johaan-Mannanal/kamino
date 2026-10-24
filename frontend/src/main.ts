@@ -250,6 +250,7 @@ function bind() {
     render()
     try {
       job = await api.create(files)
+      files = []
       draft = {}
       if (mode === 'live') {
         const url = new URL(location.href)
