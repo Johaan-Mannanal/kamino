@@ -1,0 +1,19 @@
+{
+  "integration_commit": "93e5aec87f4f8236abc57cd572092f174ed7cbe4",
+  "job_id": "9b3b27bf-805c-4fa0-9aca-e10eba75a62e",
+  "frontend_mode": "live",
+  "backend_provider": "mock",
+  "synthetic": true,
+  "ui_upload": true,
+  "ui_properties_saved": true,
+  "ui_process_completed": true,
+  "ui_download_event_received": true,
+  "browser_download_sha256": "bfbc1cc8d8430adbeb4b6cc7cafde715129f74b6aeb36eb584c4605ed8a3610c",
+  "browser_zip_matches_server_bundle": true,
+  "unauthorized_zip_status": 401,
+  "token_included_in_evidence": false,
+  "browser_console_errors": [],
+  "native_viewer_inspected": true,
+  "relocated_validation_passed": true,
+  "final_charger_accepted": false
+}

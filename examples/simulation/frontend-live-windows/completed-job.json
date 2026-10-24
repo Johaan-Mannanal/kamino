@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "id": "9b3b27bf-805c-4fa0-9aca-e10eba75a62e",
+  "status": "completed",
+  "provider": "mock",
+  "synthetic": true,
+  "created_at": "2026-10-24T05:52:30.953830Z",
+  "updated_at": "2026-10-24T05:53:02.183261Z",
+  "progress": 100,
+  "source_images": [
+    "uploads/00.png"
+  ],
+  "provider_task_id": "mock-04062559-9f7a-4be5-8582-71d780f1ab31",
+  "mesh_path": "reconstruction/mesh.obj",
+  "properties": {
+    "dimensions_m": {
+      "x": 0.04,
+      "y": 0.05,
+      "z": 0.06,
+      "source": "estimated",
+      "note": "Synthetic browser acceptance dimensions; not a real-object measurement."
+    },
+    "mass_kg": {
+      "value": 0.08,
+      "source": "estimated",
+      "note": "Assumed mass for synthetic acceptance test."
+    },
+    "sliding_friction": null
+  },
+  "asset": {
+    "schema_version": "1.0",
+    "asset_id": "f9dfc697-6b9c-486b-8fe8-67a64ae1abfa",
+    "visual_mesh": "meshes/visual.obj",
+    "properties": {
+      "dimensions_m": {
+        "x": 0.04,
+        "y": 0.05,
+        "z": 0.06,
+        "source": "estimated",
+        "note": "Synthetic browser acceptance dimensions; not a real-object measurement."
+      },
+      "mass_kg": {
+        "value": 0.08,
+        "source": "estimated",
+        "note": "Assumed mass for synthetic acceptance test."
+      },
+      "sliding_friction": null
+    },
+    "collision": {
+      "kind": "box",
+      "mesh_path": null
+    },
+    "synthetic": true,
+    "notes": [
+      "Orientation: the input mesh axes are assumed to already match the requested x/y/z dimension axes; no rotation or axis permutation was applied.",
+      "Bounding box centred at the origin; source centre was (0, 0, 0) in input units.",
+      "Scaled per axis independently from source extents (1, 1, 1) (input units, treated as unknown) to confirmed full extents (0.04, 0.05, 0.06) m.",
+      "Nonuniform distortion: per-axis scale factors differ by up to 50.0% (x:y:z ratio 1.000:1.250:1.500); the mesh's proportions did not match the confirmed dimensions.",
+      "Collision is a box centred at the origin with the confirmed dimensions; mass and friction were passed through unchanged and not inferred from geometry.",
+      "Simulation visual is a geometry-only copy; original reconstruction and prepared materials are retained separately. No texture fidelity is claimed."
+    ]
+  },
+  "export_path": "attempts/3cf13650-7253-4f03-bb25-16af200224d9/bundle/scene.xml",
+  "validation_path": "attempts/3cf13650-7253-4f03-bb25-16af200224d9/bundle/validation-report.json",
+  "bundle_path": "attempts/3cf13650-7253-4f03-bb25-16af200224d9/simulation.zip",
+  "error": null
+}
