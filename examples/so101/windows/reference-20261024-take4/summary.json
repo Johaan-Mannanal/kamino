@@ -1,0 +1,54 @@
+{
+  "samples": 599,
+  "first_read_utc": "2026-10-24T13:32:49.220808+00:00",
+  "last_read_utc": "2026-10-24T13:34:49.089175+00:00",
+  "span_s": 119.86625149999963,
+  "sample_rate_hz": 4.988893808863305,
+  "signals": {
+    "shoulder_pan.pos": {
+      "median": -4.351648351648351,
+      "min": -4.351648351648351,
+      "max": -4.351648351648351,
+      "span": 0.0,
+      "delta_from_take3_median": -3.9560439560439558
+    },
+    "shoulder_lift.pos": {
+      "median": -104.26373626373626,
+      "min": -104.26373626373626,
+      "max": -104.26373626373626,
+      "span": 0.0,
+      "delta_from_take3_median": -0.0879120879120876
+    },
+    "elbow_flex.pos": {
+      "median": 96.26373626373626,
+      "min": 96.26373626373626,
+      "max": 96.26373626373626,
+      "span": 0.0,
+      "delta_from_take3_median": 0.0879120879120876
+    },
+    "wrist_flex.pos": {
+      "median": 87.47252747252747,
+      "min": 87.47252747252747,
+      "max": 87.47252747252747,
+      "span": 0.0,
+      "delta_from_take3_median": 3.4285714285714306
+    },
+    "wrist_roll.pos": {
+      "median": 3.912087912087912,
+      "min": 3.912087912087912,
+      "max": 3.912087912087912,
+      "span": 0.0,
+      "delta_from_take3_median": -0.26373626373626413
+    },
+    "gripper.pos": {
+      "median": 0.8867667121418827,
+      "min": 0.8867667121418827,
+      "max": 0.8867667121418827,
+      "span": 0.0,
+      "delta_from_take3_median": -0.068212824010914
+    }
+  },
+  "accepted_as_paired_reference": false,
+  "accepted_as_distinct_mapping_pose": false,
+  "reason": "Operator reported no intentional joint change and explicitly said timing or unchanged pose/jaw opening is uncertain."
+}

@@ -1,0 +1,5 @@
+# Preserve archived source bytes for cross-platform hashes.
+/capture.json -text whitespace=cr-at-eol
+/calibration.json -text whitespace=cr-at-eol
+/observations.jsonl -text whitespace=cr-at-eol
+/summary.json -text whitespace=cr-at-eol

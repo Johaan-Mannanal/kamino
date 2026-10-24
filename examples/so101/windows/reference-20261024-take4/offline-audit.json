@@ -1,0 +1,133 @@
+{
+  "schema_version": "stationary-audit-1.0",
+  "scope": "Saved capture integrity and signal ranges only; not physical calibration",
+  "capture_integrity_passed": true,
+  "units_verified": false,
+  "hardware_mapping_verified": false,
+  "physical_pose_pairing_verified": false,
+  "operator_stationarity_verified": false,
+  "source_hashes": {
+    "capture.json": "af32817618b4fcf3c8642daca6406aa5788c17a700c309c10cabb0f91f61fc27",
+    "calibration.json": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+    "observations.jsonl": "ca1d362a5f08ffffe207242d683976ddc29ade57ebfc2f505c36dc5da8d35f43"
+  },
+  "samples": 599,
+  "first_read_utc": "2026-10-24T13:32:49.220808+00:00",
+  "last_read_utc": "2026-10-24T13:34:49.089175+00:00",
+  "elapsed_span_s": 119.86625149999963,
+  "sample_rate_hz": 4.988893808863305,
+  "signals": {
+    "shoulder_pan.pos": {
+      "declared_unit": "degrees",
+      "minimum": -4.351648351648351,
+      "maximum": -4.351648351648351,
+      "span": 0.0,
+      "median": -4.351648351648351
+    },
+    "shoulder_lift.pos": {
+      "declared_unit": "degrees",
+      "minimum": -104.26373626373626,
+      "maximum": -104.26373626373626,
+      "span": 0.0,
+      "median": -104.26373626373626
+    },
+    "elbow_flex.pos": {
+      "declared_unit": "degrees",
+      "minimum": 96.26373626373626,
+      "maximum": 96.26373626373626,
+      "span": 0.0,
+      "median": 96.26373626373626
+    },
+    "wrist_flex.pos": {
+      "declared_unit": "degrees",
+      "minimum": 87.47252747252747,
+      "maximum": 87.47252747252747,
+      "span": 0.0,
+      "median": 87.47252747252747
+    },
+    "wrist_roll.pos": {
+      "declared_unit": "degrees",
+      "minimum": 3.912087912087912,
+      "maximum": 3.912087912087912,
+      "span": 0.0,
+      "median": 3.912087912087912
+    },
+    "gripper.pos": {
+      "declared_unit": "normalized_0_100",
+      "minimum": 0.8867667121418827,
+      "maximum": 0.8867667121418827,
+      "span": 0.0,
+      "median": 0.8867667121418827
+    }
+  },
+  "mapping_review": {
+    "shoulder_pan.pos": {
+      "declared_source_unit": "degrees",
+      "simulation_joint": null,
+      "sign": null,
+      "offset_rad": null,
+      "radians_per_unit": null,
+      "status": "unreviewed",
+      "evidence": []
+    },
+    "shoulder_lift.pos": {
+      "declared_source_unit": "degrees",
+      "simulation_joint": null,
+      "sign": null,
+      "offset_rad": null,
+      "radians_per_unit": null,
+      "status": "unreviewed",
+      "evidence": []
+    },
+    "elbow_flex.pos": {
+      "declared_source_unit": "degrees",
+      "simulation_joint": null,
+      "sign": null,
+      "offset_rad": null,
+      "radians_per_unit": null,
+      "status": "unreviewed",
+      "evidence": []
+    },
+    "wrist_flex.pos": {
+      "declared_source_unit": "degrees",
+      "simulation_joint": null,
+      "sign": null,
+      "offset_rad": null,
+      "radians_per_unit": null,
+      "status": "unreviewed",
+      "evidence": []
+    },
+    "wrist_roll.pos": {
+      "declared_source_unit": "degrees",
+      "simulation_joint": null,
+      "sign": null,
+      "offset_rad": null,
+      "radians_per_unit": null,
+      "status": "unreviewed",
+      "evidence": []
+    },
+    "gripper.pos": {
+      "declared_source_unit": "normalized_0_100",
+      "simulation_joint": null,
+      "sign": null,
+      "offset_rad": null,
+      "radians_per_unit": null,
+      "status": "unreviewed",
+      "evidence": []
+    }
+  },
+  "mapping_equation": "q_rad = sign * radians_per_unit * observation + offset_rad",
+  "missing_evidence": [
+    "Associated whole-arm front/side photographs and operator unchanged-pose confirmation",
+    "Multiple distinct associated poses to resolve joint signs and offsets",
+    "Measured jaw opening and reviewed gripper conversion",
+    "Measured base/table placement before world-frame comparison"
+  ],
+  "limitations": [
+    "Calibration agreement checks recorded metadata against saved bytes; hardware was not contacted.",
+    "Units are declarations from capture metadata, not independently verified by this generic audit.",
+    "Encoder stability alone does not establish stationary camera association or joint mapping.",
+    "No normalized signal is treated as an angle; mapping fields intentionally remain unset.",
+    "No requested or sent actions are inferred from observations."
+  ]
+}

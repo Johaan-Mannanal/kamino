@@ -1,0 +1,181 @@
+{
+  "scope": "Offline source/calibration arithmetic audit, not calibration or a fitted hardware mapping",
+  "lerobot_commit": "146d8474932c8b566717eb2738ba459337ab71c4",
+  "formula": "degrees=(Present_Position-(range_min+range_max)/2)*360/(4096-1)",
+  "parent_commit_same_formula": "297774fca4e3ad0aa34e7425fbf937111637e77b",
+  "half_turn_homing_reference_counts": 2047,
+  "shoulder_lift_range_midpoint_counts": 2145,
+  "shoulder_lift_half_turn_pose_degree_value": -8.615384615384615,
+  "shoulder_lift_take3_with_unverified_halfturn_zero_deg": -95.56043956043956,
+  "halfturn_rezero_is_not_adopted": true,
+  "homing_offset_added_again": false,
+  "current_normalization_recomputed_all_take3_take4_body_samples": true,
+  "body_joints": [
+    {
+      "joint": "shoulder_pan",
+      "calibration_range_counts": [
+        745,
+        3444
+      ],
+      "range_midpoint_counts": 2094.5,
+      "calibrated_degree_range": [
+        -118.63736263736264,
+        118.63736263736264
+      ],
+      "take3_count": 2090,
+      "take3_reported_degrees": -0.3956043956043956,
+      "model_joint_range_rad": [
+        -1.91986,
+        1.91986
+      ],
+      "model_joint_range_degrees": [
+        -109.99987525598623,
+        109.99987525598623
+      ],
+      "model_mapping_verified": false
+    },
+    {
+      "joint": "shoulder_lift",
+      "calibration_range_counts": [
+        948,
+        3342
+      ],
+      "range_midpoint_counts": 2145.0,
+      "calibrated_degree_range": [
+        -105.23076923076924,
+        105.23076923076924
+      ],
+      "take3_count": 960,
+      "take3_reported_degrees": -104.17582417582418,
+      "model_joint_range_rad": [
+        -1.7453293,
+        1.7453293
+      ],
+      "model_joint_range_degrees": [
+        -100.00000275052231,
+        100.00000275052231
+      ],
+      "model_mapping_verified": false
+    },
+    {
+      "joint": "elbow_flex",
+      "calibration_range_counts": [
+        796,
+        2994
+      ],
+      "range_midpoint_counts": 1895.0,
+      "calibrated_degree_range": [
+        -96.61538461538463,
+        96.61538461538463
+      ],
+      "take3_count": 2989,
+      "take3_reported_degrees": 96.17582417582418,
+      "model_joint_range_rad": [
+        -1.69,
+        1.69
+      ],
+      "model_joint_range_degrees": [
+        -96.82986737710912,
+        96.82986737710912
+      ],
+      "model_mapping_verified": false
+    },
+    {
+      "joint": "wrist_flex",
+      "calibration_range_counts": [
+        933,
+        2935
+      ],
+      "range_midpoint_counts": 1934.0,
+      "calibrated_degree_range": [
+        -88.0,
+        88.0
+      ],
+      "take3_count": 2890,
+      "take3_reported_degrees": 84.04395604395604,
+      "model_joint_range_rad": [
+        -1.658063,
+        1.658063
+      ],
+      "model_joint_range_degrees": [
+        -95.00001206679983,
+        95.00001206679983
+      ],
+      "model_mapping_verified": false
+    },
+    {
+      "joint": "wrist_roll",
+      "calibration_range_counts": [
+        0,
+        4095
+      ],
+      "range_midpoint_counts": 2047.5,
+      "calibrated_degree_range": [
+        -180.0,
+        180.0
+      ],
+      "take3_count": 2095,
+      "take3_reported_degrees": 4.175824175824176,
+      "model_joint_range_rad": [
+        -2.7438473,
+        2.8412063
+      ],
+      "model_joint_range_degrees": [
+        -157.21086991836626,
+        162.78912971598044
+      ],
+      "model_mapping_verified": false
+    }
+  ],
+  "upstream_limits": [
+    {
+      "shoulder_lift_attributes": {
+        "axis": "0 0 1",
+        "name": "shoulder_lift",
+        "type": "hinge",
+        "range": "-1.7453292519943224 1.7453292519943366",
+        "class": "sts3215"
+      },
+      "limits_deg": [
+        -99.99999999999959,
+        100.00000000000041
+      ],
+      "source_url": "https://github.com/TheRobotStudio/SO-ARM100/blob/608122e9ac330a753735f2e18aee73338e9ac407/Simulation/SO101/so101_new_calib.xml",
+      "git_blob": "ee235d7e313a9cd9ab56a98dd707c61c97f1e44a"
+    },
+    {
+      "shoulder_lift_attributes": {
+        "axis": "0 0 1",
+        "name": "shoulder_lift",
+        "type": "hinge",
+        "range": "-1.7453292519943224 1.7453292519943366",
+        "class": "sts3215"
+      },
+      "limits_deg": [
+        -99.99999999999959,
+        100.00000000000041
+      ],
+      "source_url": "https://github.com/TheRobotStudio/SO-ARM100/blob/aec17bbc256d1a7342d53aaa4950595d4c30b40d/Simulation/SO101/so101_new_calib.xml",
+      "git_blob": "ee235d7e313a9cd9ab56a98dd707c61c97f1e44a"
+    },
+    {
+      "shoulder_lift_attributes": {
+        "axis": "0 0 1",
+        "name": "shoulder_lift",
+        "type": "hinge",
+        "range": "-3.31612557878923 0.1745329251994294",
+        "class": "sts3215"
+      },
+      "limits_deg": [
+        -190.00000000000023,
+        9.999999999999796
+      ],
+      "source_url": "https://github.com/TheRobotStudio/SO-ARM100/blob/608122e9ac330a753735f2e18aee73338e9ac407/Simulation/SO101/so101_old_calib.xml",
+      "git_blob": "7bc79e982ccd9208caaa2132801d6496ecbe0425"
+    }
+  ],
+  "calibration_creation_procedure": "unknown; current source inspected but not executed",
+  "model_limits_changed": false,
+  "calibration_changed": false,
+  "mappings_fitted": false
+}

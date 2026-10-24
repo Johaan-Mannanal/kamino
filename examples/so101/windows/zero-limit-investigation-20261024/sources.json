@@ -1,0 +1,51 @@
+{
+  "sources": [
+    {
+      "kind": "Upstream calibration convention documentation",
+      "url": "https://github.com/TheRobotStudio/SO-ARM100/blob/608122e9ac330a753735f2e18aee73338e9ac407/Simulation/SO101/README.md",
+      "git_blob": "44d954daf2ef168fdbfd9c2831d36094a15eceb9"
+    },
+    {
+      "kind": "Upstream new-calibration MJCF, README-linked ref",
+      "url": "https://github.com/TheRobotStudio/SO-ARM100/blob/608122e9ac330a753735f2e18aee73338e9ac407/Simulation/SO101/so101_new_calib.xml",
+      "git_blob": "ee235d7e313a9cd9ab56a98dd707c61c97f1e44a"
+    },
+    {
+      "kind": "Upstream new-calibration MJCF, derivation-step ref",
+      "url": "https://github.com/TheRobotStudio/SO-ARM100/blob/aec17bbc256d1a7342d53aaa4950595d4c30b40d/Simulation/SO101/so101_new_calib.xml",
+      "git_blob": "ee235d7e313a9cd9ab56a98dd707c61c97f1e44a"
+    },
+    {
+      "kind": "Upstream old-calibration MJCF",
+      "url": "https://github.com/TheRobotStudio/SO-ARM100/blob/608122e9ac330a753735f2e18aee73338e9ac407/Simulation/SO101/so101_old_calib.xml",
+      "git_blob": "7bc79e982ccd9208caaa2132801d6496ecbe0425"
+    },
+    {
+      "kind": "Upstream new-calibration URDF",
+      "url": "https://github.com/TheRobotStudio/SO-ARM100/blob/608122e9ac330a753735f2e18aee73338e9ac407/Simulation/SO101/so101_new_calib.urdf",
+      "git_blob": "9552a231d8b23bed68ec15779eba620c5d875ec4"
+    },
+    {
+      "kind": "Pinned Menagerie changelog",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/f3b6013629c7b94f8ee93fd977b161fa8350f9bc/robotstudio_so101/CHANGELOG.md",
+      "git_blob": "d8318d4c49688f8ea714e4dce5349c4958783d0e"
+    }
+  ],
+  "verified_findings": {
+    "new_calibration_documented_zero": "middle of joint range",
+    "old_calibration_documented_zero": "fully extended horizontally",
+    "gripper_normalization_not_reflected_in_model": true,
+    "new_mjcf_refs_same_git_blob": true,
+    "new_model_shoulder_lift_limits_degrees": [
+      -100,
+      100
+    ],
+    "old_model_shoulder_lift_limits_degrees": [
+      -190,
+      10
+    ],
+    "limits_are_per_instance_measurements": false,
+    "limits_measurement_origin": "Not documented in inspected files; generated CAD/model inputs, not this arm's calibration JSON"
+  },
+  "do_not_infer": "A different old/new range centre alone does not supply a verified frame/sign/zero conversion; source link frames also differ."
+}

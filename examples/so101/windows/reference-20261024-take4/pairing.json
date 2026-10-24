@@ -1,0 +1,33 @@
+{
+  "capture_take_id": "reference-20261024-take4",
+  "status": "unpaired",
+  "pairing_complete": false,
+  "hardware_synchronized": false,
+  "operator_initially_ready": true,
+  "operator_intentional_joint_changes": false,
+  "operator_later_confirmation": "Timing or unchanged pose/jaw opening is uncertain",
+  "images": [
+    {
+      "path": "unpaired-oblique.png",
+      "sha256": "d3221a5184b716ffc876eb453e4b8f2b7d0ef582c89a28cb519d55088ce0b982",
+      "bytes": 6723300,
+      "capture_time": null,
+      "view": "oblique; not a distinct front/side pair"
+    }
+  ],
+  "received_attachments": 2,
+  "unique_images": 1,
+  "duplicate_attachment_filenames": [
+    "codex-clipboard-d79f1230-fd7a-4869-a031-6aa3a2818424.png",
+    "codex-clipboard-84a38636-4c81-4e59-8f0b-8e495bd217bd.png"
+  ],
+  "jaw_gap": {
+    "operator_report": "still around 1/8 inch",
+    "approx_mm": 3.175,
+    "measurement_time": null,
+    "ruler_image_supplied": false,
+    "jaw_unchanged_between_reading_measurement": null,
+    "accepted_as_gripper_calibration_pair": false
+  },
+  "additional_capture_started": false
+}
