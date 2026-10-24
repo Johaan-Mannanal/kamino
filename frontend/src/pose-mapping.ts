@@ -1,6 +1,7 @@
 import type { ReviewProject } from './assembly-review'
 export type Unit = 'degrees' | 'radians' | 'normalized_0_100' | 'normalized_-100_100'
 export type Signal = { unit: Unit; median: number; minimum: number; maximum: number }
+export type Observation = { time_s: number; values: Record<string, number> }
 export type Capture = {
   id: string
   samples: number
@@ -8,6 +9,7 @@ export type Capture = {
   source_hashes: Record<string, string>
   pairing: Record<string, unknown>
   signals: Record<string, Signal>
+  observations?: Observation[]
   photos: { view: string; original_sha256: string; data_url: string; note?: string }[]
 }
 export type CapturePack = { format: 'photo2sim-captures-1.0'; captures: Capture[] }
@@ -49,7 +51,10 @@ export function parseCaptures(text: string): CapturePack {
     )
     ids.add(c.id)
     check(
-      Number.isInteger(c.samples) && c.samples >= 2 && hash(c.calibration_sha256),
+      Number.isInteger(c.samples) &&
+        c.samples >= 2 &&
+        c.samples <= 20_000 &&
+        hash(c.calibration_sha256),
       'Invalid capture provenance',
     )
     check(
@@ -74,6 +79,34 @@ export function parseCaptures(text: string): CapturePack {
           s.median <= s.maximum,
         'Invalid signal units or values',
       )
+    }
+    if (c.observations !== undefined) {
+      check(
+        Array.isArray(c.observations) && c.observations.length === c.samples,
+        'Invalid observation count',
+      )
+      let previous = -1
+      const keys = Object.keys(c.signals).sort()
+      for (const observation of c.observations) {
+        check(
+          object(observation) &&
+            Number.isFinite(observation.time_s) &&
+            observation.time_s >= 0 &&
+            observation.time_s > previous &&
+            object(observation.values) &&
+            JSON.stringify(Object.keys(observation.values).sort()) === JSON.stringify(keys),
+          'Invalid observation timeline',
+        )
+        previous = observation.time_s
+        for (const key of keys) {
+          const value = observation.values[key]
+          const signal = c.signals[key]
+          check(
+            Number.isFinite(value) && value >= signal.minimum && value <= signal.maximum,
+            'Invalid observation value',
+          )
+        }
+      }
     }
     check(Array.isArray(c.photos) && c.photos.length <= 8, 'Invalid capture photos')
     for (const photo of c.photos)
@@ -153,40 +186,82 @@ function validMappings(project: ReviewProject, mappings: Mapping[]) {
     check(['unverified', 'user_verified'].includes(m.status), 'Invalid verification status')
   }
 }
+type JointResult = { angle_rad: number | null; issues: string[] }
+function mapValues(
+  project: ReviewProject,
+  c: Capture,
+  mappings: Mapping[],
+  values: Record<string, number>,
+  calibrationConflict: boolean,
+) {
+  const joints: Record<string, JointResult> = Object.create(null)
+  for (const m of mappings) {
+    const issues: string[] = []
+    if (calibrationConflict) issues.push('Different calibration hashes across captures')
+    if (m.signal && mappings.filter((x) => x.signal === m.signal).length > 1)
+      issues.push('Duplicate source signal mapping')
+    const signal = Object.hasOwn(c.signals, m.signal) ? c.signals[m.signal] : undefined
+    let angle: number | null = null
+    if (!signal) issues.push('Missing source signal')
+    else if (signal.unit !== m.unit) issues.push('Declared unit mismatch')
+    else if (m.radians_per_unit === null)
+      issues.push('Explicit conversion required for normalized signal')
+    else {
+      const sourceValue = values[m.signal]
+      if (!Number.isFinite(sourceValue)) issues.push('Missing source observation')
+      const value = m.sign * m.radians_per_unit * sourceValue + m.offset_rad
+      if (!Number.isFinite(value)) issues.push('Nonfinite conversion')
+      else {
+        angle = value
+        const limits = project.joints.find((j) => j.name === m.joint)!.limits_rad!
+        const ends = [signal.minimum, signal.maximum].map(
+          (v) => m.sign * m.radians_per_unit! * v + m.offset_rad,
+        )
+        if (ends.some((v) => !Number.isFinite(v) || v < limits[0] || v > limits[1]))
+          issues.push(`Joint limit conflict [${limits.join(', ')}] rad; values are not clipped`)
+      }
+    }
+    joints[m.joint] = { angle_rad: angle, issues }
+  }
+  return joints
+}
 export function compareCaptures(project: ReviewProject, pack: CapturePack, mappings: Mapping[]) {
   validMappings(project, mappings)
   const calibrationConflict = new Set(pack.captures.map((c) => c.calibration_sha256)).size !== 1
-  return pack.captures.map((c) => {
-    const joints: Record<string, { angle_rad: number | null; issues: string[] }> =
-      Object.create(null)
-    for (const m of mappings) {
-      const issues: string[] = []
-      if (calibrationConflict) issues.push('Different calibration hashes across captures')
-      if (m.signal && mappings.filter((x) => x.signal === m.signal).length > 1)
-        issues.push('Duplicate source signal mapping')
-      const signal = Object.hasOwn(c.signals, m.signal) ? c.signals[m.signal] : undefined
-      let angle: number | null = null
-      if (!signal) issues.push('Missing source signal')
-      else if (signal.unit !== m.unit) issues.push('Declared unit mismatch')
-      else if (m.radians_per_unit === null)
-        issues.push('Explicit conversion required for normalized signal')
-      else {
-        const value = m.sign * m.radians_per_unit * signal.median + m.offset_rad
-        if (!Number.isFinite(value)) issues.push('Nonfinite conversion')
-        else {
-          angle = value
-          const limits = project.joints.find((j) => j.name === m.joint)!.limits_rad!
-          const ends = [signal.minimum, signal.maximum].map(
-            (v) => m.sign * m.radians_per_unit! * v + m.offset_rad,
-          )
-          if (ends.some((v) => !Number.isFinite(v) || v < limits[0] || v > limits[1]))
-            issues.push(`Joint limit conflict [${limits.join(', ')}] rad; values are not clipped`)
-        }
-      }
-      joints[m.joint] = { angle_rad: angle, issues }
-    }
-    return { capture_id: c.id, joints }
-  })
+  return pack.captures.map((c) => ({
+    capture_id: c.id,
+    joints: mapValues(
+      project,
+      c,
+      mappings,
+      Object.fromEntries(Object.entries(c.signals).map(([key, signal]) => [key, signal.median])),
+      calibrationConflict,
+    ),
+  }))
+}
+export function replayObservation(
+  project: ReviewProject,
+  capture: Capture,
+  mappings: Mapping[],
+  time_s: number,
+): { sample_index: number; sample_time_s: number; joints: Record<string, JointResult> } {
+  validMappings(project, mappings)
+  check(
+    Number.isFinite(time_s) && time_s >= 0 && capture.observations,
+    'Observation replay unavailable',
+  )
+  const observations = capture.observations!
+  let sample_index = 0
+  for (let i = 1; i < observations.length; i++) {
+    if (observations[i].time_s > time_s) break
+    sample_index = i
+  }
+  const sample = observations[sample_index]
+  return {
+    sample_index,
+    sample_time_s: sample.time_s,
+    joints: mapValues(project, capture, mappings, sample.values, false),
+  }
 }
 const canonical = (value: unknown): string => {
   const sorted = (v: unknown): unknown =>

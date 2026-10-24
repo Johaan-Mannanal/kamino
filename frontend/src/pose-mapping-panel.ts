@@ -8,6 +8,7 @@ import {
   saveReview,
   loadReview,
   projectBinding,
+  replayObservation,
   unitScale,
   type CapturePack,
   type Mapping,
@@ -25,14 +26,28 @@ export function createMappingPanel(
     identity = '',
     pack: CapturePack | undefined,
     mappings: Mapping[] = [],
-    selected = ''
+    selected = '',
+    replayTime = 0,
+    replayTimer: number | undefined,
+    replayStatus: HTMLElement | undefined,
+    replayScrub: HTMLInputElement | undefined
   host.classList.add('mapping-panel')
-  host.innerHTML = `<h2>4. Compare stationary captures</h2><p>Map recorded signals to model joint angles. Preview one candidate across several poses before accepting it. This is kinematic review, not physics validation or hardware control.</p>
+  host.innerHTML = `<h2>4. Compare captures and replay</h2><p>Map recorded signals to model joint angles. Preview one candidate across several poses before accepting it. This is kinematic review, not physics validation or hardware control.</p>
 <label>Capture pack or saved mapping review <input type="file" accept=".json" aria-label="Capture pack or saved mapping review"></label>
 <p class="mapping-message" role="status">Load an audited capture pack to begin.</p><div class="mapping-content"></div>`
   const status = host.querySelector<HTMLElement>('.mapping-message')!
   const content = host.querySelector<HTMLElement>('.mapping-content')!
   const file = host.querySelector<HTMLInputElement>('input[type=file]')!
+  function stopReplay() {
+    if (replayTimer !== undefined) window.clearInterval(replayTimer)
+    replayTimer = undefined
+  }
+  function updateReplayControls(capture: CapturePack['captures'][number]) {
+    if (!capture.observations || !replayStatus || !replayScrub) return
+    const replay = replayObservation(project, capture, mappings, replayTime)
+    replayStatus.textContent = `Unverified observation replay · ${replay.sample_index + 1}/${capture.observations.length} at ${replay.sample_time_s.toFixed(3)} s`
+    replayScrub.value = String(replayTime)
+  }
   function fail(e: unknown) {
     status.textContent = e instanceof Error ? e.message : String(e)
   }
@@ -57,13 +72,18 @@ export function createMappingPanel(
   }
   function apply() {
     if (!pack || !selected) return
-    const result = compareCaptures(project, pack, mappings).find((r) => r.capture_id === selected)!
+    const capture = pack.captures.find((c) => c.id === selected)!
+    const result = capture.observations
+      ? replayObservation(project, capture, mappings, replayTime)
+      : compareCaptures(project, pack, mappings).find((r) => r.capture_id === selected)!
     const values = Object.fromEntries(
       Object.entries(result.joints).map(([name, row]) => [name, row.angle_rad ?? 0]),
     )
     preview(values, selected)
   }
   function draw() {
+    replayStatus = undefined
+    replayScrub = undefined
     content.replaceChildren()
     if (!pack) return
     const note = text(
@@ -80,7 +100,9 @@ export function createMappingPanel(
     pack.captures.forEach((c) => select.add(new Option(c.id, c.id)))
     select.value = selected
     select.onchange = () => {
+      stopReplay()
       selected = select.value
+      replayTime = 0
       if (!selected) preview({}, '')
       draw()
       apply()
@@ -88,6 +110,7 @@ export function createMappingPanel(
     label.append(select)
     content.append(label)
     button(content, 'Reset capture preview', () => {
+      stopReplay()
       selected = ''
       preview({}, '')
       draw()
@@ -97,6 +120,64 @@ export function createMappingPanel(
     content.append(photos)
     const capture = pack.captures.find((c) => c.id === selected)
     if (capture) {
+      if (capture.observations) {
+        const last = capture.observations.at(-1)!.time_s
+        const replay = replayObservation(project, capture, mappings, replayTime)
+        const replayControls = document.createElement('div')
+        replayControls.className = 'observation-replay'
+        replayStatus = text(
+          replayControls,
+          'p',
+          `Unverified observation replay · ${replay.sample_index + 1}/${capture.observations.length} at ${replay.sample_time_s.toFixed(3)} s`,
+        )
+        const scrub = document.createElement('input')
+        scrub.type = 'range'
+        scrub.min = '0'
+        scrub.max = String(last)
+        scrub.step = 'any'
+        scrub.value = String(replayTime)
+        scrub.setAttribute('aria-label', 'Observation replay time')
+        replayScrub = scrub
+        const seek = () => {
+          stopReplay()
+          replayTime = Number(scrub.value)
+          apply()
+          updateReplayControls(capture)
+        }
+        scrub.addEventListener('input', seek)
+        replayControls.append(scrub)
+        if (new Set(pack.captures.map((item) => item.calibration_sha256)).size !== 1)
+          text(
+            replayControls,
+            'p',
+            'Warning: different calibration hashes exist across this capture pack.',
+          )
+        const play = button(replayControls, 'Play observation replay', () => {
+          stopReplay()
+          const beganAt = performance.now()
+          const beganAtTime = replayTime
+          replayTimer = window.setInterval(() => {
+            if (!pack || selected !== capture.id) {
+              stopReplay()
+              return
+            }
+            replayTime = Math.min(last, beganAtTime + (performance.now() - beganAt) / 1000)
+            apply()
+            updateReplayControls(capture)
+            if (replayTime >= last) stopReplay()
+          }, 50)
+        })
+        play.dataset.action = 'play-observations'
+        const pause = button(replayControls, 'Pause observation replay', stopReplay)
+        pause.dataset.action = 'pause-observations'
+        button(replayControls, 'Reset observation replay', () => {
+          stopReplay()
+          replayTime = 0
+          apply()
+          updateReplayControls(capture)
+        })
+        content.append(replayControls)
+      }
       for (const photo of capture.photos) {
         const figure = document.createElement('figure'),
           img = document.createElement('img')
@@ -142,6 +223,7 @@ export function createMappingPanel(
       grid.className = 'guided-grid'
       row.append(grid)
       const change = (values: Partial<Mapping>) => {
+        stopReplay()
         mappings[i] = editMapping(mappings[i], values)
         status.textContent = `${m.joint}: candidate changed; user verification cleared.`
         draw()
@@ -267,13 +349,18 @@ export function createMappingPanel(
     text(
       content,
       'p',
-      'Saved locally as a separate review file. Reload with the same project revision. Assembly exports, acknowledgements and hardware configuration are unchanged.',
+      'A local review download is available. “Save mapping to job” retains this capture and photo evidence for the exact project revision; hardware configuration is unchanged.',
     )
   }
   file.onchange = async () => {
     const f = file.files?.[0]
     if (!f || !project) return
     const active = ++version
+    stopReplay()
+    selected = ''
+    replayTime = 0
+    preview({}, '')
+    draw()
     try {
       if (f.size > 50_000_000) throw Error('File exceeds 50 MB')
       const raw = await f.text()
@@ -290,6 +377,8 @@ export function createMappingPanel(
       pack = nextPack
       mappings = nextMappings
       selected = ''
+      replayTime = 0
+      stopReplay()
       preview({}, '')
       status.textContent = `Loaded ${pack.captures.length} captures. Source hashes are recorded; browser imports do not re-audit original files. No automatic verification.`
       draw()
@@ -302,6 +391,7 @@ export function createMappingPanel(
   return {
     sync(next: ReviewProject, key: number) {
       version++
+      stopReplay()
       const nextIdentity = projectBinding(next)
       if (key !== workspace) {
         pack = undefined
@@ -319,13 +409,36 @@ export function createMappingPanel(
       workspace = key
       identity = nextIdentity
       selected = ''
+      replayTime = 0
       draw()
     },
     cancelPreview() {
+      stopReplay()
       selected = ''
+      replayTime = 0
       draw()
     },
     invalidatePending() {
+      version++
+      stopReplay()
+    },
+    getReview() {
+      return pack ? saveReview(project, pack, mappings) : undefined
+    },
+    loadSavedReview(raw: string) {
+      stopReplay()
+      version++
+      const review = loadReview(raw, project)
+      pack = review.captures
+      mappings = review.mappings
+      selected = ''
+      replayTime = 0
+      preview({}, '')
+      status.textContent = `Loaded ${pack.captures.length} saved captures for this project revision.`
+      draw()
+    },
+    dispose() {
+      stopReplay()
       version++
     },
   }

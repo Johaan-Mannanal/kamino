@@ -40,3 +40,14 @@ def test_tampered_photo_rejected(tmp_path):
     (target / "photos/front.png").write_bytes(b"changed")
     with pytest.raises(ValueError, match="integrity"):
         build_capture_pack([target])
+
+
+def test_pack_preserves_every_timestamped_observation():
+    directory = ROOT / "examples/so101/windows/reference-20261024-take5"
+    rows = [
+        json.loads(line) for line in (directory / "observations.jsonl").read_text().splitlines()
+    ]
+    capture = build_capture_pack([directory])["captures"][0]
+    assert len(capture["observations"]) == len(rows)
+    for actual, original in zip(capture["observations"], rows):
+        assert actual == {"time_s": original["elapsed_s"], "values": original["observation"]}

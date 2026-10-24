@@ -64,7 +64,45 @@ same project revision. Modified conversions/evidence cannot retain a stale
 verification binding. Bindings detect stale content; they are not digital
 signatures or authenticated identities.
 
-The review remains a separate local JSON file. It is not persisted by the job
-API, inserted into simulator ZIPs, used to move hardware, or treated as assembly
-acknowledgement. Download it before closing the tab. No calibrated SO101 mapping
-is supplied; the sample remains unverified pending independent physical evidence.
+## Replay timestamped observations
+
+New capture packs include each audited observation as `observations`, with elapsed
+`time_s` and named `values`. Older summary-only packs still support stationary
+comparison but cannot replay. Select a capture, then play, pause, reset or scrub.
+Playback holds the latest recorded sample at its original elapsed time; gaps are
+not interpolated. The same signs, offsets and unit conversions apply to all rows.
+Limit conflicts are displayed without clipping. Unmapped joints use zero only for
+display. This animates measured/recorded configurations; it does not predict motion,
+validate forces or send hardware commands. Stationary captures remain stationary.
+
+## Retain with a job and export
+
+For an open backend job, save assembly edits first, then use **Save mapping to
+job**. Evidence is bound to that exact saved project revision. Each mapping save
+creates an immutable version; stale revision/version saves are rejected. Reopening
+the job restores its current mapping. Local JSON download remains available for
+offline work. Changed assembly revisions start with no retained mapping, so review
+and save the candidate again before processing.
+
+Processing snapshots the retained mapping version. Mapped bundles include
+`mapping-review.json`, `reviewed-project.json` and `replay_observations.py`.
+Previously generated exports never change after later mapping edits. To export a
+new mapping after completion, save the new mapping and process another attempt.
+The assembly revision stays the same; the mapping version distinguishes attempts. Failed attempts retain their available evidence.
+
+From an extracted mapped bundle, with its simulator requirements installed:
+
+```sh
+python replay_observations.py --capture CAPTURE_ID --report replay-report.json
+python replay_observations.py --capture CAPTURE_ID --view
+```
+
+On macOS the native viewer requires `mjpython` in place of `python`. Space pauses;
+R resets. Headless replay writes recorded angles and conflicts, using `mj_forward`
+and no dynamics steps. The runner checks the reviewed project and scene joint
+names/limits, but does not authenticate hardware evidence or certify physical
+accuracy. It requires the bundled dependencies, not the Photo2Sim package.
+
+Mapping evidence remains separate from assembly acknowledgements. No calibrated
+SO101 mapping is supplied; its candidate remains unverified pending independent
+physical evidence.

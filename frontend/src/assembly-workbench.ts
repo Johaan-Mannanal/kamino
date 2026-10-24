@@ -28,11 +28,13 @@ root.innerHTML = `<header><a href="/">Photo2Sim</a><span>Guided assembly review<
 <section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div><details><summary>Add a link and connection</summary><div class="guided-grid"><label>New link name <input id="new-link-name"></label><label>Parent link <select id="new-parent"></select></label><label>New joint name <input id="new-joint-name"></label><label>Connection type <select id="new-kind"><option value="revolute">Revolute hinge</option><option value="fixed">Fixed</option></select></label></div><button id="add-link">Add link and joint</button><p>Assign at least one part to the new link, then review its pivot, mass and joint parameters. A hinge starts on local Z with estimated drive settings.</p></details>
 <h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; limits are radians. Pivot edits change joint frames while preserving source geometry at the reference pose; they do not translate the entire scene. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
 <h2>3. Save and process</h2><button id="save-revision">Save revision to job</button><label>Collision geometry <select id="collision-mode"><option value="box">Box (historical default)</option><option value="convex_mesh">Convex mesh</option></select></label><label><input id="exclude-joint-pairs" type="checkbox"> Exclude direct parent-child collision pairs</label><button id="process">Run preparation, export and validation</button><p>These export settings are recorded per attempt and do not alter the reviewed source project. Save the review before processing. To change a completed result, apply edits, acknowledge the revised inputs and save a new revision. Previous attempts remain available after a revision or failed validation.</p><button id="save">Download project JSON</button><button id="save-package">Download review package</button>
-<div id="mapping-review"></div><details><summary>Advanced: full project / add links and joints</summary><textarea id="full" aria-label="Full project JSON" spellcheck="false"></textarea><button id="apply-full">Apply full project</button></details><details><summary>Provenance and limitations</summary><pre id="notes"></pre></details></section></div></div></main>`
+<div id="mapping-review"></div><button id="save-mapping-job" disabled>Save mapping to job</button><p>Mapping evidence is retained for this saved revision. Existing attempt ZIPs remain unchanged. A newly saved mapping can be exported in a new attempt on this revision.</p><details><summary>Advanced: full project / add links and joints</summary><textarea id="full" aria-label="Full project JSON" spellcheck="false"></textarea><button id="apply-full">Apply full project</button></details><details><summary>Provenance and limitations</summary><pre id="notes"></pre></details></section></div></div></main>`
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 let payload: ReviewPackage | undefined,
   job: AssemblyJob | undefined,
   savedProject = '',
+  savedMapping = '',
+  savedMappingVersion = 0,
   generation = 0,
   mutationPending = false,
   pollTimer: ReturnType<typeof setTimeout> | undefined,
@@ -111,6 +113,7 @@ function renderJob() {
   const attempts = el('attempts')
   attempts.replaceChildren()
   if (!job) {
+    el<HTMLButtonElement>('save-mapping-job').disabled = true
     el<HTMLButtonElement>('save-revision').disabled = true
     el<HTMLButtonElement>('process').disabled = true
     status.textContent =
@@ -118,10 +121,19 @@ function renderJob() {
     return
   }
   const dirty = !!payload && JSON.stringify(payload.project) !== savedProject
+  el<HTMLButtonElement>('save-mapping-job').disabled =
+    mutationPending || running(job.status) || dirty || !payload
   status.textContent = `Job ${job.id} · revision ${job.revision} · ${job.status} · ${job.synthetic ? 'synthetic' : 'source-assisted'} · ${dirty ? 'unsaved edits' : 'saved'} · export generated: ${job.export_generated ? 'yes' : 'no'} · motion validation passed: ${job.motion_validation_passed === null ? 'pending' : job.motion_validation_passed ? 'yes' : 'no'}${job.error ? ' · ' + job.error.message : ''}`
   el<HTMLButtonElement>('save-revision').disabled = mutationPending || running(job.status) || !dirty
+  const mappingChanged =
+    job.status === 'completed' &&
+    !!job.mapping_review_path &&
+    (job.mapping_version ?? 0) !== (job.attempts.at(-1)?.mapping_version ?? 0)
   el<HTMLButtonElement>('process').disabled =
-    mutationPending || !['awaiting_review', 'failed'].includes(job.status) || dirty || !payload
+    mutationPending ||
+    (!['awaiting_review', 'failed'].includes(job.status) && !mappingChanged) ||
+    dirty ||
+    !payload
   el<HTMLButtonElement>('process').textContent =
     job.status === 'failed'
       ? 'Retry preparation, export and validation'
@@ -224,12 +236,19 @@ async function openJob(id: string, active = beginWorkspace()) {
     if (active !== generation) return
     const packageData = parsePackage(JSON.stringify(await assemblyApi.reviewPackage(next)))
     if (active !== generation) return
+    const retainedMapping = next.mapping_review_path
+      ? await (await assemblyApi.file(next.id, next.mapping_review_path)).text()
+      : undefined
+    if (active !== generation) return
     mutationPending = false
     job = next
     payload = packageData
     savedProject = JSON.stringify(payload.project)
     el<HTMLInputElement>('job-id').value = id
     render()
+    if (retainedMapping) mappingPanel.loadSavedReview(retainedMapping)
+    savedMapping = retainedMapping ? JSON.stringify(mappingPanel.getReview()) : ''
+    savedMappingVersion = next.mapping_version ?? 0
     renderJob()
     message('Opened saved job and review package.')
   } catch (e) {
@@ -778,7 +797,38 @@ el('save-revision').onclick = async () => {
     if (active !== generation) return
     job = next
     savedProject = submitted
+    savedMapping = ''
+    savedMappingVersion = 0
     message(`Saved revision ${job.revision}.`)
+  } catch (e) {
+    if (active === generation) error(e)
+  } finally {
+    if (active === generation) {
+      mutationPending = false
+      renderJob()
+    }
+  }
+}
+el('save-mapping-job').onclick = async () => {
+  if (!job || !payload || mutationPending || running(job.status)) return
+  if (JSON.stringify(payload.project) !== savedProject) {
+    message('Save this assembly revision before retaining mapping evidence.')
+    return
+  }
+  const active = generation
+  try {
+    const review = mappingPanel.getReview()
+    if (!review) throw Error('Load a capture pack or mapping review first.')
+    mutationPending = true
+    renderJob()
+    const next = await assemblyApi.saveMapping(job.id, job.revision, savedMappingVersion, review)
+    if (active !== generation) return
+    job = next
+    savedMapping = JSON.stringify(review)
+    savedMappingVersion = next.mapping_version ?? 0
+    message(
+      `Saved mapping version ${job.mapping_version} for revision ${job.revision}. Existing exports are unchanged.`,
+    )
   } catch (e) {
     if (active === generation) error(e)
   } finally {
@@ -790,6 +840,16 @@ el('save-revision').onclick = async () => {
 }
 el('process').onclick = async () => {
   if (!job || !payload || mutationPending) return
+  try {
+    const currentMapping = mappingPanel.getReview()
+    if (currentMapping && JSON.stringify(currentMapping) !== savedMapping) {
+      message('Save the current mapping to this job before processing.')
+      return
+    }
+  } catch (e) {
+    error(e)
+    return
+  }
   if (JSON.stringify(payload.project) !== savedProject) {
     message('Save this revision before processing.')
     return
@@ -798,10 +858,15 @@ el('process').onclick = async () => {
   mutationPending = true
   renderJob()
   try {
-    const next = await assemblyApi.process(job.id, job.revision, {
-      collision_mode: el<HTMLSelectElement>('collision-mode').value as 'box' | 'convex_mesh',
-      exclude_joint_pairs: el<HTMLInputElement>('exclude-joint-pairs').checked,
-    })
+    const next = await assemblyApi.process(
+      job.id,
+      job.revision,
+      {
+        collision_mode: el<HTMLSelectElement>('collision-mode').value as 'box' | 'convex_mesh',
+        exclude_joint_pairs: el<HTMLInputElement>('exclude-joint-pairs').checked,
+      },
+      savedMappingVersion,
+    )
     if (active !== generation) return
     job = next
     message('Preparation started. Export and motion validation results will appear separately.')

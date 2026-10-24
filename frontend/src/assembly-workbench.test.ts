@@ -500,3 +500,69 @@ it('previews current collision policy without changing review acknowledgements',
   expect(document.querySelector('#collision-preview-note')?.textContent).toContain('current draft')
   expect(document.querySelector('#summary')?.textContent).toContain('1/1 acknowledged')
 })
+
+it('restores retained mapping evidence and saves it with revision/version preconditions', async () => {
+  const { saveReview, parseCaptures } = await import('./pose-mapping')
+  const capturePack = parseCaptures(
+    JSON.stringify({
+      format: 'photo2sim-captures-1.0',
+      captures: [
+        {
+          id: 'synthetic-motion',
+          samples: 2,
+          calibration_sha256: 'a'.repeat(64),
+          source_hashes: { 'observations.jsonl': 'b'.repeat(64) },
+          pairing: { association: 'synthetic' },
+          photos: [],
+          signals: { angle: { unit: 'radians', median: 0.5, minimum: 0, maximum: 1 } },
+          observations: [
+            { time_s: 0, values: { angle: 0 } },
+            { time_s: 1, values: { angle: 1 } },
+          ],
+        },
+      ],
+    }),
+  )
+  const { parsePackage } = await import('./assembly-review')
+  const review = saveReview(parsePackage(JSON.stringify(pack)).project, capturePack, [])
+  const job = {
+    id: 'mapped-job',
+    revision: 1,
+    status: 'awaiting_review',
+    synthetic: true,
+    attempts: [],
+    mapping_review_path: 'revisions/0001/mappings/0001.json',
+    mapping_version: 1,
+  }
+  const saveMapping = vi.fn(async () => ({ ...job, mapping_version: 2 }))
+  vi.doMock('./assembly-api', () => ({
+    assemblyApi: {
+      get: vi.fn(async () => job),
+      reviewPackage: vi.fn(async () => pack),
+      file: vi.fn(async () => ({ text: async () => JSON.stringify(review) })),
+      saveMapping,
+    },
+    setAssemblyToken: vi.fn(),
+  }))
+  await import('./assembly-workbench')
+  document.querySelector<HTMLInputElement>('#job-id')!.value = job.id
+  document.querySelector<HTMLElement>('#open-job')!.click()
+  await vi.waitFor(() =>
+    expect(
+      document.querySelector('.mapping-message')?.textContent,
+      document.querySelector('#message')?.textContent || '',
+    ).toContain('Loaded 1'),
+  )
+  document.querySelector<HTMLElement>('#save-mapping-job')!.click()
+  await vi.waitFor(() =>
+    expect(saveMapping).toHaveBeenCalledWith(
+      job.id,
+      1,
+      1,
+      expect.objectContaining({ format: 'photo2sim-mapping-review-1.0' }),
+    ),
+  )
+  expect(document.querySelector('#message')?.textContent).toContain('mapping version 2')
+  document.querySelector<HTMLElement>('#approve')!.click()
+  expect(document.querySelector<HTMLButtonElement>('#save-mapping-job')!.disabled).toBe(true)
+})

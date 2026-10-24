@@ -1,6 +1,8 @@
 import type { ReviewProject, ReviewPackage } from './assembly-review'
 
 export type AssemblyAttempt = {
+  mapping_review_path?: string | null
+  mapping_version?: number
   number: number
   revision: number
   status: string
@@ -13,6 +15,8 @@ export type AssemblyAttempt = {
   export_config: { collision_mode: 'box' | 'convex_mesh'; exclude_joint_pairs: boolean }
 }
 export type AssemblyJob = {
+  mapping_review_path?: string | null
+  mapping_version?: number
   id: string
   name: string
   synthetic: boolean
@@ -102,11 +106,25 @@ export const assemblyApi = {
       collision_mode: 'box',
       exclude_joint_pairs: false,
     },
+    expected_mapping_version = 0,
   ): Promise<AssemblyJob> {
     return (
       await request(path(id) + '/process', {
-        ...json({ expected_revision, ...config }),
+        ...json({ expected_revision, expected_mapping_version, ...config }),
         method: 'POST',
+      })
+    ).json()
+  },
+  async saveMapping(
+    id: string,
+    expected_revision: number,
+    expected_mapping_version: number,
+    review: unknown,
+  ): Promise<AssemblyJob> {
+    return (
+      await request(path(id) + '/mapping-review', {
+        ...json({ expected_revision, expected_mapping_version, review }),
+        method: 'PUT',
       })
     ).json()
   },

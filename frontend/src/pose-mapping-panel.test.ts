@@ -119,3 +119,57 @@ it('keeps the newer capture import when an older file read finishes late', async
   expect(host.textContent).toContain('newer')
   expect(host.textContent).not.toContain('older')
 })
+
+it('plays, pauses, resets and invalidates observation replay without stale callbacks', async () => {
+  vi.useFakeTimers()
+  const host = document.createElement('div')
+  document.body.replaceChildren(host)
+  const preview = vi.fn()
+  const panel = createMappingPanel(host, preview, vi.fn())
+  const project = {
+    joints: [{ name: 'hinge', kind: 'revolute', limits_rad: [-2, 2] }],
+  } as ReviewProject
+  panel.sync(project, 1)
+  const input = host.querySelector<HTMLInputElement>('input[type=file]')!
+  const pack = {
+    format: 'photo2sim-captures-1.0',
+    captures: [
+      {
+        id: 'replay',
+        samples: 2,
+        calibration_sha256: 'a'.repeat(64),
+        source_hashes: { source: 'b'.repeat(64) },
+        pairing: {},
+        photos: [],
+        signals: { 'hinge.pos': { unit: 'degrees', median: 0, minimum: 0, maximum: 90 } },
+        observations: [
+          { time_s: 0, values: { 'hinge.pos': 0 } },
+          { time_s: 1, values: { 'hinge.pos': 90 } },
+        ],
+      },
+    ],
+  }
+  Object.defineProperty(input, 'files', {
+    configurable: true,
+    value: [{ size: 500, text: async () => JSON.stringify(pack) }],
+  })
+  input.dispatchEvent(new Event('change'))
+  await vi.runAllTimersAsync()
+  const select = host.querySelector<HTMLSelectElement>('[aria-label="Preview capture"]')!
+  select.value = 'replay'
+  select.dispatchEvent(new Event('change'))
+  expect(host.textContent).toContain('Unverified observation replay')
+  let clock = 0
+  vi.spyOn(performance, 'now').mockImplementation(() => clock)
+  host.querySelector<HTMLButtonElement>('[data-action="play-observations"]')!.click()
+  clock = 600
+  await vi.advanceTimersByTimeAsync(600)
+  host.querySelector<HTMLButtonElement>('[data-action="pause-observations"]')!.click()
+  const calls = preview.mock.calls.length
+  await vi.advanceTimersByTimeAsync(1000)
+  expect(preview).toHaveBeenCalledTimes(calls)
+  panel.invalidatePending()
+  await vi.advanceTimersByTimeAsync(1000)
+  expect(preview).toHaveBeenCalledTimes(calls)
+  vi.useRealTimers()
+})

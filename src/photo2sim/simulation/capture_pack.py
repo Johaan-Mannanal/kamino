@@ -33,6 +33,13 @@ def build_capture_pack(directories):
             raise ValueError("Duplicate capture id")
         seen.add(root.name)
         audit = audit_capture(root)
+        if audit["samples"] > 20_000:
+            raise ValueError("Replay capture exceeds 20000 samples; split the recording")
+        rows = [
+            json.loads(line)
+            for line in (root / "observations.jsonl").read_text().splitlines()
+            if line.strip()
+        ]
         pairing_path = root / "pairing.json"
         pairing = json.loads(pairing_path.read_text()) if pairing_path.exists() else {}
         manifest = root / "integrity.json"
@@ -76,6 +83,9 @@ def build_capture_pack(directories):
             {
                 "id": root.name,
                 "samples": audit["samples"],
+                "observations": [
+                    {"time_s": row["elapsed_s"], "values": row["observation"]} for row in rows
+                ],
                 "elapsed_span_s": audit["elapsed_span_s"],
                 "calibration_sha256": hashes["calibration.json"],
                 "source_hashes": hashes,

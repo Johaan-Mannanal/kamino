@@ -72,3 +72,12 @@ Its CAD/template provenance and pending physical mapping remain visible. The
 hinged panel proves the software workflow independently of that physical evidence.
 
 Stop each terminal with Ctrl-C. No cloud deployment is needed for this local demo.
+
+## Mapping retention and observation replay
+
+The [synthetic replay acceptance example](../examples/assemblies/observation-replay/README.md)
+demonstrates play/pause/reset, saved mapping revisions, authenticated ZIP download
+and standalone playback after relocation. It is a synthetic mechanism, not a
+physical accuracy comparison. SO101 stationary take-3/take-5 packs now include
+timestamps; moving-arm comparison still requires independently verified mapping
+and a motion recording from Windows.

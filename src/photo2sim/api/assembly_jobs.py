@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 from photo2sim.assemblies.contracts import AssemblyRecord
 from photo2sim.assemblies.draft import draft_from_meshes
 from photo2sim.assemblies.export import export_assembly
+from photo2sim.assemblies.mapping_review import validate_mapping_review
 from photo2sim.assemblies.review import (
     ReviewProject,
     assembly_record,
@@ -41,6 +42,7 @@ class RevisionRequest(BaseModel):
 
 class ProcessRequest(BaseModel):
     expected_revision: int = Field(ge=1)
+    expected_mapping_version: int = Field(default=0, ge=0)
     collision_mode: Literal["box", "convex_mesh"] = "box"
     exclude_joint_pairs: bool = False
 
@@ -52,6 +54,11 @@ class AssemblyJobs:
         self.executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="assembly")
         for path in self.root.glob("*/job.json"):
             job = json.loads(path.read_text(encoding="utf-8"))
+            migrated = False
+            for key, value in (("mapping_review_path", None), ("mapping_version", 0)):
+                if key not in job:
+                    job[key] = value
+                    migrated = True
             if job["status"] in {"preparing", "exporting", "validating"}:
                 job["status"] = "failed"
                 job["error"] = {
@@ -59,6 +66,8 @@ class AssemblyJobs:
                     "message": "Server restarted; retry the saved revision.",
                 }
                 job["attempts"][-1].update(status="failed", error=job["error"])
+                self.write(job)
+            elif migrated:
                 self.write(job)
 
     def close(self):
@@ -78,7 +87,10 @@ class AssemblyJobs:
             path = self.directory(job_id) / "job.json"
             if not path.is_file():
                 raise KeyError(job_id)
-            return json.loads(path.read_text(encoding="utf-8"))
+            job = json.loads(path.read_text(encoding="utf-8"))
+            job.setdefault("mapping_review_path", None)
+            job.setdefault("mapping_version", 0)
+            return job
 
     def update(self, job_id: UUID, **changes):
         with self.lock:
@@ -123,6 +135,8 @@ class AssemblyJobs:
                 "revision": 1,
                 "project_path": "revisions/0001/project.json",
                 "package_path": "revisions/0001/package.json",
+                "mapping_review_path": None,
+                "mapping_version": 0,
                 "export_generated": False,
                 "motion_validation_passed": None,
                 "export_path": None,
@@ -183,6 +197,10 @@ class AssemblyJobs:
                 status="awaiting_review",
                 project_path=f"revisions/{number:04d}/project.json",
                 package_path=f"revisions/{number:04d}/package.json",
+                # Mapping reviews bind the previous project snapshot.  Keep the
+                # old evidence on disk but never point a new revision at it.
+                mapping_review_path=None,
+                mapping_version=0,
                 export_generated=False,
                 motion_validation_passed=None,
                 export_path=None,
@@ -191,13 +209,60 @@ class AssemblyJobs:
                 error=None,
             )
 
+    def save_mapping_review(
+        self,
+        job_id: UUID,
+        expected_revision: int,
+        expected_mapping_version: int,
+        review: dict,
+    ):
+        with self.lock:
+            job = self.get(job_id)
+            if (
+                job["revision"] != expected_revision
+                or job.get("mapping_version", 0) != expected_mapping_version
+            ):
+                raise RuntimeError("Job changed; reload before saving")
+            if job["status"] in {"preparing", "exporting", "validating"}:
+                raise RuntimeError("Job is processing; reload before saving")
+            root = self.directory(job_id)
+            project = ReviewProject.model_validate_json(
+                (root / job["project_path"]).read_text(encoding="utf-8")
+            )
+            validate_mapping_review(review, project)
+            version = expected_mapping_version + 1
+            relative = f"revisions/{job['revision']:04d}/mapping-review-{version:04d}.json"
+            target = root / relative
+            # This is immutable evidence.  A version collision can only mean a
+            # corrupted publication state; never replace it.
+            if target.exists():
+                raise RuntimeError("Mapping review version already exists; reload before saving")
+            target.write_text(
+                json.dumps(review, ensure_ascii=False, separators=(",", ":"), allow_nan=False),
+                encoding="utf-8",
+            )
+            return self.update(job_id, mapping_review_path=relative, mapping_version=version)
+
     def start(self, job_id: UUID, request: ProcessRequest):
         with self.lock:
             job = self.get(job_id)
-            if job["revision"] != request.expected_revision or job["status"] not in {
-                "awaiting_review",
-                "failed",
-            }:
+            mapping_path = job.get("mapping_review_path")
+            mapping_version = job.get("mapping_version", 0)
+            completed_with_new_mapping = (
+                job["status"] == "completed"
+                and mapping_path is not None
+                and bool(job["attempts"])
+                and job["attempts"][-1].get("revision") == request.expected_revision
+                and job["attempts"][-1].get("mapping_version", 0) != mapping_version
+            )
+            if (
+                job["revision"] != request.expected_revision
+                or mapping_version != request.expected_mapping_version
+                or (
+                    job["status"] not in {"awaiting_review", "failed"}
+                    and not completed_with_new_mapping
+                )
+            ):
                 raise RuntimeError("Job changed or is processing; reload before retrying")
             root = self.directory(job_id)
             project = ReviewProject.model_validate_json(
@@ -206,10 +271,14 @@ class AssemblyJobs:
             assembly_record(project)
             checked_parts(project, root / "sources")
             attempt = len(job["attempts"]) + 1
+            mapping_bytes = (root / mapping_path).read_bytes() if mapping_path else None
+            project_bytes = (root / job["project_path"]).read_bytes()
             job["attempts"].append(
                 {
                     "number": attempt,
                     "revision": request.expected_revision,
+                    "mapping_review_path": mapping_path,
+                    "mapping_version": mapping_version,
                     "status": "preparing",
                     "started_at": now(),
                     "export_generated": False,
@@ -235,7 +304,9 @@ class AssemblyJobs:
                 validation_path=None,
                 bundle_path=None,
             )
-            self.executor.submit(self.process, job_id, attempt, project, request)
+            self.executor.submit(
+                self.process, job_id, attempt, project, request, project_bytes, mapping_bytes
+            )
             return job
 
     def stage(self, job_id: UUID, status: str, **values):
@@ -244,7 +315,15 @@ class AssemblyJobs:
             job["attempts"][-1].update(status=status, **values)
             self.update(job_id, status=status, attempts=job["attempts"], **values)
 
-    def process(self, job_id: UUID, attempt: int, project: ReviewProject, request: ProcessRequest):
+    def process(
+        self,
+        job_id: UUID,
+        attempt: int,
+        project: ReviewProject,
+        request: ProcessRequest,
+        project_bytes: bytes,
+        mapping_bytes: bytes | None,
+    ):
         root = self.directory(job_id)
         folder = root / "attempts" / f"{attempt:04d}"
         try:
@@ -259,6 +338,18 @@ class AssemblyJobs:
                 collision_mode=request.collision_mode,
                 exclude_joint_pairs=request.exclude_joint_pairs,
             )
+            # Capture the immutable inputs before validation.  Failed attempts
+            # retain these snapshots too, while later saves cannot rewrite them.
+            evidence = folder / "evidence"
+            evidence.mkdir()
+            (evidence / "reviewed-project.json").write_bytes(project_bytes)
+            if mapping_bytes is not None:
+                (evidence / "mapping-review.json").write_bytes(mapping_bytes)
+            replay = Path(__file__).resolve().parents[1] / "assemblies" / "observation_replay.py"
+            if mapping_bytes is not None and not replay.is_file():
+                raise FileNotFoundError("Observation replay runner is unavailable")
+            if replay.is_file():
+                shutil.copyfile(replay, evidence / "replay_observations.py")
             export_path = scene.relative_to(root).as_posix()
             self.stage(job_id, "validating", export_generated=True, export_path=export_path)
             report = validate_assembly(scene)
@@ -286,6 +377,7 @@ class AssemblyJobs:
                     (folder / "prepared", "prepared"),
                     (root / "sources", "sources"),
                     (root / "originals", "originals"),
+                    (folder / "evidence", ""),
                 ):
                     for path in tree.rglob("*"):
                         if path.is_file():
@@ -407,6 +499,37 @@ def assembly_router(service: AssemblyJobs, api_token: str, max_bytes: int):
         find(job_id)
         try:
             return service.save(job_id, body.project, body.expected_revision)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from None
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+
+    @router.put("/{job_id}/mapping-review")
+    async def save_mapping_review(job_id: UUID, request: Request):
+        find(job_id)
+        content = await request.body()
+        if len(content) > 50 * 1024 * 1024:
+            raise HTTPException(413, "Mapping review exceeds 50 MiB")
+        try:
+            body = json.loads(content)
+            if not isinstance(body, dict):
+                raise ValueError("Mapping review request must be an object")
+            revision = body.get("expected_revision")
+            version = body.get("expected_mapping_version")
+            review = body.get("review")
+            if (
+                not isinstance(revision, int)
+                or isinstance(revision, bool)
+                or revision < 1
+                or not isinstance(version, int)
+                or isinstance(version, bool)
+                or version < 0
+                or not isinstance(review, dict)
+            ):
+                raise ValueError("Invalid mapping review request")
+            return service.save_mapping_review(job_id, revision, version, review)
+        except json.JSONDecodeError:
+            raise HTTPException(422, "Mapping review must be valid JSON") from None
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from None
         except ValueError as exc:

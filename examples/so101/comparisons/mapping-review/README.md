@@ -18,3 +18,11 @@ reset, save and reload. No hardware connection or model change was made.
 Use [the mapping guide](../../../../docs/MAPPING_REVIEW.md) to package further
 captures. Open the same reviewed assembly/package and load the baseline review,
 or open any assembly and load `captures.json` to start a new unverified mapping.
+
+## Timestamped playback
+
+`captures-with-observations.json` contains the same take-3/take-5 evidence plus all
+599 timestamped readings per capture. Load it to use play/pause/reset/scrub. These
+are stationary captures, so playback should show only their small recorded
+variation; they do not establish a moving-arm replay or verified joint mapping.
+The historical summary pack and baseline review remain unchanged.

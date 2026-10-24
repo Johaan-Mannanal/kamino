@@ -149,3 +149,12 @@ photos and evidence in a local review file. See [MAPPING_REVIEW.md](MAPPING_REVI
 Take 3/take 5 are available as an unverified baseline. Independent joint signs,
 zeros and gripper conversion still require Yash's physical reference evidence;
 this tool does not resolve those unknowns automatically.
+
+### Recorded observation replay and retained mapping evidence
+
+Timestamped capture packs can now drive play/pause/reset/scrub in the guided
+workbench and a portable MuJoCo replay runner. Mapping evidence can be saved to
+an exact assembly revision, restored on reopening and snapshotted into each
+export attempt. Revisions invalidate the active mapping; later mapping saves
+cannot rewrite prior bundles. These are kinematic replay and reproducibility
+features, not verification of SO101 calibration or predicted physical behavior.

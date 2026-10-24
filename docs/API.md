@@ -178,3 +178,31 @@ New motion reports include `tracking_errors_rad`, keyed by actual joint name in
 error remains compatible. The workbench compares these to the report's
 `tracking_tolerance_rad`; legacy aggregate-only reports do not identify a failing
 joint. Downloaded raw inputs from mesh-only imports are included under `originals/`.
+
+### Retained assembly mapping reviews
+
+`PUT /api/assembly-jobs/{id}/mapping-review` uses the same application token.
+Body: `{ "expected_revision": 1, "expected_mapping_version": 0, "review": {...} }`.
+The review is the workbench's `photo2sim-mapping-review-1.0` artifact. Job responses
+add nullable `mapping_review_path` and `mapping_version` (initially 0). The saved
+project must match exactly; the mapping must cover its revolute joints. Capture
+units, hashes, finite values and optional ordered observations are checked. A
+user verification is an attestation, not server-certified calibration.
+
+Both preconditions must match and processing must be idle; conflicts return 409.
+Each accepted save retains a new immutable file. New assembly revisions clear the
+active pointer/version while preserving earlier evidence. Each process attempt
+records the mapping path/version it claimed and packages its snapshot with the
+reviewed project. Completed jobs may process a new attempt when a newer mapping
+version is saved; repeating the same completed mapping is rejected. Older ZIPs
+and attempt evidence are never rewritten. Files use the existing authenticated
+`GET /api/assembly-jobs/{id}/files/{path}` route.
+
+Mapped ZIPs include `mapping-review.json`, `reviewed-project.json` and
+`replay_observations.py`. Observation replay sets recorded joint poses and calls
+`mj_forward`; it neither predicts dynamics nor controls hardware. See
+[MAPPING_REVIEW.md](MAPPING_REVIEW.md) for usage and limitations.
+
+Processing also requires `expected_mapping_version` alongside `expected_revision`.
+It defaults to 0 for legacy jobs without mapping evidence. A stale version returns
+409 before creating an attempt; reopen the job to review the newer mapping.

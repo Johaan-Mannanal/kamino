@@ -8,6 +8,7 @@ import {
   verifyMapping,
   saveReview,
   loadReview,
+  replayObservation,
 } from './pose-mapping'
 
 export const project = {
@@ -131,4 +132,48 @@ it('invalidates verification when embedded photo evidence changes', () => {
   const saved = saveReview(project, c, m)
   saved.captures.captures[0].photos[0].data_url = 'data:image/jpeg;base64,Yg=='
   expect(() => loadReview(JSON.stringify(saved), project)).toThrow(/verification/)
+})
+it('replays the nearest preceding recorded observation with the same conversion and limit warning', () => {
+  const raw: any = structuredClone(pack)
+  raw.captures[0].samples = 3
+  raw.captures[0].signals['hinge.pos'].maximum = 90
+  raw.captures[0].signals['jaw.pos'].maximum = 10
+  raw.captures[0].observations = [
+    { time_s: 0, values: { 'hinge.pos': 10, 'jaw.pos': 5 } },
+    { time_s: 0.5, values: { 'hinge.pos': 90, 'jaw.pos': 10 } },
+    { time_s: 2, values: { 'hinge.pos': 20, 'jaw.pos': 8 } },
+  ]
+  const captures = parseCaptures(JSON.stringify(raw))
+  const mappings = createMappings(project, captures)
+  mappings[1] = editMapping(mappings[1], { radians_per_unit: 0.01 })
+  const replay = replayObservation(project, captures.captures[0], mappings, 1.25)
+  expect(replay.sample_index).toBe(1)
+  expect(replay.sample_time_s).toBe(0.5)
+  expect(replay.joints.hinge.angle_rad).toBeCloseTo(Math.PI / 2)
+  expect(replay.joints.hinge.issues.join(' ')).toContain('limit')
+  expect(replay.joints.jaw.angle_rad).toBeCloseTo(0.1)
+})
+it('rejects invalid observation timelines and preserves stationary packs', () => {
+  expect(parseCaptures(JSON.stringify(pack)).captures[0].observations).toBeUndefined()
+  for (const mutate of [
+    (p: any) => (p.captures[0].observations = [{ time_s: 0, values: { 'hinge.pos': 10 } }]),
+    (p: any) => {
+      p.captures[0].samples = 2
+      p.captures[0].observations = [
+        { time_s: 1, values: { 'hinge.pos': 10, 'jaw.pos': 5 } },
+        { time_s: 1, values: { 'hinge.pos': 10, 'jaw.pos': 5 } },
+      ]
+    },
+    (p: any) => {
+      p.captures[0].samples = 2
+      p.captures[0].observations = [
+        { time_s: 0, values: { 'hinge.pos': 1000, 'jaw.pos': 5 } },
+        { time_s: 1, values: { 'hinge.pos': 10, 'jaw.pos': 5 } },
+      ]
+    },
+  ]) {
+    const raw = structuredClone(pack)
+    mutate(raw)
+    expect(() => parseCaptures(JSON.stringify(raw))).toThrow(/observation/i)
+  }
 })
