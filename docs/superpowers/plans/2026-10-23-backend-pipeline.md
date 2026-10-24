@@ -31,9 +31,9 @@ Files: `src/photo2sim/contracts.py`, `tests/test_contracts.py`, `docs/API.md`, `
 
 Produces: AssetProperties, AssetRecord, JobRecord and the exact boundaries in API.md.
 
-- [ ] Write and run failing tests for property validation, portable paths, and provenance.
-- [ ] Implement models and publish contracts plus separate teammate instructions on the backend branch.
-- [ ] Run contract tests, lint, formatting; commit and push.
+- [x] Write and run failing tests for property validation, portable paths, and provenance.
+- [x] Implement models and publish contracts plus separate teammate instructions on the backend branch.
+- [x] Run contract tests, lint, formatting; commit and push.
 
 ### Task 2: Persistent mock backend
 
@@ -41,9 +41,9 @@ Files: `src/photo2sim/api/{app,config,store,worker}.py`, `src/photo2sim/integrat
 
 Consumes: shared models. Produces: create_app(settings, provider), HTTP routes in API.md, SQLite job records and preserved artifacts.
 
-- [ ] Write and run failing tests covering upload→mesh→properties, invalid inputs, file confinement, provider failure, and restart persistence.
-- [ ] Implement bounded worker execution and safe recovery without automatic paid resubmission.
-- [ ] Run the suite and commit the mock backend.
+- [x] Write and run failing tests covering upload→mesh→properties, invalid inputs, file confinement, provider failure, and restart persistence.
+- [x] Implement bounded worker execution and safe recovery without automatic paid resubmission.
+- [x] Run the suite and commit the mock backend.
 
 ### Task 3: Meshy adapter and runnable handoff
 
@@ -51,7 +51,11 @@ Files: `src/photo2sim/integrations/meshy.py`, `tests/test_meshy.py`, README, con
 
 Consumes: provider submit/poll/download boundary. Produces: saved self-contained GLB, persistent task ID, actionable sanitized errors.
 
-- [ ] Write failing HTTP-transport tests using the official Meshy multi-image endpoint/payload.
-- [ ] Implement bounded polling, anonymous asset download, and preservation on failure.
-- [ ] Run all tests, lint, format, package install, and a local HTTP smoke test.
-- [ ] Publish the backend branch; report live provider execution separately from transport tests.
+- [x] Write failing HTTP-transport tests using the official Meshy multi-image endpoint/payload.
+- [x] Implement bounded polling, anonymous asset download, and preservation on failure.
+- [x] Run all tests, lint, format, package install, and a local HTTP smoke test.
+- [x] Publish the backend branch; report live provider execution separately from transport tests.
+
+## Execution evidence
+
+Task 1 published in `641084f` with 12 passing contract tests. Tasks 2/3 passed the full 44-test suite, lint, format, dependency consistency, and a real local HTTP smoke test. Live Meshy generation remains unverified. Feature branch publication and GitHub Python 3.12 checks are verified separately in the final handoff.

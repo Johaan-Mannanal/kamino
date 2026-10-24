@@ -1,11 +1,11 @@
 # Shared contract v1
 
-Authoritative Python models: `src/photo2sim/contracts.py`. Backend owns this file; propose coordinated changes rather than creating parallel schemas.
+Authoritative Python models: `src/photo2sim/contracts.py`. Backend owns this file; propose coordinated changes rather than creating parallel schemas. A synthetic response fixture is at `examples/api/job-awaiting-properties.json`; its paths/ID are illustrative, not a live job.
 
 ## HTTP interface
 
 - `GET /api/health`: service status and configured reconstruction provider.
-- `POST /api/jobs`: multipart field **`images`**, repeated for 1–4 JPEG/PNG/WebP images, at most 10 MiB each. Returns **202** and `JobRecord`.
+- `POST /api/jobs`: multipart field **`images`**, repeated for 1–4 JPEG/PNG/WebP images, at most 10 MiB and 25 megapixels each. Returns **202** and `JobRecord`.
 - `GET /api/jobs/{id}`: returns `JobRecord`; poll while reconstruction runs.
 - `PATCH /api/jobs/{id}/properties`: JSON `AssetProperties`; accepted only at `awaiting_properties`. Saves confirmed inputs. It does not yet launch preparation or simulation.
 - `GET /api/jobs/{id}/files/{path}`: job-relative artifact download, e.g. `reconstruction/mesh.glb` or `uploads/00.png`.
