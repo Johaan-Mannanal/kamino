@@ -1,5 +1,7 @@
 """Rigid target review stays separate from sizing, Gemini and numerical acceptance."""
 
+import hashlib
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -10,9 +12,41 @@ from photo2sim.api.store import JobConflict
 from photo2sim.contracts import TargetReview, TargetReviewRequest
 
 
-def reviewed_geometry(job, source, *, properties=None, required=False):
+@dataclass(frozen=True)
+class WholeGeometry:
+    source_mesh_sha256: str
+    geometry_context_sha256: str
+
+
+def reviewed_geometry(job, source, *, properties=None, required=False, orientation=None):
     try:
-        from photo2sim.assets.target import geometry_context, inspect_target
+        from photo2sim.assets.target import geometry_context, inspect_target, whole_geometry_context
+
+        if properties and properties.geometry_scope == "whole_reconstruction":
+            source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+            context = whole_geometry_context(source_hash, orientation or job.orientation)
+            if (
+                (
+                    properties.source_mesh_sha256 is not None
+                    and properties.source_mesh_sha256 != source_hash
+                )
+                or (
+                    properties.geometry_context_sha256 is not None
+                    and properties.geometry_context_sha256 != context
+                )
+                or (
+                    required
+                    and (
+                        properties.geometry_context_sha256 != context
+                        or properties.source_mesh_sha256 != source_hash
+                        or properties.sizing is None
+                    )
+                )
+            ):
+                raise HTTPException(
+                    409, "Source or orientation changed; preview and save full-mesh sizing again"
+                )
+            return WholeGeometry(source_hash, context)
 
         target = inspect_target(source)
         review = job.geometry_review

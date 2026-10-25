@@ -90,12 +90,21 @@ export class BackendSession {
   private disposed = false;
   private listeners = new Set<() => void>();
   readonly pollIntervalMs: number;
+  readonly geometryScope: "reviewed_target" | "whole_reconstruction";
+  get wholeMesh() {
+    return this.geometryScope === "whole_reconstruction";
+  }
 
   constructor(
     readonly api: Api = liveApi,
-    options: { onChange?: () => void; pollIntervalMs?: number } = {},
+    options: {
+      onChange?: () => void;
+      pollIntervalMs?: number;
+      geometryScope?: "reviewed_target" | "whole_reconstruction";
+    } = {},
   ) {
     this.pollIntervalMs = options.pollIntervalMs ?? 1000;
+    this.geometryScope = options.geometryScope ?? "reviewed_target";
     if (options.onChange) this.listeners.add(options.onChange);
   }
 
@@ -110,6 +119,27 @@ export class BackendSession {
         canProcess: false,
         reason: `Job status could not be refreshed: ${this.metadataFailure.message} Retry status before generating.`,
       };
+    if (this.wholeMesh) {
+      const properties = this.job?.properties;
+      const ready =
+        properties?.geometry_scope === "whole_reconstruction" &&
+        !!properties.source_mesh_sha256 &&
+        !!properties.geometry_context_sha256 &&
+        !!properties.sizing &&
+        !!this.job &&
+        sameOrientation(
+          properties.sizing.reviewed_orientation,
+          this.job.orientation,
+        );
+      return {
+        status: "whole_reconstruction" as const,
+        referenceReady: ready,
+        canProcess: ready,
+        reason: ready
+          ? "The entire reconstruction is used."
+          : "Preview and save sizing for the entire reconstruction.",
+      };
+    }
     return this.job
       ? targetReviewStatus(this.job, this.target)
       : {
@@ -143,6 +173,7 @@ export class BackendSession {
       throw new Error(
         "Save orientation before reviewing target geometry and reference sizing.",
       );
+    if (this.wholeMesh) return null;
     if (this.targetStatus.status !== "reviewed" || !job.geometry_review)
       throw new Error(this.targetStatus.reason);
     return job.geometry_review.geometry_context_sha256;
@@ -173,6 +204,18 @@ export class BackendSession {
     this.metadataFailure = null;
     this.metadataVersion++;
     const previous = this.job;
+    if (this.wholeMesh) {
+      if (
+        previous &&
+        (previous.id !== job.id ||
+          previous.mesh_path !== job.mesh_path ||
+          !sameOrientation(previous.orientation, job.orientation))
+      )
+        this.invalidateReference();
+      this.job = job;
+      this.changed();
+      return;
+    }
     const targetDirty =
       previous &&
       targetReviewStatus(previous, {
@@ -212,6 +255,7 @@ export class BackendSession {
     this.changed();
   }
   async loadGeometry(force = true) {
+    if (this.wholeMesh) return;
     const job = this.job;
     if (
       !job?.mesh_path ||
@@ -522,9 +566,16 @@ export class BackendSession {
       sizing: clone(sizing),
       orientation: clone(orientation),
       geometry_context_sha256: context,
+      ...(this.wholeMesh
+        ? { geometry_scope: "whole_reconstruction" as const }
+        : {}),
     });
     this.check(generation);
-    if (result.geometry_context_sha256 !== context)
+    if (
+      this.wholeMesh
+        ? !this.validWholePreview(result)
+        : result.geometry_context_sha256 !== context
+    )
       throw new Error(
         "Target context changed; preview the reviewed geometry again.",
       );
@@ -541,7 +592,24 @@ export class BackendSession {
     return result;
   }
 
+  private validWholePreview(preview: SizingPreview) {
+    return (
+      /^[a-f0-9]{64}$/.test(preview.geometry_context_sha256 ?? "") &&
+      /^[a-f0-9]{64}$/.test(preview.source_mesh_sha256 ?? "")
+    );
+  }
+
   async saveProperties(properties: Properties) {
+    if (this.wholeMesh) {
+      if (!properties.sizing)
+        throw new Error("Choose a full-mesh sizing reference first.");
+      return this.saveReviewed({
+        orientation: this.requireJob().orientation,
+        sizing: properties.sizing,
+        mass_kg: properties.mass_kg,
+        sliding_friction: properties.sliding_friction,
+      });
+    }
     const context = this.reviewedContext(
       properties.sizing?.reviewed_orientation,
     );
@@ -577,9 +645,16 @@ export class BackendSession {
         sizing: values.sizing,
         orientation: values.orientation,
         geometry_context_sha256: context,
+        ...(this.wholeMesh
+          ? { geometry_scope: "whole_reconstruction" as const }
+          : {}),
       });
       this.check(generation);
-      if (preview.geometry_context_sha256 !== context)
+      if (
+        this.wholeMesh
+          ? !this.validWholePreview(preview)
+          : preview.geometry_context_sha256 !== context
+      )
         throw new Error(
           "Target context changed; preview the reviewed geometry again.",
         );
@@ -593,7 +668,15 @@ export class BackendSession {
         mass_kg: values.mass_kg,
         sliding_friction: values.sliding_friction,
         sizing: values.sizing,
-        geometry_context_sha256: context,
+        geometry_context_sha256: this.wholeMesh
+          ? preview.geometry_context_sha256
+          : context,
+        ...(this.wholeMesh
+          ? {
+              geometry_scope: "whole_reconstruction" as const,
+              source_mesh_sha256: preview.source_mesh_sha256,
+            }
+          : {}),
       });
       this.check(generation);
       if (draft === this.draft && targetVersion === this.targetDraftVersion) {

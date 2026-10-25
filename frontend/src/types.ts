@@ -33,11 +33,14 @@ export type SizingResult = {
   geometry_review: string
 }
 export type SizingPreview = {
+  source_mesh_sha256?: string | null
   geometry_context_sha256?: string | null
   dimensions_m: Properties['dimensions_m']
   sizing_result: SizingResult
 }
 export type Properties = {
+  geometry_scope?: 'reviewed_target' | 'whole_reconstruction'
+  source_mesh_sha256?: string | null
   geometry_context_sha256?: string | null
   dimensions_m: { x: number; y: number; z: number; source: Source; note?: string | null }
   mass_kg: Scalar

@@ -187,8 +187,11 @@ export function draftFromJob(job: Job): {
       // A saved reference bound to an older target context must be confirmed again.
       acknowledged:
         !!reference &&
-        (properties?.geometry_context_sha256 ?? null) ===
-          (job.geometry_review?.geometry_context_sha256 ?? null),
+        (properties?.geometry_scope === "whole_reconstruction"
+          ? !!properties.geometry_context_sha256 &&
+            !!properties.source_mesh_sha256
+          : (properties?.geometry_context_sha256 ?? null) ===
+            (job.geometry_review?.geometry_context_sha256 ?? null)),
       mass: text(properties?.mass_kg.value),
       massSource: properties?.mass_kg.source ?? "user_supplied",
       friction: text(friction?.value),
@@ -465,9 +468,17 @@ export function mountLiveWorkspace(
   const { session, icon, toast } = ctx;
   const initialJob = session.job!;
   const jobId = initialJob.id;
+  const wholeMesh = session.wholeMesh;
   const initial = draftFromJob(initialJob);
   const retained = restoreWorkspaceDraft(session, initialJob);
   let draft = retained?.draft ?? initial.draft;
+  if (
+    wholeMesh &&
+    initialJob.properties &&
+    initialJob.properties.geometry_scope !== "whole_reconstruction"
+  ) {
+    draft = { ...draft, acknowledged: false };
+  }
   let origins = retained?.origins ?? initial.origins;
   // Only untouched, new-job defaults can be replaced automatically.
   let frictionTouched = !!retained || !!initialJob.properties;
@@ -502,6 +513,7 @@ export function mountLiveWorkspace(
   };
   let viewerMode: ViewerMode = "studio";
   let viewerContext: string | null = null;
+  let viewerSourceHash: string | null = null;
   let retainedView: ViewerViewState | null = null;
   let outputsKey = "";
   let reportKey = "";
@@ -526,12 +538,20 @@ export function mountLiveWorkspace(
   suggestionsCard.querySelector("p")!.textContent =
     "Saved estimates load first. If none exist, one automatic Gemini request is attempted per job. Friction fills automatically unless you have edited or saved it; other estimates require Apply. Save commits your draft.";
   inspector.insertBefore(suggestionsCard, form);
-  inspector.insertBefore($("#live-target"), form);
+  if (!wholeMesh) inspector.insertBefore($("#live-target"), form);
   inspector.append($(".live-outputs"));
   inspector.querySelector<HTMLElement>(
     ":scope > .prototype-note",
-  )!.textContent =
-    "Save orientation and target review first. Review the reference, then save properties or use Save & generate. Numerical checks do not establish physical accuracy.";
+  )!.textContent = wholeMesh
+    ? "The entire reconstruction is used. Save orientation, then preview and save its full-extent reference or use Save & generate."
+    : "Save orientation and target review first. Review the reference, then save properties or use Save & generate. Numerical checks do not establish physical accuracy.";
+  if (wholeMesh) {
+    const reference = form.querySelector<HTMLInputElement>(
+      '[name="acknowledged"]',
+    )!;
+    reference.parentElement!.lastChild!.textContent =
+      " My reference matches the entire reconstructed mesh extent, including protrusions.";
+  }
 
   const download = async (
     blob: Promise<Blob> | (() => Promise<Blob>),
@@ -636,24 +656,35 @@ export function mountLiveWorkspace(
       session.targetStatus,
       session.sizingPreview,
       draftViewer?.orientation ?? null,
+      wholeMesh,
     );
     $("#live-viewer-label").textContent = spec.label;
     if (spec.key === viewerKey || !job.mesh_path) return;
     viewerKey = spec.key;
-    const hash = session.target.inventory?.source_mesh_sha256;
-    const nextContext = hash
-      ? JSON.stringify([
-          job.id,
-          job.mesh_path,
-          hash,
-          spec.selection?.islandIds ?? null,
-        ])
-      : null;
+    const hash = wholeMesh
+      ? (session.sizingPreview?.source_mesh_sha256 ??
+        (job.properties?.geometry_scope === "whole_reconstruction"
+          ? job.properties.source_mesh_sha256
+          : null))
+      : session.target.inventory?.source_mesh_sha256;
+    const nextContext = wholeMesh
+      ? JSON.stringify([job.id, job.mesh_path, "whole_reconstruction"])
+      : hash
+        ? JSON.stringify([
+            job.id,
+            job.mesh_path,
+            hash,
+            spec.selection?.islandIds ?? null,
+          ])
+        : null;
+    const sourceChanged =
+      !!hash && !!viewerSourceHash && hash !== viewerSourceHash;
     retainedView =
-      nextContext && nextContext === viewerContext
+      nextContext && nextContext === viewerContext && !sourceChanged
         ? (viewerHandle?.getViewState() ?? retainedView)
         : null;
     viewerContext = nextContext;
+    viewerSourceHash = hash ?? null;
     disposeViewer();
     viewerHandle = mountViewer(
       $("#live-viewer"),
@@ -685,6 +716,7 @@ export function mountLiveWorkspace(
   // Target review: controls outside the physical-properties form, events delegated
   // to the persistent host so a structural re-render never needs re-binding.
   const targetHost = $("#live-target");
+  if (wholeMesh) targetHost.remove();
   const savedOrientation = (job: Job) => {
     const value = draftOrientation(draft);
     return typeof value !== "string" && sameOrientation(value, job.orientation);
@@ -740,6 +772,7 @@ export function mountLiveWorkspace(
     }
   });
   function syncTarget(job: Job) {
+    if (wholeMesh) return;
     const target = session.target;
     const key = targetControlsKey(job, target);
     if (key !== targetKey) {
@@ -761,6 +794,7 @@ export function mountLiveWorkspace(
           "Compare with the uploaded Source photos in the source panel.";
     }
     const status = session.targetStatus;
+    if (status.status === "whole_reconstruction") return;
     const orientationSaved = savedOrientation(job);
     syncTargetControls(targetHost, target, status, {
       locked: targetLocked(job),
@@ -824,7 +858,8 @@ export function mountLiveWorkspace(
   }
   const onEdit = (event: Event) => {
     const name = (event.target as HTMLInputElement).name;
-    if (name === "friction" || name === "frictionSource") frictionTouched = true;
+    if (name === "friction" || name === "frictionSource")
+      frictionTouched = true;
     const next = editWorkspaceDraft(draft, readDraft());
     if (JSON.stringify(next) === JSON.stringify(draft)) return;
     if (next.x !== draft.x || next.y !== draft.y || next.z !== draft.z) {
@@ -874,7 +909,13 @@ export function mountLiveWorkspace(
   function referenceBlock(job: Job | null) {
     if (!job) return "Open a reconstructed job first.";
     if (!savedOrientation(job))
-      return "Save orientation before target review and sizing.";
+      return wholeMesh
+        ? "Save orientation before sizing."
+        : "Save orientation before target review and sizing.";
+    if (wholeMesh)
+      return session.targetStatus.status === "error"
+        ? session.targetStatus.reason
+        : "";
     const status = session.targetStatus;
     return status.status === "reviewed" ? "" : status.reason;
   }
@@ -1062,10 +1103,24 @@ export function mountLiveWorkspace(
       suggestions = values;
       const friction = values.sliding_friction;
       const activeJob = currentJob();
-      if (!frictionTouched && activeJob && !activeJob.properties && friction &&
-          Number.isFinite(friction.value) && friction.value >= 0) {
-        draft = { ...draft, friction: String(friction.value), frictionSource: "estimated" };
-        origins.friction = { ...friction, source: "estimated", note: friction.note || "Gemini estimate; not measured." };
+      if (
+        !frictionTouched &&
+        activeJob &&
+        !activeJob.properties &&
+        friction &&
+        Number.isFinite(friction.value) &&
+        friction.value >= 0
+      ) {
+        draft = {
+          ...draft,
+          friction: String(friction.value),
+          frictionSource: "estimated",
+        };
+        origins.friction = {
+          ...friction,
+          source: "estimated",
+          note: friction.note || "Gemini estimate; not measured.",
+        };
         writeDraft(draft);
         session.markDirty();
       }
@@ -1225,8 +1280,11 @@ export function mountLiveWorkspace(
           : "Not yet saved";
     $("#live-friction-note").textContent =
       toScalar(draft.friction, draft.frictionSource, origins.friction)?.note ??
-      (draft.friction === "" ? "Unknown. Enter a value or apply an estimate if available." :
-       draft.frictionSource === "estimated" ? "Estimated friction; adjust for the contacting surfaces." : "Your supplied friction value.");
+      (draft.friction === ""
+        ? "Unknown. Enter a value or apply an estimate if available."
+        : draft.frictionSource === "estimated"
+          ? "Estimated friction; adjust for the contacting surfaces."
+          : "Your supplied friction value.");
     $("#live-saved").textContent = savedText;
     $("#live-save-status").textContent = editable
       ? savedText
@@ -1304,11 +1362,12 @@ export function mountLiveWorkspace(
     $("#live-bundle").hidden = !(job.status === "completed" && job.bundle_path);
     // Only a preview bound to the current reviewed target is shown as current sizing.
     const context = job.geometry_review?.geometry_context_sha256 ?? null;
-    const preview =
-      session.sizingPreview &&
-      session.targetStatus.status === "reviewed" &&
-      !!context &&
-      session.sizingPreview.geometry_context_sha256 === context
+    const preview = wholeMesh
+      ? session.sizingPreview
+      : session.sizingPreview &&
+          session.targetStatus.status === "reviewed" &&
+          !!context &&
+          session.sizingPreview.geometry_context_sha256 === context
         ? session.sizingPreview
         : null;
     $("#live-preview-output").innerHTML = previewError
@@ -1323,7 +1382,13 @@ export function mountLiveWorkspace(
     syncViewer(job);
     // A directly opened job may not have started source validation yet.
     const target = session.target;
-    if (job.mesh_path && !target.inventory && !target.loading && !target.error)
+    if (
+      !wholeMesh &&
+      job.mesh_path &&
+      !target.inventory &&
+      !target.loading &&
+      !target.error
+    )
       void session.loadGeometry(false);
     if (!initialEstimatesStarted && !isRunning(job) && !working) {
       initialEstimatesStarted = true;

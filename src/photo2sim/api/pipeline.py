@@ -44,7 +44,17 @@ def process_job(store: JobStore, job_id: UUID) -> None:
             raise ValueError("Source changed after processing claim")
         prepared = attempt / "prepared"
         review = inputs.geometry_review
-        if (
+        if inputs.properties.geometry_scope == "whole_reconstruction":
+            from photo2sim.assets.target import whole_geometry_context
+
+            context = whole_geometry_context(inputs.source_mesh_sha256, inputs.orientation)
+            if (
+                inputs.properties.source_mesh_sha256 != inputs.source_mesh_sha256
+                or inputs.properties.geometry_context_sha256 != context
+            ):
+                raise ValueError("A current source-bound whole-mesh sizing is required")
+            review = None
+        elif (
             review is None
             or review.orientation != inputs.orientation
             or inputs.properties.geometry_context_sha256 != review.geometry_context_sha256

@@ -140,6 +140,7 @@ class SizingResult(Contract):
 
 
 class SizingPreviewRequest(Contract):
+    geometry_scope: Literal["reviewed_target", "whole_reconstruction"] = "reviewed_target"
     geometry_context_sha256: GeometryHash | None = None
     sizing: Sizing
     orientation: Orientation
@@ -147,6 +148,8 @@ class SizingPreviewRequest(Contract):
 
 
 class AssetProperties(Contract):
+    geometry_scope: Literal["reviewed_target", "whole_reconstruction"] = "reviewed_target"
+    source_mesh_sha256: GeometryHash | None = None
     geometry_context_sha256: GeometryHash | None = None
     dimensions_m: Dimensions
     mass_kg: ScalarProperty

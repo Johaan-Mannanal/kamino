@@ -1,3 +1,4 @@
+import hashlib
 import shutil
 import warnings
 from contextlib import asynccontextmanager
@@ -187,10 +188,24 @@ def create_app(
         try:
             from photo2sim.assets.sizing import preview_sizing
 
-            reviewed_geometry(job, source, properties=properties)
-            return preview_sizing(
-                source, properties, orientation, geometry_review=job.geometry_review
+            target = reviewed_geometry(job, source, properties=properties, orientation=orientation)
+            whole = properties.geometry_scope == "whole_reconstruction"
+            properties, result = preview_sizing(
+                source,
+                properties,
+                orientation,
+                geometry_review=None if whole else job.geometry_review,
             )
+            if whole:
+                if hashlib.sha256(source.read_bytes()).hexdigest() != target.source_mesh_sha256:
+                    raise HTTPException(409, "Source changed during sizing; preview again")
+                properties = properties.model_copy(
+                    update={
+                        "source_mesh_sha256": target.source_mesh_sha256,
+                        "geometry_context_sha256": target.geometry_context_sha256,
+                    }
+                )
+            return properties, result
         except ImportError:
             raise HTTPException(503, "Sizing requires the simulation dependencies") from None
         except ValueError:
@@ -211,6 +226,7 @@ def create_app(
         job = get_job(job_id)
         dims = request.dimensions_m or (job.properties.dimensions_m if job.properties else None)
         properties = AssetProperties(
+            geometry_scope=request.geometry_scope,
             dimensions_m=dims or {"x": 1, "y": 1, "z": 1, "source": "estimated"},
             mass_kg={"value": 1, "source": "estimated", "note": "Preview placeholder, never saved"},
             sizing=request.sizing,
@@ -220,9 +236,12 @@ def create_app(
         return {
             "dimensions_m": properties.dimensions_m.model_dump(mode="json"),
             "sizing_result": result.model_dump(mode="json"),
-            "geometry_context_sha256": job.geometry_review.geometry_context_sha256
+            "geometry_context_sha256": properties.geometry_context_sha256
+            if request.geometry_scope == "whole_reconstruction"
+            else job.geometry_review.geometry_context_sha256
             if job.geometry_review
             else None,
+            "source_mesh_sha256": properties.source_mesh_sha256,
         }
 
     @app.get("/api/health")
@@ -320,7 +339,9 @@ def create_app(
         job = get_job(job_id)
         if job.status not in {"awaiting_properties", "completed"} and not retryable_processing(job):
             raise HTTPException(409, "Properties require awaiting input or a failed simulation")
-        if properties.sizing is None and not job.legacy_sizing_allowed:
+        if properties.sizing is None and (
+            not job.legacy_sizing_allowed or properties.geometry_scope == "whole_reconstruction"
+        ):
             raise HTTPException(
                 422, "Choose uniform sizing or explicitly acknowledge advanced stretching"
             )
@@ -336,6 +357,9 @@ def create_app(
                 expected_input_revision=job.input_revision,
                 input_revision=job.input_revision + 1,
                 properties=properties,
+                geometry_review=None
+                if properties.geometry_scope == "whole_reconstruction"
+                else job.geometry_review,
                 legacy_sizing_allowed=job.legacy_sizing_allowed and properties.sizing is None,
                 sizing_result=sizing_result,
                 attempts=retained_attempts(job),

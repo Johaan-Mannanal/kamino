@@ -24,6 +24,17 @@ def geometry_context(source_hash, island_ids, orientation):
     ).hexdigest()
 
 
+def whole_geometry_context(source_hash, orientation):
+    value = {
+        "source": source_hash,
+        "scope": "whole_reconstruction",
+        "orientation": {k: float(v) if v else 0.0 for k, v in orientation.model_dump().items()},
+    }
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
 def _components(mesh):
     # Weld identical positions for connectivity analysis only, never export geometry.
     _, vertices = np.unique(mesh.vertices, axis=0, return_inverse=True)

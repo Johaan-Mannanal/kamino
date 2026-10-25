@@ -35,7 +35,10 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 // Real jobs go through one controller; the procedural demo never touches it.
 let liveSession: BackendSession | undefined;
 const uploads = new UploadNavigation();
-const live = () => (liveSession ??= new BackendSession());
+const live = () =>
+  (liveSession ??= new BackendSession(undefined, {
+    geometryScope: "whole_reconstruction",
+  }));
 const liveJobId = () => jobIdFromSearch(location.search);
 const setLiveJob = (id: string | null) =>
   history.replaceState(

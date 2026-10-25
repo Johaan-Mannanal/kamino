@@ -21,6 +21,7 @@ export type Api = {
     id: string,
     request: {
       sizing: Sizing
+      geometry_scope?: 'reviewed_target' | 'whole_reconstruction'
       orientation: Orientation
       geometry_context_sha256?: string | null
       dimensions_m?: Properties['dimensions_m']

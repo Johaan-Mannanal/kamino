@@ -15,7 +15,14 @@ import type {
 // target, guesses dimensions or rebinds a reference automatically.
 // ---------------------------------------------------------------------------
 
-export type TargetStatus = ReturnType<typeof targetReviewStatus>;
+export type TargetStatus =
+  | ReturnType<typeof targetReviewStatus>
+  | {
+      status: "whole_reconstruction";
+      referenceReady: boolean;
+      canProcess: boolean;
+      reason: string;
+    };
 const sameOrientation = (a: Orientation, b: Orientation) =>
   a.x_deg === b.x_deg && a.y_deg === b.y_deg && a.z_deg === b.z_deg;
 
@@ -45,7 +52,11 @@ export function generateGate(input: GenerateGateInput): {
   if (target.error) return blocked(target.error);
   if (!input.orientationSaved)
     return blocked("Save orientation, then review the target again.");
-  if (targetStatus.status !== "reviewed" || !targetStatus.canProcess)
+  if (
+    (targetStatus.status !== "reviewed" &&
+      targetStatus.status !== "whole_reconstruction") ||
+    !targetStatus.canProcess
+  )
     return blocked(targetStatus.reason);
   if (input.dirty)
     return blocked("Save reviewed properties before generating.");
@@ -68,8 +79,8 @@ export type PrimaryViewer = {
 };
 
 /**
- * Primary preview: only the selected target islands, scaled only when the target
- * review is current and the scale belongs to its geometry context.
+ * Whole-reconstruction mode always loads the full source. Legacy selected-target
+ * mode scales only when the review and sizing belong to the same geometry context.
  */
 export function primaryViewer(
   job: Job,
@@ -77,7 +88,41 @@ export function primaryViewer(
   status: TargetStatus,
   preview: SizingPreview | null,
   draftOrientation: Orientation | null,
+  wholeReconstruction = false,
 ): PrimaryViewer {
+  if (wholeReconstruction) {
+    const full = job.properties?.geometry_scope === "whole_reconstruction";
+    const context = full ? job.properties?.geometry_context_sha256 : null;
+    const orientation = draftOrientation ?? job.orientation;
+    const currentPreview =
+      preview &&
+      preview.source_mesh_sha256 &&
+      sameOrientation(preview.sizing_result.orientation, job.orientation);
+    const scale = draftOrientation
+      ? undefined
+      : currentPreview
+        ? preview.sizing_result.scale_factors
+        : full &&
+            job.sizing_result &&
+            sameOrientation(job.sizing_result.orientation, job.orientation)
+          ? job.sizing_result.scale_factors
+          : undefined;
+    return {
+      orientation,
+      scale,
+      label: `Entire reconstruction · ${draftOrientation ? "draft orientation · unsaved" : "saved orientation"} · ${scale ? "uniform sizing" : "unscaled"}`,
+      key: JSON.stringify([
+        job.id,
+        job.mesh_path,
+        preview?.source_mesh_sha256 ??
+          job.properties?.source_mesh_sha256 ??
+          null,
+        context,
+        orientation,
+        scale ?? null,
+      ]),
+    };
+  }
   const inventory = target.inventory;
   const ids = inventory
     ? target.draft.selectedIslandIds
