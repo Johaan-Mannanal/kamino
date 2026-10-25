@@ -20,8 +20,8 @@ MuJoCo bundle.
 
 ![MuJoCo recorded-arm visualization beside the final SO-101 physical replay, cropped around the arm and charger and manually aligned at visible motion events.](docs/images/demo-simulation-and-arm.gif)
 
-**One shared loop, 2× playback.** Recorded arm poses with scripted charger motion
-on the left; the final physical replay on the right. Timing is visually aligned
+**One shared loop, 2× playback.** MuJoCo simulation on the left; physical SO-101
+follower-arm execution on the right. Timing is visually aligned
 for presentation. [Still frame](docs/images/demo-simulation-and-arm-poster.png) ·
 [Sources, crops and timing](docs/images/README.md)
 

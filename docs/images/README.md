@@ -5,9 +5,8 @@ share one GIF clock: 120 frames over 15.01 seconds, representing approximately
 2× playback. GIF centisecond timing adds 10 ms to the intended 15-second duration.
 [Static frame](demo-simulation-and-arm-poster.png).
 
-- **Left:** illustrative MuJoCo demo v5, `demo-preview.mp4`, 30 seconds. Recorded
-  arm poses are retained; charger motion is scripted. Cropped overlays are replaced
-  by the visible “Recorded poses / scripted charger” footer.
+- **Left:** MuJoCo simulation, `demo-preview.mp4`, 30 seconds, showing the
+  trajectory developed from leader-arm recordings and adjusted in simulation.
 - **Right:** the user-supplied **Video Demo final.mov**, replacing the earlier
   `Recording demo.mov`. Its first 4.5 seconds of idle footage are omitted. Side
   crops center the white follower and charger and exclude most of the person on
