@@ -68,6 +68,26 @@ beforeEach(() => {
     }
   })
 })
+it('exchanges assembly access code for a browser session and clears the input', async () => {
+  const fetch = vi
+    .fn()
+    .mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ authenticated: true }))),
+    )
+  vi.stubGlobal('fetch', fetch)
+  try {
+    await import('./assembly-workbench')
+    const input = document.querySelector<HTMLInputElement>('#api-token')!
+    input.value = 'private-team-code'
+    document.querySelector<HTMLButtonElement>('#set-token')!.click()
+    await vi.waitFor(() => expect(input.value).toBe(''))
+    expect(fetch.mock.calls[0][0]).toMatch(/\/api\/session$/)
+    expect(fetch.mock.calls[0][1].credentials).toBe('include')
+    expect(document.querySelector('#message')?.textContent).toMatch(/signed in/i)
+  } finally {
+    vi.unstubAllGlobals()
+  }
+})
 async function load() {
   await import('./assembly-workbench')
   const input = document.querySelector<HTMLInputElement>('#load')!

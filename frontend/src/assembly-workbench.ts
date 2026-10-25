@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { assemblyApi, setAssemblyToken, type AssemblyJob } from './assembly-api'
+import { browserAccess } from './access'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import {
   assignPart,
@@ -20,7 +21,7 @@ import './assembly.css'
 const root = document.querySelector<HTMLDivElement>('#assembly-app')!
 root.innerHTML = `<header><a href="/">Kamino</a><span>Guided assembly review</span></header>
 <main><h1>From parts to a moving assembly.</h1><p>Group rigid parts, review pivots and joint limits, then prepare a simulator export. This preview is kinematic; it does not test forces, collisions or hardware accuracy.</p>
-<details><summary>API access</summary><label>Application token <input id="api-token" type="password" autocomplete="off"></label><button id="set-token">Set token for this session</button></details>
+<details><summary>Team sign-in</summary><p>Already signed in on Kamino? Your browser access works here too. Otherwise ask Johaan for the team code. Sign-in lasts 12 hours, including refresh.</p><label>Team access code <input id="api-token" type="password" autocomplete="off"></label><button id="set-token">Sign in</button><button id="sign-out">Sign out</button></details>
 <section class="job-controls"><h2>Start from component meshes</h2><p>Upload separate geometry-only OBJ/STL parts in a shared reference frame. Choose their units; positions are preserved. Define links and joints below. No project JSON is needed.</p><div class="guided-grid"><label>Assembly name <input id="draft-name" value="my_assembly" maxlength="64"></label><label>Source units <select id="draft-units"><option value="">Choose units</option><option value="m">Metres</option><option value="mm">Millimetres</option></select></label><label>Component meshes <input id="draft-meshes" type="file" accept=".obj,.stl" multiple></label><label><input id="draft-synthetic" type="checkbox"> Synthetic example geometry</label></div><button id="create-draft">Create assembly draft</button><p>Starting masses and drive settings are estimates to review. Original files are retained. STEP conversion is available through the optional CAD tool.</p><details><summary>Import an existing source project</summary><h2>Import source project</h2><label>Review project JSON <input id="import-project" type="file" accept=".json,application/json"></label><label>Source meshes (select all files) <input id="import-meshes" type="file" accept=".obj,.stl" multiple></label><button id="import">Import and open review</button><p>Mesh filenames must match the paths in the project. For nested paths, select a folder below.</p><label>Source mesh folder <input id="import-folder" type="file" webkitdirectory multiple></label></details><h2>Open existing job</h2><label>Job ID <input id="job-id" type="text" autocomplete="off"></label><button id="open-job">Open job</button><p id="job-status"></p><div id="attempts"></div></section>
 <label class="load">Open review package <input id="load" type="file" accept=".json,application/json"></label>
 <p id="message" role="status">Import a project and its meshes, open a saved job, or load an offline review package.</p>
@@ -748,9 +749,30 @@ el('create-draft').onclick = async () => {
     button.disabled = false
   }
 }
-el('set-token').onclick = () => {
-  setAssemblyToken(el<HTMLInputElement>('api-token').value)
-  message('Application token set for this browser session.')
+el('set-token').onclick = async () => {
+  const button = el<HTMLButtonElement>('set-token')
+  const input = el<HTMLInputElement>('api-token')
+  if (button.disabled || !input.value.trim()) return
+  button.disabled = true
+  try {
+    await browserAccess.signIn(input.value)
+    setAssemblyToken('')
+    input.value = ''
+    message('Signed in for 12 hours on this browser. You can now open your saved job.')
+  } catch (e) {
+    error(e)
+  } finally {
+    button.disabled = false
+  }
+}
+el('sign-out').onclick = async () => {
+  try {
+    await browserAccess.signOut()
+    setAssemblyToken('')
+    message('Signed out on this browser.')
+  } catch (e) {
+    error(e)
+  }
 }
 el('import').onclick = async () => {
   const active = beginWorkspace()

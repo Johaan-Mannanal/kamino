@@ -10,10 +10,12 @@ export class UploadNavigation {
       isCurrent: () => boolean;
       openCurrent: () => void;
       acceptedInBackground: () => void;
+      takingLonger?: () => void;
     },
   ): Promise<T> {
     if (this.pending) throw new Error("An upload is already in progress.");
     this.pending = true;
+    const slow = setTimeout(() => navigation.takingLonger?.(), 15000);
     try {
       const job = await create();
       // Page navigation does not revoke an accepted reconstruction request.
@@ -24,6 +26,7 @@ export class UploadNavigation {
       else navigation.acceptedInBackground();
       return job;
     } finally {
+      clearTimeout(slow);
       this.pending = false;
     }
   }

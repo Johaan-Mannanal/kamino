@@ -3,7 +3,6 @@ import warnings
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from io import BytesIO
-from secrets import compare_digest
 from typing import Annotated
 from uuid import UUID, uuid4
 
@@ -13,6 +12,12 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPBearer
 from PIL import Image, UnidentifiedImageError
 
+from photo2sim.api.browser_session import (
+    authorized,
+    bearer_access,
+    register_session_routes,
+    trusted_origin,
+)
 from photo2sim.api.config import Settings
 from photo2sim.api.rigid_history import new_attempt, retained_attempts
 from photo2sim.api.store import JobConflict, JobStore
@@ -103,23 +108,31 @@ def create_app(
             if (
                 request.method != "OPTIONS"
                 and request.url.path.startswith("/api/")
-                and request.url.path != "/api/health"
+                and request.url.path not in {"/api/health", "/api/session"}
             ):
-                scheme, _, token = request.headers.get("Authorization", "").partition(" ")
-                if scheme.lower() != "bearer" or not compare_digest(
-                    token.encode("utf-8"), settings.api_token.encode("utf-8")
-                ):
+                if not authorized(request, settings.api_token):
                     return JSONResponse(
                         status_code=401,
                         content={"detail": "Application access token required"},
                         headers={"WWW-Authenticate": "Bearer"},
                     )
+                if (
+                    request.method not in {"GET", "HEAD", "OPTIONS"}
+                    and not bearer_access(request, settings.api_token)
+                    and not trusted_origin(request, settings.cors_origins, settings.public_origin)
+                ):
+                    return JSONResponse(
+                        status_code=403,
+                        content={"detail": "Use the Kamino website for this action"},
+                    )
             return await call_next(request)
 
+    register_session_routes(app, settings)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(settings.cors_origins),
-        allow_methods=["GET", "POST", "PATCH", "PUT"],
+        allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
+        allow_credentials=True,
         allow_headers=["Content-Type", "Authorization"],
     )
     if assembly_jobs is not None:

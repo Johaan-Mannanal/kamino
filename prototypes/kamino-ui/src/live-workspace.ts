@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import { ApiError } from "../../../frontend/src/api";
+import { browserAccess } from "../../../frontend/src/access";
 import { makeSizing } from "../../../frontend/src/sizing";
 import { mountViewer } from "../../../frontend/src/viewer";
 import { canRetry } from "../../../frontend/src/pipeline";
@@ -373,7 +374,7 @@ export const esc = (value: string) =>
       ]!,
   );
 
-/** Memory-only token prompt. The token is never stored or placed in a URL. */
+/** Exchange the team code for an HttpOnly session; never persist the code in JS. */
 export function promptForToken(
   session: BackendSession,
   message: string,
@@ -381,12 +382,35 @@ export function promptForToken(
   return new Promise((resolve) => {
     const dialog = document.createElement("dialog");
     dialog.className = "guide live-token";
-    dialog.innerHTML = `<h2>Application access token</h2><p class="muted small">${esc(message)}</p><form method="dialog"><label class="property-field"><span>Token (kept in memory for this tab only)</span><div class="input-shell"><input name="token" type="password" autocomplete="off" spellcheck="false" required aria-label="Application access token"></div></label><div class="save-row"><button class="text-button" value="cancel" formnovalidate>Cancel</button><button class="primary compact" value="ok">Use token</button></div></form>`;
+    dialog.innerHTML = `<h2>Team sign-in</h2><p class="muted small">${esc(message)}</p><p class="muted small">Ask Johaan for the team access code. Sign-in lasts 12 hours on this browser, including refresh and reopening. Your provider API keys are not needed.</p><form><label class="property-field"><span>Team access code</span><div class="input-shell"><input name="token" type="password" autocomplete="off" spellcheck="false" required aria-label="Team access code"></div></label><p class="error" role="alert"></p><div class="save-row"><button class="text-button" type="button" data-cancel>Cancel</button><button class="primary compact" type="submit">Sign in</button></div></form>`;
     document.body.append(dialog);
     const input = dialog.querySelector<HTMLInputElement>("input")!;
+    const submit = dialog.querySelector<HTMLButtonElement>(
+      'button[type="submit"]',
+    )!;
+    dialog.querySelector<HTMLButtonElement>("[data-cancel]")!.onclick = () =>
+      dialog.close();
+    dialog.querySelector("form")!.onsubmit = async (event) => {
+      event.preventDefault();
+      if (submit.disabled || !input.value.trim()) return;
+      submit.disabled = true;
+      submit.textContent = "Signing in…";
+      try {
+        await browserAccess.signIn(input.value);
+        session.setToken("");
+        input.value = "";
+        if (dialog.open) dialog.close("ok");
+      } catch (error) {
+        if (dialog.open)
+          dialog.querySelector('[role="alert"]')!.textContent =
+            describeError(error);
+      } finally {
+        submit.disabled = false;
+        submit.textContent = "Sign in";
+      }
+    };
     dialog.addEventListener("close", () => {
-      const ok = dialog.returnValue === "ok" && !!input.value.trim();
-      if (ok) session.setToken(input.value);
+      const ok = dialog.returnValue === "ok";
       input.value = "";
       dialog.remove();
       resolve(ok);

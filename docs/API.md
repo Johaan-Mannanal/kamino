@@ -92,7 +92,9 @@ Applying a suggestion requires an explicit PATCH to `/properties`; the server do
 
 ## Deployment access
 
-When `PHOTO2SIM_API_TOKEN` is set, every `/api/` route except `/api/health` requires `Authorization: Bearer <application-token>`. Missing/wrong credentials return 401 with WWW-Authenticate: Bearer. Docs/OpenAPI remain readable and Swagger provides an Authorize control. OPTIONS preflight does not require a token. Local development with a blank token remains unchanged; Compose requires one for public deployment.
+When `PHOTO2SIM_API_TOKEN` is set, protected `/api/` routes accept either `Authorization: Bearer <application-token>` or the signed browser session. `/api/health` and `/api/session` expose no private job data without access. Missing/wrong credentials return 401. Docs/OpenAPI remain readable and Swagger provides an Authorize control. OPTIONS preflight does not require a token. Local development with a blank token remains unchanged.
+
+`GET /api/session` returns `required` and `authenticated`. `POST /api/session` with the correct Bearer code establishes a 12-hour HttpOnly browser cookie; it does not return the code. Cookie-authenticated mutations require a trusted Origin. `DELETE /api/session` from the trusted origin clears the browser cookie. Railway requires `PHOTO2SIM_PUBLIC_ORIGIN` to identify its HTTPS frontend through TLS termination; see [deployment access](../deploy/railway/README.md).
 
 This application token is distinct from Gemini/Meshy/Agentverse/Vultr keys. Never put provider keys in browser code. Team-demo clients need the app token through private configuration, user entry or a server-side proxy; do not bundle it into a public frontend. File downloads also require authorization: fetch them with headers and create a local Blob download, rather than relying on an unauthenticated anchor URL.
 

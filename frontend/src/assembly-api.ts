@@ -43,6 +43,7 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
   try {
     response = await fetch(base + path, {
       ...init,
+      credentials: 'include',
       headers: {
         ...Object.fromEntries(new Headers(init?.headers)),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),

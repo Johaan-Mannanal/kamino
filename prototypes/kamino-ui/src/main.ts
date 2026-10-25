@@ -1,4 +1,5 @@
 import "./style.css";
+import { browserAccess } from "../../../frontend/src/access";
 import { initAppearance } from "./appearance";
 initAppearance();
 import { mountHome } from "./home";
@@ -66,6 +67,7 @@ let cleanup = () => {};
 let navToken = 0;
 let prepared = new Map<number, Blob>();
 let busy = false;
+let checkingAccess = false;
 const demoPhotos = () =>
   ["5df27.png", "06849.png", "d28af.png"].map((file, i) => ({
     name: ["Front", "Side", "Above"][i],
@@ -168,7 +170,7 @@ function upload() {
     const demo = photos.length > 0 && photos.some((p) => !p.file);
     $("#photo-count").textContent = `· ${photos.length} of 4`;
     $<HTMLButtonElement>("#create-mesh").disabled =
-      !photos.length || uploads.pending;
+      !photos.length || uploads.pending || checkingAccess;
     $<HTMLButtonElement>("#choose").disabled = uploads.pending;
     $<HTMLButtonElement>("#sample-photos").disabled = uploads.pending;
     if (uploads.pending)
@@ -240,13 +242,40 @@ function upload() {
     $("#drop-zone").classList.remove("drag-over");
     add(Array.from((e as DragEvent).dataTransfer?.files ?? []));
   });
-  $("#access-token").onclick = () =>
-    void promptForToken(
-      live(),
-      "Required only when the API is configured with an application token.",
-    );
+  $("#access-token").textContent = "Team sign-in";
+  $("#access-token").onclick = async () => {
+    try {
+      const status = await browserAccess.status();
+      if (status.required && status.authenticated) {
+        await browserAccess.signOut();
+        live().setToken("");
+        $("#access-token").textContent = "Team sign-in";
+        toast("Signed out on this browser.");
+      } else if (status.required) {
+        if (
+          await promptForToken(
+            live(),
+            "Sign in to upload photos and open saved jobs.",
+          )
+        )
+          $("#access-token").textContent = "Sign out";
+      } else toast("This server does not require sign-in.");
+    } catch (error) {
+      toast(describeError(error));
+    }
+  };
+  const accessView = navToken;
+  void browserAccess
+    .status()
+    .then((status) => {
+      if (navToken === accessView && status.required && status.authenticated)
+        $("#access-token").textContent = "Sign out";
+    })
+    .catch(() => {
+      /* Create mesh retries the access check with a visible error. */
+    });
   $("#create-mesh").onclick = async () => {
-    if (!photos.length || uploads.pending) return;
+    if (!photos.length || uploads.pending || checkingAccess) return;
     const files = photos.flatMap((p) => (p.file ? [p.file] : []));
     if (files.length !== photos.length) {
       // Explicit synthetic demo: procedural mug, no upload, no reconstruction.
@@ -262,8 +291,19 @@ function upload() {
     }
     const token = navToken;
     $("#upload-error").textContent = "";
-    $("#create-mesh").lastChild!.textContent = "Uploading…";
+    checkingAccess = true;
+    draw();
+    $("#create-mesh").lastChild!.textContent = "Checking access…";
     try {
+      const access = await browserAccess.status();
+      if (token !== navToken) return;
+      if (
+        !access.authenticated &&
+        !(await promptForToken(live(), "Sign in before sending your photos."))
+      )
+        return;
+      if (token !== navToken) return;
+      checkingAccess = false;
       const request = uploads.submit(() => live().upload(files), {
         remember: setLiveJob,
         isCurrent: () => token === navToken,
@@ -271,8 +311,15 @@ function upload() {
         acceptedInBackground: () => {
           toast("Upload accepted. Use Resume server job to continue.");
         },
+        takingLonger: () => {
+          if (token === navToken)
+            $("#upload-note").textContent =
+              "Still waiting for the upload response. Large photos or a slow connection can take longer. Keep this tab open; do not resubmit, because the server may already be accepting this job.";
+        },
       });
       draw();
+      $("#upload-note").textContent =
+        `Sending ${files.length} photo(s), ${(files.reduce((n, f) => n + f.size, 0) / 1048576).toFixed(1)} MiB. Keep this tab open. Creating mesh starts after the server confirms the upload.`;
       await request;
     } catch (error) {
       if (error instanceof SessionCancelledError) return;
@@ -285,15 +332,16 @@ function upload() {
       // Selected photos stay in place so the user can retry.
       if (isAuthError(error)) {
         $("#upload-error").textContent =
-          "The API requires an application token. Enter it, then choose Create mesh again.";
+          "Your sign-in expired. Sign in, then choose Create mesh again.";
         void promptForToken(
           live(),
-          "Enter the application token, then choose Create mesh again.",
+          "Sign in again, then choose Create mesh. The rejected request did not start reconstruction.",
         );
       } else
         $("#upload-error").textContent =
           `Upload failed: ${describeError(error)}`;
     } finally {
+      checkingAccess = false;
       if (token === navToken) {
         $("#create-mesh").lastChild!.textContent = "Create mesh";
         draw();
@@ -319,10 +367,7 @@ function liveLoading(token: number, id: string) {
     paint();
     if (
       isAuthError(error) &&
-      (await promptForToken(
-        session,
-        "This job requires the application access token.",
-      ))
+      (await promptForToken(session, "Sign in to open this saved job."))
     )
       if (token === navToken) restore();
   };

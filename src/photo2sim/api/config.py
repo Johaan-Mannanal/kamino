@@ -2,6 +2,7 @@ import math
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from dotenv import dotenv_values
 
@@ -21,6 +22,7 @@ class Settings:
     gemini_deadline_seconds: float = 75
     gemini_backoff_seconds: float = 0.5
     api_token: str = field(default="", repr=False)
+    public_origin: str = ""
     cors_origins: tuple[str, ...] = ("http://localhost:5173", "http://127.0.0.1:5173")
     max_image_bytes: int = 10 * 1024 * 1024
     max_asset_bytes: int = 100 * 1024 * 1024
@@ -28,6 +30,21 @@ class Settings:
     max_polls: int = 300
 
     def __post_init__(self):
+        if self.public_origin:
+            origin = urlsplit(self.public_origin)
+            if (
+                origin.scheme != "https"
+                or not origin.hostname
+                or origin.path
+                or origin.query
+                or origin.fragment
+                or origin.username
+                or origin.password
+            ):
+                raise ValueError("PHOTO2SIM_PUBLIC_ORIGIN must be an HTTPS origin without a path")
+            host = f"[{origin.hostname}]" if ":" in origin.hostname else origin.hostname
+            port = f":{origin.port}" if origin.port not in (None, 443) else ""
+            object.__setattr__(self, "public_origin", f"https://{host}{port}")
         if self.provider not in ("mock", "meshy"):
             raise ValueError("PHOTO2SIM_PROVIDER must be mock or meshy")
         if self.provider == "meshy" and not self.meshy_api_key:
@@ -67,6 +84,7 @@ class Settings:
             gemini_deadline_seconds=float(values.get("GEMINI_DEADLINE_SECONDS") or 75),
             gemini_backoff_seconds=float(values.get("GEMINI_BACKOFF_SECONDS") or 0.5),
             api_token=values.get("PHOTO2SIM_API_TOKEN") or "",
+            public_origin=(values.get("PHOTO2SIM_PUBLIC_ORIGIN") or "").rstrip("/"),
             cors_origins=tuple(
                 origin.strip().rstrip("/")
                 for origin in (

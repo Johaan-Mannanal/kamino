@@ -94,6 +94,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     response = await fetch(`${base}${path}`, {
       ...init,
+      credentials: 'include',
       headers: {
         ...Object.fromEntries(new Headers(init?.headers)),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -198,6 +199,7 @@ export const liveApi: Api = {
     let response: Response
     try {
       response = await fetch(fileUrl(id, path), {
+        credentials: 'include',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
     } catch {

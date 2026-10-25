@@ -8,7 +8,6 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
-from secrets import compare_digest
 from typing import Literal
 from uuid import UUID, uuid4
 
@@ -414,8 +413,9 @@ class AssemblyJobs:
 def assembly_router(service: AssemblyJobs, api_token: str, max_bytes: int):
     def authorize(request: Request):
         if api_token:
-            scheme, _, token = request.headers.get("Authorization", "").partition(" ")
-            if scheme.lower() != "bearer" or not compare_digest(token.encode(), api_token.encode()):
+            from photo2sim.api.browser_session import authorized
+
+            if not authorized(request, api_token):
                 raise HTTPException(
                     401, "Application access token required", headers={"WWW-Authenticate": "Bearer"}
                 )

@@ -12,6 +12,34 @@ function deferred<T>() {
 }
 
 describe("accepted upload navigation", () => {
+  it("warns about a slow request without retrying it or losing its eventual job", async () => {
+    vi.useFakeTimers();
+    try {
+      const pending = deferred<{ id: string }>();
+      const uploads = new UploadNavigation();
+      const create = vi.fn(() => pending.promise);
+      const slow = vi.fn();
+      const remember = vi.fn();
+      const result = uploads.submit(create, {
+        remember,
+        isCurrent: () => true,
+        openCurrent: vi.fn(),
+        acceptedInBackground: vi.fn(),
+        takingLonger: slow,
+      });
+      await vi.advanceTimersByTimeAsync(20000);
+      expect(slow).toHaveBeenCalledOnce();
+      expect(create).toHaveBeenCalledOnce();
+      expect(uploads.pending).toBe(true);
+      pending.resolve({ id: "late-but-accepted" });
+      await result;
+      expect(remember).toHaveBeenCalledWith("late-but-accepted");
+      await vi.advanceTimersByTimeAsync(20000);
+      expect(slow).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it("retains the accepted job before handling navigation away from the upload page", async () => {
     const pending = deferred<{ id: string }>();
     const uploads = new UploadNavigation();
