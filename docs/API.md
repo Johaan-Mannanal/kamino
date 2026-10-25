@@ -26,6 +26,8 @@ After processing, `export_path` names `attempts/{attempt}/bundle/scene.xml`, `va
 
 Restarting while preparing/validating marks the job `failed` with `processing_interrupted`; retry `/process` to use the cached reconstruction in a new attempt. This never submits another paid generation. Processing errors are sanitized and retain saved artifacts. Unexpected validator exceptions still produce a safe failure report. A failed simulation can be retried directly or have its properties corrected with PATCH first; reconstruction failures cannot use this recovery path. Without the simulation extra, processing fails with `simulation_unavailable` and installation instructions.
 
+Provider status polling and asset downloads retry transient connection failures and HTTP 408, 429, 500, 502, 503, or 504 responses up to three total attempts, waiting one then two seconds. Shutdown interrupts those waits and leaves the saved task resumable at startup. Invalid responses, terminal HTTP errors, invalid meshes, and local file errors fail immediately. Paid generation submission is never automatically retried. Exhausted read retries retain the task ID for diagnosis.
+
 ## Property input
 
 ```json

@@ -188,3 +188,81 @@ def test_reusable_validator_rejects_corrupted_exports(tmp_path, fault):
 def test_validator_rejects_invalid_duration(tmp_path):
     with pytest.raises(ValueError, match="Duration"):
         validate_export(Path(tmp_path / "absent.xml"), duration_s=float("nan"))
+
+
+@pytest.mark.parametrize(
+    "fault,error",
+    [
+        ("visual_x", "Rendered mesh must be centred"),
+        ("visual_y", "Rendered mesh must be centred"),
+        ("visual_z", "Rendered mesh must be centred"),
+        ("visual_attachment", "must belong to the asset body"),
+        ("collision_attachment", "must belong to the asset body"),
+        ("collision_position", "Collision box must be centred"),
+        ("collision_rotation", "Collision box must be centred"),
+        ("body_rotation", "Asset must start upright"),
+        ("ground_height", "Ground must be a stationary horizontal plane"),
+        ("ground_rotation", "Ground must be a stationary horizontal plane"),
+        ("ground_attachment", "Ground must be a stationary horizontal plane"),
+    ],
+)
+def test_validator_rejects_displaced_and_wrongly_attached_geometry(tmp_path, fault, error):
+    asset, root = prepared(tmp_path)
+    scene = export_asset(asset, root, tmp_path / "bundle")
+    tree = ET.parse(scene)
+    world = tree.find("worldbody")
+    body = world.find("body")
+    visual = body.find("geom[@name='visual']")
+    collision = body.find("geom[@name='collision']")
+    ground = world.find("geom[@name='ground']")
+    if fault.startswith("visual_") and fault[-1] in "xyz":
+        offset = [0, 0, 0]
+        offset["xyz".index(fault[-1])] = 1
+        visual.set("pos", " ".join(map(str, offset)))
+    elif fault in {"visual_attachment", "collision_attachment"}:
+        geom = visual if fault == "visual_attachment" else collision
+        body.remove(geom)
+        # Keep the same initial world position so an extents/pose-only check
+        # cannot mistake a detached, stationary geom for the body's own mesh.
+        geom.set("pos", body.get("pos"))
+        world.append(geom)
+    elif fault == "collision_position":
+        collision.set("pos", "0.01 0 0")
+    elif fault == "collision_rotation":
+        collision.set("euler", "0 0 0.5")
+    elif fault == "body_rotation":
+        body.set("euler", "0.2 0 0")
+    elif fault == "ground_height":
+        ground.set("pos", "0 0 0.01")
+    elif fault == "ground_rotation":
+        ground.set("euler", "0.2 0 0")
+    else:
+        world.remove(ground)
+        ET.SubElement(world, "body", name="other_static_body").append(ground)
+    tree.write(scene)
+    report = validate_export(scene, duration_s=0.8)
+    assert not report["passed"]
+    assert not report["portability_passed"]
+    for location in ("original", "relocated"):
+        assert error in report[location]["error"], report
+
+
+def test_validator_accepts_mujoco_recentred_asymmetric_mesh(tmp_path):
+    asset, root = prepared(tmp_path)
+    # Its bounding box is centred, but its volume centroid and inertia frame
+    # are not. MuJoCo therefore supplies a nonzero geom_pos when compiling it.
+    vertices = np.array([[-1, -1, -1], [1, -1, -1], [-1, 1, -1], [-0.4, -0.2, 1]])
+    vertices *= np.array([0.04, 0.05, 0.06]) / 2
+    mesh = trimesh.Trimesh(
+        vertices=vertices,
+        faces=[[0, 2, 1], [0, 1, 3], [1, 2, 3], [2, 0, 3]],
+        process=False,
+    )
+    mesh.export(root / asset.visual_mesh)
+    scene = export_asset(asset, root, tmp_path / "bundle")
+    model = mujoco.MjModel.from_xml_path(str(scene))
+    visual = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual")
+    assert np.linalg.norm(model.geom_pos[visual]) > 0.001
+    report = validate_export(scene, duration_s=0.8)
+    assert report["passed"], report
+    np.testing.assert_allclose(report["original"]["rendered_center_offset_m"], 0, atol=1e-8)
