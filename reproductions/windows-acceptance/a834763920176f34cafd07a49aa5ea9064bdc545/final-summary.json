@@ -1,0 +1,167 @@
+{
+  "commit": "a834763920176f34cafd07a49aa5ea9064bdc545",
+  "finished_at_utc": "2026-10-25T08:58:39.410750+00:00",
+  "status": "BLOCKED",
+  "counts": {
+    "PASS": 20,
+    "FAIL": 0,
+    "BLOCKED": 8,
+    "NOT RUN": 0
+  },
+  "job_id": "c25fcbbd-cec8-4065-ab36-d829fd9be888",
+  "input_revision": 17,
+  "final_attempt": "b55c6230-e25c-434d-9015-abb9c72ed189",
+  "attempts": [
+    {
+      "id": "dba1c1d0-f245-4111-aff7-b6fc0ac005c5",
+      "status": "completed"
+    },
+    {
+      "id": "26895d18-e19f-4a71-bd75-ec80a148d44a",
+      "status": "completed"
+    },
+    {
+      "id": "b16e0f1a-c095-404a-9327-f07ee340534c",
+      "status": "failed"
+    },
+    {
+      "id": "b55c6230-e25c-434d-9015-abb9c72ed189",
+      "status": "completed"
+    }
+  ],
+  "provider_calls_observed": 0,
+  "app_source_changed": false,
+  "native_backend_original": {
+    "passed": 365,
+    "failed": 25,
+    "skipped": 7
+  },
+  "separate_short_temp_diagnostic_passed": 25,
+  "frontend_passed": [
+    103,
+    99
+  ],
+  "physical_accuracy": "unverified",
+  "zip_hashes": {
+    "A-redownload-after-B.zip": "8eb2b606a74e0fea8040bbf7ce8436f09d4887f72ba4a4e1449b156fe8420569",
+    "A-redownload-after-reopen.zip": "8eb2b606a74e0fea8040bbf7ce8436f09d4887f72ba4a4e1449b156fe8420569",
+    "A-redownload-final.zip": "8eb2b606a74e0fea8040bbf7ce8436f09d4887f72ba4a4e1449b156fe8420569",
+    "A.zip": "8eb2b606a74e0fea8040bbf7ce8436f09d4887f72ba4a4e1449b156fe8420569",
+    "B-before-selection-check.zip": "eb019c244711a1c7086e1e076929a0a8c9c6e2d1d0ba95c3919452cdc2682618",
+    "B.zip": "f8d4d57bc924940eef6f8ba06316797b754d7c7369d854b3926252b628ad53cf"
+  },
+  "rows": [
+    {
+      "id": "G01",
+      "result": "PASS"
+    },
+    {
+      "id": "G02",
+      "result": "PASS"
+    },
+    {
+      "id": "S01",
+      "result": "PASS"
+    },
+    {
+      "id": "S02",
+      "result": "BLOCKED"
+    },
+    {
+      "id": "S03",
+      "result": "PASS"
+    },
+    {
+      "id": "S04",
+      "result": "PASS"
+    },
+    {
+      "id": "O01",
+      "result": "BLOCKED"
+    },
+    {
+      "id": "O02",
+      "result": "PASS"
+    },
+    {
+      "id": "O03",
+      "result": "PASS"
+    },
+    {
+      "id": "O04",
+      "result": "BLOCKED"
+    },
+    {
+      "id": "P01",
+      "result": "PASS"
+    },
+    {
+      "id": "P02",
+      "result": "PASS"
+    },
+    {
+      "id": "P03",
+      "result": "PASS"
+    },
+    {
+      "id": "P04",
+      "result": "PASS"
+    },
+    {
+      "id": "P05",
+      "result": "BLOCKED"
+    },
+    {
+      "id": "D01",
+      "result": "PASS"
+    },
+    {
+      "id": "D02",
+      "result": "PASS"
+    },
+    {
+      "id": "D03",
+      "result": "BLOCKED"
+    },
+    {
+      "id": "D04",
+      "result": "PASS"
+    },
+    {
+      "id": "R01",
+      "result": "PASS"
+    },
+    {
+      "id": "R02",
+      "result": "PASS"
+    },
+    {
+      "id": "R03",
+      "result": "BLOCKED"
+    },
+    {
+      "id": "R04",
+      "result": "BLOCKED"
+    },
+    {
+      "id": "R05",
+      "result": "PASS"
+    },
+    {
+      "id": "Z01",
+      "result": "PASS"
+    },
+    {
+      "id": "Z02",
+      "result": "PASS"
+    },
+    {
+      "id": "Z03",
+      "result": "BLOCKED"
+    },
+    {
+      "id": "Z04",
+      "result": "PASS"
+    }
+  ]
+}
