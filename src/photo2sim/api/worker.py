@@ -7,6 +7,14 @@ from photo2sim.api.store import JobStore
 from photo2sim.contracts import JobError
 from photo2sim.integrations.reconstruction import ProviderError, ReconstructionProvider
 
+# Three total attempts, with stop-aware one- and two-second backoff waits.
+PROVIDER_READ_ATTEMPTS = 3
+PROVIDER_RETRY_DELAY_S = 1
+
+
+class _WorkerStopped(Exception):
+    """Keep the saved task active so startup can resume it after shutdown."""
+
 
 class JobWorker:
     def __init__(self, store: JobStore, provider: ReconstructionProvider, settings: Settings):
@@ -54,6 +62,19 @@ class JobWorker:
     def fail(self, job_id: UUID, code: str, message: str):
         self.store.update(job_id, status="failed", error=JobError(code=code, message=message))
 
+    def retry_read(self, operation):
+        """Retry only explicitly transient failures of idempotent provider reads."""
+        for attempt in range(PROVIDER_READ_ATTEMPTS):
+            if self.stopping.is_set():
+                raise _WorkerStopped
+            try:
+                return operation()
+            except ProviderError as error:
+                if not error.retryable or attempt == PROVIDER_READ_ATTEMPTS - 1:
+                    raise
+                if self.stopping.wait(PROVIDER_RETRY_DELAY_S * 2**attempt):
+                    raise _WorkerStopped from None
+
     def run(self, job_id: UUID):
         try:
             job = self.store.get(job_id)
@@ -79,7 +100,7 @@ class JobWorker:
             for _ in range(self.settings.max_polls):
                 if self.stopping.is_set():
                     return
-                snapshot = self.provider.poll(job.provider_task_id)
+                snapshot = self.retry_read(lambda: self.provider.poll(job.provider_task_id))
                 if snapshot.status == "failed":
                     raise ProviderError(
                         "provider_failed", "Reconstruction failed. Inspect the provider task."
@@ -87,7 +108,9 @@ class JobWorker:
                 self.store.update(job_id, progress=max(0, min(100, snapshot.progress)))
                 if snapshot.status == "succeeded":
                     root = self.store.job_dir(job_id)
-                    mesh = self.provider.download(snapshot, root / "reconstruction")
+                    mesh = self.retry_read(
+                        lambda: self.provider.download(snapshot, root / "reconstruction")
+                    )
                     relative = mesh.resolve().relative_to(root.resolve()).as_posix()
                     self.store.update(
                         job_id, status="awaiting_properties", progress=100, mesh_path=relative
@@ -99,6 +122,8 @@ class JobWorker:
                 "provider_timeout",
                 "Polling limit reached. The saved provider task may still finish.",
             )
+        except _WorkerStopped:
+            return
         except ProviderError as error:
             self.fail(job_id, error.code, error.message)
         except Exception:

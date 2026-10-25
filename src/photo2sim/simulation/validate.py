@@ -74,6 +74,31 @@ def _one_scene(scene, duration_s):
                 "Required exported elements missing",
             )
             sides = _dimensions(asset)
+            alignment_tolerance = max(1e-8, float(sides.max()) * 1e-5)
+            _require(
+                model.geom_bodyid[visual] == model.geom_bodyid[collision] == body,
+                "Visual and collision geometry must belong to the asset body",
+            )
+            _require(
+                np.allclose(data.xmat[body].reshape(3, 3), np.eye(3), atol=1e-8),
+                "Asset must start upright with its exported axes",
+            )
+            _require(
+                np.allclose(model.geom_pos[collision], 0, atol=alignment_tolerance)
+                and np.allclose(
+                    data.geom_xmat[collision].reshape(3, 3),
+                    data.xmat[body].reshape(3, 3),
+                    atol=1e-8,
+                ),
+                "Collision box must be centred and aligned with the asset body",
+            )
+            _require(
+                model.geom_bodyid[ground] == 0
+                and model.geom_type[ground] == mujoco.mjtGeom.mjGEOM_PLANE
+                and abs(data.geom_xpos[ground, 2]) <= alignment_tolerance
+                and np.allclose(data.geom_xmat[ground].reshape(3, 3)[:, 2], [0, 0, 1], atol=1e-8),
+                "Ground must be a stationary horizontal plane at z=0",
+            )
             _require(
                 np.isclose(model.body_mass[body], asset.properties.mass_kg.value),
                 "Exported mass mismatch",
@@ -109,6 +134,16 @@ def _one_scene(scene, duration_s):
             _require(
                 np.allclose(rendered_extents, sides, rtol=1e-4, atol=1e-8),
                 "Rendered mesh scale mismatch",
+            )
+            # MuJoCo recentres mesh vertices around their inertia frame and folds
+            # that transform into the geom pose. Check reconstructed bounds, not
+            # geom_pos (which can be nonzero for a correctly centred source mesh).
+            rendered_center_offset = (vertices.min(axis=0) + vertices.max(axis=0)) / 2 - data.xpos[
+                body
+            ]
+            _require(
+                np.allclose(rendered_center_offset, 0, atol=alignment_tolerance),
+                "Rendered mesh must be centred on the asset collision box",
             )
             _require(
                 np.allclose(model.opt.gravity, assumptions["gravity_m_s2"]),
@@ -190,6 +225,7 @@ def _one_scene(scene, duration_s):
                 maximum_settled_linear_speed_m_s=tail_linear,
                 maximum_settled_angular_speed_rad_s=tail_angular,
                 rendered_dimensions_m=rendered_extents.tolist(),
+                rendered_center_offset_m=rendered_center_offset.tolist(),
                 mujoco_warning_counts=warning_counts,
                 python_warnings=[str(w.message) for w in caught],
                 asset_id=str(asset.asset_id),

@@ -10,6 +10,8 @@ import httpx
 from photo2sim.api.config import Settings
 from photo2sim.integrations.reconstruction import ProviderError, ProviderSnapshot
 
+TRANSIENT_HTTP_STATUSES = {408, 429, 500, 502, 503, 504}
+
 
 class MeshyProvider:
     name = "meshy"
@@ -37,15 +39,18 @@ class MeshyProvider:
             raise ProviderError(
                 "provider_http_error",
                 f"Meshy returned HTTP {error.response.status_code}. Check API access/credits/task.",
+                retryable=method == "GET" and error.response.status_code in TRANSIENT_HTTP_STATUSES,
             ) from None
-        except (httpx.RequestError, ValueError):
+        except (httpx.RequestError, ValueError) as error:
             if method == "POST":
                 raise ProviderError(
                     "submission_uncertain",
                     "Submission result is unknown. Inspect Meshy's dashboard before resubmitting.",
                 ) from None
             raise ProviderError(
-                "provider_response_error", "Could not read Meshy task status."
+                "provider_response_error",
+                "Could not read Meshy task status.",
+                retryable=isinstance(error, httpx.RequestError),
             ) from None
 
     def submit(self, images: list[Path]) -> str:
@@ -134,6 +139,18 @@ class MeshyProvider:
                 raise ProviderError("invalid_mesh", "Downloaded output is not a complete GLB v2.")
             partial.replace(destination)
             return destination
+        except httpx.HTTPStatusError as error:
+            raise ProviderError(
+                "asset_download_error",
+                "Mesh download failed. The provider task ID is retained.",
+                retryable=error.response.status_code in TRANSIENT_HTTP_STATUSES,
+            ) from None
+        except httpx.RequestError:
+            raise ProviderError(
+                "asset_download_error",
+                "Mesh download failed. The provider task ID is retained.",
+                retryable=True,
+            ) from None
         except (httpx.HTTPError, OSError):
             raise ProviderError(
                 "asset_download_error", "Mesh download failed. The provider task ID is retained."
