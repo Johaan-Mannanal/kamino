@@ -22,6 +22,9 @@ class Settings:
     gemini_deadline_seconds: float = 75
     gemini_backoff_seconds: float = 0.5
     api_token: str = field(default="", repr=False)
+    student_code: str = field(default="", repr=False)
+    judge_code: str = field(default="", repr=False)
+    team_code: str = field(default="", repr=False)
     public_origin: str = ""
     cors_origins: tuple[str, ...] = ("http://localhost:5173", "http://127.0.0.1:5173")
     max_image_bytes: int = 10 * 1024 * 1024
@@ -30,6 +33,12 @@ class Settings:
     max_polls: int = 300
 
     def __post_init__(self):
+        codes = [self.student_code, self.judge_code, self.team_code]
+        if any(codes) and not self.api_token:
+            raise ValueError("Tier codes require PHOTO2SIM_API_TOKEN as the signing secret")
+        configured = [value for value in [self.api_token, *codes] if value]
+        if len(configured) != len(set(configured)) or any(v != v.strip() for v in configured):
+            raise ValueError("Access codes must be distinct and have no surrounding whitespace")
         if self.public_origin:
             origin = urlsplit(self.public_origin)
             if (
@@ -84,6 +93,9 @@ class Settings:
             gemini_deadline_seconds=float(values.get("GEMINI_DEADLINE_SECONDS") or 75),
             gemini_backoff_seconds=float(values.get("GEMINI_BACKOFF_SECONDS") or 0.5),
             api_token=values.get("PHOTO2SIM_API_TOKEN") or "",
+            student_code=values.get("PHOTO2SIM_STUDENT_CODE") or "",
+            judge_code=values.get("PHOTO2SIM_JUDGE_CODE") or "",
+            team_code=values.get("PHOTO2SIM_TEAM_CODE") or "",
             public_origin=(values.get("PHOTO2SIM_PUBLIC_ORIGIN") or "").rstrip("/"),
             cors_origins=tuple(
                 origin.strip().rstrip("/")

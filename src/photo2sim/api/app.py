@@ -11,10 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPBearer
 from PIL import Image, UnidentifiedImageError
+from starlette.concurrency import run_in_threadpool
 
+from photo2sim.api.access_limits import AccessLimits, request_action
 from photo2sim.api.browser_session import (
-    authorized,
-    bearer_access,
+    access_role,
+    bearer_role,
     register_session_routes,
     trusted_origin,
 )
@@ -102,15 +104,18 @@ def create_app(
         dependencies=[Depends(HTTPBearer(auto_error=False))] if settings.api_token else [],
     )
     if settings.api_token:
+        access_limits = AccessLimits(settings.data_dir)
 
         @app.middleware("http")
         async def application_access(request, call_next):
+            reservation = None
             if (
                 request.method != "OPTIONS"
                 and request.url.path.startswith("/api/")
                 and request.url.path not in {"/api/health", "/api/session"}
             ):
-                if not authorized(request, settings.api_token):
+                role = access_role(request, settings)
+                if role is None:
                     return JSONResponse(
                         status_code=401,
                         content={"detail": "Application access token required"},
@@ -118,14 +123,31 @@ def create_app(
                     )
                 if (
                     request.method not in {"GET", "HEAD", "OPTIONS"}
-                    and not bearer_access(request, settings.api_token)
+                    and not bearer_role(request, settings)
                     and not trusted_origin(request, settings.cors_origins, settings.public_origin)
                 ):
                     return JSONResponse(
                         status_code=403,
                         content={"detail": "Use the Kamino website for this action"},
                     )
-            return await call_next(request)
+                try:
+                    reservation = await run_in_threadpool(
+                        access_limits.reserve,
+                        role,
+                        request_action(request.method, request.url.path),
+                    )
+                except HTTPException as error:
+                    return JSONResponse(
+                        status_code=error.status_code,
+                        content={"detail": error.detail},
+                        headers=error.headers,
+                    )
+            response = await call_next(request)
+            # Rejected/redirected requests did not enqueue work. Keep 5xx reservations:
+            # a provider may already have received the request before an error.
+            if 300 <= response.status_code < 500:
+                await run_in_threadpool(access_limits.refund, reservation)
+            return response
 
     register_session_routes(app, settings)
     app.add_middleware(
@@ -136,9 +158,7 @@ def create_app(
         allow_headers=["Content-Type", "Authorization"],
     )
     if assembly_jobs is not None:
-        app.include_router(
-            assembly_router(assembly_jobs, settings.api_token, settings.max_asset_bytes)
-        )
+        app.include_router(assembly_router(assembly_jobs, settings, settings.max_asset_bytes))
 
     def get_job(job_id: UUID) -> JobRecord:
         try:

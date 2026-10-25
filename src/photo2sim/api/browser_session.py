@@ -8,6 +8,8 @@ import time
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 
+from photo2sim.api.access_limits import LIMITS, SESSION_SECONDS
+
 COOKIE = "kamino_session"
 LIFETIME = 12 * 60 * 60
 
@@ -54,6 +56,63 @@ def authorized(request: Request, key: str) -> bool:
     return cookie_access(request, key)
 
 
+def tier_codes(settings):
+    return {
+        "student": settings.student_code,
+        "judge": settings.judge_code,
+        "team": settings.team_code,
+    }
+
+
+def bearer_role(request, settings):
+    if bearer_access(request, settings.api_token):
+        return "team"
+    for role, code in tier_codes(settings).items():
+        if code and bearer_access(request, code):
+            return role
+    return None
+
+
+def access_role(request, settings):
+    if not settings.api_token:
+        return "team"
+    if request.headers.get("authorization"):
+        return bearer_role(request, settings)
+    raw = request.cookies.get(COOKIE, "")
+    if len(raw) > 250:
+        return None
+    if not raw.startswith("v2."):
+        return "team" if cookie_access(request, settings.api_token) else None
+    try:
+        version, role, expires, nonce, fingerprint, signed = raw.split(".")
+        code = tier_codes(settings).get(role)
+        if not code or len(nonce) != 32:
+            return None
+        value = ".".join([version, role, expires, nonce, fingerprint])
+        if (
+            0 < int(expires) - time.time() <= SESSION_SECONDS[role]
+            and secrets.compare_digest(
+                fingerprint, signature("code:" + code, settings.api_token)[:16]
+            )
+            and secrets.compare_digest(signed, signature(value, settings.api_token))
+        ):
+            return role
+    except (ValueError, TypeError, KeyError):
+        pass
+    return None
+
+
+def role_details(role):
+    return {
+        "role": role,
+        "session_seconds": SESSION_SECONDS[role],
+        "limits": {
+            action: {"per_24_hours": maximum, "cooldown_seconds": cooldown}
+            for action, (maximum, cooldown) in LIMITS.get(role, {}).items()
+        },
+    }
+
+
 def trusted_origin(request: Request, origins: tuple[str, ...], public_origin: str = "") -> bool:
     origin = request.headers.get("origin", "")
     return origin in {public_origin or str(request.base_url).rstrip("/"), *origins}
@@ -62,10 +121,12 @@ def trusted_origin(request: Request, origins: tuple[str, ...], public_origin: st
 def register_session_routes(app, settings):
     @app.get("/api/session")
     def status(request: Request):
+        role = access_role(request, settings)
         return JSONResponse(
             {
                 "required": bool(settings.api_token),
-                "authenticated": authorized(request, settings.api_token),
+                "authenticated": role is not None,
+                **(role_details(role) if role and settings.api_token else {}),
             },
             headers={"Cache-Control": "no-store"},
         )
@@ -76,18 +137,27 @@ def register_session_routes(app, settings):
             request, settings.cors_origins, settings.public_origin
         ):
             raise HTTPException(403, "Sign in from the Kamino website")
-        if settings.api_token and not bearer_access(request, settings.api_token):
+        role = bearer_role(request, settings) if settings.api_token else "team"
+        if role is None:
             raise HTTPException(401, "That team access code was not accepted")
         secure = bool(settings.public_origin) or request.url.scheme == "https"
         if not secure and request.url.hostname not in {"localhost", "127.0.0.1", "::1"}:
             raise HTTPException(400, "Sign in over HTTPS")
-        result = JSONResponse({"authenticated": True}, headers={"Cache-Control": "no-store"})
+        result = JSONResponse(
+            {"authenticated": True, **role_details(role)}, headers={"Cache-Control": "no-store"}
+        )
         if settings.api_token:
-            value = f"{int(time.time()) + LIFETIME}.{secrets.token_hex(16)}"
+            lifetime = SESSION_SECONDS[role]
+            value = f"{int(time.time()) + lifetime}.{secrets.token_hex(16)}"
+            if not bearer_access(request, settings.api_token):
+                fingerprint = signature("code:" + tier_codes(settings)[role], settings.api_token)[
+                    :16
+                ]
+                value = f"v2.{role}.{value}.{fingerprint}"
             result.set_cookie(
                 COOKIE,
                 value + "." + signature(value, settings.api_token),
-                max_age=LIFETIME,
+                max_age=lifetime,
                 path="/api",
                 secure=secure,
                 httponly=True,

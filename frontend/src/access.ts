@@ -1,9 +1,23 @@
 const base = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')
 
-async function request(
-  method: string,
-  code?: string,
-): Promise<{ authenticated: boolean; required?: boolean }> {
+export type AccessStatus = {
+  authenticated?: boolean
+  required?: boolean
+  role?: 'student' | 'judge' | 'team'
+  session_seconds?: number
+}
+
+export function accessDescription(status: AccessStatus): string {
+  const seconds = status.session_seconds
+  const duration = seconds
+    ? seconds < 3600
+      ? `${seconds / 60} minutes`
+      : `${seconds / 3600} hours`
+    : 'this session'
+  return `Signed in${status.role ? ` as ${status.role}` : ''} for ${duration}. Refresh and new tabs keep access.`
+}
+
+async function request(method: string, code?: string): Promise<AccessStatus> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), 10000)
   try {

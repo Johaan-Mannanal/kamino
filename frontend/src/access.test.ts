@@ -6,6 +6,13 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+it('describes the granted tier without promising every user a 12-hour session', async () => {
+  const { accessDescription } = await import('./access')
+  expect(accessDescription({ role: 'student', session_seconds: 1800 })).toContain('30 minutes')
+  expect(accessDescription({ role: 'judge', session_seconds: 21600 })).toContain('6 hours')
+  expect(accessDescription({ role: 'team', session_seconds: 43200 })).toContain('12 hours')
+})
+
 it('exchanges a code for browser access without storing it or putting it in a URL', async () => {
   const fetch = vi
     .fn()

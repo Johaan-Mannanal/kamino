@@ -17,6 +17,33 @@ share this browser session. Sign out clears this browser's cookie; it does not r
 copies elsewhere. Rotating the application code invalidates all existing sessions.
 This is shared team access, not individual user accounts.
 
+Optional `PHOTO2SIM_STUDENT_CODE`, `PHOTO2SIM_JUDGE_CODE` and `PHOTO2SIM_TEAM_CODE`
+add access levels. Configure them only as private server variables, never frontend
+build variables or committed values. Keep `PHOTO2SIM_API_TOKEN` unchanged: it is
+the signing secret and remains a valid team code. Codes must be distinct. Existing
+12-hour sessions and Bearer clients remain valid. A tier code also works through
+Bearer authentication, with the same limits as its browser session. Changing a
+tier code revokes its sessions; changing the original token revokes every session.
+
+| Access | Session | Mesh submissions / 24h | Gemini requests / 24h | Simulation submissions / 24h |
+| --- | --- | --- | --- | --- |
+| Student/friends | 30 minutes | 2, 5-minute cooldown | 10, 30-second cooldown | 10, 30-second cooldown |
+| Judge | 6 hours | 10, 30-second cooldown | 40, 5-second cooldown | 50, 5-second cooldown |
+| Team and original code | 12 hours | No quota | No quota | No quota |
+
+Limits are shared across everyone using a tier over a rolling 24-hour window,
+not per browser or sign-in. Admission is atomic and persisted in
+`PHOTO2SIM_DATA_DIR/access-usage.sqlite3`; preserve this file with the job data.
+Assembly creation and processing count as simulation submissions, as does rigid
+processing. Cached reads, previews, manual edits and downloads do not consume these
+quotas. Rejected 3xx/4xx requests refund admission; 5xx failures conservatively keep
+it because a provider may already have received work. A successful cached POST to
+suggestions counts as a request; use GET for free cached reads. The API returns 429
+with a human-readable wait time and `Retry-After`. Refresh, re-sign-in and server
+restart do not reset allowance. Expiry does not cancel accepted background work:
+sign in again to inspect it. Existing provider deadlines and worker safeguards still
+apply to every tier. These are shared project access codes, not separate private accounts.
+
 API scripts may continue using the existing Bearer header. Browser writes authenticated
 by cookies must come from the configured public origin or explicitly allowed CORS
 origins. Keep allowed origins narrow. Local HTTP sign-in is restricted to loopback;

@@ -410,12 +410,12 @@ class AssemblyJobs:
                 self.stage(job_id, "failed", error=details)
 
 
-def assembly_router(service: AssemblyJobs, api_token: str, max_bytes: int):
+def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
     def authorize(request: Request):
-        if api_token:
-            from photo2sim.api.browser_session import authorized
+        if settings.api_token:
+            from photo2sim.api.browser_session import access_role
 
-            if not authorized(request, api_token):
+            if access_role(request, settings) is None:
                 raise HTTPException(
                     401, "Application access token required", headers={"WWW-Authenticate": "Bearer"}
                 )
