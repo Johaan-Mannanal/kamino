@@ -1,3 +1,47 @@
+# Core frontend completion — 2026-10-24
+
+Current completion is on `codex/frontend-demo-completion`, based on backend commit `2ceb121`. The earlier Windows handoff below is retained as historical evidence. This section supersedes its deferred viewer/orientation/Gemini items.
+
+- Added authenticated GLB/OBJ preview with orbit/zoom, Z-up camera, loading/error states and download fallback. Preview uses `job.mesh_path` only; prepared files are downloadable and never get rotation applied twice. Existing GLB scene transforms are retained, then the orientation parent applies fixed-axis `Rz @ Ry @ Rx`, followed by preview bounding-box centring. Dimensions are not inferred or scaled in the raw preview.
+- Added X/Y/Z degree drafts, validation (-180 to 180), explicit preview and PATCH save, persisted state readback, and process blocking while either property or rotation edits are unsaved.
+- Added explicit GET cached suggestions and POST requests/refresh. Suggestions show unverified values, notes and questions. Applying requires confirmation and changes only the editable draft; saving properties remains a separate operator action. Busy/unavailable requests keep existing values and estimates, with manual entry available. No provider keys enter browser code.
+- Reused the viewer canvas across unrelated renders. Disposal invalidates pending loads and frees geometry, materials, textures/ImageBitmaps, controls, animation frames, resize observation and WebGL contexts. Artifact downloads still use authenticated fetch plus temporary Blob URLs; no app token appears in artifact URLs.
+- Standalone UI mock original/relocated results now say “Simulated pass/failure”; live MuJoCo checks retain actual results. Duplicate-upload protection stays covered.
+
+## Run this revision
+
+Use the existing backend instructions below; choose ports that do not collide with another developer. For the acceptance run here, backend used `8001`, frontend `5174`, exact backend CORS `http://127.0.0.1:5174`, and an ephemeral local application token entered through API access. Provider keys were absent and the server provider explicitly `mock`.
+
+```sh
+cd frontend
+pnpm install --frozen-lockfile
+pnpm test
+pnpm build
+VITE_API_MODE=live VITE_API_BASE_URL=http://127.0.0.1:8001 pnpm exec vite --host 127.0.0.1 --port 5174 --strictPort
+```
+
+The application token remains memory-only and must be entered again after a full page reload. Reopen with `?job=<uuid>` and use API access to restore a protected job. Without live mode, the standalone synthetic UI mock remains the default. GLB previews require embedded resources; external GLB texture URLs are rejected with a download fallback. OBJ preview is geometry-only. WebGL must be supported by the browser.
+
+## Acceptance evidence for this revision
+
+Runtime: Node **22.19.0**, project-selected pnpm **11.25.0**, TypeScript **5.9.3**, Vite **7.3.7**, Three **0.180.0**; Python **3.13.7**, MuJoCo **3.3.7**, NumPy **2.5.4**. Full frontend tests: **25 passed**. A deferred orientation PATCH regression verifies that edits made during a save remain unsaved drafts after its response, and processing stays blocked until those edits are saved. Deferred GET/PATCH regressions cover orientation and property saves: older reads cannot overwrite newer saved state; refresh is disabled during mutations. A timer-controlled replacement-upload failure regression verifies that the retained running job resumes polling after the busy upload settles. Production build passes; Vite emits its advisory warning for the approximately 629 kB Three-containing bundle (163 kB gzip).
+
+Isolated local data: `/private/tmp/frontend-completion-acceptance`, seeded job `68a8fb91-106f-4fd1-9db1-ff893d06d942`. The seed copied `examples/reconstruction/apple-20w-charger-cleaned/mesh.glb` and its estimated properties into a new job; Gemini GET data was seeded from the checked-in suggestion example. There was **no new photo reconstruction or successful Gemini generation** in this acceptance run. The job's provider label records original Meshy provenance, while this local server was configured `mock` with no provider credentials. Source photos were not reseeded (zero photos in this isolated cache).
+
+Browser verified: protected job first returned 401, token entry restored it, authenticated charger GLB loaded, +90° X made the pins upright, orbit and scroll zoom changed the view, PATCH saved all angles, cached estimates did not change X=43 mm, manual X=44 survived an actual unavailable refresh (503), explicit apply placed 42/27/58 mm and 58 g in the editable form, then Save properties and Generate simulation completed through the real backend. All property provenance remains estimated, friction unknown. The browser downloaded the actual authenticated ZIP. Its `asset.json` records `{x_deg:90,y_deg:0,z_deg:0}`. Original and relocated checks passed; extracting that exact browser ZIP elsewhere and rerunning the actual validator also passed both checks. Browser layout at 390 px had `scrollWidth == clientWidth == 390` and retained the viewer canvas.
+
+Evidence committed under `frontend/evidence/completion/`:
+
+- `cached-charger-completed.png`: full browser completion page, reviewed property provenance, preview and actual validation results.
+- `cached-charger-orbit.png`: changed camera view after drag and scroll.
+- `cached-charger-mobile.png`: responsive completion page.
+- `cached-charger-browser.zip`: actual browser-downloaded scene bundle, not the standalone UI mock.
+- `validation-report.json`: packaged report; `relocated-browser-zip-report.json`: independent revalidation of extracted browser ZIP.
+
+The GLB browser inspection verifies rendering and the selected orientation, not geometry fidelity or native MuJoCo viewer acceptance. Validator scope remains the upright box-proxy smoke test; `viewer_inspected` remains false. This work does not establish SO101 live-versus-simulated motion, robot calibration, Windows/native viewer acceptance, physical fidelity, public deployment, Agentverse/ASI:One registration, or a second real-object acceptance. Those remain separate team work. Optional Fetch deployment/seed/auth policy work was outside this completion scope and was not changed.
+
+---
+
 # Send to the other computer
 
 Branch: `codex/web-workflow`. Merged `origin/codex/backend-pipeline` through `3b614d4`, including Johaan's pipeline integration `43ad99e`. No merge into main was performed. See the final chat handoff for the pushed feature commit SHA.

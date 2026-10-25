@@ -25,6 +25,14 @@ class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class Orientation(Contract):
+    """Active right-handed rotations about fixed X, then Y, then Z, in degrees."""
+
+    x_deg: float = Field(default=0, ge=-180, le=180, allow_inf_nan=False, strict=True)
+    y_deg: float = Field(default=0, ge=-180, le=180, allow_inf_nan=False, strict=True)
+    z_deg: float = Field(default=0, ge=-180, le=180, allow_inf_nan=False, strict=True)
+
+
 def bundle_path(value: str) -> str:
     """Require a relative, forward-slash path independent of the host OS."""
     if (
@@ -92,6 +100,7 @@ class AssetRecord(Contract):
     collision: CollisionGeometry
     synthetic: bool = False
     notes: list[str] = Field(default_factory=list)
+    orientation: Orientation = Field(default_factory=Orientation)
 
     _portable_mesh = field_validator("visual_mesh")(bundle_path)
 
@@ -119,3 +128,4 @@ class JobRecord(Contract):
     validation_path: str | None = None
     bundle_path: str | None = None
     error: JobError | None = None
+    orientation: Orientation = Field(default_factory=Orientation)

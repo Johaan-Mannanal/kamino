@@ -1,0 +1,17 @@
+{
+  "scope": "Local IAB at /assembly.html; kinematic preview only",
+  "package": "11 CAD parts, 7 template groups, 6 template joints",
+  "checked": [
+    "Loaded local package",
+    "Rendered colored structural components",
+    "Moved shoulder_pan slider to 1.91986 rad",
+    "Edited joint review note and applied",
+    "Acknowledged only shoulder_pan: 1/13",
+    "Downloaded project JSON",
+    "Python parsed actual download and matched review snapshot",
+    "Python rejected preparation until remaining reviews completed"
+  ],
+  "console_errors": 0,
+  "gpu_preview": true,
+  "physical_accuracy_verified": false
+}

@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="two_link_hinge">
+  <compiler angle="radian" inertiafromgeom="false" fusestatic="false" />
+  <option timestep="0.001" gravity="0 0 -9.81" integrator="implicitfast" />
+  <asset>
+    <mesh name="mesh_base" file="meshes/base.obj" scale="1 1 1" />
+    <mesh name="mesh_arm" file="meshes/arm.obj" scale="1 1 1" />
+  </asset>
+  <worldbody>
+    <light pos="0 -1 2" dir="0 0 -1" />
+    <geom name="ground" type="plane" size="0 0 .05" rgba=".3 .33 .36 1" friction=".8 .005 .0001" />
+    <body name="base" pos="0 0 0.25" quat="1 0 0 0">
+      <inertial pos="0 0 0" mass="0.5" diaginertia="0.00041666666666666675 0.00041666666666666675 0.00030000000000000003" />
+      <geom name="visual_base" type="mesh" mesh="mesh_base" contype="0" conaffinity="0" group="2" mass="0" rgba=".1 .65 .85 1" />
+      <geom name="collision_base" type="box" pos="0 0 0" size="0.029999999999999999 0.029999999999999999 0.040000000000000001" group="3" friction="0.80000000000000004 0.0050000000000000001 0.0001" solref=".02 1" rgba=".9 .35 .15 1" />
+      <body name="arm" pos="0 0 0.059999999999999998" quat="1 0 0 0">
+        <inertial pos="0.10000000000000001 0 0" mass="0.1" diaginertia="1.0416666666666676e-05 0.00033854166666666673 0.00033854166666666673" />
+        <joint name="hinge" type="hinge" pos="0 0 0" axis="0 0 1" limited="true" range="-0.80000000000000004 0.80000000000000004" damping="0.2" />
+        <geom name="visual_arm" type="mesh" mesh="mesh_arm" contype="0" conaffinity="0" group="2" mass="0" rgba=".1 .65 .85 1" />
+        <geom name="collision_arm" type="box" pos="0.10000000000000001 0 0" size="0.10000000000000001 0.012500000000000001 0.012500000000000001" group="3" friction="0.80000000000000004 0.0050000000000000001 0.0001" solref=".02 1" rgba=".9 .35 .15 1" />
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <position name="drive_hinge" joint="hinge" kp="5.0" ctrllimited="true" ctrlrange="-0.80000000000000004 0.80000000000000004" forcelimited="true" forcerange="-2 2" />
+  </actuator>
+</mujoco>

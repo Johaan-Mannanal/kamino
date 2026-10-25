@@ -1,0 +1,165 @@
+{
+  "original": {
+    "passed": true,
+    "configuration_matches": true,
+    "configuration_checks": {
+      "degrees_of_freedom": true,
+      "mass": true,
+      "inertia": true,
+      "box_dimensions": true,
+      "collision_enabled": true,
+      "timestep": true,
+      "gravity": true,
+      "friction": true,
+      "contact_settings": true,
+      "table_position": true,
+      "table_size": true,
+      "initial_object_position": true,
+      "reset_targets": true,
+      "asset_record": true
+    },
+    "scope": "Offline robot hold and object drop/reset only; no manipulation or physical validation",
+    "portability_checked": false,
+    "portability_note": "This report checks one directory; validate a relocated copy separately",
+    "environment": {
+      "mujoco": "3.3.7",
+      "numpy": "2.5.4"
+    },
+    "timestep_s": 0.0001,
+    "total_wall_clock_s": 7.531691766002041,
+    "thresholds": {
+      "maximum_penetration_m": 0.001,
+      "final_bottom_error_m": 0.0002,
+      "settling_window_s": 0.5,
+      "maximum_settled_linear_speed_m_s": 0.001,
+      "maximum_settled_angular_speed_rad_s": 0.01,
+      "maximum_hold_deviation_rad": 0.02
+    },
+    "hardware_mapping_verified": false,
+    "manipulation_tested": false,
+    "reset_reproducible": true,
+    "runs": [
+      {
+        "passed": true,
+        "steps": 30000,
+        "simulated_duration_s": 3.0000000000019065,
+        "finite_state": true,
+        "warning_count": 0,
+        "table_contact": true,
+        "object_robot_contact_count": 0,
+        "maximum_penetration_m": 0.00025142626323236376,
+        "final_bottom_error_m": -2.18605236360081e-06,
+        "maximum_hold_deviation_rad": 0.0008243720614234315,
+        "maximum_settled_linear_speed_m_s": 1.323526433248243e-14,
+        "maximum_settled_angular_speed_rad_s": 0.0,
+        "final_object_position_m": [
+          0.3,
+          0.1,
+          0.0289978139476364
+        ]
+      },
+      {
+        "passed": true,
+        "steps": 30000,
+        "simulated_duration_s": 3.0000000000019065,
+        "finite_state": true,
+        "warning_count": 0,
+        "table_contact": true,
+        "object_robot_contact_count": 0,
+        "maximum_penetration_m": 0.00025142626323236376,
+        "final_bottom_error_m": -2.18605236360081e-06,
+        "maximum_hold_deviation_rad": 0.0008243720614234315,
+        "maximum_settled_linear_speed_m_s": 1.323526433248243e-14,
+        "maximum_settled_angular_speed_rad_s": 0.0,
+        "final_object_position_m": [
+          0.3,
+          0.1,
+          0.0289978139476364
+        ]
+      }
+    ],
+    "python_warnings": []
+  },
+  "relocated": {
+    "passed": true,
+    "configuration_matches": true,
+    "configuration_checks": {
+      "degrees_of_freedom": true,
+      "mass": true,
+      "inertia": true,
+      "box_dimensions": true,
+      "collision_enabled": true,
+      "timestep": true,
+      "gravity": true,
+      "friction": true,
+      "contact_settings": true,
+      "table_position": true,
+      "table_size": true,
+      "initial_object_position": true,
+      "reset_targets": true,
+      "asset_record": true
+    },
+    "scope": "Offline robot hold and object drop/reset only; no manipulation or physical validation",
+    "portability_checked": false,
+    "portability_note": "This report checks one directory; validate a relocated copy separately",
+    "environment": {
+      "mujoco": "3.3.7",
+      "numpy": "2.5.4"
+    },
+    "timestep_s": 0.0001,
+    "total_wall_clock_s": 7.711168514000747,
+    "thresholds": {
+      "maximum_penetration_m": 0.001,
+      "final_bottom_error_m": 0.0002,
+      "settling_window_s": 0.5,
+      "maximum_settled_linear_speed_m_s": 0.001,
+      "maximum_settled_angular_speed_rad_s": 0.01,
+      "maximum_hold_deviation_rad": 0.02
+    },
+    "hardware_mapping_verified": false,
+    "manipulation_tested": false,
+    "reset_reproducible": true,
+    "runs": [
+      {
+        "passed": true,
+        "steps": 30000,
+        "simulated_duration_s": 3.0000000000019065,
+        "finite_state": true,
+        "warning_count": 0,
+        "table_contact": true,
+        "object_robot_contact_count": 0,
+        "maximum_penetration_m": 0.00025142626323236376,
+        "final_bottom_error_m": -2.18605236360081e-06,
+        "maximum_hold_deviation_rad": 0.0008243720614234315,
+        "maximum_settled_linear_speed_m_s": 1.323526433248243e-14,
+        "maximum_settled_angular_speed_rad_s": 0.0,
+        "final_object_position_m": [
+          0.3,
+          0.1,
+          0.0289978139476364
+        ]
+      },
+      {
+        "passed": true,
+        "steps": 30000,
+        "simulated_duration_s": 3.0000000000019065,
+        "finite_state": true,
+        "warning_count": 0,
+        "table_contact": true,
+        "object_robot_contact_count": 0,
+        "maximum_penetration_m": 0.00025142626323236376,
+        "final_bottom_error_m": -2.18605236360081e-06,
+        "maximum_hold_deviation_rad": 0.0008243720614234315,
+        "maximum_settled_linear_speed_m_s": 1.323526433248243e-14,
+        "maximum_settled_angular_speed_rad_s": 0.0,
+        "final_object_position_m": [
+          0.3,
+          0.1,
+          0.0289978139476364
+        ]
+      }
+    ],
+    "python_warnings": []
+  },
+  "passed": true
+}

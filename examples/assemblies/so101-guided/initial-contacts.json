@@ -1,0 +1,25 @@
+{
+  "scope": "Read-only q=0 diagnosis; not a collision fix",
+  "contacts": [
+    {
+      "geom1": "collision_base",
+      "geom2": "collision_shoulder",
+      "distance_m": -0.019000349999999996
+    },
+    {
+      "geom1": "collision_base",
+      "geom2": "collision_shoulder",
+      "distance_m": -0.019000349999999996
+    },
+    {
+      "geom1": "collision_base",
+      "geom2": "collision_shoulder",
+      "distance_m": -0.019000349999999996
+    },
+    {
+      "geom1": "collision_base",
+      "geom2": "collision_shoulder",
+      "distance_m": -0.019000349999999996
+    }
+  ]
+}

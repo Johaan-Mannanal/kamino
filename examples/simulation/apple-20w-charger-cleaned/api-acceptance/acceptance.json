@@ -1,0 +1,17 @@
+{
+  "job_id": "14ec98fd-cda0-4b0c-915f-a70e0805dc66",
+  "provider_calls": 0,
+  "raw_sha256_unchanged": "bf153592c7408a0dd88d7e36f7a51a8d17977af8b671ab10df0661cafa39e25e",
+  "orientation": {
+    "x_deg": 90.0,
+    "y_deg": 0.0,
+    "z_deg": 0.0
+  },
+  "completed_through_api": true,
+  "download_bytes": 2172698,
+  "download_sha256": "8d3165f06b7e9ca7464b8a93210e491ffb7a4a753936ff436c50372aa4ba20e9",
+  "matches_manually_oriented_candidate_vertices": true,
+  "geometry_comparison_tolerance_m": 1e-08,
+  "validation_passed": true,
+  "native_viewer_inspected": false
+}

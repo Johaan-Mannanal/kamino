@@ -8,10 +8,18 @@ export type JobStatus =
   | 'completed'
   | 'failed'
 export type Scalar = { value: number; source: Source; note?: string | null }
+export type Orientation = { x_deg: number; y_deg: number; z_deg: number }
 export type Properties = {
   dimensions_m: { x: number; y: number; z: number; source: Source; note?: string | null }
   mass_kg: Scalar
   sliding_friction: Scalar | null
+}
+export type Suggestions = {
+  dimensions_m: Properties['dimensions_m'] | null
+  mass_kg: Scalar | null
+  sliding_friction: Scalar | null
+  clarifying_questions: string[]
+  notes: string[]
 }
 export type Job = {
   schema_version: '1.0'
@@ -38,6 +46,7 @@ export type Job = {
   validation_path: string | null
   bundle_path: string | null
   error: { code: string; message: string } | null
+  orientation: Orientation
 }
 
 export type ValidationRun = {

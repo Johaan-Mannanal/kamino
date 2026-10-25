@@ -1,0 +1,13 @@
+[
+  "/SO101 Assembly v4[1]/Base_SO101 v12:1/Base_SO101 v12",
+  "/SO101 Assembly v4[2]/Rotation_Pitch_SO101 v8:1/Rotation_Pitch_SO101 v8",
+  "/SO101 Assembly v4[3]/Upper_arm_SO101 v9:1/Upper_arm_SO101 v9[3]/=>[0:1:1:7]/SOLID",
+  "/SO101 Assembly v4[4]/Under_arm_SO101 v12:1/Under_arm_SO101 v12[2]/=>[0:1:1:10]/SOLID",
+  "/SO101 Assembly v4[5]/Base_08p v18:1/Base_08p v18",
+  "/SO101 Assembly v4[6]/Motor_holder_SO101_Base v6:1/Motor_holder_SO101_Base v6[4]/=>[0:1:1:16]/SOLID",
+  "/SO101 Assembly v4[7]/Motor_holder_SO101_Wrist v8:1/Motor_holder_SO101_Wrist v8[3]/=>[0:1:1:20]/SOLID",
+  "/SO101 Assembly v4[8]/Wrist_Roll_Pitch_SO100 v15:1/Wrist_Roll_Pitch_SO100 v15[2]/=>[0:1:1:23]/SOLID",
+  "/SO101 Assembly v4[9]/Wrist_Roll_Follower_SO101 v10:1/Wrist_Roll_Follower_SO101 v10[2]/=>[0:1:1:28]/SOLID",
+  "/SO101 Assembly v4[10]/Moving_Jaw_SO101 v3:1/Moving_Jaw_SO101 v3",
+  "/SO101 Assembly v4[96]/WaveShare_Mounting_Plate_SO101 v4:1/WaveShare_Mounting_Plate_SO101 v4"
+]

@@ -8,7 +8,7 @@ from uuid import uuid4
 import numpy as np
 import trimesh
 
-from photo2sim.contracts import AssetProperties, AssetRecord, CollisionGeometry
+from photo2sim.contracts import AssetProperties, AssetRecord, CollisionGeometry, Orientation
 
 SUPPORTED_EXTENSIONS = {".obj": "obj", ".glb": "glb"}
 VISUAL_MESH = "meshes/visual.obj"
@@ -21,12 +21,19 @@ class AssetPreparationError(ValueError):
     """The input mesh or output location cannot produce a valid asset bundle."""
 
 
-def prepare_asset(mesh_path: Path, output_dir: Path, properties: AssetProperties) -> AssetRecord:
+def prepare_asset(
+    mesh_path: Path,
+    output_dir: Path,
+    properties: AssetProperties,
+    *,
+    orientation: Orientation | None = None,
+) -> AssetRecord:
     """Centre, scale, and export ``mesh_path`` into ``output_dir``.
 
-    Orientation is not inferred: the input's x/y/z axes are assumed to already match
-    the x/y/z of ``properties.dimensions_m``. Each axis is scaled independently to
-    the confirmed full extents, which distorts the mesh when its proportions differ.
+    Orientation is not inferred: explicit fixed-axis X/Y/Z rotations are applied
+    before centring and scaling. Omission preserves the input axes. Each axis is
+    scaled independently to the confirmed full extents, which distorts the mesh
+    when its proportions differ.
     The input file is never modified, and nothing is left in ``output_dir`` on failure.
     """
     mesh_path = Path(mesh_path)
@@ -34,6 +41,16 @@ def prepare_asset(mesh_path: Path, output_dir: Path, properties: AssetProperties
     _check_output_dir(output_dir)
     mesh, baked_transforms = _load_mesh(mesh_path)
     _check_geometry(mesh, mesh_path)
+    orientation = Orientation.model_validate(orientation or Orientation())
+    x, y, z = np.deg2rad([orientation.x_deg, orientation.y_deg, orientation.z_deg])
+    cx, cy, cz = np.cos([x, y, z])
+    sx, sy, sz = np.sin([x, y, z])
+    rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
+    ry = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
+    rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
+    rotation = rz @ ry @ rx
+    rotation[np.abs(rotation) < 1e-15] = 0
+    mesh.vertices = mesh.vertices @ rotation.T
 
     dimensions = properties.dimensions_m
     target = np.array([dimensions.x, dimensions.y, dimensions.z], dtype=float)
@@ -44,13 +61,22 @@ def prepare_asset(mesh_path: Path, output_dir: Path, properties: AssetProperties
 
     _write_bundle(mesh, output_dir)
 
+    notes = _notes(mesh_path, source_extents, source_centre, target, scale, baked_transforms)
+    if any((orientation.x_deg, orientation.y_deg, orientation.z_deg)):
+        notes[0] = (
+            "Explicit right-handed rotation before centring and dimension scaling: "
+            f"fixed X={orientation.x_deg:g}, Y={orientation.y_deg:g}, Z={orientation.z_deg:g} "
+            "degrees, applied in X then Y then Z order (Rz @ Ry @ Rx). "
+            "Dimensions refer to the resulting axes. Orientation was not inferred."
+        )
     return AssetRecord(
         asset_id=uuid4(),
         visual_mesh=VISUAL_MESH,
         properties=properties,
         collision=CollisionGeometry(kind="box"),
         synthetic=False,
-        notes=_notes(mesh_path, source_extents, source_centre, target, scale, baked_transforms),
+        notes=notes,
+        orientation=orientation,
     )
 
 
