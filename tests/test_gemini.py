@@ -257,7 +257,7 @@ def test_total_deadline_rejects_delayed_valid_success(images, monkeypatch):
     import photo2sim.integrations.gemini as gemini
 
     elapsed = [0.0]
-    monkeypatch.setattr(gemini.time, "monotonic", lambda: elapsed[0])
+    monkeypatch.setattr(gemini, "_clock", lambda: elapsed[0])
     seen = []
 
     def handle(request):
@@ -299,7 +299,7 @@ def test_slow_primary_reserves_time_for_fallback(images):
         return httpx.Response(200, json={**envelope(GOOD), "modelVersion": "fallback-actual"})
 
     try:
-        started = time.monotonic()
+        started = time.perf_counter()
         result = suggest_properties_result(
             images,
             api_key=SECRET,
@@ -310,7 +310,7 @@ def test_slow_primary_reserves_time_for_fallback(images):
             backoff_seconds=0,
             transport=handle,
         )
-        assert time.monotonic() - started < 0.25
+        assert time.perf_counter() - started < 0.25
         assert result.model == "fallback-actual"
         assert result.fallback_used
         assert len(seen) == 2

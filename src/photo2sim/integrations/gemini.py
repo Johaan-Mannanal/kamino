@@ -29,6 +29,9 @@ Transport = Callable[[httpx.Request], httpx.Response] | httpx.BaseTransport
 # A timed-out synchronous transport may still be unwinding. Keep that work bounded
 # process-wide; abandoned requests can never write a cache or confirm properties.
 _REQUEST_SLOTS = BoundedSemaphore(4)
+# perf_counter is monotonic and uses the high-resolution Windows performance
+# counter; Python 3.12 time.monotonic can otherwise have ~16 ms granularity.
+_clock = time.perf_counter
 
 
 class _AttemptTimeout(Exception):
@@ -38,7 +41,7 @@ class _AttemptTimeout(Exception):
 def _request_until(
     url: str, key: str, body: dict, transport: Transport | None, deadline: float
 ) -> httpx.Response | None:
-    remaining = deadline - time.monotonic()
+    remaining = deadline - _clock()
     if remaining <= 0:
         raise _AttemptTimeout
     if not _REQUEST_SLOTS.acquire(blocking=False):
@@ -51,7 +54,7 @@ def _request_until(
     def send() -> None:
         try:
             with httpx.Client(transport=transport, trust_env=transport is None) as client:
-                remaining = deadline - time.monotonic()
+                remaining = deadline - _clock()
                 if remaining <= 0:
                     outcome.append(None)
                     return
@@ -72,7 +75,7 @@ def _request_until(
     except Exception:
         _REQUEST_SLOTS.release()
         raise GeminiUnavailable("Gemini request could not start.", reason="provider") from None
-    if not finished.wait(max(0, deadline - time.monotonic())) or time.monotonic() >= deadline:
+    if not finished.wait(max(0, deadline - _clock())) or _clock() >= deadline:
         raise _AttemptTimeout
     return outcome[0]
 
@@ -209,7 +212,7 @@ def suggest_properties_result(
     HTTP, connection, and malformed-response failures raise GeminiUnavailable with
     safe messages. Invalid local inputs raise ValueError without echoing inputs.
     """
-    deadline = time.monotonic() + deadline_seconds
+    deadline = _clock() + deadline_seconds
     key = api_key if api_key is not None else os.environ.get("GEMINI_API_KEY", "")
     if not key.strip():
         raise GeminiUnavailable(
@@ -269,11 +272,11 @@ def suggest_properties_result(
         "generationConfig": {"response_mime_type": "application/json"},
     }
     for model_index, candidate_model in enumerate(models):
-        now = time.monotonic()
+        now = _clock()
         # Reserve an equal share of the remaining budget for each later model.
         model_deadline = now + (deadline - now) / (len(models) - model_index)
         for attempt in range(max_attempts):
-            now = time.monotonic()
+            now = _clock()
             if now >= deadline:
                 raise GeminiUnavailable("Gemini request deadline exceeded.", reason="deadline")
             if now >= model_deadline:
@@ -306,20 +309,20 @@ def suggest_properties_result(
                         "Gemini returned invalid or incomplete property JSON.", reason="malformed"
                     ) from None
                 suggestions = _suggestions(_response_data(envelope))
-                # Parsing and validation also consume the elapsed-time budget.
-                if time.monotonic() >= deadline:
-                    raise GeminiUnavailable("Gemini request deadline exceeded.", reason="deadline")
                 actual_model = envelope.get("modelVersion") if isinstance(envelope, dict) else None
                 if not isinstance(actual_model, str) or not actual_model:
                     actual_model = candidate_model
                 actual_model = actual_model.removeprefix("models/")
+                # Parsing, validation and provenance extraction also consume time.
+                if _clock() >= deadline:
+                    raise GeminiUnavailable("Gemini request deadline exceeded.", reason="deadline")
                 return GeminiResult(suggestions, actual_model, selected_model, model_index > 0)
             else:
                 reason, retryable = _failure(response)
             if not retryable:
                 raise GeminiUnavailable(_failure_message(reason), reason=reason) from None
             if attempt + 1 < max_attempts:
-                delay = min(backoff_seconds * 2**attempt, max(0, model_deadline - time.monotonic()))
+                delay = min(backoff_seconds * 2**attempt, max(0, model_deadline - _clock()))
                 if delay:
                     time.sleep(delay)
             elif model_index == len(models) - 1:
