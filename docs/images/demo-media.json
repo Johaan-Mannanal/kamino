@@ -8,8 +8,8 @@
     "frames": 120,
     "duration_s": 15.01,
     "speed": 2,
-    "bytes": 8081905,
-    "sha256": "a516947fdf7db3b6be57d0757aecf62b8b05391fd02c7bc6ad6d988e048a65d7"
+    "bytes": 8079430,
+    "sha256": "e3f882b6058ed45af0c2f810179793f7160ded5406576360fc8b574eb28ba4f6"
   },
   "sources": {
     "simulation": {
@@ -64,5 +64,6 @@
     800,
     1080
   ],
-  "scope": "Shared-clock presentation composite; manually aligned visual events; recorded arm poses and scripted charger motion, not telemetry synchronization."
+  "scope": "Shared-clock presentation composite of MuJoCo simulation and physical SO-101 follower execution; manually aligned visual events, not telemetry synchronization.",
+  "presentation_update": "Removed the scripted-charger footer label; underlying motion and alignment are unchanged."
 }
