@@ -79,6 +79,12 @@ export class BackendSession {
   private draft = 0;
   private readRequest = 0;
   private suggestionRequest = 0;
+  private automaticAttempts = new Set<string>();
+  private initialRead?: {
+    generation: number;
+    id: string;
+    promise: Promise<Suggestions>;
+  };
   private previewRequest = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private disposed = false;
@@ -599,6 +605,23 @@ export class BackendSession {
     });
   }
 
+  async saveAndProcess(inputs: ReviewedInputs) {
+    if (this.refreshing)
+      throw new Error("Wait for the current job refresh before saving.");
+    const generation = this.generation,
+      draft = this.draft,
+      target = this.targetDraftVersion;
+    await this.saveReviewed(inputs);
+    this.check(generation);
+    if (
+      this.dirty ||
+      draft !== this.draft ||
+      target !== this.targetDraftVersion
+    )
+      throw new SessionCancelledError();
+    return this.process();
+  }
+
   async process() {
     const id = this.requireJob().id;
     if (this.refreshing)
@@ -647,6 +670,50 @@ export class BackendSession {
   cachedSuggestions() {
     const id = this.requireJob().id;
     return this.readSuggestions(() => this.api.cachedSuggestions(id), true);
+  }
+  /** Cache first; at most one automatic attempt per job/session. Manual retry remains explicit. */
+  initialSuggestions(): Promise<Suggestions> {
+    const id = this.requireJob().id,
+      generation = this.generation;
+    if (
+      this.initialRead?.generation === generation &&
+      this.initialRead.id === id
+    )
+      return this.initialRead.promise;
+    const promise = this.readInitialSuggestions(id, generation);
+    this.initialRead = { id, generation, promise };
+    const clear = () => {
+      if (this.initialRead?.promise === promise) this.initialRead = undefined;
+    };
+    void promise.then(clear, clear);
+    return promise;
+  }
+  private async readInitialSuggestions(id: string, generation: number) {
+    const serial = this.suggestionRequest + 1;
+    try {
+      return await this.cachedSuggestions();
+    } catch (error) {
+      this.check(generation);
+      if (serial !== this.suggestionRequest) throw new SessionCancelledError();
+      if (!(error instanceof ApiError) || error.status !== 404) throw error;
+      // An optional estimate must not start a provider request during processing or a save.
+      if (this.busy || this.refreshing || running(this.job)) throw error;
+      const key = `kamino:gemini-auto:${id}`;
+      let attempted = this.automaticAttempts.has(id);
+      try {
+        attempted ||= sessionStorage.getItem(key) === "attempted";
+      } catch {
+        /* optional storage */
+      }
+      if (attempted) throw error;
+      this.automaticAttempts.add(id);
+      try {
+        sessionStorage.setItem(key, "attempted");
+      } catch {
+        /* retain in-memory guard */
+      }
+      return this.requestSuggestions({ refresh: false });
+    }
   }
   requestSuggestions(
     request: { object_hint?: string; refresh?: boolean } = {},

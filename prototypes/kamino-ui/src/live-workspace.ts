@@ -453,6 +453,7 @@ export function mountLiveWorkspace(
   let suggestionState = "";
   let provenance: Provenance | null | string = null;
   let suggestionBusy = false;
+  let initialEstimatesStarted = false;
   let previewError = "";
   let draftViewer: ViewerSpec | null = null;
   let viewerKey = "";
@@ -470,6 +471,22 @@ export function mountLiveWorkspace(
     host.querySelector<T>(selector)!;
   const form = $<HTMLFormElement>("#live-form");
   const currentJob = () => (session.job?.id === jobId ? session.job : null);
+  document.documentElement.classList.add("live-workspace-page");
+  host.classList.add("live-workspace-host");
+  const inspector = $(".inspector");
+  const suggestionsCard = $(".live-suggestions");
+  suggestionsCard.setAttribute("open", "");
+  suggestionsCard.querySelector("summary")!.textContent =
+    "Gemini starting values";
+  suggestionsCard.querySelector("p")!.textContent =
+    "Saved estimates load first. If none exist, one automatic Gemini request is attempted per job in this browser session. Values are never applied or saved automatically. Manual retry remains available.";
+  inspector.insertBefore(suggestionsCard, form);
+  inspector.insertBefore($("#live-target"), form);
+  inspector.append($(".live-outputs"), $(".sources"));
+  inspector.querySelector<HTMLElement>(
+    ":scope > .prototype-note",
+  )!.textContent =
+    "Save orientation and target review first. Review the reference, then save properties or use Save & generate. Numerical checks do not establish physical accuracy.";
 
   const download = async (
     blob: Promise<Blob> | (() => Promise<Blob>),
@@ -666,7 +683,7 @@ export function mountLiveWorkspace(
       const photos = targetHost.querySelector("#target-source-photos");
       if (photos)
         photos.textContent =
-          "Compare with the uploaded source photos in the left column.";
+          "Compare with the uploaded Source photos below in this inspector.";
     }
     const status = session.targetStatus;
     const orientationSaved = savedOrientation(job);
@@ -849,7 +866,14 @@ export function mountLiveWorkspace(
     void session.refresh().then(retryArtifacts).catch(handleError);
   $("#live-generate").onclick = async () => {
     try {
-      await session.process();
+      if (session.dirty || !currentJob()?.properties) {
+        const built = buildReviewed(draft, origins);
+        const blocked = referenceBlock(currentJob());
+        if (built.error !== undefined || blocked)
+          throw new Error(built.error ?? blocked);
+        await session.saveAndProcess(built.value);
+        if (!session.dirty) retainWorkspaceDraft(session, jobId, null);
+      } else await session.process();
       if (!disposed)
         toast(
           "Simulation preparation requested. Status updates from the server.",
@@ -933,7 +957,7 @@ export function mountLiveWorkspace(
       });
   }
 
-  // Suggestions: cached GET never changes the draft; requests are explicit only.
+  // Cache-first initial request; neither arrival nor provider failure changes the draft.
   const suggestionHost = $("#live-suggestions");
   async function loadProvenance() {
     try {
@@ -956,9 +980,11 @@ export function mountLiveWorkspace(
       : "Requesting suggestions…";
     renderSuggestions();
     try {
-      suggestions = await read();
+      const values = await read();
+      if (disposed) return;
+      suggestions = values;
       suggestionState = cached
-        ? "Saved suggestions (not applied)."
+        ? "Estimates ready (not applied)."
         : "Suggestions ready (not applied).";
       provenance = null;
       void loadProvenance();
@@ -968,7 +994,7 @@ export function mountLiveWorkspace(
       suggestionError = error;
       suggestionState =
         cached && error instanceof ApiError && error.status === 404
-          ? "No saved suggestions yet. Request them when you are ready."
+          ? "No saved suggestions. Automatic request unavailable or already attempted; request explicitly or enter values manually."
           : describeError(error);
       if (isAuthError(error)) await handleError(error);
     } finally {
@@ -1158,15 +1184,32 @@ export function mountLiveWorkspace(
       targetStatus: session.targetStatus,
     });
     const generate = $<HTMLButtonElement>("#live-generate");
-    generate.disabled = !gate.allowed;
-    generate.title = gate.reason;
-    $("#live-generate-reason").textContent = gate.reason;
+    const needsSave = session.dirty || !job.properties;
+    const combinedReady =
+      needsSave &&
+      editable &&
+      !working &&
+      !invalid &&
+      !session.target.loading &&
+      !referenceBlocked;
+    const reason = isRunning(job)
+      ? "Processing saved inputs. Earlier downloads remain available."
+      : combinedReady
+        ? "Ready to save the reviewed inputs and generate a new attempt. Earlier downloads remain available."
+        : gate.reason;
+    generate.disabled = !(combinedReady || gate.allowed);
+    generate.title = reason;
+    $("#live-generate-reason").textContent = reason;
     generate.textContent =
       job.status === "preparing" || job.status === "validating"
         ? "Generating…"
-        : job.status === "failed"
-          ? "Retry simulation"
-          : "Generate simulation";
+        : needsSave
+          ? job.status === "failed"
+            ? "Save & retry"
+            : "Save & generate"
+          : job.status === "failed"
+            ? "Retry simulation"
+            : "Generate simulation";
     $("#live-bundle").hidden = !(job.status === "completed" && job.bundle_path);
     // Only a preview bound to the current reviewed target is shown as current sizing.
     const context = job.geometry_review?.geometry_context_sha256 ?? null;
@@ -1191,19 +1234,23 @@ export function mountLiveWorkspace(
     const target = session.target;
     if (job.mesh_path && !target.inventory && !target.loading && !target.error)
       void session.loadGeometry(false);
+    if (!initialEstimatesStarted && !isRunning(job) && !working) {
+      initialEstimatesStarted = true;
+      void readSuggestions(() => session.initialSuggestions(), true);
+    }
   }
 
   const unsubscribe = session.subscribe(update);
   update();
-  if (!isRunning(initialJob))
-    void readSuggestions(() => session.cachedSuggestions(), true);
-  else {
+  if (isRunning(initialJob)) {
     suggestionState =
       "Suggestions are available when the server is not processing.";
     renderSuggestions();
   }
 
   return () => {
+    document.documentElement.classList.remove("live-workspace-page");
+    host.classList.remove("live-workspace-host");
     retainWorkspaceDraft(
       session,
       jobId,

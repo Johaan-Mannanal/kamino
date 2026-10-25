@@ -739,6 +739,106 @@ describe("live target review", () => {
     return { state, host, adapter, mount, cleanup };
   }
 
+  it.each(["awaiting_properties", "failed"] as const)(
+    "explicitly saves edited inputs before generating from %s",
+    async (status) => {
+      const before = {
+        ...reviewed,
+        status,
+        error:
+          status === "failed"
+            ? { code: "validation_failed", message: "Retryable" }
+            : null,
+      };
+      const save = vi.fn(async (_id, properties) => ({
+        ...reviewed,
+        properties,
+        input_revision: 4,
+      }));
+      const process = vi.fn(async () => ({
+        ...reviewed,
+        status: "preparing" as const,
+      }));
+      const { host, state } = mounted({ save, process }, before);
+      await loaded(state);
+      type($(host, '[name="mass"]'), "0.58");
+      const button = $<HTMLButtonElement>(host, "#live-generate");
+      expect(button.textContent).toBe(
+        status === "failed" ? "Save & retry" : "Save & generate",
+      );
+      expect(button.disabled).toBe(false);
+      button.click();
+      await vi.waitFor(() => expect(state.job?.status).toBe("preparing"));
+      expect(save).toHaveBeenCalledWith(
+        ID,
+        expect.objectContaining({
+          mass_kg: expect.objectContaining({ value: 0.58 }),
+          geometry_context_sha256: context,
+        }),
+      );
+      expect(save.mock.invocationCallOrder[0]).toBeLessThan(
+        process.mock.invocationCallOrder[0],
+      );
+    },
+  );
+  it("keeps combined generation blocked after target edits even with valid numeric drafts", async () => {
+    const { host, state, adapter } = mounted({}, reviewed);
+    await loaded(state);
+    type($(host, '[name="mass"]'), "0.58");
+    expect(generateDisabled(host)).toBe(false);
+    state.setTargetDraft({ ...state.target.draft, selectedIslandIds: [body] });
+    expect(generateDisabled(host)).toBe(true);
+    expect($<HTMLInputElement>(host, '[name="acknowledged"]').checked).toBe(
+      false,
+    );
+    expect(adapter.process).not.toHaveBeenCalled();
+  });
+  it("keeps review, warnings and source photos in the scrollable inspector and restores Home scrolling", () => {
+    const { host, cleanup } = mounted({}, reviewed);
+    expect(host.querySelector(".inspector #live-target")).not.toBeNull();
+    expect(host.querySelector(".inspector .live-outputs")).not.toBeNull();
+    expect(host.querySelector(".inspector .sources")).not.toBeNull();
+    const inspector = host.querySelector(".inspector")!;
+    expect(
+      inspector
+        .querySelector(".live-suggestions")!
+        .compareDocumentPosition(inspector.querySelector("#live-form")!) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      document.documentElement.classList.contains("live-workspace-page"),
+    ).toBe(true);
+    cleanup();
+    expect(
+      document.documentElement.classList.contains("live-workspace-page"),
+    ).toBe(false);
+  });
+
+  it("starts initial estimates once processing returns to an editable workspace", async () => {
+    sessionStorage.clear();
+    const suggestions = vi.fn(async () => ({
+      dimensions_m: null,
+      mass_kg: null,
+      sliding_friction: null,
+      notes: [],
+      clarifying_questions: [],
+    }));
+    const { state, adapter } = mounted(
+      { get: vi.fn(async () => reviewed), suggestions },
+      { ...reviewed, status: "validating" },
+    );
+    expect(adapter.cachedSuggestions).not.toHaveBeenCalled();
+    await state.refresh();
+    await vi.waitFor(() =>
+      expect(suggestions).toHaveBeenCalledExactlyOnceWith(ID, {
+        refresh: false,
+      }),
+    );
+    state.markDirty();
+    expect(suggestions).toHaveBeenCalledTimes(1);
+    sessionStorage.clear();
+  });
+
   it("shows every source island unselected and saves an explicit multipart review", async () => {
     // Server clears the reference binding when the new review is saved.
     const afterReview = job({

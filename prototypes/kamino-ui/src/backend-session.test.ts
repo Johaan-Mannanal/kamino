@@ -163,9 +163,169 @@ afterEach(() => {
   sessions.forEach((value) => value.dispose());
   sessions.length = 0;
   vi.useRealTimers();
+  vi.unstubAllGlobals();
 });
 
 describe("live backend session", () => {
+  it("does not automatically repeat a failed request in a new session instance", async () => {
+    const storage = new Map<string, string>();
+    vi.stubGlobal("sessionStorage", {
+      getItem: (key: string) => storage.get(key),
+      setItem: (key: string, value: string) => storage.set(key, value),
+    });
+    const adapter = api({
+      cachedSuggestions: vi
+        .fn()
+        .mockRejectedValue(new ApiError("Missing", 404)),
+      suggestions: vi.fn().mockRejectedValue(new Error("Unavailable")),
+    });
+    const firstSession = session(adapter);
+    await firstSession.restore("job-a");
+    await expect(firstSession.initialSuggestions()).rejects.toThrow(
+      "Unavailable",
+    );
+    const reopened = session(adapter);
+    await reopened.restore("job-a");
+    await expect(reopened.initialSuggestions()).rejects.toThrow("Missing");
+    expect(adapter.suggestions).toHaveBeenCalledTimes(1);
+    await expect(reopened.requestSuggestions()).rejects.toThrow("Unavailable");
+    expect(adapter.suggestions).toHaveBeenCalledTimes(2);
+  });
+  it("does not launch an automatic request when a manual result superseded the pending cache miss", async () => {
+    const pending = deferred<Awaited<ReturnType<Api["cachedSuggestions"]>>>();
+    const adapter = api({ cachedSuggestions: vi.fn(() => pending.promise) });
+    const state = session(adapter);
+    await state.restore("job-a");
+    const old = state.initialSuggestions();
+    const rejected = expect(old).rejects.toBeInstanceOf(SessionCancelledError);
+    const fresh = await state.requestSuggestions({ object_hint: "new hint" });
+    pending.reject(new ApiError("Missing", 404));
+    await rejected;
+    expect(state.suggestionValues).toEqual(fresh);
+    expect(adapter.suggestions).toHaveBeenCalledExactlyOnceWith("job-a", {
+      object_hint: "new hint",
+    });
+  });
+  it("loads cached estimates without provider requests or draft changes", async () => {
+    const adapter = api();
+    const state = session(adapter);
+    await state.restore("job-a");
+    state.markDirty();
+    await state.initialSuggestions();
+    expect(adapter.suggestions).not.toHaveBeenCalled();
+    expect(state.dirty).toBe(true);
+    expect(state.job?.properties).toEqual(properties);
+  });
+  it("automatically requests a cache miss once without refresh, then reuses cache on reopen", async () => {
+    const adapter = api({
+      cachedSuggestions: vi
+        .fn()
+        .mockRejectedValue(new ApiError("Missing", 404)),
+    });
+    const state = session(adapter);
+    await state.restore("job-a");
+    await Promise.all([state.initialSuggestions(), state.initialSuggestions()]);
+    expect(adapter.suggestions).toHaveBeenCalledExactlyOnceWith("job-a", {
+      refresh: false,
+    });
+    await state.restore("job-a");
+    await expect(state.initialSuggestions()).rejects.toThrow();
+    expect(adapter.suggestions).toHaveBeenCalledTimes(1);
+  });
+  it.each([401, 403, 500])(
+    "does not turn cache error %s into a provider request",
+    async (status) => {
+      const adapter = api({
+        cachedSuggestions: vi
+          .fn()
+          .mockRejectedValue(new ApiError("Unavailable", status)),
+      });
+      const state = session(adapter);
+      await state.restore("job-a");
+      await expect(state.initialSuggestions()).rejects.toThrow("Unavailable");
+      expect(adapter.suggestions).not.toHaveBeenCalled();
+    },
+  );
+  it.each(["result", "404"])(
+    "rejects an old initial cache %s after reopening the same job",
+    async (outcome) => {
+      const pending = deferred<Awaited<ReturnType<Api["cachedSuggestions"]>>>();
+      const adapter = api({ cachedSuggestions: vi.fn(() => pending.promise) });
+      const state = session(adapter);
+      await state.restore("job-a");
+      const old = state.initialSuggestions();
+      const rejected = expect(old).rejects.toBeInstanceOf(
+        SessionCancelledError,
+      );
+      await state.restore("job-a");
+      if (outcome === "404") pending.reject(new ApiError("Missing", 404));
+      else
+        pending.resolve({
+          dimensions_m: null,
+          mass_kg: null,
+          sliding_friction: null,
+          notes: ["OLD"],
+          clarifying_questions: [],
+        });
+      await rejected;
+      expect(state.suggestionValues).toBeNull();
+      expect(adapter.suggestions).not.toHaveBeenCalled();
+    },
+  );
+  it("saves reviewed inputs before processing, with the current geometry binding", async () => {
+    const adapter = api();
+    const state = session(adapter);
+    await state.restore("job-a");
+    await state.loadGeometry();
+    state.markDirty();
+    await state.saveAndProcess({
+      orientation,
+      sizing,
+      mass_kg: properties.mass_kg,
+      sliding_friction: null,
+    });
+    expect(adapter.save).toHaveBeenCalledWith(
+      "job-a",
+      expect.objectContaining({ geometry_context_sha256: context }),
+    );
+    expect(
+      vi.mocked(adapter.previewSizing).mock.invocationCallOrder[0],
+    ).toBeLessThan(vi.mocked(adapter.save).mock.invocationCallOrder[0]);
+    expect(vi.mocked(adapter.save).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(adapter.process).mock.invocationCallOrder[0],
+    );
+    expect(state.job?.status).toBe("preparing");
+  });
+  it.each(["save-fails", "numeric-edit", "target-edit", "same-job-reopen"])(
+    "never processes after %s during combined save",
+    async (change) => {
+      const pending = deferred<Job>();
+      const adapter = api({ save: vi.fn(() => pending.promise) });
+      const state = session(adapter);
+      await state.restore("job-a");
+      await state.loadGeometry();
+      state.markDirty();
+      const operation = state.saveAndProcess({
+        orientation,
+        sizing,
+        mass_kg: properties.mass_kg,
+        sliding_friction: null,
+      });
+      const rejected = expect(operation).rejects.toThrow();
+      await vi.waitFor(() => expect(adapter.save).toHaveBeenCalled());
+      if (change === "numeric-edit") state.markDirty();
+      if (change === "target-edit")
+        state.setTargetDraft({
+          ...state.target.draft,
+          selectedIslandIds: [second],
+        });
+      if (change === "same-job-reopen") await state.restore("job-a");
+      if (change === "save-fails") pending.reject(new Error("save failed"));
+      else pending.resolve(job());
+      await rejected;
+      expect(adapter.process).not.toHaveBeenCalled();
+    },
+  );
   it.each(["unchanged", "completed", "mesh-changed"] as const)(
     "automatic processing polls revalidate geometry only when needed: %s",
     async (transition) => {

@@ -2257,3 +2257,94 @@ html:not([data-page="home"]) .cursor-glow {
     white-space: normal;
   }
 }
+
+/* Keep the live mesh visible while reviewing inputs; Home keeps its own scrolling. */
+html.live-workspace-page,
+.live-workspace-page body {
+  height: 100%;
+  overflow: hidden;
+}
+.live-workspace-host {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+}
+.live-workspace-host .live-workspace {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  overflow: hidden;
+}
+.live-workspace-host .workspace-center {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  overflow: hidden;
+}
+.live-workspace-host .workspace-center > .viewport {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+}
+.live-workspace-host .inspector {
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.live-workspace-host .live-suggestions {
+  margin: 16px 0;
+}
+.live-workspace-host .inspector > .sources {
+  display: block;
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+}
+.live-workspace-host #live-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.live-workspace-host #live-photos img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+.live-workspace-host .live-target,
+.live-workspace-host .live-outputs {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .live-workspace-host .live-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(140px, 38%) minmax(0, 1fr);
+  }
+  .live-workspace-host .inspector {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 16px;
+  }
+  .live-workspace-host .viewport-toolbar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .live-workspace-host .viewer-actions {
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 4px;
+  }
+  .live-workspace-host .viewport-label {
+    top: 112px;
+    font-size: 10px;
+  }
+  .live-workspace-host .viewport-help {
+    display: none;
+  }
+  .live-workspace-host .steps .step-note {
+    display: none;
+  }
+}
