@@ -1,12 +1,9 @@
 # Kamino
 
-**Turn photos of real objects into editable, portable MuJoCo simulation assets.**
+![Kamino — From photos to simulation. Real objects. Editable physics.](prototypes/kamino-ui/public/social/kamino-share-v1.png)
 
-Kamino brings reconstruction, geometry review, physical-property estimates and
-simulation export into one workspace. Start with object photos, inspect the
-reconstructed mesh, set a real-world reference length, review the assumptions,
-and download a runnable bundle. Corrections create new attempts while preserving
-earlier inputs and downloads.
+Turn object photos into editable, portable MuJoCo assets. Inspect the mesh, review
+its size and physics, then export a runnable scene—with earlier versions preserved.
 
 [Open Kamino](https://kamino.design) · [Devpost](https://devpost.com/software/kamino) ·
 [Figma design](https://www.figma.com/design/rSOvF7zmhYyGwLxGqLRgAo/Untitled?node-id=0-1&m=dev) ·
@@ -20,26 +17,18 @@ MuJoCo bundle.
 
 ## What you can do
 
-1. **Upload photos.** We recommend 2–4 clear views of the same object. One image is
-   still supported; four is the maximum. Cropping is optional, and originals are retained.
-2. **Inspect the reconstruction.** Compare source photos with the actual mesh,
-   switch Studio/Mesh display, orbit, pan, zoom and reset the camera. The current
-   workspace uses the entire reconstruction for viewing, sizing and export.
-3. **Review orientation and size.** Confirm one full-extent reference length in
-   the reviewed orientation. Uniform scaling preserves the reconstructed proportions;
-   the other dimensions are derived, not independently forced to match estimates.
-4. **Review physical properties.** Gemini can suggest properties and explanatory
-   notes. Other than the untouched new-job friction default, estimates require
-   explicit application. Mass remains editable. Friction starts as **estimated**:
-   a valid Gemini estimate can replace the untouched default; otherwise 0.8 is
-   disclosed as a simulator fallback with unknown contacting materials. Save commits
-   the draft; estimates are not measurements. Optional advanced controls cover
-   collision geometry, twist/rolling friction, inertia, contact response and initial
-   placement; see [advanced physics and progress](docs/advanced-physics.md) for units
-   and validation scope.
-5. **Prepare and download.** Generate a MuJoCo scene, local assets, metadata,
-   assumptions and validation report. Reopen a saved job, correct its inputs and
-   regenerate from cached reconstruction without overwriting earlier exports.
+![Three steps: upload photos for Meshy reconstruction; review geometry, uniform sizing and physical properties with Gemini assistance; export a portable MuJoCo scene, meshes and report. Corrections reuse the cached mesh and preserve earlier attempts.](docs/images/workflow.png)
+
+- **Photos and mesh:** 2–4 views recommended; one supported, four maximum. Optional
+  cropping retains originals. Source photos, Studio/Mesh controls and camera reset
+  help you inspect the entire reconstruction used for export.
+- **Size and physics:** one reviewed reference scales the mesh uniformly. Mass is
+  editable; friction starts as estimated. Gemini can replace untouched default
+  friction; other estimates require Apply. Without an estimate, friction uses a
+  disclosed 0.8 simulator fallback. **Estimates are not measurements; Save commits drafts.**
+- **Corrections and exports:** reopen, edit and regenerate without overwriting
+  earlier inputs or downloads. [Advanced physics](docs/advanced-physics.md) covers
+  collision shape, twist/rolling friction, inertia, contact response and placement.
 
 The separate [assembly workbench](https://kamino.design/assembly.html) accepts
 component meshes and reviewed link/joint definitions. See the
