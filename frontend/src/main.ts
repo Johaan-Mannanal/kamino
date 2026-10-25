@@ -14,6 +14,15 @@ import type {
 import { makeSizing, sizingControls, sizingMode } from './sizing'
 import { makeOrientation } from './orientation'
 import { mountViewer } from './viewer'
+import {
+  initialTargetDraft,
+  targetReviewControls,
+  targetReviewStatus,
+  readTargetDraft,
+  targetReviewRequest,
+  mountTargetGeometry,
+  type TargetReviewState,
+} from './target-review'
 import { canRetry, canDownloadBundle, preparedMeshPath } from './pipeline'
 
 const mode = import.meta.env.VITE_API_MODE === 'live' ? 'live' : 'mock'
@@ -37,6 +46,172 @@ let suggestions: Suggestions | null = null,
 let orientationDraft: Record<string, string> = {}
 let sizingPreview: SizingPreview | null = null
 let sizingDraftVersion = 0
+let targetState: TargetReviewState = {
+  inventory: null,
+  loading: false,
+  error: null,
+  draft: { selectedIslandIds: [], reviewNote: '', acknowledged: false },
+}
+let targetJobId = '',
+  targetLoadSequence = 0,
+  targetDraftVersion = 0
+let targetNode: HTMLElement | null = null,
+  targetViewerKey = '',
+  disposeTarget: (() => void) | undefined
+let photoJobId = '',
+  photoSequence = 0,
+  photoUrls: string[] = []
+function invalidateTargetSizing() {
+  sizingPreview = null
+  sizingDraftVersion++
+  draft.reference_full_extent = ''
+}
+async function loadTargetInventory(force = false) {
+  if (
+    !job?.mesh_path ||
+    (!force && (targetState.loading || targetState.inventory || targetState.error))
+  )
+    return
+  const id = job.id,
+    path = job.mesh_path,
+    sequence = ++targetLoadSequence,
+    version = targetDraftVersion
+  targetState.loading = true
+  targetState.error = null
+  updateTargetGate()
+  try {
+    const inventory = await api.geometry(id, true)
+    if (job?.id !== id || job.mesh_path !== path || sequence !== targetLoadSequence) return
+    if (!inventory || !Array.isArray(inventory.islands) || !inventory.source_mesh_sha256)
+      throw Error('Source inventory is unavailable. Reload geometry before review.')
+    const review = job.geometry_review
+    const changed =
+      (!!targetState.inventory &&
+        targetState.inventory.source_mesh_sha256 !== inventory.source_mesh_sha256) ||
+      (!!review &&
+        (review.source_mesh_sha256 !== inventory.source_mesh_sha256 ||
+          JSON.stringify(review.orientation) !== JSON.stringify(job.orientation)))
+    if (changed) invalidateTargetSizing()
+    if (!targetState.inventory || changed) {
+      const restored = initialTargetDraft(job, inventory)
+      targetState.draft =
+        version !== targetDraftVersion
+          ? { ...restored, reviewNote: targetState.draft.reviewNote, acknowledged: false }
+          : restored
+      targetDraftVersion++
+    }
+    targetState.inventory = inventory
+  } catch (error) {
+    if (job?.id === id && sequence === targetLoadSequence)
+      targetState.error = (error as Error).message
+  } finally {
+    if (job?.id === id && sequence === targetLoadSequence) {
+      targetState.loading = false
+      render()
+    }
+  }
+}
+async function syncSourcePhotos() {
+  const host = document.querySelector<HTMLElement>('#target-source-photos')
+  if (!host || !job) return
+  if (photoJobId === job.id) {
+    for (const [i, url] of photoUrls.entries()) {
+      const image = document.createElement('img')
+      image.src = url
+      image.alt = `Original source photo ${i + 1}`
+      image.style.maxWidth = '180px'
+      image.style.maxHeight = '180px'
+      image.style.objectFit = 'contain'
+      host.append(image)
+    }
+    return
+  }
+  photoUrls.forEach((url) => URL.revokeObjectURL(url))
+  photoUrls = []
+  photoJobId = job.id
+  const id = job.id,
+    sequence = ++photoSequence
+  for (const path of job.source_images) {
+    try {
+      const blob = await api.file(id, path)
+      if (job?.id !== id || sequence !== photoSequence) return
+      const url = URL.createObjectURL(blob)
+      photoUrls.push(url)
+      const current = document.querySelector('#target-source-photos')
+      if (current) {
+        const image = document.createElement('img')
+        image.src = url
+        image.alt = `Original source photo ${photoUrls.length}`
+        image.style.maxWidth = '180px'
+        image.style.maxHeight = '180px'
+        image.style.objectFit = 'contain'
+        current.append(image)
+      }
+    } catch {
+      if (job?.id === id && sequence === photoSequence) {
+        const current = document.querySelector('#target-source-photos')
+        if (current)
+          current.textContent =
+            'Some source photos are unavailable. Inspect retained originals before review.'
+      }
+    }
+  }
+}
+function syncTargetView() {
+  if (!job?.mesh_path) {
+    disposeTarget?.()
+    disposeTarget = undefined
+    targetNode = null
+    return
+  }
+  if (!targetState.inventory && !targetState.loading && !targetState.error)
+    void loadTargetInventory()
+  const host = document.querySelector<HTMLElement>('#target-geometry-view'),
+    inventory = targetState.inventory
+  if (host && inventory) {
+    let orientation = job.orientation
+    try {
+      if (Object.keys(orientationDraft).length) orientation = makeOrientation(orientationDraft)
+    } catch {
+      /* retain saved orientation */
+    }
+    const key = JSON.stringify([
+      job.id,
+      inventory.source_mesh_sha256,
+      targetState.draft.selectedIslandIds,
+      orientation,
+    ])
+    if (key === targetViewerKey && targetNode) host.replaceWith(targetNode)
+    else {
+      disposeTarget?.()
+      targetNode = host
+      targetViewerKey = key
+      disposeTarget = mountTargetGeometry(
+        host,
+        inventory,
+        orientation,
+        targetState.draft.selectedIslandIds,
+      )
+    }
+  }
+  void syncSourcePhotos()
+}
+function targetIsReady() {
+  return !!job && targetReviewStatus(job, targetState).canProcess
+}
+function updateTargetGate() {
+  if (!job) return
+  const status = targetReviewStatus(job, targetState),
+    node = document.querySelector('#target-review-status')
+  if (node) node.textContent = status.reason
+  const button = document.querySelector<HTMLButtonElement>('#process')
+  if (button)
+    button.disabled =
+      busy ||
+      !status.canProcess ||
+      !!Object.keys(draft).length ||
+      !!Object.keys(orientationDraft).length
+}
 let viewerKey = '',
   viewerNode: HTMLElement | null = null,
   disposeViewer: (() => void) | undefined
@@ -121,13 +296,19 @@ async function previewSizing(values: Record<string, string>) {
   if (!job) throw Error('Open a reconstructed job first.')
   if (Object.keys(orientationDraft).length)
     throw Error('Save the reviewed orientation before sizing.')
+  if (targetReviewStatus(job, targetState).status !== 'reviewed')
+    throw Error('Select and save the target geometry review before sizing.')
   const sizing = makeSizing(values, job.orientation)
   if (!sizing || sizing.mode !== 'uniform') return null
   const id = job.id,
     version = sizingDraftVersion,
     revision = job.input_revision,
     orientation = JSON.stringify(job.orientation)
-  const result = await api.previewSizing(id, { sizing, orientation: job.orientation })
+  const result = await api.previewSizing(id, {
+    sizing,
+    orientation: job.orientation,
+    geometry_context_sha256: job.geometry_review?.geometry_context_sha256,
+  })
   if (
     job?.id !== id ||
     version !== sizingDraftVersion ||
@@ -234,7 +415,20 @@ function syncViewer() {
     (Object.keys(draft).length === 0 && Object.keys(orientationDraft).length === 0
       ? job.sizing_result?.scale_factors
       : undefined)
-  const key = JSON.stringify([job.id, job.mesh_path, orientation, scales])
+  const inventory = targetState.inventory
+  const selection =
+    inventory && targetState.draft.selectedIslandIds.length
+      ? { inventory, islandIds: targetState.draft.selectedIslandIds }
+      : undefined
+  const safeScales = targetReviewStatus(job, targetState).status === 'reviewed' ? scales : undefined
+  const key = JSON.stringify([
+    job.id,
+    job.mesh_path,
+    orientation,
+    safeScales,
+    selection?.islandIds,
+    inventory?.source_mesh_sha256,
+  ])
   if (key === viewerKey && viewerNode) {
     host.replaceWith(viewerNode)
     return
@@ -242,9 +436,20 @@ function syncViewer() {
   disposeViewer?.()
   viewerNode = host
   viewerKey = key
-  disposeViewer = mountViewer(host, api, job.id, job.mesh_path, orientation, scales)
+  disposeViewer = mountViewer(host, api, job.id, job.mesh_path, orientation, safeScales, selection)
 }
 function render() {
+  if (job && targetJobId !== job.id) {
+    targetJobId = job.id
+    targetLoadSequence++
+    targetDraftVersion++
+    targetState = {
+      inventory: null,
+      loading: false,
+      error: null,
+      draft: { selectedIslandIds: [], reviewNote: '', acknowledged: false },
+    }
+  }
   const focus = document.activeElement as HTMLInputElement | HTMLSelectElement | null
   const focusName = focus?.name
   const cursor =
@@ -260,12 +465,15 @@ function render() {
   ${message ? `<div class="notice" role="status" aria-live="polite">${esc(message)} <button id="dismiss" aria-label="Dismiss">×</button></div>` : ''}
   ${mode === 'live' ? '<details class="access"><summary>API access</summary><label>Application token<input id="api-token" type="password" autocomplete="off" placeholder="Only needed for a protected backend"></label><button id="connect" type="button">Set token</button></details>' : ''}
   <section><h2><span>1</span>Photos</h2><div class="body"><label class="drop" id="drop" for="photos">Drop photos here or choose files <span>1–4 JPEG, PNG, or WebP · 10 MiB each · 25 MP</span></label><input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>${files.map((f, i) => `<div class="selected"><span>${esc(f.name)}</span><button type="button" data-index="${i}" class="remove" aria-label="Remove ${esc(f.name)}">Remove</button></div>`).join('')}${mode === 'mock' ? `<label class="demo">Demo result ${selectScenario()}</label>` : ''}<button class="primary" id="upload" ${busy || !files.length ? 'disabled' : ''}>${busyAction === 'upload' ? '<span class="spinner" aria-hidden="true"></span>' : ''}${job ? 'Start new job' : 'Upload photos'}</button></div></section>
+  ${job?.mesh_path ? targetReviewControls(job, targetState) : ''}
   <section><h2><span>2</span>Object data</h2><div class="body">${editable && !done ? suggestionView(!!canSave) : ''}${done ? propertySummary() : editable ? `<form id="properties">${sizingForm()}<div class="grid two gap">${input('mass', 'Mass · grams', job?.properties ? job.properties.mass_kg.value * 1000 : '', !!done, true)}<label>Mass source ${select('mass_source', job?.properties?.mass_kg.source || 'user_supplied', !!done)}</label></div>${input('mass_note', 'Mass note · optional', job?.properties?.mass_kg.note || '', !!done)}<div class="grid two gap"><label>Sliding friction · blank if unknown<input name="friction" type="number" min="0" step="any" value="${val('friction', job?.properties?.sliding_friction?.value ?? '')}" ${done ? 'disabled' : ''}></label><label>Friction source ${select('friction_source', job?.properties?.sliding_friction?.source || 'estimated', !!done)}</label></div>${input('friction_note', 'Friction note · optional', job?.properties?.sliding_friction?.note || '', !!done)}<div class="form-end"><span>mm → m and g → kg when saved</span>${!done ? `<button id="save-properties" type="submit" class="primary" ${!canSave || busy ? 'disabled' : ''}>${busy ? 'Saving…' : 'Save properties'}</button>` : ''}</div>${!canSave && !done ? `<p class="hint">${job ? 'Enter measurements now. Save after reconstruction.' : 'Upload photos to start.'}</p>` : ''}</form>` : '<p class="empty">Upload photos to add measurements.</p>'}</div></section>
   ${orientationView(!!canSave, !!done)}
-  <section><h2><span>3</span>Process</h2><div class="body"><div class="stages" aria-label="Processing stages">${stages()}</div>${job ? `<div class="jobline"><span>Job ${esc(job.id.slice(0, 8))} · ${esc(job.provider)} · ${job.synthetic ? 'Synthetic' : 'Provider generated'}</span><button id="refresh" ${busy ? 'disabled' : ''}>Refresh</button></div>` : ''}${job?.status === 'failed' ? `<div class="failure"><strong>${esc(job.error?.code || 'Failed')}</strong><p>${esc(job.error?.message || 'The provider did not finish.')}</p></div>` : ''}${(job?.status === 'awaiting_properties' && job.properties) || canRetry(job) ? `<button class="primary" id="process" ${busy ? 'disabled' : ''}>${canRetry(job) ? 'Retry simulation' : 'Generate simulation'}</button>` : ''}<p>Geometry review: reference correspondence and physical accuracy remain unverified. Numerical validation reports simulation smoke checks separately.</p>${reportView()}${attemptHistory()}</div></section>
+  <section><h2><span>3</span>Process</h2><div class="body"><div class="stages" aria-label="Processing stages">${stages()}</div>${job ? `<div class="jobline"><span>Job ${esc(job.id.slice(0, 8))} · ${esc(job.provider)} · ${job.synthetic ? 'Synthetic' : 'Provider generated'}</span><button id="refresh" ${busy ? 'disabled' : ''}>Refresh</button></div>` : ''}${job?.status === 'failed' ? `<div class="failure"><strong>${esc(job.error?.code || 'Failed')}</strong><p>${esc(job.error?.message || 'The provider did not finish.')}</p></div>` : ''}${(job?.status === 'awaiting_properties' && job.properties) || canRetry(job) ? `<button class="primary" id="process" ${busy || !targetIsReady() ? 'disabled' : ''}>${canRetry(job) ? 'Retry simulation' : 'Generate simulation'}</button>` : ''}<p>Geometry review: reference correspondence and physical accuracy remain unverified. Numerical validation reports simulation smoke checks separately.</p>${reportView()}${attemptHistory()}</div></section>
   <section><h2><span>4</span>Files</h2><div class="body">${job?.mesh_path || job?.export_path ? `<div class="files">${job?.mesh_path ? link(job.mesh_path, 'Reconstructed mesh') : ''}${preparedMeshPath(job) ? link(preparedMeshPath(job)!, 'Prepared mesh') : ''}${job?.export_path ? link(job.export_path, canDownloadBundle(job) ? 'MuJoCo scene' : 'Diagnostic scene') : ''}${job?.validation_path ? link(job.validation_path, 'Validation report') : ''}${canDownloadBundle(job) ? link(job!.bundle_path!, 'Simulation ZIP') : ''}</div>` : '<p class="empty">Files appear when available.</p>'}${job?.status === 'completed' && mode === 'mock' ? '<p class="hint">Synthetic UI demo. No geometry or simulation validation was run.</p>' : ''}</div></section></main>`
   bind()
+  syncTargetView()
   syncViewer()
+  updateTargetGate()
   const sizingStatus = document.querySelector('#sizing-preview')
   if (sizingStatus) {
     const result =
@@ -321,6 +529,9 @@ async function refresh() {
   if (!job || busy) return
   const id = job.id
   const generation = ++jobGeneration
+  const sourcePath = job.mesh_path
+  // Supersede pending geometry immediately, without waiting for the job GET.
+  void loadTargetInventory(true)
   try {
     const updated = await api.get(id)
     if (job?.id !== id || generation !== jobGeneration) return
@@ -328,7 +539,16 @@ async function refresh() {
       sizingPreview = null
       sizingDraftVersion++
     }
+    const previousTarget = job.geometry_review?.geometry_context_sha256
+    const targetDirty =
+      targetReviewStatus(job, { ...targetState, loading: false, error: null }).status === 'unsaved'
     job = updated
+    if (previousTarget !== job.geometry_review?.geometry_context_sha256) {
+      invalidateTargetSizing()
+      if (!targetDirty && targetState.inventory)
+        targetState.draft = initialTargetDraft(job, targetState.inventory)
+    }
+    if (job.mesh_path !== sourcePath) void loadTargetInventory(true)
     message = ''
     render()
     schedule()
@@ -340,6 +560,68 @@ async function refresh() {
   }
 }
 function bind() {
+  const targetForm = document.querySelector<HTMLFormElement>('#target-review-form')
+  targetForm?.addEventListener('input', () => {
+    targetState.draft = readTargetDraft(targetForm)
+    targetDraftVersion++
+    updateTargetGate()
+  })
+  targetForm?.addEventListener('change', (event) => {
+    targetState.draft = readTargetDraft(targetForm)
+    targetDraftVersion++
+    if ((event.target as HTMLInputElement).hasAttribute('data-target-island')) {
+      targetState.draft.acknowledged = false
+      invalidateTargetSizing()
+      render()
+    } else updateTargetGate()
+  })
+  for (const [id, all] of [
+    ['target-select-all', true],
+    ['target-clear', false],
+  ] as const)
+    document.querySelector('#' + id)?.addEventListener('click', () => {
+      targetState.draft.selectedIslandIds = all
+        ? targetState.inventory?.islands.map((i) => i.id) || []
+        : []
+      targetState.draft.acknowledged = false
+      targetDraftVersion++
+      invalidateTargetSizing()
+      render()
+    })
+  document
+    .querySelector('#reload-target-geometry')
+    ?.addEventListener('click', () => void loadTargetInventory(true))
+  targetForm?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    if (!job || busy) return
+    try {
+      if (Object.keys(orientationDraft).length)
+        throw Error('Save orientation before reviewing target geometry.')
+      targetState.draft = readTargetDraft(targetForm)
+      const request = targetReviewRequest(job, targetState)
+      const id = job.id,
+        revision = job.input_revision,
+        version = targetDraftVersion
+      busy = true
+      render()
+      const saved = await api.reviewGeometry(id, request)
+      if (job?.id !== id || job.input_revision !== revision) return
+      job = saved
+      if (version === targetDraftVersion && targetState.inventory)
+        targetState.draft = initialTargetDraft(job, targetState.inventory)
+      invalidateTargetSizing()
+      validation = null
+      reportPath = ''
+      reportError = ''
+      message =
+        'Target review saved. Review and save its reference correspondence before generating.'
+    } catch (error) {
+      message = (error as Error).message
+    } finally {
+      busy = false
+      render()
+    }
+  })
   const saveButton = document.querySelector<HTMLButtonElement>('#save-properties')
   if (saveButton)
     saveButton.innerHTML = `${busyAction === 'save' ? '<span class="spinner" aria-hidden="true"></span>' : ''}Save properties`
@@ -468,6 +750,8 @@ function bind() {
   document.querySelector('#orientation')?.addEventListener('input', (event) => {
     sizingPreview = null
     sizingDraftVersion++
+    draft.reference_full_extent = ''
+    updateTargetGate()
     const target = event.target as HTMLInputElement
     const saved = job?.orientation || zeroOrientation
     orientationDraft = {
@@ -504,6 +788,8 @@ function bind() {
       busy = true
       render()
       job = await api.saveOrientation(job.id, orientation)
+      targetState.draft.acknowledged = false
+      draft.reference_full_extent = ''
       sizingPreview = null
       sizingDraftVersion++
       const hasNewerEdits = (['x_deg', 'y_deg', 'z_deg'] as const).some(
@@ -532,6 +818,7 @@ function bind() {
     sizingDraftVersion++
     const status = document.querySelector('#sizing-preview')
     if (status) status.textContent = 'Inputs changed; preview resulting dimensions again.'
+    updateTargetGate()
   })
   document.querySelector<HTMLFormElement>('#properties')?.addEventListener('change', (e) => {
     const t = e.target as HTMLInputElement | HTMLSelectElement
@@ -580,7 +867,11 @@ function bind() {
         values.dimensions_source = preview.dimensions_m.source
         values.dimensions_note = preview.dimensions_m.note || ''
       }
-      const properties = { ...makeProperties(values), ...(sizing ? { sizing } : {}) }
+      const properties = {
+        ...makeProperties(values),
+        ...(sizing ? { sizing } : {}),
+        geometry_context_sha256: job.geometry_review?.geometry_context_sha256 || null,
+      }
       busyAction = 'save'
       jobGeneration++
       busy = true
@@ -606,6 +897,11 @@ function bind() {
   })
   document.querySelector('#process')?.addEventListener('click', async () => {
     if (!job) return
+    if (!targetIsReady()) {
+      message = 'Review target geometry and save its reference correspondence before generating.'
+      render()
+      return
+    }
     if (Object.keys(draft).length || Object.keys(orientationDraft).length) {
       message = 'Save your revised properties and orientation before generating the simulation.'
       render()
@@ -654,6 +950,9 @@ function bind() {
   document.querySelector('#connect')?.addEventListener('click', () => {
     setApiToken(document.querySelector<HTMLInputElement>('#api-token')?.value || '')
     viewerKey = ''
+    targetState.error = null
+    targetState.inventory = null
+    photoJobId = ''
     message = 'Application token set for this session.'
     render()
     if (!job) void restoreJob()
@@ -686,5 +985,7 @@ void restoreJob()
 
 window.addEventListener('pagehide', () => {
   disposeViewer?.()
+  disposeTarget?.()
+  photoUrls.forEach((url) => URL.revokeObjectURL(url))
   if (timer) clearTimeout(timer)
 })

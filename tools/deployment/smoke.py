@@ -50,10 +50,28 @@ def check_backend(client: httpx.Client, *, run_mock: bool = False) -> dict:
     )
     response.raise_for_status()
     job_id = response.json()["id"]
-    wait_for(client, job_id, "awaiting_properties")
+    ready = wait_for(client, job_id, "awaiting_properties")
+    inventory = client.get(f"/api/jobs/{job_id}/geometry")
+    inventory.raise_for_status()
+    geometry = inventory.json()
+    # Intentional all-parts choice for this known synthetic mock fixture only.
+    reviewed = client.patch(
+        f"/api/jobs/{job_id}/geometry-review",
+        json={
+            "source_mesh_sha256": geometry["source_mesh_sha256"],
+            "island_ids": [part["id"] for part in geometry["islands"]],
+            "orientation": ready["orientation"],
+            "expected_input_revision": ready["input_revision"],
+            "acknowledge_geometry": True,
+            "review_note": "Explicit known synthetic smoke target; all fixture surfaces belong together",
+        },
+    )
+    reviewed.raise_for_status()
+    context = reviewed.json()["geometry_review"]["geometry_context_sha256"]
     saved = client.patch(
         f"/api/jobs/{job_id}/properties",
         json={
+            "geometry_context_sha256": context,
             "dimensions_m": {
                 "x": 0.04,
                 "y": 0.05,

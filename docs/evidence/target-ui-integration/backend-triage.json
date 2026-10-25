@@ -1,0 +1,53 @@
+{
+  "baseline": {
+    "passed": 353,
+    "skipped": 8,
+    "failed": 13,
+    "errors": 9,
+    "missing_fixture_cases": 14,
+    "filesystem_permission_cases": 8,
+    "independent_product_assertions_established": 0
+  },
+  "target_focused": {
+    "passed": 12,
+    "warnings": 1,
+    "elapsed_seconds": 7.18
+  },
+  "evidence": [
+    {
+      "path": "outputs/ui-integration/python-final-tests.log",
+      "sha256": "d70805bcd9f859c935b13863c8f9b7fd4613fc084142a95a5661b5825761bcbb",
+      "bytes": 22295
+    },
+    {
+      "path": "outputs/target-ui-integration/python-target-focused.log",
+      "sha256": "07e91dc11ab29d8263b0dc98e77edaf962a94cf2afe1c60565f4cb0538efbbc5",
+      "bytes": 588
+    },
+    {
+      "path": "outputs/pytest-ui-final-all/test_real_motion_failure_corre0/assemblies/f1b64445-a220-44a9-9ccd-9bc14a91baa3/job.json",
+      "sha256": "41db901822a2bc8d87003322a60875a58c5710b2865ddb17d209f5d8d19463f6",
+      "bytes": 2033
+    },
+    {
+      "path": "outputs/pytest-ui-final-all/test_hash_auth_and_failed_vali0/assemblies/b8b4f2ce-cc5b-42d1-83b2-76906b9a9458/job.json",
+      "sha256": "fac2c26647ee13569dc524c5dfbaa4e584d9591d157f6760a2c35b262d2a0a71",
+      "bytes": 1331
+    },
+    {
+      "path": "outputs/target-ui-integration/full-backend-detailed.log",
+      "sha256": "aa4d269981458abaaed35b041a1541b08715cb7166ff885677c0998a4228dbdf",
+      "bytes": 143401
+    }
+  ],
+  "patched_full": {
+    "passed": 369,
+    "skipped": 8,
+    "failed": 9,
+    "errors": 9,
+    "elapsed_seconds": 106.15,
+    "missing_fixture_cases": 14,
+    "filesystem_permission_cases": 4,
+    "independent_product_assertions_established": 0
+  }
+}

@@ -1,3 +1,4 @@
+import type { TargetReview } from './target-review'
 export type Source = 'measured' | 'user_supplied' | 'sourced' | 'estimated'
 export type JobStatus =
   | 'queued'
@@ -32,10 +33,12 @@ export type SizingResult = {
   geometry_review: string
 }
 export type SizingPreview = {
+  geometry_context_sha256?: string | null
   dimensions_m: Properties['dimensions_m']
   sizing_result: SizingResult
 }
 export type Properties = {
+  geometry_context_sha256?: string | null
   dimensions_m: { x: number; y: number; z: number; source: Source; note?: string | null }
   mass_kg: Scalar
   sliding_friction: Scalar | null
@@ -74,6 +77,7 @@ export type Job = {
   bundle_path: string | null
   error: { code: string; message: string } | null
   orientation: Orientation
+  geometry_review?: TargetReview | null
   sizing_result?: SizingResult | null
   input_revision?: number
   attempts?: {

@@ -5,6 +5,11 @@ import { mountViewer } from "../../../frontend/src/viewer";
 import { canRetry } from "../../../frontend/src/pipeline";
 import type { JobStatus, Scalar, Source } from "../../../frontend/src/types";
 import {
+  mountTargetGeometry,
+  readTargetDraft,
+  targetReviewControls,
+} from "../../../frontend/src/target-review";
+import {
   SessionCancelledError,
   type BackendSession,
   type Job,
@@ -12,6 +17,12 @@ import {
   type ReviewedInputs,
   type Suggestions,
 } from "./backend-session";
+import {
+  generateGate,
+  primaryViewer,
+  syncTargetControls,
+  targetControlsKey,
+} from "./live-target-review";
 
 // ---------------------------------------------------------------------------
 // Pure helpers (unit tested). Nothing here invents bounds, mass or friction.
@@ -41,7 +52,12 @@ export type SuggestionChoice = {
   axis: "" | Axis;
 };
 
-type RetainedDraft = { draft: Draft; origins: Origins };
+/** referenceEpoch records which target/orientation binding the draft was confirmed against. */
+type RetainedDraft = {
+  draft: Draft;
+  origins: Origins;
+  referenceEpoch?: number;
+};
 const retainedDrafts = new WeakMap<
   BackendSession,
   Map<string, RetainedDraft>
@@ -155,7 +171,11 @@ export function draftFromJob(job: Job): {
       unit: reference?.unit ?? "mm",
       referenceSource: reference?.source ?? "user_supplied",
       description: reference?.description ?? "",
-      acknowledged: !!reference,
+      // A saved reference bound to an older target context must be confirmed again.
+      acknowledged:
+        !!reference &&
+        (properties?.geometry_context_sha256 ?? null) ===
+          (job.geometry_review?.geometry_context_sha256 ?? null),
       mass: text(properties?.mass_kg.value),
       massSource: properties?.mass_kg.source ?? "user_supplied",
       friction: text(properties?.sliding_friction?.value),
@@ -414,6 +434,11 @@ export function mountLiveWorkspace(
   let draft = retained?.draft ?? initial.draft;
   let origins = retained?.origins ?? initial.origins;
   if (retained && !session.dirty) session.markDirty();
+  // Target/orientation invalidations since this draft was confirmed clear its reference ack.
+  let seenEpoch = retained?.referenceEpoch ?? session.referenceEpoch;
+  let targetKey = "";
+  let targetViewKey = "";
+  let disposeTargetView = () => {};
   const inputSnapshot = (job: Job) =>
     JSON.stringify([
       job.input_revision,
@@ -439,7 +464,7 @@ export function mountLiveWorkspace(
   let prompting = false;
   const urls: string[] = [];
 
-  host.innerHTML = `<header class="project-header">${ctx.brand}<span class="divider"></span><span class="project-title">Job ${esc(jobId.slice(0, 8))}</span><span id="live-saved" class="muted small"></span><div class="header-right"><span id="live-status" class="badge" role="status" aria-live="polite"></span><a class="text-button" href="${esc(assemblyUrl())}">Assembly ↗</a><button class="secondary compact" id="live-bundle" hidden>Download bundle</button><button class="primary compact" id="live-generate">Generate simulation</button></div></header>${ctx.steps}<main class="workspace live-workspace"><aside class="sources"><div class="section-line"><strong>Source photos</strong><span class="muted">${initialJob.source_images.length}/4</span></div><div id="live-photos"></div><button class="secondary add-photos" id="live-edit-photos">${icon("49255.svg", 13)}New upload</button><p class="source-note">${esc(initialJob.provider)} reconstruction${initialJob.synthetic ? " · synthetic mock geometry" : ""}<br>Z-up · fixed X → Y → Z rotations<br>Server sizing in metres</p></aside><section class="workspace-center"><div class="viewport"><div class="viewport-toolbar"><span class="badge">${initialJob.synthetic ? "Synthetic mock mesh" : "Reconstructed mesh"}</span><div class="viewer-actions"><button class="secondary compact" id="live-orient-preview" type="button">Preview draft orientation</button><button class="secondary compact" id="live-mesh" type="button">Download mesh</button><button class="square" id="live-fullscreen" type="button" aria-label="Toggle fullscreen">${icon("28ea9.svg")}</button></div></div><div class="viewport-label"><span id="live-viewer-label"></span></div><div id="live-viewer" class="viewer"></div><div class="viewport-help"><span>Geometry preview only · collision is generated during preparation and not shown</span><span>Red X · Green Y · Blue Z · Z-up</span></div></div><section class="live-outputs" aria-labelledby="live-outputs-title"><h2 id="live-outputs-title">Simulation</h2><div id="live-outputs"></div></section></section><aside class="inspector"><div class="section-line"><h2>Physical properties</h2>${icon("66491.svg")}</div><p class="muted small">Manual review · saved to the server</p>${initial.notice ? `<p class="live-notice small" role="note">${esc(initial.notice)}</p>` : ""}<form id="live-form" novalidate><section class="property-section"><h3>Orientation <span>Fixed X → Y → Z · Z-up</span></h3><div class="field-grid three">${(["x", "y", "z"] as const).map((a) => input(`${a.toUpperCase()} rotation`, a, draft[a], "°", 'min="-180" max="180"')).join("")}</div><p class="muted tiny">Active right-handed rotations about the fixed X, then Y, then Z axes.</p></section><section class="property-section"><h3>Sizing <span>Uniform · one full-extent reference</span></h3><div class="field-grid two"><label class="property-field"><span>Full extent axis</span><select name="axis" aria-label="Reference axis"><option value="">Choose axis</option>${(["x", "y", "z"] as const).map((a) => `<option value="${a}" ${draft.axis === a ? "selected" : ""}>${a.toUpperCase()} · full extent</option>`).join("")}</select></label>${input("Reference length", "length", draft.length, "", 'min="0"')}<label class="property-field"><span>Units</span><select name="unit" aria-label="Reference units"><option value="mm" ${draft.unit === "mm" ? "selected" : ""}>Millimetres</option><option value="m" ${draft.unit === "m" ? "selected" : ""}>Metres</option></select></label>${sourceSelect("referenceSource", draft.referenceSource, "Reference source")}</div><label class="property-field live-wide"><span>Describe the full extent (body, pins and other protrusions)</span><div class="input-shell"><input name="description" aria-label="Full extent description" maxlength="2000" value="${esc(draft.description)}"></div></label><label class="live-check"><input type="checkbox" name="acknowledged" ${draft.acknowledged ? "checked" : ""}> My reference matches the selected full mesh extent, including any protrusions.</label><button type="button" class="secondary compact" id="live-preview">Preview dimensions on server</button><div id="live-preview-output" class="live-preview small" role="status" aria-live="polite"></div></section><section class="property-section"><h3>Dynamics <span>Manual entry</span></h3><div class="field-grid two">${input("Mass", "mass", draft.mass, "kg", 'min="0"')}${sourceSelect("massSource", draft.massSource, "Mass source")}${input("Friction", "friction", draft.friction, "μ", 'min="0"')}${sourceSelect("frictionSource", draft.frictionSource, "Friction source")}</div><p class="muted tiny">Leave friction blank if unknown; it is saved as unknown.</p></section><p id="live-form-error" class="error" aria-live="polite"></p><p id="live-error" class="error" role="alert"></p><button type="button" class="text-button" id="live-retry" hidden>Retry status</button><div class="save-row"><span class="muted small" id="live-save-status"></span><button class="primary compact" id="live-save" type="submit">Save reviewed properties</button></div></form><details class="suggestions live-suggestions"><summary>${icon("a4dc8.svg", 15)}Gemini suggestions</summary><p class="muted small">Requests run only when you ask. Values are never applied or saved automatically.</p><label class="property-field"><span>Object hint (optional)</span><div class="input-shell"><input id="live-hint" maxlength="200" aria-label="Object hint"></div></label><div class="save-row"><button class="secondary compact" type="button" id="live-suggest">Request</button><button class="secondary compact" type="button" id="live-suggest-refresh">Refresh (new request)</button></div><div id="live-suggestions" aria-live="polite"></div></details><p class="prototype-note">Saving sends orientation, then the server sizing preview, then properties. Generate simulation is a separate step.</p></aside></main>`;
+  host.innerHTML = `<header class="project-header">${ctx.brand}<span class="divider"></span><span class="project-title">Job ${esc(jobId.slice(0, 8))}</span><span id="live-saved" class="muted small"></span><div class="header-right"><span id="live-status" class="badge" role="status" aria-live="polite"></span><a class="text-button" href="${esc(assemblyUrl())}">Assembly ↗</a><button class="secondary compact" id="live-bundle" hidden>Download bundle</button><button class="primary compact" id="live-generate">Generate simulation</button></div></header>${ctx.steps}<main class="workspace live-workspace"><aside class="sources"><div class="section-line"><strong>Source photos</strong><span class="muted">${initialJob.source_images.length}/4</span></div><div id="live-photos"></div><button class="secondary add-photos" id="live-edit-photos">${icon("49255.svg", 13)}New upload</button><p class="source-note">${esc(initialJob.provider)} reconstruction${initialJob.synthetic ? " · synthetic mock geometry" : ""}<br>Z-up · fixed X → Y → Z rotations<br>Server sizing in metres</p></aside><section class="workspace-center"><div class="viewport"><div class="viewport-toolbar"><span class="badge">${initialJob.synthetic ? "Synthetic mock mesh" : "Reconstructed mesh"}</span><div class="viewer-actions"><button class="secondary compact" id="live-orient-preview" type="button">Preview draft orientation</button><button class="secondary compact" id="live-mesh" type="button">Download mesh</button><button class="square" id="live-fullscreen" type="button" aria-label="Toggle fullscreen">${icon("28ea9.svg")}</button></div></div><div class="viewport-label"><span id="live-viewer-label"></span></div><div id="live-viewer" class="viewer"></div><div class="viewport-help"><span>Geometry preview only · collision is generated during preparation and not shown</span><span>Red X · Green Y · Blue Z · Z-up</span></div></div><div id="live-target" class="live-target"></div><section class="live-outputs" aria-labelledby="live-outputs-title"><h2 id="live-outputs-title">Simulation</h2><p id="live-generate-reason" class="muted small" role="status"></p><div id="live-outputs"></div></section></section><aside class="inspector"><div class="section-line"><h2>Physical properties</h2>${icon("66491.svg")}</div><p class="muted small">Manual review · saved to the server</p>${initial.notice ? `<p class="live-notice small" role="note">${esc(initial.notice)}</p>` : ""}<form id="live-form" novalidate><section class="property-section"><h3>Orientation <span>Fixed X → Y → Z · Z-up</span></h3><div class="field-grid three">${(["x", "y", "z"] as const).map((a) => input(`${a.toUpperCase()} rotation`, a, draft[a], "°", 'min="-180" max="180"')).join("")}</div><p class="muted tiny">Active right-handed rotations about the fixed X, then Y, then Z axes.</p><div class="save-row"><span class="muted small" id="live-orientation-status" role="status"></span><button type="button" class="secondary compact" id="live-save-orientation">Save orientation</button></div></section><section class="property-section"><h3>Sizing <span>Uniform · one full-extent reference</span></h3><p id="live-target-gate" class="live-target-gate small" role="status"></p><div class="field-grid two"><label class="property-field"><span>Full extent axis</span><select name="axis" aria-label="Reference axis"><option value="">Choose axis</option>${(["x", "y", "z"] as const).map((a) => `<option value="${a}" ${draft.axis === a ? "selected" : ""}>${a.toUpperCase()} · full extent</option>`).join("")}</select></label>${input("Reference length", "length", draft.length, "", 'min="0"')}<label class="property-field"><span>Units</span><select name="unit" aria-label="Reference units"><option value="mm" ${draft.unit === "mm" ? "selected" : ""}>Millimetres</option><option value="m" ${draft.unit === "m" ? "selected" : ""}>Metres</option></select></label>${sourceSelect("referenceSource", draft.referenceSource, "Reference source")}</div><label class="property-field live-wide"><span>Describe the full extent (body, pins and other protrusions)</span><div class="input-shell"><input name="description" aria-label="Full extent description" maxlength="2000" value="${esc(draft.description)}"></div></label><label class="live-check"><input type="checkbox" name="acknowledged" ${draft.acknowledged ? "checked" : ""}> My reference matches the selected full mesh extent, including any protrusions.</label><button type="button" class="secondary compact" id="live-preview">Preview dimensions on server</button><div id="live-preview-output" class="live-preview small" role="status" aria-live="polite"></div></section><section class="property-section"><h3>Dynamics <span>Manual entry</span></h3><div class="field-grid two">${input("Mass", "mass", draft.mass, "kg", 'min="0"')}${sourceSelect("massSource", draft.massSource, "Mass source")}${input("Friction", "friction", draft.friction, "μ", 'min="0"')}${sourceSelect("frictionSource", draft.frictionSource, "Friction source")}</div><p class="muted tiny">Leave friction blank if unknown; it is saved as unknown.</p></section><p id="live-form-error" class="error" aria-live="polite"></p><p id="live-error" class="error" role="alert"></p><button type="button" class="text-button" id="live-retry" hidden>Retry status</button><div class="save-row"><span class="muted small" id="live-save-status"></span><button class="primary compact" id="live-save" type="submit">Save reviewed properties</button></div></form><details class="suggestions live-suggestions"><summary>${icon("a4dc8.svg", 15)}Gemini suggestions</summary><p class="muted small">Requests run only when you ask. Values are never applied or saved automatically.</p><label class="property-field"><span>Object hint (optional)</span><div class="input-shell"><input id="live-hint" maxlength="200" aria-label="Object hint"></div></label><div class="save-row"><button class="secondary compact" type="button" id="live-suggest">Request</button><button class="secondary compact" type="button" id="live-suggest-refresh">Refresh (new request)</button></div><div id="live-suggestions" aria-live="polite"></div></details><p class="prototype-note">Save orientation first, then save the target review, then preview and save properties against that reviewed target. Generate simulation is a separate step.</p></aside></main>`;
 
   const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
     host.querySelector<T>(selector)!;
@@ -541,33 +566,18 @@ export function mountLiveWorkspace(
   retryFiles.onclick = retryArtifacts;
   $(".viewer-actions").append(retryFiles);
 
-  function savedViewer(job: Job): ViewerSpec {
-    const result = job.sizing_result;
-    const sized =
-      !!job.properties?.sizing &&
-      !!result &&
-      sameOrientation(result.orientation, job.orientation);
-    return {
-      orientation: job.orientation,
-      scale: sized ? result!.scale_factors : undefined,
-      label: sized ? "Saved orientation · saved sizing" : "Saved orientation",
-    };
-  }
   function syncViewer(job: Job) {
-    const preview = session.sizingPreview;
-    const spec =
-      draftViewer ??
-      (preview
-        ? {
-            orientation: preview.sizing_result.orientation,
-            scale: preview.sizing_result.scale_factors,
-            label: "Server sizing preview · unsaved",
-          }
-        : savedViewer(job));
-    const key = JSON.stringify([job.mesh_path, spec.orientation, spec.scale]);
+    // Selected target only; the all-surface review view lives in #live-target.
+    const spec = primaryViewer(
+      job,
+      session.target,
+      session.targetStatus,
+      session.sizingPreview,
+      draftViewer?.orientation ?? null,
+    );
     $("#live-viewer-label").textContent = spec.label;
-    if (key === viewerKey || !job.mesh_path) return;
-    viewerKey = key;
+    if (spec.key === viewerKey || !job.mesh_path) return;
+    viewerKey = spec.key;
     disposeViewer();
     disposeViewer = mountViewer(
       $("#live-viewer"),
@@ -576,6 +586,116 @@ export function mountLiveWorkspace(
       job.mesh_path,
       spec.orientation,
       spec.scale,
+      spec.selection,
+    );
+  }
+
+  // Target review: controls outside the physical-properties form, events delegated
+  // to the persistent host so a structural re-render never needs re-binding.
+  const targetHost = $("#live-target");
+  const savedOrientation = (job: Job) => {
+    const value = draftOrientation(draft);
+    return typeof value !== "string" && sameOrientation(value, job.orientation);
+  };
+  // A status refresh does not lock fields being edited; it only blocks saving.
+  const targetLocked = (job: Job) =>
+    session.busy ||
+    isRunning(job) ||
+    !EDITABLE.includes(job.status) ||
+    (job.status === "failed" && !canRetry(job));
+  function pushTargetDraft(next = readTargetDraft(targetHost)) {
+    if (JSON.stringify(next) === JSON.stringify(session.target.draft)) return;
+    session.setTargetDraft(next);
+  }
+  targetHost.addEventListener("input", (event) => {
+    if ((event.target as HTMLElement).closest("#target-review-form"))
+      pushTargetDraft();
+  });
+  targetHost.addEventListener("change", (event) => {
+    if ((event.target as HTMLElement).closest("#target-review-form"))
+      pushTargetDraft();
+  });
+  targetHost.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+      "button",
+    );
+    if (!button || button.disabled) return;
+    const inventory = session.target.inventory;
+    if (button.id === "reload-target-geometry") void session.loadGeometry(true);
+    else if (button.id === "target-select-all" && inventory)
+      pushTargetDraft({
+        ...session.target.draft,
+        selectedIslandIds: inventory.islands.map((island) => island.id),
+      });
+    else if (button.id === "target-clear")
+      pushTargetDraft({ ...session.target.draft, selectedIslandIds: [] });
+  });
+  targetHost.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const job = currentJob();
+    if (!job || targetLocked(job) || session.refreshing) return;
+    if (!savedOrientation(job))
+      return toast("Save orientation before confirming the target.");
+    pushTargetDraft();
+    try {
+      await session.saveTargetReview();
+      if (!disposed)
+        toast(
+          "Target review saved. Confirm the reference full extent, then preview and save properties.",
+        );
+    } catch (error) {
+      await handleError(error, "Target review not saved");
+    }
+  });
+  function syncTarget(job: Job) {
+    const target = session.target;
+    const key = targetControlsKey(job, target);
+    if (key !== targetKey) {
+      targetKey = key;
+      targetViewKey = "";
+      disposeTargetView();
+      disposeTargetView = () => {};
+      const focused = targetHost.contains(document.activeElement)
+        ? document.activeElement?.id
+        : "";
+      targetHost.innerHTML = targetReviewControls(job, target);
+      if (focused)
+        targetHost
+          .querySelector<HTMLElement>(`#${focused}`)
+          ?.focus({ preventScroll: true });
+      const photos = targetHost.querySelector("#target-source-photos");
+      if (photos)
+        photos.textContent =
+          "Compare with the uploaded source photos in the left column.";
+    }
+    const status = session.targetStatus;
+    const orientationSaved = savedOrientation(job);
+    syncTargetControls(targetHost, target, status, {
+      locked: targetLocked(job),
+      orientationSaved,
+    });
+    if (session.refreshing)
+      targetHost
+        .querySelector<HTMLButtonElement>("#save-target-review")
+        ?.setAttribute("disabled", "");
+    const view = targetHost.querySelector<HTMLElement>("#target-geometry-view");
+    if (!view || !target.inventory) return;
+    const value = draftOrientation(draft);
+    const orientation =
+      draftViewer && typeof value !== "string" ? value : job.orientation;
+    const viewKey = JSON.stringify([
+      target.inventory.source_mesh_sha256,
+      [...target.draft.selectedIslandIds].sort(),
+      orientation,
+    ]);
+    if (viewKey === targetViewKey) return;
+    targetViewKey = viewKey;
+    disposeTargetView();
+    disposeTargetView = mountTargetGeometry(
+      view,
+      target.inventory,
+      orientation,
+      target.draft.selectedIslandIds,
     );
   }
 
@@ -629,6 +749,11 @@ export function mountLiveWorkspace(
     event.preventDefault();
     const built = buildReviewed(draft, origins);
     if (built.error !== undefined) return update();
+    const blocked = referenceBlock(currentJob());
+    if (blocked) {
+      previewError = blocked;
+      return update();
+    }
     try {
       await session.saveReviewed(built.value);
       if (!session.dirty) retainWorkspaceDraft(session, jobId, null);
@@ -651,10 +776,19 @@ export function mountLiveWorkspace(
     }
   });
 
+  /** Sizing binds to the saved orientation and the current reviewed target only. */
+  function referenceBlock(job: Job | null) {
+    if (!job) return "Open a reconstructed job first.";
+    if (!savedOrientation(job))
+      return "Save orientation before target review and sizing.";
+    const status = session.targetStatus;
+    return status.status === "reviewed" ? "" : status.reason;
+  }
   $("#live-preview").onclick = async () => {
     const built = buildSizing(draft);
-    if (built.error !== undefined) {
-      previewError = built.error;
+    const blocked = referenceBlock(currentJob());
+    if (built.error !== undefined || blocked) {
+      previewError = built.error ?? blocked;
       return update();
     }
     previewError = "";
@@ -680,6 +814,22 @@ export function mountLiveWorkspace(
       label: "Draft orientation · unsaved · unscaled",
     };
     update();
+  };
+  $("#live-save-orientation").onclick = async () => {
+    const orientation = draftOrientation(draft);
+    if (typeof orientation === "string") return toast(orientation);
+    try {
+      // Numeric drafts stay; the session invalidates target and reference binding.
+      await session.saveOrientation(orientation);
+      if (disposed) return;
+      draftViewer = null;
+      update();
+      toast(
+        "Orientation saved. Review the target again, then confirm the reference full extent.",
+      );
+    } catch (error) {
+      await handleError(error, "Orientation not saved");
+    }
   };
   $("#live-mesh").onclick = () => {
     const job = currentJob();
@@ -919,6 +1069,17 @@ export function mountLiveWorkspace(
       left = true;
       return ctx.onLeave();
     }
+    if (session.referenceEpoch !== seenEpoch) {
+      // Source, selection, review or saved orientation changed: keep numbers, re-confirm.
+      seenEpoch = session.referenceEpoch;
+      if (draft.acknowledged) {
+        draft = { ...draft, acknowledged: false };
+        (form.elements.namedItem("acknowledged") as HTMLInputElement).checked =
+          false;
+        previewError =
+          "Target or saved orientation changed. Your values are kept; confirm the reference full extent again, then preview and save.";
+      }
+    }
     const snapshot = inputSnapshot(job);
     if (snapshot !== savedInputSnapshot) {
       savedInputSnapshot = snapshot;
@@ -941,8 +1102,7 @@ export function mountLiveWorkspace(
     const globalError =
       session.error && session.error !== suggestionError ? session.error : null;
     if (globalError && isAuthError(globalError)) void handleError(globalError);
-    $("#live-status").textContent =
-      STATUS_LABEL[job.status];
+    $("#live-status").textContent = STATUS_LABEL[job.status];
     const savedText = working
       ? "Working…"
       : session.dirty
@@ -964,11 +1124,43 @@ export function mountLiveWorkspace(
       ? "Retry status"
       : "Refresh status";
     $<HTMLButtonElement>("#live-retry").disabled = working;
+    const orientationSaved = savedOrientation(job);
+    const referenceBlocked = referenceBlock(job);
     $<HTMLButtonElement>("#live-save").disabled =
-      working || !session.dirty || invalid || !editable;
-    $<HTMLButtonElement>("#live-preview").disabled = working;
+      working ||
+      !session.dirty ||
+      invalid ||
+      !editable ||
+      !!referenceBlocked ||
+      session.target.loading;
+    $<HTMLButtonElement>("#live-preview").disabled =
+      working || !!referenceBlocked || session.target.loading;
+    $("#live-target-gate").textContent = referenceBlocked
+      ? `Reference sizing waits for the target: ${referenceBlocked}`
+      : session.targetStatus.reason;
+    const orientationButton = $<HTMLButtonElement>("#live-save-orientation");
+    orientationButton.disabled =
+      working ||
+      !editable ||
+      orientationSaved ||
+      typeof draftOrientation(draft) === "string";
+    $("#live-orientation-status").textContent = orientationSaved
+      ? "Saved orientation"
+      : "Unsaved orientation · save before target review";
+    const gate = generateGate({
+      job,
+      dirty: session.dirty,
+      working,
+      invalid,
+      orientationSaved,
+      stageReady: canGenerate(job, session.dirty, working, invalid),
+      target: session.target,
+      targetStatus: session.targetStatus,
+    });
     const generate = $<HTMLButtonElement>("#live-generate");
-    generate.disabled = !canGenerate(job, session.dirty, working, invalid);
+    generate.disabled = !gate.allowed;
+    generate.title = gate.reason;
+    $("#live-generate-reason").textContent = gate.reason;
     generate.textContent =
       job.status === "preparing" || job.status === "validating"
         ? "Generating…"
@@ -976,7 +1168,15 @@ export function mountLiveWorkspace(
           ? "Retry simulation"
           : "Generate simulation";
     $("#live-bundle").hidden = !(job.status === "completed" && job.bundle_path);
-    const preview = session.sizingPreview;
+    // Only a preview bound to the current reviewed target is shown as current sizing.
+    const context = job.geometry_review?.geometry_context_sha256 ?? null;
+    const preview =
+      session.sizingPreview &&
+      session.targetStatus.status === "reviewed" &&
+      !!context &&
+      session.sizingPreview.geometry_context_sha256 === context
+        ? session.sizingPreview
+        : null;
     $("#live-preview-output").innerHTML = previewError
       ? `<span class="error">${esc(previewError)}</span>`
       : preview
@@ -985,7 +1185,12 @@ export function mountLiveWorkspace(
     syncReport(job);
     renderOutputs(job);
     syncSuggestButtons();
+    syncTarget(job);
     syncViewer(job);
+    // A directly opened job may not have started source validation yet.
+    const target = session.target;
+    if (job.mesh_path && !target.inventory && !target.loading && !target.error)
+      void session.loadGeometry(false);
   }
 
   const unsubscribe = session.subscribe(update);
@@ -1002,11 +1207,12 @@ export function mountLiveWorkspace(
     retainWorkspaceDraft(
       session,
       jobId,
-      session.dirty ? { draft, origins } : null,
+      session.dirty ? { draft, origins, referenceEpoch: seenEpoch } : null,
     );
     disposed = true;
     unsubscribe();
     disposeViewer();
+    disposeTargetView();
     urls.forEach((url) => URL.revokeObjectURL(url));
   };
 }

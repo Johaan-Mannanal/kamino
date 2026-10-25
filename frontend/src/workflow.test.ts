@@ -1,6 +1,38 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { Job, Suggestions } from './types'
+const fixtureSource = 'a'.repeat(64),
+  fixtureIsland = 'b'.repeat(64),
+  fixtureContext = 'c'.repeat(64)
+const geometryReview = {
+  source_mesh_sha256: fixtureSource,
+  island_ids: [fixtureIsland],
+  orientation: { x_deg: 0, y_deg: 0, z_deg: 0 },
+  review_note: 'Explicit synthetic fixture review',
+  acknowledge_geometry: true,
+  geometry_context_sha256: fixtureContext,
+  algorithm: 'surface-islands-exact-seams-v1',
+  reviewed_at: '',
+  state: 'user_reviewed_not_physically_verified' as const,
+}
+const geometryInventory = {
+  source_mesh_sha256: fixtureSource,
+  algorithm: 'surface-islands-exact-seams-v1',
+  islands: [
+    {
+      id: fixtureIsland,
+      label: 'Synthetic fixture',
+      node_index: 0,
+      face_count: 12,
+      vertex_count: 8,
+      bounds_input_units: [
+        [0, 0, 0],
+        [1, 3, 2],
+      ],
+    },
+  ],
+  geometry: {},
+}
 const record: Job = {
   schema_version: '1.0',
   id: 'd415d0ce-07af-4eae-9a1d-cf81ebb227a0',
@@ -13,7 +45,9 @@ const record: Job = {
   source_images: [],
   provider_task_id: null,
   mesh_path: 'mesh.glb',
+  geometry_review: geometryReview,
   properties: {
+    geometry_context_sha256: fixtureContext,
     dimensions_m: { x: 0.04, y: 0.05, z: 0.06, source: 'measured' },
     mass_kg: { value: 0.08, source: 'measured' },
     sliding_friction: null,
@@ -36,6 +70,10 @@ beforeEach(() => {
   vi.resetModules()
   vi.stubEnv('VITE_API_MODE', 'live')
   vi.doMock('./viewer', () => ({ mountViewer: () => () => {} }))
+  vi.doMock('./target-review', async () => ({
+    ...(await vi.importActual<typeof import('./target-review')>('./target-review')),
+    mountTargetGeometry: () => () => {},
+  }))
   vi.stubGlobal(
     'URL',
     class extends URL {
@@ -66,10 +104,18 @@ const reviewedSizing = (length: number) => ({
     description: 'Synthetic full Y span',
   },
 })
+function installFetch(fetch: ReturnType<typeof vi.fn>) {
+  vi.stubGlobal('fetch', (url: string, init?: RequestInit) =>
+    url.includes('/geometry?') ? Promise.resolve(json(geometryInventory)) : fetch(url, init),
+  )
+}
 async function start(fetch: ReturnType<typeof vi.fn>) {
-  vi.stubGlobal('fetch', fetch)
+  vi.stubGlobal('fetch', (url: string, init?: RequestInit) =>
+    url.includes('/geometry?') ? Promise.resolve(json(geometryInventory)) : fetch(url, init),
+  )
   await import('./main')
   await vi.waitFor(() => expect(document.querySelector('#process')).not.toBeNull())
+  await vi.waitFor(() => expect(document.querySelector('[data-target-island]')).not.toBeNull())
 }
 function change(name: string, value: string) {
   const el = document.querySelector<HTMLInputElement>(`[name="${name}"]`)!
@@ -175,10 +221,13 @@ it('previews explicit uniform sizing without inventing a reference length', asyn
         })
       : json(fresh),
   )
-  vi.stubGlobal('fetch', fetch)
+  installFetch(fetch)
   await import('./main')
   await vi.waitFor(() => expect(document.querySelector('[name="reference_length"]')).not.toBeNull())
   expect(document.querySelector<HTMLInputElement>('[name="reference_length"]')!.value).toBe('')
+  await vi.waitFor(() =>
+    expect(document.querySelector('#target-review-status')?.textContent).toContain('Target reviewed'),
+  )
   change('reference_axis', 'y')
   change('reference_length', '60')
   change('reference_description', 'Full object including pins')
@@ -200,9 +249,12 @@ it('rejects an outstanding dimensions preview when the orientation draft changes
         })
       : json({ ...record, properties: null }),
   )
-  vi.stubGlobal('fetch', fetch)
+  installFetch(fetch)
   await import('./main')
   await vi.waitFor(() => expect(document.querySelector('#preview-sizing')).not.toBeNull())
+  await vi.waitFor(() =>
+    expect(document.querySelector('#target-review-status')?.textContent).toContain('Target reviewed'),
+  )
   change('reference_axis', 'y')
   change('reference_length', '60')
   change('reference_description', 'Full synthetic Y span')
@@ -244,9 +296,12 @@ it('keeps newer reference edits after save without displaying the old dimensions
     }
     return json({ ...record, properties: null })
   })
-  vi.stubGlobal('fetch', fetch)
+  installFetch(fetch)
   await import('./main')
   await vi.waitFor(() => expect(document.querySelector('#properties')).not.toBeNull())
+  await vi.waitFor(() =>
+    expect(document.querySelector('#target-review-status')?.textContent).toContain('Target reviewed'),
+  )
   change('reference_axis', 'y')
   change('reference_length', '60')
   change('reference_description', 'Full synthetic Y span')
@@ -266,7 +321,7 @@ it('keeps newer reference edits after save without displaying the old dimensions
   expect(document.querySelector<HTMLInputElement>('[name="reference_length"]')!.value).toBe('90')
   expect(document.querySelector('#sizing-preview')?.textContent).not.toContain('20.000')
 })
-it('blocks processing on an orientation draft, preserves it on failure, then saves all angles before process', async () => {
+it('preserves failed orientation drafts and requires new target review after saving all angles', async () => {
   let fail = true
   const fetch = vi.fn(async (url: string, init?: RequestInit) => {
     if (url.endsWith('/orientation'))
@@ -292,7 +347,7 @@ it('blocks processing on an orientation draft, preserves it on failure, then sav
   await vi.waitFor(() => expect(document.body.textContent).toContain('Orientation saved'))
   document.querySelector<HTMLButtonElement>('#process')!.click()
   await vi.waitFor(() =>
-    expect(fetch.mock.calls.some(([url]) => url.endsWith('/process'))).toBe(true),
+    expect(fetch.mock.calls.some(([url]) => url.endsWith('/process'))).toBe(false),
   )
   const orientationCall = fetch.mock.calls.find(([url]) => url.endsWith('/orientation'))!
   expect(JSON.parse(orientationCall[1]!.body as string)).toEqual({ x_deg: 90, y_deg: 0, z_deg: 0 })
@@ -385,8 +440,9 @@ it('preserves newer orientation edits when an earlier PATCH completes and keeps 
   change('z_deg', '10')
   finishSave(json({ ...record, orientation: { x_deg: 90, y_deg: 0, z_deg: 0 } }))
   await vi.waitFor(() =>
-    expect(document.querySelector<HTMLButtonElement>('#process')!.disabled).toBe(false),
+    expect(document.body.textContent).toContain('Newer rotation edits remain unsaved'),
   )
+  expect(document.querySelector<HTMLButtonElement>('#process')!.disabled).toBe(true)
   expect(document.querySelector<HTMLInputElement>('[name="x_deg"]')!.value).toBe('45')
   expect(document.querySelector<HTMLInputElement>('[name="z_deg"]')!.value).toBe('10')
   expect(document.body.textContent).toContain('Newer rotation edits remain unsaved')
@@ -399,7 +455,7 @@ it('preserves newer orientation edits when an earlier PATCH completes and keeps 
   await vi.waitFor(() => expect(document.body.textContent).toContain('Orientation saved. Review'))
   document.querySelector<HTMLButtonElement>('#process')!.click()
   await vi.waitFor(() =>
-    expect(fetch.mock.calls.some(([url]) => url.endsWith('/process'))).toBe(true),
+    expect(fetch.mock.calls.some(([url]) => url.endsWith('/process'))).toBe(false),
   )
   const calls = fetch.mock.calls.filter(([url]) => url.endsWith('/orientation'))
   expect(JSON.parse(calls[1][1]!.body as string)).toEqual({ x_deg: 45, y_deg: 0, z_deg: 10 })
@@ -424,6 +480,12 @@ it.each(['orientation', 'properties'] as const)(
     await start(fetch)
     document.querySelector<HTMLButtonElement>('#refresh')!.click()
     await vi.waitFor(() => expect(finishRefresh).toBeTypeOf('function'))
+    // The job GET remains pending; wait for independent source revalidation before saving.
+    await vi.waitFor(() =>
+      expect(document.querySelector('#target-review-status')?.textContent).toContain(
+        'Target reviewed by you',
+      ),
+    )
     change(kind === 'orientation' ? 'x_deg' : 'x', kind === 'orientation' ? '90' : '44')
     document
       .querySelector<HTMLFormElement>(kind === 'orientation' ? '#orientation' : '#properties')!

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../../frontend/src/api";
 import type { Api } from "../../../frontend/src/api";
 import { mountViewer } from "../../../frontend/src/viewer";
+import type { TargetInventory } from "../../../frontend/src/target-review";
 import { BackendSession } from "./backend-session";
 import type { Job, Suggestions } from "./backend-session";
 import {
@@ -28,9 +29,53 @@ import {
 vi.mock("../../../frontend/src/viewer", () => ({
   mountViewer: vi.fn(() => vi.fn()),
 }));
+vi.mock("../../../frontend/src/target-review", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../frontend/src/target-review")
+  >()),
+  mountTargetGeometry: vi.fn(() => vi.fn()),
+}));
 
 const ID = "0f8fad5b-d9cb-469f-a165-70867728950e";
 const orientation = { x_deg: 0, y_deg: 90, z_deg: 0 };
+const source = "a".repeat(64);
+const context = "d".repeat(64);
+const [body, handle, stray] = ["b", "c", "e"].map((c) => c.repeat(64));
+const triangle = {
+  vertices: [
+    [0, 0, 0],
+    [1, 0, 0],
+    [0, 1, 0],
+  ],
+  faces: [[0, 1, 2]],
+};
+const inventoryFor = (hash = source): TargetInventory => ({
+  source_mesh_sha256: hash,
+  algorithm: "surface-islands-exact-seams-v1",
+  islands: [body, handle, stray].map((id, i) => ({
+    id,
+    label: ["Body", "Handle", "Stray"][i],
+    node_index: 0,
+    face_count: 1,
+    vertex_count: 3,
+    bounds_input_units: [
+      [0, 0, 0],
+      [1, 1, 0],
+    ],
+  })),
+  geometry: { [body]: triangle, [handle]: triangle, [stray]: triangle },
+});
+const review = {
+  source_mesh_sha256: source,
+  island_ids: [body, handle],
+  orientation,
+  review_note: "Body and handle are one object",
+  acknowledge_geometry: true,
+  algorithm: "surface-islands-exact-seams-v1",
+  geometry_context_sha256: context,
+  reviewed_at: "2026-10-24T00:00:00Z",
+  state: "user_reviewed_not_physically_verified" as const,
+};
 function job(changes: Partial<Job> = {}): Job {
   return {
     schema_version: "1.0",
@@ -73,6 +118,29 @@ const saved = job({
     },
   },
 });
+/** Target reviewed and the saved reference bound to its geometry context. */
+const reviewed = job({
+  ...saved,
+  input_revision: 3,
+  geometry_review: review,
+  properties: { ...saved.properties!, geometry_context_sha256: context },
+});
+const $ = <T extends HTMLElement = HTMLElement>(host: HTMLElement, s: string) =>
+  host.querySelector<T>(s)!;
+const islands = (host: HTMLElement) => [
+  ...host.querySelectorAll<HTMLInputElement>("[data-target-island]"),
+];
+const loaded = (state: BackendSession) =>
+  vi.waitFor(() => {
+    expect(state.target.inventory).toBeTruthy();
+    expect(state.target.loading).toBe(false);
+  });
+const generateDisabled = (host: HTMLElement) =>
+  $<HTMLButtonElement>(host, "#live-generate").disabled;
+const type = (el: HTMLElement, value: string) => {
+  (el as HTMLInputElement | HTMLTextAreaElement).value = value;
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+};
 const complete = (draft: Partial<Draft> = {}): Draft => ({
   ...draftFromJob(saved).draft,
   ...draft,
@@ -361,7 +429,9 @@ describe("live workspace DOM regressions", () => {
         throw new ApiError("No suggestions", 404);
       }),
       report: vi.fn(async () => ({ passed: true })),
+      geometry: vi.fn(async () => inventoryFor()),
       previewSizing: vi.fn(async () => ({
+        geometry_context_sha256: context,
         dimensions_m: saved.properties!.dimensions_m,
         sizing_result: {
           orientation,
@@ -376,7 +446,7 @@ describe("live workspace DOM regressions", () => {
     sessions.push(state);
     const host = document.createElement("div");
     document.body.append(host);
-    const context = {
+    const mountContext = {
       session: state,
       brand: "",
       steps: "",
@@ -386,7 +456,7 @@ describe("live workspace DOM regressions", () => {
       onLeave: vi.fn(),
     };
     const mount = () => {
-      const cleanup = mountLiveWorkspace(host, context);
+      const cleanup = mountLiveWorkspace(host, mountContext);
       cleanups.push(cleanup);
       return cleanup;
     };
@@ -431,27 +501,30 @@ describe("live workspace DOM regressions", () => {
     ).toBe(true);
   });
   it("does not mark an own successful save as a stale refreshed draft", async () => {
-    const { host, state } = mounted({
-      save: vi.fn(async () => ({ ...saved, input_revision: 2 })),
-    });
+    const { host, state } = mounted(
+      { save: vi.fn(async () => ({ ...reviewed, input_revision: 4 })) },
+      reviewed,
+    );
+    await loaded(state);
     const mass = host.querySelector<HTMLInputElement>('[name="mass"]')!;
     mass.value = "0.9";
     mass.dispatchEvent(new Event("input", { bubbles: true }));
-    await state.saveProperties(saved.properties!);
+    await state.saveProperties(reviewed.properties!);
     expect(state.dirty).toBe(false);
     expect(
       host.querySelector<HTMLInputElement>('[name="acknowledged"]')!.checked,
     ).toBe(true);
   });
-  it("disables Save for reconstruction failures but permits simulation correction", () => {
+  it("disables Save for reconstruction failures but permits simulation correction", async () => {
     const { host, state } = mounted(
       {},
       {
-        ...saved,
+        ...reviewed,
         status: "failed",
         error: { code: "provider_failed", message: "Failed" },
       },
     );
+    await loaded(state);
     const mass = host.querySelector<HTMLInputElement>('[name="mass"]')!;
     mass.value = "0.9";
     mass.dispatchEvent(new Event("input", { bubbles: true }));
@@ -468,7 +541,8 @@ describe("live workspace DOM regressions", () => {
     );
   });
   it("replaces orientation-only preview with authoritative server scaling", async () => {
-    const { host } = mounted();
+    const { host, state, adapter } = mounted({}, reviewed);
+    await loaded(state);
     host.querySelector<HTMLButtonElement>("#live-orient-preview")!.click();
     host.querySelector<HTMLButtonElement>("#live-preview")!.click();
     await vi.waitFor(() =>
@@ -478,6 +552,14 @@ describe("live workspace DOM regressions", () => {
     );
     expect(host.querySelector("#live-viewer-label")!.textContent).toContain(
       "Server sizing",
+    );
+    // Primary preview is the selected reviewed target, bound to its context.
+    expect(vi.mocked(mountViewer).mock.lastCall?.[6]?.islandIds).toEqual(
+      [body, handle].sort(),
+    );
+    expect(adapter.previewSizing).toHaveBeenCalledWith(
+      ID,
+      expect.objectContaining({ geometry_context_sha256: context }),
     );
   });
   it("shows Gemini notes and questions without changing manual values until explicit Apply", async () => {
@@ -590,5 +672,229 @@ describe("live workspace DOM regressions", () => {
     expect(adapter.get).toHaveBeenCalledTimes(1);
     expect(vi.mocked(mountViewer).mock.calls.length).toBeGreaterThanOrEqual(2);
     expect(process).not.toHaveBeenCalled();
+  });
+});
+
+describe("live target review", () => {
+  const cleanups: (() => void)[] = [];
+  const sessions: BackendSession[] = [];
+  afterEach(() => {
+    cleanups.splice(0).forEach((fn) => fn());
+    sessions.splice(0).forEach((state) => state.dispose());
+    document.body.replaceChildren();
+    vi.clearAllMocks();
+  });
+  function mounted(overrides: Partial<Api> = {}, current: Job = saved) {
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: vi.fn(() => "blob:fixture"),
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: vi.fn(),
+    });
+    const adapter = {
+      get: vi.fn(async () => current),
+      file: vi.fn(async () => new Blob(["fixture"])),
+      cachedSuggestions: vi.fn(async () => {
+        throw new ApiError("No suggestions", 404);
+      }),
+      report: vi.fn(async () => ({ passed: true })),
+      geometry: vi.fn(async () => inventoryFor()),
+      previewSizing: vi.fn(async () => ({
+        geometry_context_sha256: context,
+        dimensions_m: saved.properties!.dimensions_m,
+        sizing_result: {
+          orientation,
+          scale_factors: [0.1, 0.1, 0.1],
+          source_extents_input_units: [1, 2, 3],
+        },
+      })),
+      saveOrientation: vi.fn(),
+      reviewGeometry: vi.fn(),
+      save: vi.fn(async () => reviewed),
+      process: vi.fn(),
+      ...overrides,
+    } as unknown as Api;
+    const state = new BackendSession(adapter);
+    state.job = current;
+    sessions.push(state);
+    const host = document.createElement("div");
+    document.body.append(host);
+    const liveContext = {
+      session: state,
+      brand: "",
+      steps: "",
+      icon: () => "",
+      toast: vi.fn(),
+      onEditPhotos: vi.fn(),
+      onLeave: vi.fn(),
+    };
+    const mount = () => {
+      const cleanup = mountLiveWorkspace(host, liveContext);
+      cleanups.push(cleanup);
+      return cleanup;
+    };
+    const cleanup = mount();
+    return { state, host, adapter, mount, cleanup };
+  }
+
+  it("shows every source island unselected and saves an explicit multipart review", async () => {
+    // Server clears the reference binding when the new review is saved.
+    const afterReview = job({
+      ...saved,
+      input_revision: 2,
+      geometry_review: review,
+    });
+    const reviewGeometry = vi.fn(async () => afterReview);
+    const { host, state, adapter } = mounted({ reviewGeometry });
+    await loaded(state);
+    expect(islands(host).map((box) => [box.value, box.checked])).toEqual([
+      [body, false],
+      [handle, false],
+      [stray, false],
+    ]);
+    expect(generateDisabled(host)).toBe(true);
+    expect($<HTMLButtonElement>(host, "#live-preview").disabled).toBe(true);
+    islands(host)[0].click();
+    islands(host)[1].click();
+    type($(host, "#target-review-note"), "Body and handle are one object");
+    $<HTMLInputElement>(host, "#target-review-ack").click();
+    expect(state.target.draft).toEqual({
+      selectedIslandIds: [body, handle],
+      reviewNote: "Body and handle are one object",
+      acknowledged: true,
+    });
+    $<HTMLButtonElement>(host, "#save-target-review").click();
+    await vi.waitFor(() => expect(state.job).toBe(afterReview));
+    expect(reviewGeometry).toHaveBeenCalledWith(ID, {
+      source_mesh_sha256: source,
+      island_ids: [body, handle],
+      orientation,
+      review_note: "Body and handle are one object",
+      acknowledge_geometry: true,
+      expected_input_revision: 1,
+    });
+    // Reference invalidated: numbers kept, full-extent ack required again.
+    const ack = $<HTMLInputElement>(host, '[name="acknowledged"]');
+    expect(ack.checked).toBe(false);
+    expect($<HTMLInputElement>(host, '[name="mass"]').value).toBe("0.4");
+    expect($<HTMLInputElement>(host, '[name="length"]').value).toBe("300");
+    expect(generateDisabled(host)).toBe(true);
+    expect($(host, "#live-generate-reason").textContent).toMatch(
+      /reference correspondence/,
+    );
+    // Explicit re-acknowledgement and Save bind the reference to the new context.
+    ack.click();
+    $<HTMLButtonElement>(host, "#live-save").click();
+    await vi.waitFor(() => expect(generateDisabled(host)).toBe(false));
+    expect(adapter.save).toHaveBeenCalledWith(
+      ID,
+      expect.objectContaining({ geometry_context_sha256: context }),
+    );
+    expect(adapter.saveOrientation).not.toHaveBeenCalled();
+  });
+
+  it("blocks Generate synchronously on refresh and ignores a late stale inventory", async () => {
+    const { host, state, adapter } = mounted({}, reviewed);
+    await loaded(state);
+    expect(generateDisabled(host)).toBe(false);
+    const mass = $<HTMLInputElement>(host, '[name="mass"]');
+    const pending: ((value: TargetInventory) => void)[] = [];
+    vi.mocked(adapter.geometry).mockImplementation(
+      () => new Promise((resolve) => pending.push(resolve)),
+    );
+    const first = state.refresh();
+    expect(generateDisabled(host)).toBe(true);
+    await first;
+    expect(generateDisabled(host)).toBe(true);
+    const second = state.refresh();
+    await second;
+    pending[0](inventoryFor());
+    await Promise.resolve();
+    expect(state.target.loading).toBe(true);
+    expect(generateDisabled(host)).toBe(true);
+    pending[1](inventoryFor("9".repeat(64)));
+    await vi.waitFor(() => expect(state.target.loading).toBe(false));
+    expect(islands(host).every((box) => !box.checked)).toBe(true);
+    expect(generateDisabled(host)).toBe(true);
+    expect($<HTMLInputElement>(host, '[name="acknowledged"]').checked).toBe(
+      false,
+    );
+    expect(mass.value).toBe("0.4");
+  });
+
+  it("keeps target and numeric drafts across status refresh and remount", async () => {
+    const unreviewed = job({ ...saved, input_revision: 2 });
+    const { host, state, mount, cleanup } = mounted({}, unreviewed);
+    await loaded(state);
+    islands(host)[2].click();
+    const note = $<HTMLTextAreaElement>(host, "#target-review-note");
+    note.focus();
+    type(note, "Only the stray part");
+    type($(host, '[name="mass"]'), "0.91");
+    await state.refresh();
+    await loaded(state);
+    expect($(host, "#target-review-note")).toBe(note);
+    expect(note.value).toBe("Only the stray part");
+    expect(islands(host)[2].checked).toBe(true);
+    expect($<HTMLInputElement>(host, '[name="mass"]').value).toBe("0.91");
+    cleanup();
+    mount();
+    expect(islands(host).map((box) => box.checked)).toEqual([
+      false,
+      false,
+      true,
+    ]);
+    expect($<HTMLTextAreaElement>(host, "#target-review-note").value).toBe(
+      "Only the stray part",
+    );
+    expect($<HTMLInputElement>(host, '[name="mass"]').value).toBe("0.91");
+    expect(generateDisabled(host)).toBe(true);
+  });
+
+  it("saves orientation separately, keeping numbers and requiring a new target review", async () => {
+    const turned = { x_deg: 10, y_deg: 90, z_deg: 0 };
+    const saveOrientation = vi.fn(async () =>
+      job({ ...reviewed, orientation: turned }),
+    );
+    const { host, state } = mounted({ saveOrientation }, reviewed);
+    await loaded(state);
+    const button = $<HTMLButtonElement>(host, "#live-save-orientation");
+    expect(button.disabled).toBe(true);
+    type($(host, '[name="x"]'), "10");
+    type($(host, '[name="mass"]'), "0.9");
+    expect(generateDisabled(host)).toBe(true);
+    expect(button.disabled).toBe(false);
+    expect($<HTMLButtonElement>(host, "#save-target-review").disabled).toBe(
+      true,
+    );
+    button.click();
+    await vi.waitFor(() => expect(state.job?.orientation).toEqual(turned));
+    expect(saveOrientation).toHaveBeenCalledWith(ID, turned);
+    expect($<HTMLInputElement>(host, '[name="x"]').value).toBe("10");
+    expect($<HTMLInputElement>(host, '[name="mass"]').value).toBe("0.9");
+    expect($<HTMLInputElement>(host, '[name="length"]').value).toBe("300");
+    expect(state.targetStatus.status).toBe("stale");
+    expect(generateDisabled(host)).toBe(true);
+    expect($<HTMLButtonElement>(host, "#save-target-review").disabled).toBe(
+      false,
+    );
+  });
+
+  it("keeps old completed downloads accessible without a current review", async () => {
+    const done = job({
+      ...saved,
+      status: "completed",
+      bundle_path: "attempts/a/bundle.zip",
+      validation_path: "attempts/a/report.json",
+    });
+    const { host, state } = mounted({}, done);
+    await loaded(state);
+    expect($(host, "#live-bundle").hidden).toBe(false);
+    expect(
+      host.querySelector('#live-outputs [data-kind="bundle"]'),
+    ).toBeTruthy();
+    expect(generateDisabled(host)).toBe(true);
   });
 });

@@ -61,12 +61,21 @@ def resolve_sizing(extents, properties: AssetProperties, orientation: Orientatio
     return properties, result
 
 
-def preview_sizing(mesh_path: Path, properties: AssetProperties, orientation: Orientation):
+def preview_sizing(
+    mesh_path: Path, properties: AssetProperties, orientation: Orientation, geometry_review=None
+):
     # Lazy import avoids a preparation/sizing import cycle and keeps HTTP setup
     # usable without optional simulation dependencies.
     from photo2sim.assets.prepare import _check_geometry, _load_mesh
 
-    mesh, _ = _load_mesh(mesh_path)
+    if geometry_review is not None and geometry_review.orientation != orientation:
+        raise ValueError("Orientation changed; review target geometry again")
+    if geometry_review is None:
+        mesh, _ = _load_mesh(mesh_path)
+    else:
+        from photo2sim.assets.target import selected_geometry
+
+        mesh = selected_geometry(mesh_path, geometry_review)
     _check_geometry(mesh, mesh_path)
     rotate_mesh(mesh, orientation)
     return resolve_sizing(mesh.extents, properties, orientation)

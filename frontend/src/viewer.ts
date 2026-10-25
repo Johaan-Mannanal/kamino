@@ -1,3 +1,4 @@
+import type { TargetInventory } from './target-review'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
@@ -14,6 +15,7 @@ export function mountViewer(
   path: string,
   orientation: Orientation,
   scaleFactors?: number[],
+  selection?: { inventory: TargetInventory; islandIds: string[] },
 ): () => void {
   let disposed = false
   let renderer: THREE.WebGLRenderer | undefined
@@ -57,23 +59,45 @@ export function mountViewer(
   void (async () => {
     try {
       // Read bytes with application authorization. No bearer token is placed in a URL.
-      const blob = await api.file(id, path)
-      if (disposed) return
-      if (/\.glb$/i.test(path)) {
-        const bytes = await blob.arrayBuffer()
+      if (selection) {
+        const group = new THREE.Group()
+        for (const island of selection.islandIds) {
+          const data = selection.inventory.geometry?.[island]
+          if (!data) throw Error('Selected target preview is unavailable.')
+          const geometry = new THREE.BufferGeometry()
+          geometry.setAttribute(
+            'position',
+            new THREE.Float32BufferAttribute(data.vertices.flat(), 3),
+          )
+          geometry.setIndex(data.faces.flat())
+          geometry.computeVertexNormals()
+          group.add(
+            new THREE.Mesh(
+              geometry,
+              new THREE.MeshStandardMaterial({ color: 0x448dde, side: THREE.DoubleSide }),
+            ),
+          )
+        }
+        model = group
+      } else {
+        const blob = await api.file(id, path)
         if (disposed) return
-        // Only embedded GLB resources are supported; never fetch remote texture URLs.
-        const manager = new THREE.LoadingManager()
-        manager.setURLModifier((url) => {
-          if (!url.startsWith('blob:') && !url.startsWith('data:'))
-            throw new Error('External GLB resources are unsupported. Download the mesh instead.')
-          return url
-        })
-        const gltf = await new GLTFLoader(manager).parseAsync(bytes, '')
-        model = gltf.scene
-      } else if (/\.obj$/i.test(path)) {
-        model = new OBJLoader().parse(await blob.text())
-      } else throw new Error('Preview supports GLB and OBJ. Download this mesh to inspect it.')
+        if (/\.glb$/i.test(path)) {
+          const bytes = await blob.arrayBuffer()
+          if (disposed) return
+          // Only embedded GLB resources are supported; never fetch remote texture URLs.
+          const manager = new THREE.LoadingManager()
+          manager.setURLModifier((url) => {
+            if (!url.startsWith('blob:') && !url.startsWith('data:'))
+              throw new Error('External GLB resources are unsupported. Download the mesh instead.')
+            return url
+          })
+          const gltf = await new GLTFLoader(manager).parseAsync(bytes, '')
+          model = gltf.scene
+        } else if (/\.obj$/i.test(path)) {
+          model = new OBJLoader().parse(await blob.text())
+        } else throw new Error('Preview supports GLB and OBJ. Download this mesh to inspect it.')
+      }
       if (disposed) {
         release(model)
         model = undefined

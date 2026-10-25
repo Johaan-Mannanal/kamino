@@ -9,10 +9,12 @@ Authoritative Python models: `src/photo2sim/contracts.py`. Backend owns this fil
 - `GET /api/jobs/{id}`: returns `JobRecord`; poll while reconstruction runs.
 - `POST /api/jobs/{id}/suggestions`: optional JSON `{object_hint, refresh}`; asks Gemini for unverified `PropertySuggestions` from the saved photos. Same hint/model uses cache unless `refresh: true`. No automatic calls, confirmation, processing or property changes.
 - `GET /api/jobs/{id}/suggestions`: returns saved suggestions, or 404 when absent. Survives server restart.
+- `GET /api/jobs/{id}/geometry?preview=true`: authenticated read-only surface-island inventory. Returns source SHA-256, algorithm, deterministic IDs, input-unit bounds and optional vertices/faces with node transforms baked. New jobs have no selected target.
+- `PATCH /api/jobs/{id}/geometry-review`: saves explicit nonempty `island_ids` (multiple allowed), `source_mesh_sha256`, saved `orientation`, `review_note`, `acknowledge_geometry: true` and `expected_input_revision`. Rejects stale source/orientation/revision with 409, invalid/unknown selections with 422. No reconstruction call.
 - `PATCH /api/jobs/{id}/properties`: JSON `AssetProperties`; accepted at `awaiting_properties`, `completed`, or after a simulation-stage failure. Saving corrected properties returns to `awaiting_properties` and clears current result pointers while retaining prior attempt inputs/files/downloads. Explicit sizing is required for new uploads. Processing starts with a separate explicit request.
-- `POST /api/jobs/{id}/sizing-preview`: authenticated read-only geometry sizing; JSON `{sizing, orientation, dimensions_m?}`. Returns authoritative `dimensions_m` and `sizing_result`, without changing the job or making provider calls. Requires saved reconstruction and simulation dependencies. See [rigid sizing](RIGID_SIZING.md).
+- `POST /api/jobs/{id}/sizing-preview`: authenticated read-only geometry sizing; JSON `{sizing, orientation, dimensions_m?, geometry_context_sha256?}`. Returns authoritative `dimensions_m` and `sizing_result`, without changing the job or making provider calls. Requires saved reconstruction and simulation dependencies. See [rigid sizing](RIGID_SIZING.md).
 - `PATCH /api/jobs/{id}/orientation`: JSON `Orientation`, for example `{"x_deg":90,"y_deg":0,"z_deg":0}`. Saves rotation before dimension scaling; accepted at the same stages as property edits. Returns the updated job. It clears current result pointers and retains old attempt files; it never submits reconstruction or starts processing.
-- `POST /api/jobs/{id}/process`: no body. Requires a reconstructed mesh and saved properties. Returns **202** with status `preparing`, then runs preparation, export and headless validation asynchronously. Duplicate/running/completed requests return **409**. Failed simulation attempts can be retried with this endpoint; existing attempt files are retained. Reconstruction failures require separate diagnosis, not this retry.
+- `POST /api/jobs/{id}/process`: no body. Requires a reconstructed mesh, a current source/selection/orientation-bound `geometry_review`, and saved properties bound to its `geometry_context_sha256`. This also applies to regeneration of historical jobs; missing/stale review or reference correspondence returns 409 without claiming an attempt. Returns **202** with status `preparing`, then runs preparation, export and headless validation asynchronously. Duplicate/running/completed requests return **409**. Failed simulation attempts can be retried with this endpoint; existing attempt files are retained. Reconstruction failures require separate diagnosis, not this retry.
 - `GET /api/jobs/{id}/files/{path}`: job-relative artifact download, e.g. `reconstruction/mesh.glb` or `uploads/00.png`.
 - `/docs` and `/openapi.json`: generated API documentation once the backend starts.
 
@@ -23,9 +25,9 @@ State sequence: `queued → reconstructing → awaiting_properties → preparing
 The provider is configured server-side (`mock` by default). Never accept API keys or arbitrary provider download URLs from the browser. Mock jobs have `synthetic: true`; they produce a known cube and make no claim of photo reconstruction. CORS defaults to `http://localhost:5173` and `http://127.0.0.1:5173`; override exact origins with comma-separated `PHOTO2SIM_CORS_ORIGINS`. Authorization and Content-Type headers are permitted.
 
 `JobRecord` additionally records `sizing_result`, `input_revision`, `attempts`,
-`active_attempt_id` and `legacy_sizing_allowed`. Nullable fields are initially
+`active_attempt_id`, `geometry_review` and `legacy_sizing_allowed`. Nullable fields are initially
 null; orientation defaults to zero. Each new process claim snapshots its full
-properties, orientation, sizing, source mesh hash and provider identity. Its
+properties, orientation, sizing, source mesh hash, target review and provider identity. Its
 `inputs.json` is downloadable and included in the new ZIP. Old results without
 an attempt index are retained as explicitly labeled legacy snapshots on first
 correction; their old files are not rewritten and no historical source hash is
@@ -42,7 +44,32 @@ After processing, `export_path` names `attempts/{attempt}/bundle/scene.xml`, `va
 
 `asset.visual_mesh` is **bundle-relative**, unlike top-level job paths. Once `export_path` exists, its visual mesh's job-relative path is `dirname(export_path) + '/' + asset.visual_mesh`. Reconstruction preview still uses `mesh_path`. Early preparation failures may have `asset` set without an export; do not infer a downloadable mesh from `asset` alone.
 
-Restarting while preparing/validating marks the job `failed` with `processing_interrupted`; retry `/process` to use the cached reconstruction in a new attempt. This never submits another paid generation. Processing errors are sanitized and retain saved artifacts. Unexpected validator exceptions still produce a safe failure report. A failed simulation can be retried directly or have its properties corrected with PATCH first; reconstruction failures cannot use this recovery path. Without the simulation extra, processing fails with `simulation_unavailable` and installation instructions.
+Restarting while preparing/validating marks the job `failed` with `processing_interrupted`; retry `/process` to use the cached reconstruction in a new attempt. This never submits another paid generation. Processing errors are sanitized and retain saved artifacts. Unexpected validator exceptions still produce a safe failure report. A failed simulation can be retried directly or have its properties corrected with PATCH first; reconstruction failures cannot use this recovery path. Without the simulation extra, geometry inspection/review returns 503; a worker that loses the runtime fails with `simulation_unavailable` and installation instructions.
+
+## Rigid target review
+
+Review uses `surface-islands-exact-seams-v1`: edge-connected surface islands with
+exact-coordinate seams matched for connectivity only. Original vertices/triangles
+are preserved; separate transformed scene nodes remain separate. There is no
+largest-island default, physical-object inference, threshold deletion or repair.
+Users may select several surfaces belonging to one object. Disconnected surfaces
+cannot separate a fused reconstruction; that geometry remains unresolved.
+
+The saved review includes `geometry_context_sha256` (source hash + sorted selected
+IDs + saved orientation), `reviewed_at`, algorithm and
+`state: user_reviewed_not_physically_verified`. Selection/source/orientation
+changes require renewed review and explicit reference correspondence. Saving a
+changed review clears the properties' binding and current result pointers; old
+attempt files remain available. Unsaved browser selection/note/acknowledgement
+also blocks generation. Property saves bind the current context; they do not
+silently transfer a body-only measurement onto a different mesh span.
+
+Old records deserialize without review metadata. Their completed downloads remain
+accessible. Their next attempt must explicitly review the source and bind sizing;
+legacy three-axis sizing remains available when previously allowed. Attempt input
+snapshots and exported assets retain selection/review provenance alongside sizing.
+Numerical validation and user geometry review have separate outcomes. Neither
+constitutes a measured physical match.
 
 ## Optional Gemini suggestions
 
@@ -86,7 +113,7 @@ the final axes. For the reviewed cleaned charger, use `x_deg: 90`: raw +Y pins
 become +Z, raw +Z becomes -Y, and raw X stays X. This is a manually selected
 setting for this asset, not a rule applied to all GLBs.
 
-Save properties and orientation, await both responses, then POST `/process`.
+Save orientation, select/review the target, then preview and save properties with the returned `geometry_context_sha256`; await the responses before POST `/process`.
 GET job responses expose the saved orientation. A retry always starts from the
 unchanged raw reconstruction; rotations do not accumulate. Edits during active
 processing return 409. Completed jobs can save a correction and explicitly

@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import trimesh
 from fastapi.testclient import TestClient
-from test_pipeline import seed_job, terminal
+from test_pipeline import bind_fixture_review, seed_job, terminal
 
 from photo2sim.api.app import create_app
 from photo2sim.api.config import Settings
@@ -79,6 +79,7 @@ def test_saved_orientation_survives_restart_and_reaches_export_zip(tmp_path):
         assert r.status_code == 200
     with TestClient(create_app(Settings(data_dir=tmp_path))) as client:
         assert client.get(f"/api/jobs/{job_id}").json()["orientation"]["x_deg"] == 90
+        bind_fixture_review(store, job_id)
         assert client.post(f"/api/jobs/{job_id}/process").status_code == 202
         job = terminal(client, job_id)
         assert job["status"] == "completed", job
@@ -129,6 +130,7 @@ def test_failed_attempt_can_change_orientation_without_losing_artifacts(tmp_path
     job_id, store = seed_job(tmp_path)
     monkeypatch.setattr(pipeline, "validate_export", lambda scene: {"passed": False})
     with TestClient(create_app(Settings(data_dir=tmp_path))) as client:
+        bind_fixture_review(store, job_id)
         assert client.post(f"/api/jobs/{job_id}/process").status_code == 202
         failed = terminal(client, job_id)
         old_scene = store.job_dir(job_id) / failed["export_path"]
@@ -140,6 +142,7 @@ def test_failed_attempt_can_change_orientation_without_losing_artifacts(tmp_path
         assert job["asset"] is None and job["export_path"] is None
         assert job["validation_path"] is None and job["bundle_path"] is None
         assert old_scene.read_bytes() == before
+        bind_fixture_review(store, job_id)
         assert client.post(f"/api/jobs/{job_id}/process").status_code == 202
         second = terminal(client, job_id)
         assert second["asset"]["orientation"]["x_deg"] == 90

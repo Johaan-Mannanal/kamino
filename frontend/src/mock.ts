@@ -18,6 +18,14 @@ export function setMockScenario(value: typeof mockScenario) {
 }
 
 export const mockApi: Api = {
+  async geometry() {
+    throw Error(
+      'Target geometry review requires a live backend with cached source geometry. Standalone mock does not establish a reviewed target.',
+    )
+  },
+  async reviewGeometry() {
+    throw Error('Target review requires the live cached-geometry workflow.')
+  },
   async previewSizing() {
     throw new Error(
       'Sizing calculations require live backend geometry. Standalone mock does not calculate geometry.',

@@ -12,6 +12,13 @@ import type {
   SizingPreview,
   Suggestions,
 } from "../../../frontend/src/types";
+import {
+  initialTargetDraft,
+  targetReviewRequest,
+  targetReviewStatus,
+  type TargetDraft,
+  type TargetReviewState,
+} from "../../../frontend/src/target-review";
 
 export type {
   Job,
@@ -20,6 +27,8 @@ export type {
   Sizing,
   SizingPreview,
   Suggestions,
+  TargetDraft,
+  TargetReviewState,
 };
 export type ReviewedInputs = {
   orientation: Orientation;
@@ -39,6 +48,16 @@ const running = (job: Job | null) =>
   !!job &&
   ["queued", "reconstructing", "preparing", "validating"].includes(job.status);
 const clone = <T>(value: T): T => structuredClone(value);
+const sameOrientation = (a: Orientation, b: Orientation) =>
+  a.x_deg === b.x_deg && a.y_deg === b.y_deg && a.z_deg === b.z_deg;
+const sameIds = (a: string[], b: string[]) =>
+  JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+const emptyTarget = (): TargetReviewState => ({
+  inventory: null,
+  loading: false,
+  error: null,
+  draft: { selectedIslandIds: [], reviewNote: "", acknowledged: false },
+});
 
 /** Owns saved server state only. Forms own their drafts and call markDirty on edits. */
 export class BackendSession {
@@ -49,6 +68,12 @@ export class BackendSession {
   dirty = false;
   suggestionValues: Suggestions | null = null;
   sizingPreview: SizingPreview | null = null;
+  target: TargetReviewState = emptyTarget();
+  referenceEpoch = 0;
+  private targetRequest = 0;
+  private targetDraftVersion = 0;
+  private metadataFailure: Error | null = null;
+  private metadataVersion = 0;
   private generation = 0;
   private revision = 0;
   private draft = 0;
@@ -70,6 +95,51 @@ export class BackendSession {
 
   get attempts() {
     return this.job?.attempts ?? [];
+  }
+  get targetStatus() {
+    if (this.metadataFailure)
+      return {
+        status: "error" as const,
+        referenceReady: false,
+        canProcess: false,
+        reason: `Job status could not be refreshed: ${this.metadataFailure.message} Retry status before generating.`,
+      };
+    return this.job
+      ? targetReviewStatus(this.job, this.target)
+      : {
+          status: "unreviewed" as const,
+          referenceReady: false,
+          canProcess: false,
+          reason: "Open a reconstructed job before target review.",
+        };
+  }
+  private invalidateReference() {
+    this.referenceEpoch++;
+    this.sizingPreview = null;
+    this.previewRequest++;
+  }
+  setTargetDraft(draft: TargetDraft) {
+    const changedSelection = !sameIds(
+      draft.selectedIslandIds,
+      this.target.draft.selectedIslandIds,
+    );
+    this.target.draft = clone(draft);
+    if (changedSelection) {
+      this.target.draft.acknowledged = false;
+      this.invalidateReference();
+    }
+    this.targetDraftVersion++;
+    this.changed();
+  }
+  private reviewedContext(orientation?: Orientation) {
+    const job = this.requireJob();
+    if (orientation && !sameOrientation(orientation, job.orientation))
+      throw new Error(
+        "Save orientation before reviewing target geometry and reference sizing.",
+      );
+    if (this.targetStatus.status !== "reviewed" || !job.geometry_review)
+      throw new Error(this.targetStatus.reason);
+    return job.geometry_review.geometry_context_sha256;
   }
   get polling() {
     return this.timer !== undefined;
@@ -94,8 +164,143 @@ export class BackendSession {
     return this.job;
   }
   private setJob(job: Job) {
+    this.metadataFailure = null;
+    this.metadataVersion++;
+    const previous = this.job;
+    const targetDirty =
+      previous &&
+      targetReviewStatus(previous, {
+        ...this.target,
+        loading: false,
+        error: null,
+      }).status === "unsaved";
+    if (previous?.id !== job.id) {
+      this.targetRequest++;
+      this.targetDraftVersion++;
+      this.target = emptyTarget();
+      this.invalidateReference();
+    } else if (previous.mesh_path !== job.mesh_path) {
+      this.targetRequest++;
+      this.targetDraftVersion++;
+      this.target = {
+        ...emptyTarget(),
+        draft: {
+          selectedIslandIds: [],
+          reviewNote: this.target.draft.reviewNote,
+          acknowledged: false,
+        },
+      };
+      this.invalidateReference();
+    } else if (
+      !sameOrientation(previous.orientation, job.orientation) ||
+      previous.geometry_review?.geometry_context_sha256 !==
+        job.geometry_review?.geometry_context_sha256
+    ) {
+      this.invalidateReference();
+      if (!targetDirty && this.target.inventory)
+        this.target.draft = initialTargetDraft(job, this.target.inventory);
+      else this.target.draft.acknowledged = false;
+      this.targetDraftVersion++;
+    }
     this.job = job;
     this.changed();
+  }
+  async loadGeometry(force = true) {
+    const job = this.job;
+    if (
+      !job?.mesh_path ||
+      (!force &&
+        (this.target.loading || this.target.inventory || this.target.error))
+    )
+      return;
+    const id = job.id,
+      path = job.mesh_path,
+      generation = this.generation;
+    const sequence = ++this.targetRequest,
+      version = this.targetDraftVersion;
+    this.target.loading = true;
+    this.target.error = null;
+    this.sizingPreview = null;
+    this.previewRequest++;
+    this.changed();
+    const current = () =>
+      !this.disposed &&
+      generation === this.generation &&
+      this.job?.id === id &&
+      this.job.mesh_path === path &&
+      sequence === this.targetRequest;
+    try {
+      const inventory = await this.api.geometry(id, true);
+      if (!current()) return;
+      if (
+        !inventory ||
+        !Array.isArray(inventory.islands) ||
+        !inventory.source_mesh_sha256
+      )
+        throw new Error(
+          "Source inventory is unavailable. Reload geometry before review.",
+        );
+      const previous = this.target.inventory;
+      const sourceChanged =
+        !!previous &&
+        previous.source_mesh_sha256 !== inventory.source_mesh_sha256;
+      const staleReview =
+        !!this.job?.geometry_review &&
+        this.job.geometry_review.source_mesh_sha256 !==
+          inventory.source_mesh_sha256;
+      if (sourceChanged || staleReview) this.invalidateReference();
+      if (sourceChanged) {
+        this.target.draft = {
+          selectedIslandIds: [],
+          reviewNote: this.target.draft.reviewNote,
+          acknowledged: false,
+        };
+        this.targetDraftVersion++;
+      } else if (!previous) {
+        const restored = initialTargetDraft(this.requireJob(), inventory);
+        this.target.draft =
+          version === this.targetDraftVersion
+            ? restored
+            : {
+                ...restored,
+                reviewNote: this.target.draft.reviewNote,
+                acknowledged: false,
+              };
+        this.targetDraftVersion++;
+      }
+      this.target.inventory = inventory;
+      return inventory;
+    } catch (error) {
+      if (current())
+        this.target.error =
+          error instanceof Error ? error.message : String(error);
+    } finally {
+      if (current()) {
+        this.target.loading = false;
+        this.changed();
+      }
+    }
+  }
+  async saveTargetReview() {
+    const current = this.requireJob();
+    if (this.target.loading || this.target.error)
+      throw new Error(this.targetStatus.reason);
+    const request = targetReviewRequest(current, this.target);
+    const version = this.targetDraftVersion;
+    return this.mutation(async (generation) => {
+      const saved = await this.api.reviewGeometry(current.id, request);
+      this.check(generation);
+      const unchanged = version === this.targetDraftVersion;
+      this.setJob(saved);
+      if (
+        unchanged &&
+        this.target.inventory &&
+        this.target.inventory.source_mesh_sha256 === request.source_mesh_sha256
+      )
+        this.target.draft = initialTargetDraft(saved, this.target.inventory);
+      this.changed();
+      return saved;
+    });
   }
   private schedule() {
     this.clearTimer();
@@ -129,6 +334,8 @@ export class BackendSession {
     this.clearTimer();
     this.busy = false;
     this.refreshing = false;
+    this.targetRequest++;
+    this.target.loading = false;
     this.changed();
   }
   dispose() {
@@ -184,11 +391,12 @@ export class BackendSession {
     return this.mutation(async (generation) => {
       const job = await this.api.create(files);
       this.check(generation);
-      this.job = job;
+      this.setJob(job);
       this.dirty = false;
       this.suggestionValues = null;
       this.sizingPreview = null;
       this.changed();
+      if (job.mesh_path) void this.loadGeometry(true);
       return job;
     });
   }
@@ -197,12 +405,21 @@ export class BackendSession {
     const retainedDirty = this.job?.id === id && this.dirty;
     this.cancel();
     return this.mutation(async (generation, draft) => {
-      const job = await this.api.get(id);
+      let job: Job;
+      try {
+        job = await this.api.get(id);
+      } catch (error) {
+        this.check(generation);
+        this.metadataFailure =
+          error instanceof Error ? error : new Error(String(error));
+        throw error;
+      }
       this.check(generation);
       if (draft === this.draft) this.dirty = retainedDirty;
       this.suggestionValues = null;
       this.sizingPreview = null;
       this.setJob(job);
+      if (job.mesh_path) void this.loadGeometry(true);
       return job;
     });
   }
@@ -212,12 +429,15 @@ export class BackendSession {
     if (this.busy) return current;
     const generation = this.generation,
       revision = this.revision;
+    const metadataVersion = this.metadataVersion;
     const request = ++this.readRequest;
     this.clearTimer();
     this.refreshing = true;
     this.sizingPreview = null;
     this.previewRequest++;
     this.changed();
+    // Start source revalidation synchronously, before waiting for metadata GET.
+    if (current.mesh_path) void this.loadGeometry(true);
     try {
       const job = await this.api.get(current.id);
       this.check(generation);
@@ -225,8 +445,20 @@ export class BackendSession {
         throw new SessionCancelledError();
       this.error = null;
       this.setJob(job);
+      if (job.mesh_path !== current.mesh_path && job.mesh_path)
+        void this.loadGeometry(true);
       return job;
     } catch (error) {
+      if (
+        generation === this.generation &&
+        request === this.readRequest &&
+        metadataVersion === this.metadataVersion &&
+        !(error instanceof SessionCancelledError)
+      ) {
+        this.metadataFailure =
+          error instanceof Error ? error : new Error(String(error));
+        this.changed();
+      }
       if (
         generation === this.generation &&
         revision === this.revision &&
@@ -249,6 +481,8 @@ export class BackendSession {
   async saveOrientation(orientation: Orientation) {
     const id = this.requireJob().id,
       value = clone(orientation);
+    if (sameOrientation(value, this.requireJob().orientation))
+      return this.requireJob();
     return this.mutation(async (generation) => {
       this.dirty = true;
       const job = await this.api.saveOrientation(id, value);
@@ -260,20 +494,29 @@ export class BackendSession {
   }
 
   async previewSizing(sizing: Sizing, orientation: Orientation) {
+    const context = this.reviewedContext(orientation);
     const id = this.requireJob().id,
       generation = this.generation;
     const draft = this.draft,
       revision = this.revision;
     const request = ++this.previewRequest;
+    const targetVersion = this.targetDraftVersion;
     const result = await this.api.previewSizing(id, {
       sizing: clone(sizing),
       orientation: clone(orientation),
+      geometry_context_sha256: context,
     });
     this.check(generation);
+    if (result.geometry_context_sha256 !== context)
+      throw new Error(
+        "Target context changed; preview the reviewed geometry again.",
+      );
     if (
       draft !== this.draft ||
       revision !== this.revision ||
-      request !== this.previewRequest
+      request !== this.previewRequest ||
+      targetVersion !== this.targetDraftVersion ||
+      this.reviewedContext(orientation) !== context
     )
       throw new SessionCancelledError();
     this.sizingPreview = result;
@@ -282,8 +525,19 @@ export class BackendSession {
   }
 
   async saveProperties(properties: Properties) {
+    const context = this.reviewedContext(
+      properties.sizing?.reviewed_orientation,
+    );
     const id = this.requireJob().id,
       value = clone(properties);
+    if (
+      value.geometry_context_sha256 &&
+      value.geometry_context_sha256 !== context
+    )
+      throw new Error(
+        "Target changed; review and save reference correspondence again.",
+      );
+    value.geometry_context_sha256 = context;
     return this.mutation(async (generation, draft) => {
       this.dirty = true;
       const job = await this.api.save(id, value);
@@ -295,27 +549,37 @@ export class BackendSession {
   }
 
   async saveReviewed(inputs: ReviewedInputs) {
+    const context = this.reviewedContext(inputs.orientation);
     const id = this.requireJob().id,
       values = clone(inputs);
+    const targetVersion = this.targetDraftVersion;
     return this.mutation(async (generation, draft) => {
       this.dirty = true;
       this.sizingPreview = null;
-      const oriented = await this.api.saveOrientation(id, values.orientation);
-      this.check(generation);
-      this.setJob(oriented);
       const preview = await this.api.previewSizing(id, {
         sizing: values.sizing,
         orientation: values.orientation,
+        geometry_context_sha256: context,
       });
       this.check(generation);
+      if (preview.geometry_context_sha256 !== context)
+        throw new Error(
+          "Target context changed; preview the reviewed geometry again.",
+        );
+      if (
+        targetVersion !== this.targetDraftVersion ||
+        this.reviewedContext(values.orientation) !== context
+      )
+        throw new SessionCancelledError();
       const job = await this.api.save(id, {
         dimensions_m: preview.dimensions_m,
         mass_kg: values.mass_kg,
         sliding_friction: values.sliding_friction,
         sizing: values.sizing,
+        geometry_context_sha256: context,
       });
       this.check(generation);
-      if (draft === this.draft) {
+      if (draft === this.draft && targetVersion === this.targetDraftVersion) {
         this.dirty = false;
         this.sizingPreview = preview;
       }
@@ -332,6 +596,8 @@ export class BackendSession {
       );
     if (this.dirty)
       throw new Error("Save your changes before generating a simulation.");
+    if (!this.targetStatus.canProcess)
+      throw new Error(this.targetStatus.reason);
     return this.mutation(async (generation) => {
       const job = await this.api.process(id);
       this.check(generation);

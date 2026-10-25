@@ -67,7 +67,7 @@ it('requires new photo selection after success instead of creating a duplicate p
   await vi.waitFor(() => expect(location.search).toContain(record.id))
   expect(uploadButton().disabled).toBe(true)
   uploadButton().click()
-  expect(fetch).toHaveBeenCalledTimes(1)
+  expect(fetch.mock.calls.filter(([, init]) => init?.method === 'POST')).toHaveLength(1)
   expect(document.querySelector('.selected')).toBeNull()
 })
 
@@ -109,11 +109,19 @@ it('resumes polling the retained running job after a replacement upload fails wh
   uploadButton().click()
   await vi.waitFor(() => expect(rejectUpload).toBeTypeOf('function'))
   await vi.advanceTimersByTimeAsync(1100)
-  expect(fetch.mock.calls.filter(([, init]) => init?.method !== 'POST')).toHaveLength(0)
+  expect(
+    fetch.mock.calls.filter(
+      ([url, init]) => init?.method !== 'POST' && url.endsWith('/api/jobs/' + record.id),
+    ),
+  ).toHaveLength(0)
   rejectUpload(new Response(JSON.stringify({ detail: 'Upload rejected' }), { status: 503 }))
   await vi.waitFor(() => expect(document.body.textContent).toContain('HTTP 503'))
   expect(document.querySelector('.selected')?.textContent).toContain('input.png')
   await vi.advanceTimersByTimeAsync(1100)
-  expect(fetch.mock.calls.filter(([, init]) => init?.method !== 'POST')).toHaveLength(1)
+  expect(
+    fetch.mock.calls.filter(
+      ([url, init]) => init?.method !== 'POST' && url.endsWith('/api/jobs/' + record.id),
+    ),
+  ).toHaveLength(1)
   expect(document.querySelector<HTMLButtonElement>('#properties button')!.disabled).toBe(false)
 })

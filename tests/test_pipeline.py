@@ -24,6 +24,35 @@ from photo2sim.contracts import AssetProperties, JobRecord
 from photo2sim.integrations.reconstruction import MockProvider
 
 
+def bind_fixture_review(store, job_id):
+    """Explicit full-object review for known synthetic fixtures in pipeline tests.
+
+    Dedicated target-review tests exercise real HTTP selection and unreviewed gates.
+    """
+    from photo2sim.assets.target import geometry_context, inspect_target
+    from photo2sim.contracts import TargetReview
+
+    job = store.get(job_id)
+    inventory = inspect_target(store.job_dir(job_id) / job.mesh_path).inventory()
+    ids = [part["id"] for part in inventory["islands"]]
+    context = geometry_context(inventory["source_mesh_sha256"], ids, job.orientation)
+    review = TargetReview(
+        source_mesh_sha256=inventory["source_mesh_sha256"],
+        island_ids=ids,
+        orientation=job.orientation,
+        review_note="Explicit known synthetic fixture target",
+        acknowledge_geometry=True,
+        geometry_context_sha256=context,
+        reviewed_at=datetime.now(UTC),
+    )
+    props = (
+        job.properties.model_copy(update={"geometry_context_sha256": context})
+        if job.properties
+        else None
+    )
+    return store.update(job_id, geometry_review=review, properties=props)
+
+
 def seed_job(tmp_path, *, textured=False, status="awaiting_properties", confirmed=True):
     store = JobStore(tmp_path)
     job_id = uuid4()
@@ -54,6 +83,8 @@ def seed_job(tmp_path, *, textured=False, status="awaiting_properties", confirme
             else None,
         )
     )
+    if confirmed:
+        bind_fixture_review(store, job_id)
     return job_id, store
 
 

@@ -1,0 +1,2861 @@
+.........s...............................................s.............. [ 18%]
+........s.............F..s.........F....s............................FFF [ 36%]
+F....................................................................... [ 54%]
+.....................F.................................................. [ 73%]
+..................................s.......F..............F....EE....EEEE [ 91%]
+EEE..............................                                        [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_composition_preserves_object_properties_and_uses_named_robot_mapping _
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+_ ERROR at setup of test_reset_restores_full_state_and_nonzero_joint_controls _
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+_ ERROR at setup of test_off_table_or_out_of_range_pose_never_published[settings0] _
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+_ ERROR at setup of test_off_table_or_out_of_range_pose_never_published[settings1] _
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+______________ ERROR at setup of test_existing_output_preserved _______________
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+_ ERROR at setup of test_combined_scene_settles_and_resets_reproducibly_after_relocation _
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+____ ERROR at setup of test_validator_does_not_accept_a_disabled_collision ____
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+_ ERROR at setup of test_validator_rejects_scene_that_disagrees_with_recorded_settings[mass-0.1] _
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+_ ERROR at setup of test_validator_rejects_scene_that_disagrees_with_recorded_settings[timestep-0.0002] _
+
+tmp_path_factory = TempPathFactory(_given_basetemp=WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), ...('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def prepared(tmp_path_factory):
+        folder = tmp_path_factory.mktemp("accepted-charger")
+>       with ZipFile(ACCEPTED) as archive:
+             ^^^^^^^^^^^^^^^^^
+
+tests\test_so101_workspace.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <zipfile.ZipFile [closed]>
+file = 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+mode = 'r', compression = 0, allowZip64 = True, compresslevel = None
+strict_timestamps = True, metadata_encoding = None
+
+    def __init__(self, file, mode="r", compression=ZIP_STORED, allowZip64=True,
+                 compresslevel=None, *, strict_timestamps=True, metadata_encoding=None):
+        """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
+        or append 'a'."""
+        if mode not in ('r', 'w', 'x', 'a'):
+            raise ValueError("ZipFile requires mode 'r', 'w', 'x', or 'a'")
+    
+        _check_compression(compression)
+    
+        self._allowZip64 = allowZip64
+        self._didModify = False
+        self.debug = 0  # Level of printing: 0 through 3
+        self.NameToInfo = {}    # Find file info given name
+        self.filelist = []      # List of ZipInfo instances for archive
+        self.compression = compression  # Method of compression
+        self.compresslevel = compresslevel
+        self.mode = mode
+        self.pwd = None
+        self._comment = b''
+        self._strict_timestamps = strict_timestamps
+        self.metadata_encoding = metadata_encoding
+    
+        # Check that we don't try to write with nonconforming codecs
+        if self.metadata_encoding and mode != 'r':
+            raise ValueError(
+                "metadata_encoding is only supported for reading files")
+    
+        # Check if we were passed a file-like object
+        if isinstance(file, os.PathLike):
+            file = os.fspath(file)
+        if isinstance(file, str):
+            # No, it's a filename
+            self._filePassed = 0
+            self.filename = file
+            modeDict = {'r' : 'rb', 'w': 'w+b', 'x': 'x+b', 'a' : 'r+b',
+                        'r+b': 'w+b', 'w+b': 'wb', 'x+b': 'xb'}
+            filemode = modeDict[mode]
+            while True:
+                try:
+>                   self.fp = io.open(file, filemode)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\examples\\simulation\\apple-20w-charger-cleaned\\api-acceptance\\simulation.zip'
+
+..\AppData\Local\Programs\Python\Python312\Lib\zipfile\__init__.py:1336: FileNotFoundError
+================================== FAILURES ===================================
+____________ test_invalid_action_is_not_clipped_or_started[phase4] ____________
+
+prepared = (AssemblyRecord(schema_version='assembly-1.0', name='two_link_hinge', synthetic=True, root_link='base', root_pose=Pose...owsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_invalid_action_is_not_cli4/input'))
+tmp_path = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_invalid_action_is_not_cli4')
+phase = {'duration_s': 1, 'targets_rad': {}}
+
+    @pytest.mark.parametrize(
+        "phase",
+        [
+            {"duration_s": -1, "targets_rad": {"hinge": 0}},
+            {"duration_s": 1000, "targets_rad": {"hinge": 0}},
+            {"duration_s": 1, "targets_rad": {"hinge": 2}},
+            {"duration_s": 1, "targets_rad": {"hinge": float("nan")}},
+            {"duration_s": 1, "targets_rad": {}},
+            {"duration_s": 1, "targets_rad": {"wrong": 0}},
+        ],
+    )
+    def test_invalid_action_is_not_clipped_or_started(prepared, tmp_path, phase):
+        from photo2sim.assemblies.motion import run_motion
+    
+>       scene = scene_for(prepared, tmp_path)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_assembly_motion.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+prepared = (AssemblyRecord(schema_version='assembly-1.0', name='two_link_hinge', synthetic=True, root_link='base', root_pose=Pose...owsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_invalid_action_is_not_cli4/input'))
+tmp_path = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_invalid_action_is_not_cli4')
+
+    def scene_for(prepared, tmp_path):
+        from photo2sim.assemblies.export import export_assembly
+    
+        a, source = prepared
+>       return export_assembly(a, source, tmp_path / "bundle")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_assembly_motion.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+record = AssemblyRecord(schema_version='assembly-1.0', name='two_link_hinge', synthetic=True, root_link='base', root_pose=Pose(...'estimated', note=None), source='user_supplied', note='Reviewed synthetic hinge, not inferred from photos')], notes=[])
+asset_dir = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_invalid_action_is_not_cli4/input')
+output_dir = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_invalid_action_is_not_cli4/bundle')
+collision_mode = 'box', exclude_joint_pairs = False
+
+    def export_assembly(
+        record: AssemblyRecord,
+        asset_dir: Path,
+        output_dir: Path,
+        *,
+        collision_mode: str = "box",
+        exclude_joint_pairs: bool = False,
+    ) -> Path:
+        """Generate a new fixed-root tree; preserve local mesh frames and reviewed inputs."""
+        if collision_mode not in {"box", "convex_mesh"}:
+            raise ValueError("Collision mode must be box or convex_mesh")
+        if not isinstance(exclude_joint_pairs, bool):
+            raise ValueError("exclude_joint_pairs must be boolean")
+        # Revalidate even if a caller has mutated a nested Pydantic object.
+        record = AssemblyRecord.model_validate(record.model_dump())
+        output = Path(output_dir).absolute()
+        if output.exists() or output.is_symlink():
+            raise FileExistsError("Output already exists; choose a new directory")
+        source_root = Path(asset_dir).resolve(strict=True)
+        if source_root.is_relative_to(output.resolve()):
+            raise ValueError("Output cannot contain the source directory")
+        prepared = {link.name: local_mesh(source_root, link.visual_mesh) for link in record.links}
+        assumptions = {
+            "collision": (
+                "per-link axis-aligned bounding boxes"
+                if collision_mode == "box"
+                else "per-link convex hull of visual mesh; concavities filled"
+            ),
+            "collision_mode": collision_mode,
+            "exclude_joint_pairs": exclude_joint_pairs,
+            "excluded_joint_pairs": [[j.parent, j.child] for j in record.joints]
+            if exclude_joint_pairs
+            else [],
+            "inertia": "uniform solid cuboid at each mesh bounding-box centre; approximation",
+            "root": "fixed to world at reviewed root_pose",
+            "gravity_m_s2": [0, 0, -9.81],
+            "timestep_s": TIMESTEP_S,
+            "default_sliding_friction": 0.8,
+            "torsional_friction": 0.005,
+            "rolling_friction": 0.0001,
+            "contact_solref": [0.02, 1],
+            "parent_child_collision": (
+                "Explicitly exclude directly joint-connected pairs, including fixed-root children; other contacts enabled"
+                if exclude_joint_pairs
+                else "MuJoCo native filtering; static-root children may collide with the root"
+            ),
+            "status": "load_checked_only; run articulated motion validation separately",
+            "links": {},
+        }
+        root = ET.Element("mujoco", model=record.name)
+        ET.SubElement(root, "compiler", angle="radian", inertiafromgeom="false", fusestatic="false")
+        ET.SubElement(
+            root, "option", timestep=str(TIMESTEP_S), gravity="0 0 -9.81", integrator="implicitfast"
+        )
+        assets = ET.SubElement(root, "asset")
+        world = ET.SubElement(root, "worldbody")
+        ET.SubElement(world, "light", pos="0 -1 2", dir="0 0 -1")
+        ET.SubElement(
+            world,
+            "geom",
+            name="ground",
+            type="plane",
+            size="0 0 .05",
+            rgba=".3 .33 .36 1",
+            friction=".8 .005 .0001",
+        )
+        if exclude_joint_pairs:
+            contact = ET.SubElement(root, "contact")
+            for j in record.joints:
+                ET.SubElement(contact, "exclude", body1=j.parent, body2=j.child)
+        actuators = ET.SubElement(root, "actuator")
+        links = {link.name: link for link in record.links}
+        children = {name: [] for name in links}
+        for j in record.joints:
+            children[j.parent].append(j)
+    
+        def add_link(name, parent, pose, joint=None):
+            link = links[name]
+            path, mesh = prepared[name]
+            sides = mesh.extents
+            centre = mesh.bounds.mean(axis=0)
+            inertia = link.mass_kg.value * (np.sum(sides**2) - sides**2) / 12
+            friction = link.sliding_friction.value if link.sliding_friction is not None else 0.8
+            assumptions["links"][name] = {
+                "bounds_m": mesh.bounds.tolist(),
+                "mass_kg": link.mass_kg.value,
+                "inertia_kg_m2": inertia.tolist(),
+                "inertia_centre_m": centre.tolist(),
+                "friction": [friction, 0.005, 0.0001],
+                "sliding_friction_defaulted": link.sliding_friction is None,
+                "source_mesh_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+            ET.SubElement(assets, "mesh", name=f"mesh_{name}", file=link.visual_mesh, scale="1 1 1")
+            body = ET.SubElement(
+                parent,
+                "body",
+                name=name,
+                pos=numbers(pose.position_m),
+                quat=numbers(pose.quaternion_wxyz),
+            )
+            ET.SubElement(
+                body,
+                "inertial",
+                pos=numbers(centre),
+                mass=str(link.mass_kg.value),
+                diaginertia=numbers(inertia),
+            )
+            if joint is not None and joint.kind == "revolute":
+                ET.SubElement(
+                    body,
+                    "joint",
+                    name=joint.name,
+                    type="hinge",
+                    pos="0 0 0",
+                    axis=numbers(joint.axis),
+                    limited="true",
+                    range=numbers(joint.limits_rad),
+                    damping=str(joint.damping.value),
+                )
+                ET.SubElement(
+                    actuators,
+                    "position",
+                    name=f"drive_{joint.name}",
+                    joint=joint.name,
+                    kp=str(joint.drive.kp),
+                    ctrllimited="true",
+                    ctrlrange=numbers(joint.limits_rad),
+                    forcelimited="true",
+                    forcerange=numbers([-joint.drive.force_limit_nm, joint.drive.force_limit_nm]),
+                )
+            ET.SubElement(
+                body,
+                "geom",
+                name=f"visual_{name}",
+                type="mesh",
+                mesh=f"mesh_{name}",
+                contype="0",
+                conaffinity="0",
+                group="2",
+                mass="0",
+                rgba=".1 .65 .85 1",
+            )
+            ET.SubElement(
+                body,
+                "geom",
+                name=f"collision_{name}",
+                **(
+                    {"type": "box", "pos": numbers(centre), "size": numbers(sides / 2)}
+                    if collision_mode == "box"
+                    else {"type": "mesh", "mesh": f"mesh_{name}"}
+                ),
+                group="3",
+                friction=numbers([friction, 0.005, 0.0001]),
+                solref=".02 1",
+                rgba=".9 .35 .15 1",
+            )
+            for child in children[name]:
+                add_link(child.child, body, child.origin, child)
+    
+        add_link(record.root_link, world, record.root_pose)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".photo2sim-assembly-", dir=output.parent) as temporary:
+            stage = Path(temporary) / "bundle"
+            (stage / "meshes").mkdir(parents=True)
+            for name, (path, _) in prepared.items():
+                target = stage / links[name].visual_mesh
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(path, target)
+            # Keep the reviewed record and its relative mesh paths intact.
+            (stage / "assembly.json").write_text(
+                record.model_dump_json(indent=2) + "\n", encoding="utf-8"
+            )
+            assumptions["exported_meshes"] = {name: link.visual_mesh for name, link in links.items()}
+            (stage / "simulation.json").write_text(
+                json.dumps(assumptions, indent=2) + "\n", encoding="utf-8"
+            )
+            ET.indent(root)
+            ET.ElementTree(root).write(stage / "scene.xml", encoding="utf-8", xml_declaration=True)
+            write_portable_files(stage, record.model_dump(mode="json"), assumptions)
+            mujoco.MjModel.from_xml_path(str(stage / "scene.xml"))
+            if output.exists() or output.is_symlink():
+                raise FileExistsError("Output appeared during export; nothing overwritten")
+>           stage.rename(output)
+
+src\photo2sim\assemblies\export.py:229: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_invalid_action_is_not_cli4/.photo2sim-assembly-88a2bp3k/bundle')
+target = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_invalid_action_is_not_cli4/bundle')
+
+    def rename(self, target):
+        """
+        Rename this path to the target path.
+    
+        The target path may be absolute or relative. Relative paths are
+        interpreted relative to the current working directory, *not* the
+        directory of the Path object.
+    
+        Returns the new Path instance pointing to the target path.
+        """
+>       os.rename(self, target)
+E       PermissionError: [WinError 5] Access is denied: 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_invalid_action_is_not_cli4\\.photo2sim-assembly-88a2bp3k\\bundle' -> 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_invalid_action_is_not_cli4\\bundle'
+
+..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1363: PermissionError
+_____________________ test_explicit_exclusion_is_recorded _____________________
+
+project = ({'name': 'review_test', 'synthetic': True, 'root_link': 'base', 'parts': [{'id': 'p0', 'mesh': 'part.obj', 'sha256': ..., WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_explicit_exclusion_is_rec0'))
+
+    def test_explicit_exclusion_is_recorded(project):
+        Model, prepare, _ = functions()
+        raw, root = project
+        raw["parts"].append(
+            {
+                **raw["parts"][0],
+                "id": "omitted",
+                "group": None,
+                "excluded_reason": "Fixture duplicate, deliberately omitted",
+            }
+        )
+        output = root / "excluded"
+>       prepare(reviewed(raw), root, output)
+
+tests\test_assembly_review.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+project = ReviewProject(schema_version='assembly-review-1.0', name='review_test', synthetic=True, root_link='base', parts=[Part(...2a207", "source": "user_supplied"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}')
+source = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_explicit_exclusion_is_rec0')
+output_dir = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_explicit_exclusion_is_rec0/excluded')
+
+    def prepare_review(project: ReviewProject, source: Path, output_dir: Path) -> Path:
+        project = ReviewProject.model_validate(project.model_dump())
+        output = Path(output_dir).absolute()
+        if output.exists() or output.is_symlink():
+            raise FileExistsError("Output already exists; choose a new directory")
+        record = assembly_record(project)
+        meshes = checked_parts(project, Path(source))
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".photo2sim-group-", dir=output.parent) as temporary:
+            stage = Path(temporary) / "prepared"
+            (stage / "meshes").mkdir(parents=True)
+            for group in project.groups:
+                to_link = np.linalg.inv(pose_matrix(group.frame))
+                members = []
+                for part in project.parts:
+                    if part.group == group.name:
+                        mesh = meshes[part.id].copy()
+                        mesh.apply_transform(to_link @ pose_matrix(part.pose))
+                        members.append(mesh)
+                trimesh.util.concatenate(members).export(stage / f"meshes/{group.name}.obj")
+            (stage / "assembly.json").write_text(record.model_dump_json(indent=2) + "\n")
+            (stage / "review-project.json").write_text(project.model_dump_json(indent=2) + "\n")
+            audit = {
+                "schema_version": "grouping-1.0",
+                "parts": {p.id: p.model_dump() for p in project.parts},
+                "frames": {g.name: g.frame.model_dump() for g in project.groups},
+                "note": "Source meshes are immutable. Prepared geometry uses inv(group frame) "
+                "@ part pose. Excluded parts are not present in the simulator.",
+            }
+            (stage / "grouping.json").write_text(json.dumps(audit, indent=2) + "\n")
+            if output.exists() or output.is_symlink():
+                raise FileExistsError("Output appeared during preparation")
+>           stage.rename(output)
+
+src\photo2sim\assemblies\review.py:205: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_explicit_exclusion_is_rec0/.photo2sim-group-daq0txcb/prepared')
+target = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_explicit_exclusion_is_rec0/excluded')
+
+    def rename(self, target):
+        """
+        Rename this path to the target path.
+    
+        The target path may be absolute or relative. Relative paths are
+        interpreted relative to the current working directory, *not* the
+        directory of the Path object.
+    
+        Returns the new Path instance pointing to the target path.
+        """
+>       os.rename(self, target)
+E       PermissionError: [WinError 5] Access is denied: 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_explicit_exclusion_is_rec0\\.photo2sim-group-daq0txcb\\prepared' -> 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_explicit_exclusion_is_rec0\\excluded'
+
+..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1363: PermissionError
+_________ test_real_captures_preserve_units_pairing_hashes_and_photos _________
+
+    def test_real_captures_preserve_units_pairing_hashes_and_photos():
+        directories = [ROOT / f"examples/so101/windows/reference-20261024-take{n}" for n in (3, 5)]
+>       pack = build_capture_pack(directories)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_capture_pack.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+directories = [WindowsPath('C:/Users/srija/calhacks-arm/examples/so101/windows/reference-20261024-take3'), WindowsPath('C:/Users/srija/calhacks-arm/examples/so101/windows/reference-20261024-take5')]
+
+    def build_capture_pack(directories):
+        if not 1 <= len(directories) <= 20:
+            raise ValueError("Choose between 1 and 20 captures")
+        captures = []
+        seen = set()
+        for root in map(Path, directories):
+            if root.name in seen:
+                raise ValueError("Duplicate capture id")
+            seen.add(root.name)
+            audit = audit_capture(root)
+            if audit["samples"] > 20_000:
+                raise ValueError("Replay capture exceeds 20000 samples; split the recording")
+            rows = [
+                json.loads(line)
+                for line in (root / "observations.jsonl").read_text().splitlines()
+                if line.strip()
+            ]
+            pairing_path = root / "pairing.json"
+            pairing = json.loads(pairing_path.read_text()) if pairing_path.exists() else {}
+            manifest = root / "integrity.json"
+            integrity = json.loads(manifest.read_text()) if manifest.exists() else {}
+            for name, entry in integrity.items():
+                path = local_file(root, name)
+                if digest(path) != entry["sha256"] or path.stat().st_size != entry["bytes"]:
+                    raise ValueError(f"Evidence integrity mismatch: {name}")
+            images = pairing.get("images", [])
+            if not images:
+                images = [
+                    {"path": name, "view": Path(name).stem, "sha256": entry["sha256"]}
+                    for name, entry in integrity.items()
+                    if name.startswith("photos/") and name.endswith((".png", ".jpg", ".jpeg"))
+                ]
+            photos = []
+            for item in images[:8]:
+>               path = local_file(root, item["path"])
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src\photo2sim\simulation\capture_pack.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('C:/Users/srija/calhacks-arm/examples/so101/windows/reference-20261024-take3')
+name = 'photos/front-oblique.png'
+
+    def local_file(root, name):
+        path = (root / name).resolve()
+        if not path.is_relative_to(root.resolve()) or not path.is_file():
+>           raise ValueError("Evidence path must be a file inside the capture directory")
+E           ValueError: Evidence path must be a file inside the capture directory
+
+src\photo2sim\simulation\capture_pack.py:22: ValueError
+_____________________ test_duplicate_capture_ids_rejected _____________________
+
+    def test_duplicate_capture_ids_rejected():
+        directory = ROOT / "examples/so101/windows/reference-20261024-take5"
+>       with pytest.raises(ValueError, match="Duplicate"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'Duplicate'
+E         Actual message: 'Evidence path must be a file inside the capture directory'
+
+tests\test_capture_pack.py:30: AssertionError
+________________________ test_tampered_photo_rejected _________________________
+
+tmp_path = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_tampered_photo_rejected0')
+
+    def test_tampered_photo_rejected(tmp_path):
+        import shutil
+    
+        source = ROOT / "examples/so101/windows/reference-20261024-take5"
+        target = tmp_path / "take5"
+        shutil.copytree(source, target)
+>       (target / "photos/front.png").write_bytes(b"changed")
+
+tests\test_capture_pack.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_tampered_photo_rejected0/take5/photos/front.png')
+data = b'changed'
+
+    def write_bytes(self, data):
+        """
+        Open the file in bytes mode, write to it, and close the file.
+        """
+        # type-check for the buffer interface before truncating the file
+        view = memoryview(data)
+>       with self.open(mode='wb') as f:
+             ^^^^^^^^^^^^^^^^^^^^
+
+..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1036: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_tampered_photo_rejected0/take5/photos/front.png')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_tampered_photo_rejected0\\take5\\photos\\front.png'
+
+..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1013: FileNotFoundError
+______________ test_pack_preserves_every_timestamped_observation ______________
+
+    def test_pack_preserves_every_timestamped_observation():
+        directory = ROOT / "examples/so101/windows/reference-20261024-take5"
+        rows = [
+            json.loads(line) for line in (directory / "observations.jsonl").read_text().splitlines()
+        ]
+>       capture = build_capture_pack([directory])["captures"][0]
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_capture_pack.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+directories = [WindowsPath('C:/Users/srija/calhacks-arm/examples/so101/windows/reference-20261024-take5')]
+
+    def build_capture_pack(directories):
+        if not 1 <= len(directories) <= 20:
+            raise ValueError("Choose between 1 and 20 captures")
+        captures = []
+        seen = set()
+        for root in map(Path, directories):
+            if root.name in seen:
+                raise ValueError("Duplicate capture id")
+            seen.add(root.name)
+            audit = audit_capture(root)
+            if audit["samples"] > 20_000:
+                raise ValueError("Replay capture exceeds 20000 samples; split the recording")
+            rows = [
+                json.loads(line)
+                for line in (root / "observations.jsonl").read_text().splitlines()
+                if line.strip()
+            ]
+            pairing_path = root / "pairing.json"
+            pairing = json.loads(pairing_path.read_text()) if pairing_path.exists() else {}
+            manifest = root / "integrity.json"
+            integrity = json.loads(manifest.read_text()) if manifest.exists() else {}
+            for name, entry in integrity.items():
+>               path = local_file(root, name)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+
+src\photo2sim\simulation\capture_pack.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+root = WindowsPath('C:/Users/srija/calhacks-arm/examples/so101/windows/reference-20261024-take5')
+name = 'photos/front.png'
+
+    def local_file(root, name):
+        path = (root / name).resolve()
+        if not path.is_relative_to(root.resolve()) or not path.is_file():
+>           raise ValueError("Evidence path must be a file inside the capture directory")
+E           ValueError: Evidence path must be a file inside the capture directory
+
+src\photo2sim\simulation\capture_pack.py:22: ValueError
+____ test_revision_clears_mapping_pointer_but_retains_the_old_mapping_file ____
+
+tmp_path = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_revision_clears_mapping_p0')
+
+    def test_revision_clears_mapping_pointer_but_retains_the_old_mapping_file(tmp_path):
+        with TestClient(create_app(Settings(data_dir=tmp_path))) as client:
+            job = upload(client).json()
+            review = mapping_review(project())
+            saved = client.put(
+                f"/api/assembly-jobs/{job['id']}/mapping-review",
+                json={"expected_revision": 1, "expected_mapping_version": 0, "review": review},
+            ).json()
+            original = client.get(
+                f"/api/assembly-jobs/{job['id']}/files/{saved['mapping_review_path']}"
+            ).content
+>           revised = client.put(
+                f"/api/assembly-jobs/{job['id']}/revisions",
+                json={"expected_revision": 1, "project": project()},
+            )
+
+tests\test_mapping_retention.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.testclient.TestClient object at 0x0000027FF4FB9850>
+url = '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions'
+content = None, data = None, files = None
+json = {'expected_revision': 1, 'project': {'schema_version': 'assembly-review-1.0', 'name': 'two_link_hinge', 'synthetic': True, 'root_link': 'base', ...}}
+params = None, headers = None, cookies = None
+auth = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+follow_redirects = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+timeout = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+extensions = None
+
+    def put(
+        self,
+        url: URL | str,
+        *,
+        content: RequestContent | None = None,
+        data: RequestData | None = None,
+        files: RequestFiles | None = None,
+        json: typing.Any | None = None,
+        params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
+        cookies: CookieTypes | None = None,
+        auth: AuthTypes | UseClientDefault = USE_CLIENT_DEFAULT,
+        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
+        timeout: TimeoutTypes | UseClientDefault = USE_CLIENT_DEFAULT,
+        extensions: RequestExtensions | None = None,
+    ) -> Response:
+        """
+        Send a `PUT` request.
+    
+        **Parameters**: See `httpx.request`.
+        """
+>       return self.request(
+            "PUT",
+            url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            timeout=timeout,
+            extensions=extensions,
+        )
+
+.venv-sim\Lib\site-packages\httpx\_client.py:1181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.testclient.TestClient object at 0x0000027FF4FB9850>
+method = 'PUT'
+url = URL('http://testserver/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions')
+content = None, data = None, files = None
+json = {'expected_revision': 1, 'project': {'schema_version': 'assembly-review-1.0', 'name': 'two_link_hinge', 'synthetic': True, 'root_link': 'base', ...}}
+params = None, headers = None, cookies = None
+auth = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+follow_redirects = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+timeout = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+extensions = None
+
+    def request(  # type: ignore[override]
+        self,
+        method: str,
+        url: httpx._types.URLTypes,
+        *,
+        content: httpx._types.RequestContent | None = None,
+        data: _RequestData | None = None,
+        files: httpx._types.RequestFiles | None = None,
+        json: Any = None,
+        params: httpx._types.QueryParamTypes | None = None,
+        headers: httpx._types.HeaderTypes | None = None,
+        cookies: httpx._types.CookieTypes | None = None,
+        auth: httpx._types.AuthTypes | httpx._client.UseClientDefault = httpx._client.USE_CLIENT_DEFAULT,
+        follow_redirects: bool | httpx._client.UseClientDefault = httpx._client.USE_CLIENT_DEFAULT,
+        timeout: httpx._types.TimeoutTypes | httpx._client.UseClientDefault = httpx._client.USE_CLIENT_DEFAULT,
+        extensions: dict[str, Any] | None = None,
+    ) -> httpx.Response:
+        if timeout is not httpx.USE_CLIENT_DEFAULT:
+            warnings.warn(
+                "You should not use the 'timeout' argument with the TestClient. "
+                "See https://github.com/Kludex/starlette/issues/1108 for more information.",
+                StarletteDeprecationWarning,
+                stacklevel=2,
+            )
+        url = self._merge_url(url)
+>       return super().request(
+            method,
+            url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            timeout=timeout,
+            extensions=extensions,
+        )
+
+.venv-sim\Lib\site-packages\starlette\testclient.py:518: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.testclient.TestClient object at 0x0000027FF4FB9850>
+method = 'PUT'
+url = URL('http://testserver/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions')
+content = None, data = None, files = None
+json = {'expected_revision': 1, 'project': {'schema_version': 'assembly-review-1.0', 'name': 'two_link_hinge', 'synthetic': True, 'root_link': 'base', ...}}
+params = None, headers = None, cookies = None
+auth = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+follow_redirects = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+timeout = <httpx._client.UseClientDefault object at 0x0000027FD0503890>
+extensions = None
+
+    def request(
+        self,
+        method: str,
+        url: URL | str,
+        *,
+        content: RequestContent | None = None,
+        data: RequestData | None = None,
+        files: RequestFiles | None = None,
+        json: typing.Any | None = None,
+        params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
+        cookies: CookieTypes | None = None,
+        auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,
+        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
+        timeout: TimeoutTypes | UseClientDefault = USE_CLIENT_DEFAULT,
+        extensions: RequestExtensions | None = None,
+    ) -> Response:
+        """
+        Build and send a request.
+    
+        Equivalent to:
+    
+        ```python
+        request = client.build_request(...)
+        response = client.send(request, ...)
+        ```
+    
+        See `Client.build_request()`, `Client.send()` and
+        [Merging of configuration][0] for how the various parameters
+        are merged with client-level configuration.
+    
+        [0]: /advanced/clients/#merging-of-configuration
+        """
+        if cookies is not None:
+            message = (
+                "Setting per-request cookies=<...> is being deprecated, because "
+                "the expected behaviour on cookie persistence is ambiguous. Set "
+                "cookies directly on the client instance instead."
+            )
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+    
+        request = self.build_request(
+            method=method,
+            url=url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            timeout=timeout,
+            extensions=extensions,
+        )
+>       return self.send(request, auth=auth, follow_redirects=follow_redirects)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\httpx\_client.py:825: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.testclient.TestClient object at 0x0000027FF4FB9850>
+request = <Request('PUT', 'http://testserver/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions')>
+stream = False, auth = <httpx.Auth object at 0x0000027FF531CF20>
+follow_redirects = True
+
+    def send(
+        self,
+        request: Request,
+        *,
+        stream: bool = False,
+        auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,
+        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
+    ) -> Response:
+        """
+        Send a request.
+    
+        The request is sent as-is, unmodified.
+    
+        Typically you'll want to build one with `Client.build_request()`
+        so that any client-level configuration is merged into the request,
+        but passing an explicit `httpx.Request()` is supported as well.
+    
+        See also: [Request instances][0]
+    
+        [0]: /advanced/clients/#request-instances
+        """
+        if self._state == ClientState.CLOSED:
+            raise RuntimeError("Cannot send a request, as the client has been closed.")
+    
+        self._state = ClientState.OPENED
+        follow_redirects = (
+            self.follow_redirects
+            if isinstance(follow_redirects, UseClientDefault)
+            else follow_redirects
+        )
+    
+        self._set_timeout(request)
+    
+        auth = self._build_request_auth(request, auth)
+    
+        response = self._send_handling_auth(
+            request,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            history=[],
+        )
+        try:
+            if not stream:
+                response.read()
+    
+            return response
+    
+        except BaseException as exc:
+            response.close()
+>           raise exc
+
+.venv-sim\Lib\site-packages\httpx\_client.py:928: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.testclient.TestClient object at 0x0000027FF4FB9850>
+request = <Request('PUT', 'http://testserver/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions')>
+stream = False, auth = <httpx.Auth object at 0x0000027FF531CF20>
+follow_redirects = True
+
+    def send(
+        self,
+        request: Request,
+        *,
+        stream: bool = False,
+        auth: AuthTypes | UseClientDefault | None = USE_CLIENT_DEFAULT,
+        follow_redirects: bool | UseClientDefault = USE_CLIENT_DEFAULT,
+    ) -> Response:
+        """
+        Send a request.
+    
+        The request is sent as-is, unmodified.
+    
+        Typically you'll want to build one with `Client.build_request()`
+        so that any client-level configuration is merged into the request,
+        but passing an explicit `httpx.Request()` is supported as well.
+    
+        See also: [Request instances][0]
+    
+        [0]: /advanced/clients/#request-instances
+        """
+        if self._state == ClientState.CLOSED:
+            raise RuntimeError("Cannot send a request, as the client has been closed.")
+    
+        self._state = ClientState.OPENED
+        follow_redirects = (
+            self.follow_redirects
+            if isinstance(follow_redirects, UseClientDefault)
+            else follow_redirects
+        )
+    
+        self._set_timeout(request)
+    
+        auth = self._build_request_auth(request, auth)
+    
+        response = self._send_handling_auth(
+            request,
+            auth=auth,
+            follow_redirects=follow_redirects,
+            history=[],
+        )
+        try:
+            if not stream:
+>               response.read()
+
+.venv-sim\Lib\site-packages\httpx\_client.py:922: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Response [500 Internal Server Error]>
+
+    def read(self) -> bytes:
+        """
+        Read and return the response content.
+        """
+        if not hasattr(self, "_content"):
+>           self._content = b"".join(self.iter_bytes())
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\httpx\_models.py:881: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Response [500 Internal Server Error]>, chunk_size = None
+
+    def iter_bytes(self, chunk_size: int | None = None) -> typing.Iterator[bytes]:
+        """
+        A byte-iterator over the decoded response content.
+        This allows us to handle gzip, deflate, brotli, and zstd encoded responses.
+        """
+        if hasattr(self, "_content"):
+            chunk_size = len(self._content) if chunk_size is None else chunk_size
+            for i in range(0, len(self._content), max(chunk_size, 1)):
+                yield self._content[i : i + chunk_size]
+        else:
+            decoder = self._get_content_decoder()
+            chunker = ByteChunker(chunk_size=chunk_size)
+            with request_context(request=self._request):
+>               for raw_bytes in self.iter_raw():
+                                 ^^^^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\httpx\_models.py:897: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Response [500 Internal Server Error]>, chunk_size = None
+
+    def iter_raw(self, chunk_size: int | None = None) -> typing.Iterator[bytes]:
+        """
+        A byte-iterator over the raw response content.
+        """
+        if self.is_stream_consumed:
+            raise StreamConsumed()
+        if self.is_closed:
+            raise StreamClosed()
+        if not isinstance(self.stream, SyncByteStream):
+            raise RuntimeError("Attempted to call a sync iterator on an async stream.")
+    
+        self.is_stream_consumed = True
+        self._num_bytes_downloaded = 0
+        chunker = ByteChunker(chunk_size=chunk_size)
+    
+        with request_context(request=self._request):
+>           for raw_stream_bytes in self.stream:
+                                    ^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\httpx\_models.py:951: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <httpx._client.BoundSyncStream object at 0x0000027FF4FABD70>
+
+    def __iter__(self) -> typing.Iterator[bytes]:
+>       for chunk in self._stream:
+                     ^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\httpx\_client.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def iter_body() -> Generator[bytes, None, None]:
+        while True:
+            try:
+                body = portal.call(receive_body)
+            except anyio.EndOfStream:
+                break
+            if request.method != "HEAD" and body:
+                yield body
+>       exit_stack.close()
+
+.venv-sim\Lib\site-packages\starlette\testclient.py:384: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <contextlib.ExitStack object at 0x0000027FF4FAB950>
+
+    def close(self):
+        """Immediately unwind the context stack."""
+>       self.__exit__(None, None, None)
+
+..\AppData\Local\Programs\Python\Python312\Lib\contextlib.py:618: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <contextlib.ExitStack object at 0x0000027FF4FAB950>
+exc_details = (<class 'PermissionError'>, PermissionError(13, 'Access is denied'), <traceback object at 0x0000027FF50D85C0>)
+
+    def __exit__(self, *exc_details):
+        received_exc = exc_details[0] is not None
+    
+        # We manipulate the exception state so it behaves as though
+        # we were actually nesting multiple with statements
+        frame_exc = sys.exc_info()[1]
+        def _fix_exception_context(new_exc, old_exc):
+            # Context may not be correct, so find the end of the chain
+            while 1:
+                exc_context = new_exc.__context__
+                if exc_context is None or exc_context is old_exc:
+                    # Context is already set correctly (see issue 20317)
+                    return
+                if exc_context is frame_exc:
+                    break
+                new_exc = exc_context
+            # Change the end of the chain to point to the exception
+            # we expect it to reference
+            new_exc.__context__ = old_exc
+    
+        # Callbacks are invoked in LIFO order to match the behaviour of
+        # nested context managers
+        suppressed_exc = False
+        pending_raise = False
+        while self._exit_callbacks:
+            is_sync, cb = self._exit_callbacks.pop()
+            assert is_sync
+            try:
+                if cb(*exc_details):
+                    suppressed_exc = True
+                    pending_raise = False
+                    exc_details = (None, None, None)
+            except:
+                new_exc_details = sys.exc_info()
+                # simulate the stack of exceptions by setting the context
+                _fix_exception_context(new_exc_details[1], exc_details[1])
+                pending_raise = True
+                exc_details = new_exc_details
+        if pending_raise:
+            try:
+                # bare "raise exc_details[1]" replaces our carefully
+                # set-up context
+                fixed_ctx = exc_details[1].__context__
+>               raise exc_details[1]
+
+..\AppData\Local\Programs\Python\Python312\Lib\contextlib.py:610: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <contextlib.ExitStack object at 0x0000027FF4FAB950>
+exc_details = (<class 'PermissionError'>, PermissionError(13, 'Access is denied'), <traceback object at 0x0000027FF50D85C0>)
+
+    def __exit__(self, *exc_details):
+        received_exc = exc_details[0] is not None
+    
+        # We manipulate the exception state so it behaves as though
+        # we were actually nesting multiple with statements
+        frame_exc = sys.exc_info()[1]
+        def _fix_exception_context(new_exc, old_exc):
+            # Context may not be correct, so find the end of the chain
+            while 1:
+                exc_context = new_exc.__context__
+                if exc_context is None or exc_context is old_exc:
+                    # Context is already set correctly (see issue 20317)
+                    return
+                if exc_context is frame_exc:
+                    break
+                new_exc = exc_context
+            # Change the end of the chain to point to the exception
+            # we expect it to reference
+            new_exc.__context__ = old_exc
+    
+        # Callbacks are invoked in LIFO order to match the behaviour of
+        # nested context managers
+        suppressed_exc = False
+        pending_raise = False
+        while self._exit_callbacks:
+            is_sync, cb = self._exit_callbacks.pop()
+            assert is_sync
+            try:
+>               if cb(*exc_details):
+                   ^^^^^^^^^^^^^^^^
+
+..\AppData\Local\Programs\Python\Python312\Lib\contextlib.py:595: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+exc_type = None, _ = (None, None)
+
+    def close_app(exc_type: type[BaseException] | None, *_: Any) -> None:
+        if app_task is None:  # pragma: no cover - only if a signal interrupts start_task_soon()
+            portal.call(cancel_scope.cancel)
+            return
+        if not app_task.done():
+            portal.call(cancel_if_incomplete)
+        wait_futures([app_task])
+        self._open_requests.discard(abort)
+        if exc_type is None and self.raise_server_exceptions and (exception := app_task.exception()):
+>           raise exception
+
+.venv-sim\Lib\site-packages\starlette\testclient.py:399: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <anyio.from_thread.BlockingPortal object at 0x0000027FF4F81490>
+func = <function _TestClientTransport.handle_request.<locals>.run_app at 0x0000027FF4F62C00>
+args = (), kwargs = {}
+future = <Future at 0x27ff4f52bd0 state=finished raised PermissionError>
+
+    async def _call_func(
+        self,
+        func: Callable[[Unpack[PosArgsT]], Awaitable[T_Retval] | T_Retval],
+        args: tuple[Unpack[PosArgsT]],
+        kwargs: dict[str, Any],
+        future: Future[T_Retval],
+    ) -> None:
+        event_loop_thread_id = self._event_loop_thread_id
+    
+        def callback(f: Future[T_Retval]) -> None:
+            if f.cancelled():
+                if event_loop_thread_id == get_ident():
+                    scope.cancel("the future was cancelled")
+                elif event_loop_thread_id is not None:
+                    run_sync(
+                        scope.cancel, "the future was cancelled", token=self._token
+                    )
+    
+        try:
+            retval_or_awaitable = func(*args, **kwargs)
+            if isawaitable(retval_or_awaitable):
+                with CancelScope() as scope:
+                    future.add_done_callback(callback)
+>                   retval = await retval_or_awaitable
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\anyio\from_thread.py:265: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    async def run_app() -> None:
+        try:
+            with cancel_scope:
+                async with body_tx:
+>                   await self.app(scope, receive, send)
+
+.venv-sim\Lib\site-packages\starlette\testclient.py:366: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <fastapi.applications.FastAPI object at 0x0000027FF4FB92E0>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function _TestClientTransport.handle_request.<locals>.send at 0x0000027FF4F63CE0>
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if self.root_path:
+            scope["root_path"] = self.root_path
+        if scope["type"] == "lifespan":
+            from fastapi.telemetry._runtime import lifespan
+    
+            await lifespan(
+                config=self._telemetry,
+                app=super().__call__,
+                scope=scope,
+                receive=receive,
+                send=send,
+            )
+            return
+        if (
+            scope["type"] not in ("http", "websocket")
+            or "fastapi.telemetry" in scope
+            or not self._native_telemetry.enabled()
+        ):
+>           await super().__call__(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\applications.py:1194: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <fastapi.applications.FastAPI object at 0x0000027FF4FB92E0>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function _TestClientTransport.handle_request.<locals>.send at 0x0000027FF4F63CE0>
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        scope["app"] = self
+        if self.middleware_stack is None:
+            self.middleware_stack = self.build_middleware_stack()
+>       await self.middleware_stack(scope, receive, send)
+
+.venv-sim\Lib\site-packages\starlette\applications.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.middleware.errors.ServerErrorMiddleware object at 0x0000027FF4FAB2C0>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function _TestClientTransport.handle_request.<locals>.send at 0x0000027FF4F63CE0>
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+    
+        response_started = False
+    
+        async def _send(message: Message) -> None:
+            nonlocal response_started, send
+    
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+    
+        try:
+            await self.app(scope, receive, _send)
+        except Exception as exc:
+            request = Request(scope)
+            if self.debug:
+                # In debug mode, return traceback responses.
+                response = await run_in_threadpool(self.debug_response, request, exc)
+            elif self.handler is None:
+                # Use our default 500 error handler.
+                response = self.error_response(request, exc)
+            else:
+                # Use an installed 500 error handler.
+                if is_async_callable(self.handler):
+                    response = await self.handler(request, exc)  # type: ignore[assignment, arg-type]
+                else:
+                    response = await run_in_threadpool(self.handler, request, exc)  # type: ignore[arg-type]
+    
+            if not response_started:
+                await response(scope, receive, send)
+    
+            # We always continue to raise the exception.
+            # This allows servers to log the error, or allows test clients
+            # to optionally raise the error within the test case.
+>           raise exc
+
+.venv-sim\Lib\site-packages\starlette\middleware\errors.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.middleware.errors.ServerErrorMiddleware object at 0x0000027FF4FAB2C0>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function _TestClientTransport.handle_request.<locals>.send at 0x0000027FF4F63CE0>
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+    
+        response_started = False
+    
+        async def _send(message: Message) -> None:
+            nonlocal response_started, send
+    
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+    
+        try:
+>           await self.app(scope, receive, _send)
+
+.venv-sim\Lib\site-packages\starlette\middleware\errors.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <fastapi.telemetry._asgi.ExceptionTelemetryMiddleware object at 0x0000027FF4FAB260>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function ServerErrorMiddleware.__call__.<locals>._send at 0x0000027FF4F63880>
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        try:
+>           await self.app(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\telemetry\_asgi.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.middleware.cors.CORSMiddleware object at 0x0000027FF4FAB230>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function ServerErrorMiddleware.__call__.<locals>._send at 0x0000027FF4F63880>
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":  # pragma: no cover
+            await self.app(scope, receive, send)
+            return
+    
+        method = scope["method"]
+        headers = Headers(scope=scope)
+        origin = headers.get("origin")
+    
+        if origin is not None and method == "OPTIONS" and "access-control-request-method" in headers:
+            response = self.preflight_response(request_headers=headers)
+            await response(scope, receive, send)
+            return
+    
+>       await self.simple_response(scope, receive, send, request_headers=headers)
+
+.venv-sim\Lib\site-packages\starlette\middleware\cors.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.middleware.cors.CORSMiddleware object at 0x0000027FF4FAB230>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x0000027FF...'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '3837', 'content-type': 'application/json'}))
+request_headers = Headers({'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '3837', 'content-type': 'application/json'})
+
+    async def simple_response(self, scope: Scope, receive: Receive, send: Send, request_headers: Headers) -> None:
+        send = functools.partial(self.send, send=send, request_headers=request_headers)
+>       await self.app(scope, receive, send)
+
+.venv-sim\Lib\site-packages\starlette\middleware\cors.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <starlette.middleware.exceptions.ExceptionMiddleware object at 0x0000027FF4FAB1D0>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x0000027FF...'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '3837', 'content-type': 'application/json'}))
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
+    
+        scope["starlette.exception_handlers"] = (
+            self._exception_handlers,
+            self._status_handlers,
+        )
+    
+        conn: Request | WebSocket
+        if scope["type"] == "http":
+            conn = Request(scope, receive, send)
+        else:
+            conn = WebSocket(scope, receive, send)
+    
+>       await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+
+.venv-sim\Lib\site-packages\starlette\middleware\exceptions.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x0000027FF...'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '3837', 'content-type': 'application/json'}))
+
+    async def wrapped_app(scope: Scope, receive: Receive, send: Send) -> None:
+        response_started = False
+    
+        async def sender(message: Message) -> None:
+            nonlocal response_started
+    
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+    
+        try:
+            await app(scope, receive, sender)
+        except Exception as exc:
+            handler = None
+    
+            if isinstance(exc, HTTPException):
+                handler = status_handlers.get(exc.status_code)
+    
+            if handler is None:
+                handler = _lookup_exception_handler(exception_handlers, exc)
+    
+            if handler is None:
+>               raise exc
+
+.venv-sim\Lib\site-packages\starlette\_exception_handler.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = functools.partial(<bound method CORSMiddleware.send of <starlette.middleware.cors.CORSMiddleware object at 0x0000027FF...'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '3837', 'content-type': 'application/json'}))
+
+    async def wrapped_app(scope: Scope, receive: Receive, send: Send) -> None:
+        response_started = False
+    
+        async def sender(message: Message) -> None:
+            nonlocal response_started
+    
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+    
+        try:
+>           await app(scope, receive, sender)
+
+.venv-sim\Lib\site-packages\starlette\_exception_handler.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <fastapi.middleware.asyncexitstack.AsyncExitStackMiddleware object at 0x0000027FF4FAB1A0>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        async with AsyncExitStack() as stack:
+            scope[self.context_name] = stack
+>           await self.app(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <fastapi.routing.APIRouter object at 0x0000027FF4FBA600>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """
+        The main entry point to the Router class.
+        """
+>       await self.middleware_stack(scope, receive, send)
+
+.venv-sim\Lib\site-packages\starlette\routing.py:678: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <fastapi.routing.APIRouter object at 0x0000027FF4FBA600>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def app(self, scope: Scope, receive: Receive, send: Send) -> None:
+        assert scope["type"] in ("http", "websocket", "lifespan")
+    
+        if "router" not in scope:
+            scope["router"] = self
+    
+        if scope["type"] == "lifespan":
+            await self.lifespan(scope, receive, send)
+            return
+    
+        partial: tuple[BaseRoute, Scope] | None = None
+        for route in self.routes:
+            match, child_scope = route.matches(scope)
+            if match == Match.FULL:
+                scope.update(child_scope)
+                _route_selected(
+                    scope=scope,
+                    path=getattr(route, "path_format", None),
+                    mount=isinstance(route, routing.Mount),
+                )
+>               await route.handle(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:2811: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = _IncludedRouter(original_router=<fastapi.routing.APIRouter object at 0x0000027FF4FBA030>, include_context=_RouterInclu...lse)], _effective_candidates_version=7, _effective_low_priority_routes=[], _effective_low_priority_routes_version=None)
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def handle(self, scope: Scope, receive: Receive, send: Send) -> None:
+        _get_fastapi_scope(scope)[_FASTAPI_INCLUDED_ROUTER_KEY] = self
+>       await self.original_router.handle(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:1839: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <fastapi.routing.APIRouter object at 0x0000027FF4FBA030>
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def handle(self, scope: Scope, receive: Receive, send: Send) -> None:
+        included_router = _get_scope_included_router(scope)
+        if (
+            isinstance(included_router, _IncludedRouter)
+            and included_router.original_router is self
+        ):
+>           await included_router._handle_selected(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:2894: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = _IncludedRouter(original_router=<fastapi.routing.APIRouter object at 0x0000027FF4FBA030>, include_context=_RouterInclu...lse)], _effective_candidates_version=7, _effective_low_priority_routes=[], _effective_low_priority_routes_version=None)
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def _handle_selected(
+        self, scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        match, child_scope, route, effective_context = self._match(scope)
+        if match == Match.NONE or route is None:
+            await self.original_router.default(scope, receive, send)
+            return
+        scope.update(child_scope)
+        if isinstance(route, _IncludedRouter):
+            await route.handle(scope, receive, send)
+            return
+        if effective_context is not None:
+            _route_selected(
+                scope=scope,
+                path=getattr(effective_context.starlette_route, "path_format", None)
+                or effective_context.path_format,
+                mount=isinstance(route, routing.Mount),
+            )
+            _get_fastapi_scope(scope)[_FASTAPI_EFFECTIVE_ROUTE_CONTEXT_KEY] = (
+                effective_context
+            )
+            original_route = effective_context.original_route
+            if isinstance(original_route, APIRoute):
+                scope["route"] = original_route
+>               await original_route.handle(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:1865: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = APIRoute(path='/api/assembly-jobs/{job_id}/revisions', name='save', methods=['PUT'])
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def handle(self, scope: Scope, receive: Receive, send: Send) -> None:
+        effective_context = _get_scope_effective_route_context(scope)
+        if effective_context is not None and effective_context.original_route is self:
+            methods = effective_context.methods
+            if methods and scope["method"] not in methods:
+                headers = {"Allow": ", ".join(methods)}
+                if "app" in scope:
+                    raise HTTPException(status_code=405, headers=headers)
+                response = PlainTextResponse(
+                    "Method Not Allowed", status_code=405, headers=headers
+                )
+                await response(scope, receive, send)
+                return
+            assert effective_context.app is not None
+>           await effective_context.app(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:1328: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def app(scope: Scope, receive: Receive, send: Send) -> None:
+        request = Request(scope, receive, send)
+    
+        async def app(scope: Scope, receive: Receive, send: Send) -> None:
+            # Starts customization
+            response_awaited = False
+            async with AsyncExitStack() as request_stack:
+                scope["fastapi_inner_astack"] = request_stack
+                async with AsyncExitStack() as function_stack:
+                    scope["fastapi_function_astack"] = function_stack
+                    response = await f(request)
+                await response(scope, receive, send)
+                # Continues customization
+                response_awaited = True
+            if not response_awaited:
+                raise FastAPIError(
+                    "Response not awaited. There's a high chance that the "
+                    "application code is raising an exception and a dependency with yield "
+                    "has a block with a bare except, or a block with except Exception, "
+                    "and is not raising the exception again. Read more about it in the "
+                    "docs: https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/#dependencies-with-yield-and-except"
+                )
+    
+        # Same as in Starlette
+>       await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def wrapped_app(scope: Scope, receive: Receive, send: Send) -> None:
+        response_started = False
+    
+        async def sender(message: Message) -> None:
+            nonlocal response_started
+    
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+    
+        try:
+            await app(scope, receive, sender)
+        except Exception as exc:
+            handler = None
+    
+            if isinstance(exc, HTTPException):
+                handler = status_handlers.get(exc.status_code)
+    
+            if handler is None:
+                handler = _lookup_exception_handler(exception_handlers, exc)
+    
+            if handler is None:
+>               raise exc
+
+.venv-sim\Lib\site-packages\starlette\_exception_handler.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC720>
+
+    async def wrapped_app(scope: Scope, receive: Receive, send: Send) -> None:
+        response_started = False
+    
+        async def sender(message: Message) -> None:
+            nonlocal response_started
+    
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+    
+        try:
+>           await app(scope, receive, sender)
+
+.venv-sim\Lib\site-packages\starlette\_exception_handler.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+scope = {'type': 'http', 'http_version': '1.1', 'method': 'PUT', 'path': '/api/assembly-jobs/102ce0ea-bf5e-44da-beb4-71a050238487/revisions', ...}
+receive = <function _TestClientTransport.handle_request.<locals>.receive at 0x0000027FF4F63A60>
+send = <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x0000027FF4FFC9A0>
+
+    async def app(scope: Scope, receive: Receive, send: Send) -> None:
+        # Starts customization
+        response_awaited = False
+        async with AsyncExitStack() as request_stack:
+            scope["fastapi_inner_astack"] = request_stack
+            async with AsyncExitStack() as function_stack:
+                scope["fastapi_function_astack"] = function_stack
+>               response = await f(request)
+                           ^^^^^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+request = <starlette.requests.Request object at 0x0000027FF4F51610>
+
+    async def app(request: Request) -> Response:
+        telemetry_data = get_telemetry_data()
+        if telemetry_data is not None:
+            telemetry_data.request = request
+        response: Response | None = None
+        file_stack = request.scope.get("fastapi_middleware_astack")
+        assert isinstance(file_stack, AsyncExitStack), (
+            "fastapi_middleware_astack not found in request scope"
+        )
+    
+        # Extract endpoint context for error messages
+        endpoint_ctx = (
+            _extract_endpoint_context(dependant.call)
+            if dependant.call
+            else EndpointContext()
+        )
+    
+        if dependant.path:
+            # For mounted sub-apps, include the mount path prefix
+            mount_path = request.scope.get("root_path", "").rstrip("/")
+            endpoint_ctx["path"] = f"{request.method} {mount_path}{dependant.path}"
+    
+        # Read body and auto-close files
+        try:
+            body: Any = Undefined
+            if body_field:
+                if is_body_form:
+                    body = await request.form()
+                    file_stack.push_async_callback(body.close)
+                else:
+                    body_bytes = await request.body()
+                    if body_bytes:
+                        json_body: Any = Undefined
+                        content_type_value = request.headers.get("content-type")
+                        if not content_type_value:
+                            if not actual_strict_content_type:
+                                json_body = await request.json()
+                        else:
+                            message = email.message.Message()
+                            message["content-type"] = content_type_value
+                            if message.get_content_maintype() == "application":
+                                subtype = message.get_content_subtype()
+                                if subtype == "json" or subtype.endswith("+json"):
+                                    json_body = await request.json()
+                        if json_body is not Undefined:
+                            body = json_body
+                        else:
+                            body = body_bytes
+        except json.JSONDecodeError as e:
+            validation_error = RequestValidationError(
+                [
+                    {
+                        "type": "json_invalid",
+                        "loc": ("body", e.pos),
+                        "msg": "JSON decode error",
+                        "input": {},
+                        "ctx": {"error": e.msg},
+                    }
+                ],
+                body=e.doc,
+                endpoint_ctx=endpoint_ctx,
+            )
+            _validation_failed(validation_error)
+            raise validation_error from e
+        except HTTPException:
+            # If a middleware raises an HTTPException, it should be raised again
+            raise
+        except Exception as e:
+            http_error = HTTPException(
+                status_code=400, detail="There was an error parsing the body"
+            )
+            raise http_error from e
+    
+        if telemetry_data is not None:
+            telemetry_data.body = None if body is Undefined else body
+    
+        # Solve dependencies and run path operation function, auto-closing dependencies
+        errors: list[Any] = []
+        async_exit_stack = request.scope.get("fastapi_inner_astack")
+        assert isinstance(async_exit_stack, AsyncExitStack), (
+            "fastapi_inner_astack not found in request scope"
+        )
+        with _operation(name="dependencies", function=dependant.call):
+            solved_result = await solve_dependencies(
+                request=request,
+                dependant=dependant,
+                body=body,
+                dependency_overrides_provider=dependency_overrides_provider,
+                async_exit_stack=async_exit_stack,
+                embed_body_fields=embed_body_fields,
+            )
+            if telemetry_data is not None:
+                telemetry_data.values = solved_result.values
+                telemetry_data.errors = solved_result.errors
+        errors = solved_result.errors
+        assert dependant.call  # For types
+        if not errors:
+            # Shared serializer for stream items (JSONL and SSE).
+            # Validates against stream_item_field when set, then
+            # serializes to JSON bytes.
+            def _serialize_data(data: Any) -> bytes:
+                if stream_item_field:
+                    value, errors_ = stream_item_field.validate(
+                        data, {}, loc=("response",)
+                    )
+                    if errors_:
+                        ctx = endpoint_ctx or EndpointContext()
+                        raise ResponseValidationError(
+                            errors=errors_,
+                            body=data,
+                            endpoint_ctx=ctx,
+                        )
+                    return stream_item_field.serialize_json(
+                        value,
+                        include=response_model_include,
+                        exclude=response_model_exclude,
+                        by_alias=response_model_by_alias,
+                        exclude_unset=response_model_exclude_unset,
+                        exclude_defaults=response_model_exclude_defaults,
+                        exclude_none=response_model_exclude_none,
+                    )
+                else:
+                    data = jsonable_encoder(data)
+                    return json.dumps(_normalize_non_finite_floats(data)).encode(
+                        "utf-8"
+                    )
+    
+            if is_sse_stream:
+                # Generator endpoint: stream as Server-Sent Events
+                gen = dependant.call(**solved_result.values)
+    
+                def _serialize_sse_item(item: Any) -> bytes:
+                    if isinstance(item, ServerSentEvent):
+                        # User controls the event structure.
+                        # Serialize the data payload if present.
+                        # For ServerSentEvent items we skip stream_item_field
+                        # validation (the user may mix types intentionally).
+                        if item.raw_data is not None:
+                            data_str: str | None = item.raw_data
+                        elif item.data is not None:
+                            if hasattr(item.data, "model_dump_json"):
+                                data_str = item.data.model_dump_json()
+                            else:
+                                data_str = json.dumps(
+                                    _normalize_non_finite_floats(
+                                        jsonable_encoder(item.data)
+                                    )
+                                )
+                        else:
+                            data_str = None
+                        return format_sse_event(
+                            data_str=data_str,
+                            event=item.event,
+                            id=item.id,
+                            retry=item.retry,
+                            comment=item.comment,
+                        )
+                    else:
+                        # Plain object: validate + serialize via
+                        # stream_item_field (if set) and wrap in data field
+                        return format_sse_event(
+                            data_str=_serialize_data(item).decode("utf-8")
+                        )
+    
+                if _is_async_gen_callable(dependant.call):
+                    sse_aiter: AsyncIterator[Any] = gen.__aiter__()
+                else:
+                    sse_aiter = iterate_in_threadpool(gen)
+    
+                @asynccontextmanager
+                async def _sse_producer_cm() -> AsyncIterator[
+                    ObjectReceiveStream[bytes]
+                ]:
+                    # Use a memory stream to decouple generator iteration
+                    # from the keepalive timer. A producer task pulls items
+                    # from the generator independently, so
+                    # `anyio.fail_after` never wraps the generator's
+                    # `__anext__` directly - avoiding CancelledError that
+                    # would finalize the generator and also working for sync
+                    # generators running in a thread pool.
+                    #
+                    # This context manager is entered on the request-scoped
+                    # AsyncExitStack so its __aexit__ (which cancels the
+                    # task group) is called by the exit stack after the
+                    # streaming response completes � not by async generator
+                    # finalization via GeneratorExit.
+                    # Ref: https://peps.python.org/pep-0789/
+                    send_stream, receive_stream = anyio.create_memory_object_stream[
+                        bytes
+                    ](max_buffer_size=1)
+    
+                    async def _producer() -> None:
+                        async with send_stream:
+                            async for raw_item in sse_aiter:
+                                await send_stream.send(_serialize_sse_item(raw_item))
+    
+                    send_keepalive, receive_keepalive = (
+                        anyio.create_memory_object_stream[bytes](max_buffer_size=1)
+                    )
+    
+                    async def _keepalive_inserter() -> None:
+                        """Read from the producer and forward to the output,
+                        inserting keepalive comments on timeout."""
+                        async with send_keepalive, receive_stream:
+                            try:
+                                while True:
+                                    try:
+                                        with anyio.fail_after(_PING_INTERVAL):
+                                            data = await receive_stream.receive()
+                                        await send_keepalive.send(data)
+                                    except TimeoutError:
+                                        await send_keepalive.send(KEEPALIVE_COMMENT)
+                            except anyio.EndOfStream:
+                                pass
+    
+                    async with anyio.create_task_group() as tg:
+                        tg.start_soon(_producer)
+                        tg.start_soon(_keepalive_inserter)
+                        yield receive_keepalive
+                        tg.cancel_scope.cancel()
+    
+                # Enter the SSE context manager on the request-scoped
+                # exit stack. The stack outlives the streaming response,
+                # so __aexit__ runs via proper structured teardown, not
+                # via GeneratorExit thrown into an async generator.
+                sse_receive_stream = await async_exit_stack.enter_async_context(
+                    _sse_producer_cm()
+                )
+                # Ensure the receive stream is closed when the exit stack
+                # unwinds, preventing ResourceWarning from __del__.
+                async_exit_stack.push_async_callback(sse_receive_stream.aclose)
+    
+                async def _sse_with_checkpoints(
+                    stream: ObjectReceiveStream[bytes],
+                ) -> AsyncIterator[bytes]:
+                    async for data in stream:
+                        yield data
+                        # Guarantee a checkpoint so cancellation can be
+                        # delivered even when the producer is faster than
+                        # the consumer and receive() never suspends.
+                        await anyio.sleep(0)
+    
+                sse_stream_content: AsyncIterator[bytes] | Iterator[bytes] = (
+                    _sse_with_checkpoints(sse_receive_stream)
+                )
+    
+                response_args = _build_response_args(
+                    status_code=status_code, solved_result=solved_result
+                )
+                response = StreamingResponse(
+                    sse_stream_content,
+                    media_type="text/event-stream",
+                    **response_args,
+                )
+                response.headers["Cache-Control"] = "no-cache"
+                # For Nginx proxies to not buffer server sent events
+                response.headers["X-Accel-Buffering"] = "no"
+                response.headers.raw.extend(solved_result.response.headers.raw)
+            elif is_json_stream:
+                # Generator endpoint: stream as JSONL
+                gen = dependant.call(**solved_result.values)
+    
+                def _serialize_item(item: Any) -> bytes:
+                    return _serialize_data(item) + b"\n"
+    
+                if _is_async_gen_callable(dependant.call):
+    
+                    async def _async_stream_jsonl() -> AsyncIterator[bytes]:
+                        async for item in gen:
+                            yield _serialize_item(item)
+                            # To allow for cancellation to trigger
+                            # Ref: https://github.com/fastapi/fastapi/issues/14680
+                            await anyio.sleep(0)
+    
+                    jsonl_stream_content: AsyncIterator[bytes] | Iterator[bytes] = (
+                        _async_stream_jsonl()
+                    )
+                else:
+    
+                    def _sync_stream_jsonl() -> Iterator[bytes]:
+                        for item in gen:  # ty: ignore[not-iterable]
+                            yield _serialize_item(item)
+    
+                    jsonl_stream_content = _sync_stream_jsonl()
+    
+                response_args = _build_response_args(
+                    status_code=status_code, solved_result=solved_result
+                )
+                response = StreamingResponse(
+                    jsonl_stream_content,
+                    media_type="application/jsonl",
+                    **response_args,
+                )
+                response.headers.raw.extend(solved_result.response.headers.raw)
+            elif _is_async_gen_callable(dependant.call) or _is_gen_callable(
+                dependant.call
+            ):
+                # Raw streaming with explicit response_class (e.g. StreamingResponse)
+                gen = dependant.call(**solved_result.values)
+                if _is_async_gen_callable(dependant.call):
+    
+                    async def _async_stream_raw(
+                        async_gen: AsyncIterator[Any],
+                    ) -> AsyncIterator[Any]:
+                        async for chunk in async_gen:
+                            yield chunk
+                            # To allow for cancellation to trigger
+                            # Ref: https://github.com/fastapi/fastapi/issues/14680
+                            await anyio.sleep(0)
+    
+                    gen = _async_stream_raw(gen)
+                response_args = _build_response_args(
+                    status_code=status_code, solved_result=solved_result
+                )
+                response = actual_response_class(content=gen, **response_args)
+                response.headers.raw.extend(solved_result.response.headers.raw)
+            else:
+>               raw_response = await run_endpoint_function(
+                    dependant=dependant,
+                    values=solved_result.values,
+                    is_coroutine=is_coroutine,
+                )
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:745: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+dependant = Dependant(path_params=[ModelField(field_info=Path(PydanticUndefined), name='job_id', mode='validation', config=None)],..._scopes=None, parent_oauth_scopes=None, use_cache=True, path='/api/assembly-jobs/{job_id}/revisions', scope='function')
+values = {'job_id': UUID('102ce0ea-bf5e-44da-beb4-71a050238487'), 'body': RevisionRequest(expected_revision=1, project=ReviewPr...fd3be6e", "source": "estimated"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}'))}
+is_coroutine = False
+
+    async def run_endpoint_function(
+        *, dependant: Dependant, values: dict[str, Any], is_coroutine: bool
+    ) -> Any:
+        # Only called by get_request_handler. Has been split into its own function to
+        # facilitate profiling endpoints, since inner functions are harder to profile.
+        assert dependant.call is not None, "dependant.call must be a function"
+    
+        if is_coroutine:
+            with _operation(name="endpoint", function=dependant.call):
+                return await dependant.call(**values)
+        else:
+>           return await run_in_threadpool(
+                _run_sync_endpoint, function=dependant.call, arguments=values
+            )
+
+.venv-sim\Lib\site-packages\fastapi\routing.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = functools.partial(<function _run_sync_endpoint at 0x0000027FD0CE2160>, function=<function assembly_router.<locals>.sav...d3be6e", "source": "estimated"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}'))})
+args = ()
+kwargs = {'function': <function assembly_router.<locals>.save at 0x0000027FF530AE80>, 'arguments': {'job_id': UUID('102ce0ea-bf...d3be6e", "source": "estimated"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}'))}}
+
+    async def run_in_threadpool(func: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
+        func = functools.partial(func, *args, **kwargs)
+>       return await anyio.to_thread.run_sync(func)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\starlette\concurrency.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+func = functools.partial(<function _run_sync_endpoint at 0x0000027FD0CE2160>, function=<function assembly_router.<locals>.sav...d3be6e", "source": "estimated"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}'))})
+abandon_on_cancel = False, cancellable = None, limiter = None, args = ()
+
+    async def run_sync(
+        func: Callable[[Unpack[PosArgsT]], T_Retval],
+        *args: Unpack[PosArgsT],
+        abandon_on_cancel: bool = False,
+        cancellable: bool | None = None,
+        limiter: CapacityLimiter | None = None,
+    ) -> T_Retval:
+        """
+        Call the given function with the given arguments in a worker thread.
+    
+        If the ``abandon_on_cancel`` option is enabled and the task waiting for its
+        completion is cancelled, the thread will still run its course but its
+        return value (or any raised exception) will be ignored.
+    
+        :param func: a callable
+        :param args: positional arguments for the callable
+        :param abandon_on_cancel: ``True`` to abandon the thread (leaving it to run
+            unchecked on own) if the host task is cancelled, ``False`` to ignore
+            cancellations in the host task until the operation has completed in the worker
+            thread
+        :param cancellable: deprecated alias of ``abandon_on_cancel``; will override
+            ``abandon_on_cancel`` if both parameters are passed
+        :param limiter: capacity limiter to use to limit the total amount of threads running
+            (if omitted, the default limiter is used)
+        :raises NoEventLoopError: if no supported asynchronous event loop is running in the
+            current thread
+        :return: an awaitable that yields the return value of the function.
+    
+        """
+        if cancellable is not None:
+            abandon_on_cancel = cancellable
+            warn(
+                "The `cancellable=` keyword argument to `anyio.to_thread.run_sync` is "
+                "deprecated since AnyIO 4.1.0; use `abandon_on_cancel=` instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+    
+>       return await get_async_backend().run_sync_in_worker_thread(
+            func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        )
+
+.venv-sim\Lib\site-packages\anyio\to_thread.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+cls = <class 'anyio._backends._asyncio.AsyncIOBackend'>
+func = functools.partial(<function _run_sync_endpoint at 0x0000027FD0CE2160>, function=<function assembly_router.<locals>.sav...d3be6e", "source": "estimated"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}'))})
+args = (), abandon_on_cancel = False, limiter = None
+
+    @classmethod
+    async def run_sync_in_worker_thread(  # type: ignore[return]
+        cls,
+        func: Callable[[Unpack[PosArgsT]], T_Retval],
+        args: tuple[Unpack[PosArgsT]],
+        abandon_on_cancel: bool = False,
+        limiter: BaseCapacityLimiter | None = None,
+    ) -> T_Retval:
+        await cls.checkpoint()
+    
+        # If this is the first run in this event loop thread, set up the necessary
+        # variables
+        try:
+            idle_workers = _threadpool_idle_workers.get()
+            workers = _threadpool_workers.get()
+        except LookupError:
+            idle_workers = deque()
+            workers = set()
+            _threadpool_idle_workers.set(idle_workers)
+            _threadpool_workers.set(workers)
+    
+        async with limiter or cls.current_default_thread_limiter():
+            with CancelScope(shield=not abandon_on_cancel) as scope:
+                future = asyncio.Future[T_Retval]()
+                root_task = find_root_task()
+                if not idle_workers:
+                    worker = WorkerThread(root_task, workers, idle_workers)
+                    worker.start()
+                    workers.add(worker)
+                    root_task.add_done_callback(worker.stop, context=Context())
+                else:
+                    worker = idle_workers.pop()
+    
+                    # Prune any other workers that have been idle for MAX_IDLE_TIME
+                    # seconds or longer
+                    now = cls.current_time()
+                    while idle_workers:
+                        if (
+                            now - idle_workers[0].idle_since
+                            < WorkerThread.MAX_IDLE_TIME
+                        ):
+                            break
+    
+                        expired_worker = idle_workers.popleft()
+                        expired_worker.root_task.remove_done_callback(
+                            expired_worker.stop
+                        )
+                        expired_worker.stop()
+    
+                context = copy_context()
+                context.run(set_current_async_library, None)
+                if abandon_on_cancel or scope._parent_scope is None:
+                    worker_scope = scope
+                else:
+                    worker_scope = scope._parent_scope
+    
+                worker.queue.put_nowait((context, func, args, future, worker_scope))
+>               return await future
+                       ^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\anyio\_backends\_asyncio.py:2706: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <WorkerThread(AnyIO worker thread, stopped daemon 34700)>
+
+    def run(self) -> None:
+        with claim_worker_thread(AsyncIOBackend, self.loop):
+            while True:
+                item = self.queue.get()
+                if item is None:
+                    # Shutdown command received
+                    return
+    
+                context, func, args, future, cancel_scope = item
+                if not future.cancelled():
+                    result = None
+                    exception: BaseException | None = None
+                    threadlocals.current_cancel_scope = cancel_scope
+                    try:
+>                       result = context.run(func, *args)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\anyio\_backends\_asyncio.py:1100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+function = <function assembly_router.<locals>.save at 0x0000027FF530AE80>
+arguments = {'job_id': UUID('102ce0ea-bf5e-44da-beb4-71a050238487'), 'body': RevisionRequest(expected_revision=1, project=ReviewPr...fd3be6e", "source": "estimated"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}'))}
+
+    def _run_sync_endpoint(
+        *, function: Callable[..., Any], arguments: dict[str, Any]
+    ) -> Any:
+        with _operation(name="endpoint", function=function):
+>           return function(**arguments)
+                   ^^^^^^^^^^^^^^^^^^^^^
+
+.venv-sim\Lib\site-packages\fastapi\telemetry\_api.py:244: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+job_id = UUID('102ce0ea-bf5e-44da-beb4-71a050238487')
+body = RevisionRequest(expected_revision=1, project=ReviewProject(schema_version='assembly-review-1.0', name='two_link_hinge'...9fd3be6e", "source": "estimated"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}'))
+
+    @router.put("/{job_id}/revisions", status_code=201)
+    def save(job_id: UUID, body: RevisionRequest):
+        find(job_id)
+        try:
+>           return service.save(job_id, body.project, body.expected_revision)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src\photo2sim\api\assembly_jobs.py:501: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <photo2sim.api.assembly_jobs.AssemblyJobs object at 0x0000027FF4FBA540>
+job_id = UUID('102ce0ea-bf5e-44da-beb4-71a050238487')
+project = ReviewProject(schema_version='assembly-review-1.0', name='two_link_hinge', synthetic=True, root_link='base', parts=[Pa...79fd3be6e", "source": "estimated"}], "root_link": "base", "schema_version": "assembly-review-1.0", "synthetic": true}')
+expected_revision = 1
+
+    def save(self, job_id: UUID, project: ReviewProject, expected_revision: int):
+        with self.lock:
+            job = self.get(job_id)
+            if job["revision"] != expected_revision or job["status"] in {
+                "preparing",
+                "exporting",
+                "validating",
+            }:
+                raise RuntimeError("Job changed; reload before saving")
+            root = self.directory(job_id)
+            original = ReviewProject.model_validate_json(
+                (root / "revisions/0001/project.json").read_text(encoding="utf-8")
+            )
+    
+            def identity(p):
+                return [
+                    (part.id, part.mesh, part.sha256, part.pose, part.source, part.note)
+                    for part in p.parts
+                ]
+    
+            if identity(original) != identity(project) or original.synthetic != project.synthetic:
+                raise ValueError(
+                    "Source paths, hashes, poses, provenance and synthetic label are immutable; import a new job"
+                )
+            package = review_package(project, root / "sources")
+            number = expected_revision + 1
+            folder = root / "revisions" / f"{number:04d}"
+            # job.json is the publication point. A crash may leave the next
+            # revision unreferenced; retain it separately before retrying.
+            if folder.exists():
+                retained = root / "interrupted-revisions"
+                retained.mkdir(exist_ok=True)
+                folder.rename(retained / f"{number:04d}-{uuid4().hex}")
+            staging = root / "revisions" / f".pending-{uuid4().hex}"
+            staging.mkdir()
+            (staging / "project.json").write_text(
+                project.model_dump_json(indent=2) + "\n", encoding="utf-8"
+            )
+            (staging / "package.json").write_text(json.dumps(package) + "\n", encoding="utf-8")
+>           staging.rename(folder)
+
+src\photo2sim\api\assembly_jobs.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_revision_clears_mapping_p0/assemblies/102ce0ea-bf5e-44da-beb4-71a050238487/revisions/.pending-e0ba6a01aba248118f30eff0d93fd2df')
+target = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_revision_clears_mapping_p0/assemblies/102ce0ea-bf5e-44da-beb4-71a050238487/revisions/0002')
+
+    def rename(self, target):
+        """
+        Rename this path to the target path.
+    
+        The target path may be absolute or relative. Relative paths are
+        interpreted relative to the current working directory, *not* the
+        directory of the Path object.
+    
+        Returns the new Path instance pointing to the target path.
+        """
+>       os.rename(self, target)
+E       PermissionError: [WinError 5] Access is denied: 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_revision_clears_mapping_p0\\assemblies\\102ce0ea-bf5e-44da-beb4-71a050238487\\revisions\\.pending-e0ba6a01aba248118f30eff0d93fd2df' -> 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_revision_clears_mapping_p0\\assemblies\\102ce0ea-bf5e-44da-beb4-71a050238487\\revisions\\0002'
+
+..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1363: PermissionError
+_ test_uniform_sizing_preserves_all_edge_lengths_and_selected_oriented_extent[orientation1-z-expected1] _
+
+tmp_path = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_uniform_sizing_preserves_1')
+orientation = Orientation(x_deg=90.0, y_deg=0, z_deg=0), axis = 'z'
+expected = [0.02, 0.04, 0.06]
+
+    @pytest.mark.parametrize(
+        "orientation,axis,expected",
+        [(Orientation(), "y", [0.02, 0.06, 0.04]), (Orientation(x_deg=90), "z", [0.02, 0.04, 0.06])],
+    )
+    def test_uniform_sizing_preserves_all_edge_lengths_and_selected_oriented_extent(
+        tmp_path, orientation, axis, expected
+    ):
+        source = tmp_path / "source.glb"
+        original = trimesh.creation.box(extents=(1, 3, 2))
+        original.export(source)
+        before = source.read_bytes()
+        props = properties(uniform(axis, orientation=orientation.model_dump()))
+        asset = prepare_asset(source, tmp_path / "prepared", props, orientation=orientation)
+        mesh = trimesh.load_mesh(tmp_path / "prepared" / asset.visual_mesh, process=False)
+        assert np.allclose(mesh.extents, expected)
+        assert np.allclose(
+            np.sort(mesh.edges_unique_length), np.sort(original.edges_unique_length) * 0.02
+        )
+        assert source.read_bytes() == before
+        assert asset.sizing_result.mode == "uniform"
+        assert asset.sizing_result.scale_factors == pytest.approx((0.02, 0.02, 0.02))
+        assert asset.properties.dimensions_m.source == "estimated"
+        assert asset.properties.sizing.reference.source == "user_supplied"
+>       scene = export_asset(asset, tmp_path / "prepared", tmp_path / "export")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_sizing.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+asset = AssetRecord(schema_version='1.0', asset_id=UUID('7a1f6504-e2b2-4f84-935e-8ef8f9abd358'), visual_mesh='meshes/visual.ob...e_extent_input_units=3.0, geometry_review='reference_correspondence_user_supplied_not_verified'), geometry_review=None)
+asset_dir = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_uniform_sizing_preserves_1/prepared')
+output_dir = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_uniform_sizing_preserves_1/export')
+
+    def export_asset(asset: AssetRecord, asset_dir: Path, output_dir: Path) -> Path:
+        """Publish a new bundle and return scene.xml; reject existing output directories.
+    
+        Prepared meshes must already be centred and dimensioned in metres. No mesh
+        preparation, rescaling, reconstruction, source edits or dynamic validation occurs here.
+        """
+        asset = AssetRecord.model_validate(asset.model_dump(mode="json"))
+        if asset.collision.kind != "box":
+            raise NotImplementedError("Only collision.kind='box' is supported by this exporter")
+        source = _check_prepared_mesh(asset, Path(asset_dir))
+        inertia = _inertia(asset)
+        _require(
+            np.isfinite(inertia).all() and np.all(inertia > 0),
+            "Dimensions/mass do not produce finite positive box inertia",
+        )
+        output = Path(output_dir).absolute()
+        if output.exists() or output.is_symlink():
+            raise FileExistsError(
+                "Choose a new output directory; existing exports are never overwritten"
+            )
+        friction = asset.properties.sliding_friction
+        assumptions = {
+            "format": "photo2sim-box-export/1",
+            "units": {"length": "m", "mass": "kg", "time": "s", "inertia": "kg*m^2"},
+            "prepared_mesh_scale": [1, 1, 1],
+            "inertia": {
+                "method": "uniform_cuboid_approximation",
+                "diagonal_kg_m2": _inertia(asset).tolist(),
+                "note": "Approximates the confirmed bounding box as uniformly filled; not measured inertia",
+            },
+            "collision": "centred axis-aligned box; full property extents divided by two",
+            "friction": [
+                DEFAULT_SLIDING_FRICTION if friction is None else friction.value,
+                0.005,
+                0.0001,
+            ],
+            "sliding_friction_source": "simulation_default_not_measured"
+            if friction is None
+            else friction.source,
+            "friction_note": "Original property/provenance is preserved in asset.json; torsional and rolling terms are assumed defaults",
+            "timestep_s": TIMESTEP_S,
+            "gravity_m_s2": [0, 0, -9.81],
+            "initial_bottom_height_m": DROP_HEIGHT_M,
+            "contact_solref": [CONTACT_TIME_S, 1],
+            "numerical_note": "20 substeps per contact time constant; modest 20 mm upright drop; not calibrated material response",
+            "status": "load_checked_only; run validate_export for dynamic evidence",
+        }
+        # Work in a sibling staging directory. The target is absent until all preflight/load checks pass.
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".photo2sim-export-", dir=output.parent) as temporary:
+            stage = Path(temporary) / "bundle"
+            mesh_target = stage / asset.visual_mesh
+            mesh_target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, mesh_target)
+            (stage / "asset.json").write_text(asset.model_dump_json(indent=2) + "\n", encoding="utf-8")
+            (stage / "simulation.json").write_text(
+                json.dumps(assumptions, indent=2) + "\n", encoding="utf-8"
+            )
+            _write_scene(asset, stage, assumptions)
+            write_portable_files(stage, asset.model_dump(mode="json"), assumptions)
+            mujoco.MjModel.from_xml_path(str(stage / "scene.xml"))
+            if output.exists() or output.is_symlink():
+                raise FileExistsError("Output appeared during export; nothing was overwritten")
+>           stage.rename(output)
+
+src\photo2sim\simulation\export.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_uniform_sizing_preserves_1/.photo2sim-export-6pw19h36/bundle')
+target = WindowsPath('C:/Users/srija/calhacks-arm/outputs/target-ui-integration/pytest-full/test_uniform_sizing_preserves_1/export')
+
+    def rename(self, target):
+        """
+        Rename this path to the target path.
+    
+        The target path may be absolute or relative. Relative paths are
+        interpreted relative to the current working directory, *not* the
+        directory of the Path object.
+    
+        Returns the new Path instance pointing to the target path.
+        """
+>       os.rename(self, target)
+E       PermissionError: [WinError 5] Access is denied: 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_uniform_sizing_preserves_1\\.photo2sim-export-6pw19h36\\bundle' -> 'C:\\Users\\srija\\calhacks-arm\\outputs\\target-ui-integration\\pytest-full\\test_uniform_sizing_preserves_1\\export'
+
+..\AppData\Local\Programs\Python\Python312\Lib\pathlib.py:1363: PermissionError
+________ test_pinned_robot_loads_and_holds_without_numerical_warnings _________
+
+    def test_pinned_robot_loads_and_holds_without_numerical_warnings():
+>       report = so101.inspect_model(SCENE, duration_s=2.0)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_so101.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+scene = WindowsPath('C:/Users/srija/calhacks-arm/third_party/robotstudio_so101/scene.xml')
+duration_s = 2.0
+
+    def inspect_model(scene: Path, *, duration_s: float = 2.0) -> dict:
+        """Load the standalone robot and run a numerical zero-target hold smoke test."""
+        if not math.isfinite(duration_s) or duration_s <= 0:
+            raise ValueError("duration_s must be finite and positive")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+>           model = mujoco.MjModel.from_xml_path(str(scene))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           ValueError: Error: Error opening file 'C:\Users/srija/calhacks-arm/third_party/robotstudio_so101/wrist_roll_follower_so101_v1.stl'
+
+src\photo2sim\simulation\so101.py:61: ValueError
+============================== warnings summary ===============================
+.venv-sim\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\srija\calhacks-arm\.venv-sim\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_assembly_motion.py::test_invalid_action_is_not_clipped_or_started[phase4]
+FAILED tests/test_assembly_review.py::test_explicit_exclusion_is_recorded - P...
+FAILED tests/test_capture_pack.py::test_real_captures_preserve_units_pairing_hashes_and_photos
+FAILED tests/test_capture_pack.py::test_duplicate_capture_ids_rejected - Asse...
+FAILED tests/test_capture_pack.py::test_tampered_photo_rejected - FileNotFoun...
+FAILED tests/test_capture_pack.py::test_pack_preserves_every_timestamped_observation
+FAILED tests/test_mapping_retention.py::test_revision_clears_mapping_pointer_but_retains_the_old_mapping_file
+FAILED tests/test_sizing.py::test_uniform_sizing_preserves_all_edge_lengths_and_selected_oriented_extent[orientation1-z-expected1]
+FAILED tests/test_so101.py::test_pinned_robot_loads_and_holds_without_numerical_warnings
+ERROR tests/test_so101_workspace.py::test_composition_preserves_object_properties_and_uses_named_robot_mapping
+ERROR tests/test_so101_workspace.py::test_reset_restores_full_state_and_nonzero_joint_controls
+ERROR tests/test_so101_workspace.py::test_off_table_or_out_of_range_pose_never_published[settings0]
+ERROR tests/test_so101_workspace.py::test_off_table_or_out_of_range_pose_never_published[settings1]
+ERROR tests/test_so101_workspace.py::test_existing_output_preserved - FileNot...
+ERROR tests/test_so101_workspace.py::test_combined_scene_settles_and_resets_reproducibly_after_relocation
+ERROR tests/test_so101_workspace.py::test_validator_does_not_accept_a_disabled_collision
+ERROR tests/test_so101_workspace.py::test_validator_rejects_scene_that_disagrees_with_recorded_settings[mass-0.1]
+ERROR tests/test_so101_workspace.py::test_validator_rejects_scene_that_disagrees_with_recorded_settings[timestep-0.0002]
+9 failed, 369 passed, 8 skipped, 1 warning, 9 errors in 106.15s (0:01:46)

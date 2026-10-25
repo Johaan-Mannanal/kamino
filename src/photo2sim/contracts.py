@@ -33,6 +33,38 @@ class Orientation(Contract):
     z_deg: float = Field(default=0, ge=-180, le=180, allow_inf_nan=False, strict=True)
 
 
+GeometryHash = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
+
+
+class TargetSelection(Contract):
+    source_mesh_sha256: GeometryHash
+    island_ids: list[GeometryHash] = Field(min_length=1)
+    orientation: Orientation
+    review_note: str = Field(min_length=1, max_length=2000)
+    acknowledge_geometry: bool = Field(strict=True)
+
+    @model_validator(mode="after")
+    def explicit_review(self):
+        if not self.acknowledge_geometry or not self.review_note.strip():
+            raise ValueError("Explicit target review and a meaningful review note are required")
+        if len(set(self.island_ids)) != len(self.island_ids):
+            raise ValueError("Duplicate surface islands are not allowed")
+        return self
+
+
+class TargetReviewRequest(TargetSelection):
+    expected_input_revision: int = Field(ge=1)
+
+
+class TargetReview(TargetSelection):
+    algorithm: Literal["surface-islands-exact-seams-v1"] = "surface-islands-exact-seams-v1"
+    geometry_context_sha256: GeometryHash
+    reviewed_at: datetime
+    state: Literal["user_reviewed_not_physically_verified"] = (
+        "user_reviewed_not_physically_verified"
+    )
+
+
 def bundle_path(value: str) -> str:
     """Require a relative, forward-slash path independent of the host OS."""
     if (
@@ -108,12 +140,14 @@ class SizingResult(Contract):
 
 
 class SizingPreviewRequest(Contract):
+    geometry_context_sha256: GeometryHash | None = None
     sizing: Sizing
     orientation: Orientation
     dimensions_m: Dimensions | None = None
 
 
 class AssetProperties(Contract):
+    geometry_context_sha256: GeometryHash | None = None
     dimensions_m: Dimensions
     mass_kg: ScalarProperty
     sliding_friction: ScalarProperty | None = None
@@ -154,6 +188,7 @@ class AssetRecord(Contract):
     notes: list[str] = Field(default_factory=list)
     orientation: Orientation = Field(default_factory=Orientation)
     sizing_result: SizingResult | None = None
+    geometry_review: TargetReview | None = None
 
     _portable_mesh = field_validator("visual_mesh")(bundle_path)
 
@@ -168,6 +203,7 @@ class RigidAttemptInputs(Contract):
     properties: AssetProperties
     orientation: Orientation
     sizing_result: SizingResult | None = None
+    geometry_review: TargetReview | None = None
     mesh_path: str
     source_mesh_sha256: str | None = None
     provider_task_id: str | None = None
@@ -209,6 +245,7 @@ class JobRecord(Contract):
     error: JobError | None = None
     orientation: Orientation = Field(default_factory=Orientation)
     sizing_result: SizingResult | None = None
+    geometry_review: TargetReview | None = None
     input_revision: int = Field(default=1, ge=1)
     attempts: list[RigidAttempt] = Field(default_factory=list)
     active_attempt_id: UUID | None = None

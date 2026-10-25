@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import * as THREE from 'three'
 import type { Api } from './api'
+import type { TargetInventory } from './target-review'
 const mocks = vi.hoisted(() => ({
   parse: vi.fn(),
   dispose: vi.fn(),
@@ -144,5 +145,39 @@ it('shows an authenticated-load failure with download fallback', async () => {
   )
   await vi.waitFor(() => expect(host.textContent).toContain('HTTP 401'))
   expect(host.textContent).toContain('download below')
+  cleanup()
+})
+
+it('renders only the explicitly selected surfaces before applying orientation and sizing', async () => {
+  const box = new THREE.BoxGeometry(1, 3, 2).toNonIndexed()
+  const vertices = Array.from({ length: box.attributes.position.count }, (_, i) => [
+    box.attributes.position.getX(i),
+    box.attributes.position.getY(i),
+    box.attributes.position.getZ(i),
+  ])
+  const faces = Array.from({ length: vertices.length / 3 }, (_, i) => [i * 3, i * 3 + 1, i * 3 + 2])
+  const inventory = {
+    geometry: {
+      chosen: { vertices, faces },
+      distractor: { vertices: vertices.map((v) => v.map((n) => n * 100)), faces },
+    },
+  } as unknown as TargetInventory
+  const file = vi.fn().mockRejectedValue(Error('Whole scene must not replace selected geometry'))
+  const cleanup = mountViewer(
+    document.querySelector('#host')!,
+    { file } as unknown as Api,
+    'job',
+    'mesh.glb',
+    orientation,
+    [2, 4, 6],
+    { inventory, islandIds: ['chosen'] },
+  )
+  await vi.waitFor(() => expect(mocks.render).toHaveBeenCalled())
+  const scene = mocks.render.mock.calls[0][0] as THREE.Scene
+  const size = new THREE.Box3().setFromObject(scene.children[0]).getSize(new THREE.Vector3())
+  expect(size.x).toBeCloseTo(2)
+  expect(size.y).toBeCloseTo(8)
+  expect(size.z).toBeCloseTo(18)
+  expect(file).not.toHaveBeenCalled()
   cleanup()
 })

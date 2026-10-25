@@ -2052,6 +2052,107 @@ html:not([data-page="home"]) .cursor-glow {
 .live-workspace #live-preview {
   margin-top: 12px;
 }
+/* Target review (frozen target-review.ts markup). Blue = selected, grey = excluded. */
+.live-target {
+  padding: 24px 28px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.live-target #target-review h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.live-target #target-review p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.live-target #target-geometry-view {
+  height: 260px;
+  margin: 12px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #151719;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  overflow: hidden;
+}
+.live-target #target-geometry-view > canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.live-target fieldset {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.live-target fieldset label {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  color: var(--muted);
+}
+.live-target [data-target-island] {
+  accent-color: #448dde;
+}
+.live-target .target-island-selected {
+  color: #9cc4f0;
+}
+.live-target textarea {
+  display: block;
+  width: 100%;
+  min-height: 64px;
+  margin-top: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--input);
+  color: #f3f4f6;
+  font: inherit;
+  padding: 8px;
+}
+.live-target fieldset label:has(textarea) {
+  display: block;
+}
+.live-target button {
+  justify-self: start;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--raised);
+  color: #f3f4f6;
+  font-size: 12px;
+  font-weight: 600;
+}
+.live-target button:not(:disabled):hover {
+  background: #2b3038;
+  border-color: #424b59;
+}
+.live-target button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.live-target #save-target-review {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0b0c0e;
+}
+.live-target #target-review-status {
+  margin-top: 10px;
+}
+.live-target [data-target-status="reviewed"] #target-review-status {
+  color: #9cc4f0;
+}
+.live-target-gate {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
 .live-preview {
   margin-top: 10px;
   color: var(--muted);

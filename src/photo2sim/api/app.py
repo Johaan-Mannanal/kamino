@@ -1,4 +1,3 @@
-import hashlib
 import shutil
 import warnings
 from contextlib import asynccontextmanager
@@ -23,6 +22,7 @@ from photo2sim.api.suggestions import (
     SuggestionService,
     failure_details,
 )
+from photo2sim.api.target_review import register_target_routes, reviewed_geometry
 from photo2sim.api.worker import JobWorker
 from photo2sim.contracts import (
     AssetProperties,
@@ -150,13 +150,24 @@ def create_app(
         try:
             from photo2sim.assets.sizing import preview_sizing
 
-            return preview_sizing(source, properties, orientation)
+            reviewed_geometry(job, source, properties=properties)
+            return preview_sizing(
+                source, properties, orientation, geometry_review=job.geometry_review
+            )
         except ImportError:
             raise HTTPException(503, "Sizing requires the simulation dependencies") from None
         except ValueError:
             raise HTTPException(
                 422, "Review sizing and orientation; the reference or geometry is invalid"
             ) from None
+
+    register_target_routes(
+        app,
+        store,
+        get_job,
+        job_source,
+        lambda job: job.status in {"awaiting_properties", "completed"} or retryable_processing(job),
+    )
 
     @app.post("/api/jobs/{job_id}/sizing-preview")
     def sizing_preview(job_id: UUID, request: SizingPreviewRequest):
@@ -166,11 +177,15 @@ def create_app(
             dimensions_m=dims or {"x": 1, "y": 1, "z": 1, "source": "estimated"},
             mass_kg={"value": 1, "source": "estimated", "note": "Preview placeholder, never saved"},
             sizing=request.sizing,
+            geometry_context_sha256=request.geometry_context_sha256,
         )
         properties, result = resolve_job_sizing(job, properties, request.orientation)
         return {
             "dimensions_m": properties.dimensions_m.model_dump(mode="json"),
             "sizing_result": result.model_dump(mode="json"),
+            "geometry_context_sha256": job.geometry_review.geometry_context_sha256
+            if job.geometry_review
+            else None,
         }
 
     @app.get("/api/health")
@@ -315,6 +330,9 @@ def create_app(
                 attempts=retained_attempts(job),
                 active_attempt_id=None,
                 orientation=orientation,
+                properties=job.properties.model_copy(update={"geometry_context_sha256": None})
+                if job.properties
+                else None,
                 status="awaiting_properties",
                 error=None,
                 asset=None,
@@ -332,13 +350,13 @@ def create_app(
             raise HTTPException(409, "Job is not ready for simulation processing")
         if job.properties is None or job.mesh_path is None:
             raise HTTPException(409, "Save confirmed properties and finish reconstruction first")
+        target = reviewed_geometry(job, job_source(job), properties=job.properties, required=True)
         if job.properties.sizing is not None:
             if job.properties.sizing.reviewed_orientation != job.orientation:
                 raise HTTPException(409, "Orientation changed; review and save sizing again")
             # Recheck source dimensions before claiming the immutable attempt.
             resolve_job_sizing(job, job.properties, job.orientation)
-        source = job_source(job)
-        attempt = new_attempt(job, hashlib.sha256(source.read_bytes()).hexdigest())
+        attempt = new_attempt(job, target.source_mesh_sha256)
         try:
             claimed = store.update(
                 job_id,

@@ -28,6 +28,7 @@ def prepare_asset(
     properties: AssetProperties,
     *,
     orientation: Orientation | None = None,
+    geometry_review=None,
 ) -> AssetRecord:
     """Centre, scale, and export ``mesh_path`` into ``output_dir``.
 
@@ -40,9 +41,17 @@ def prepare_asset(
     mesh_path = Path(mesh_path)
     output_dir = Path(output_dir)
     _check_output_dir(output_dir)
-    mesh, baked_transforms = _load_mesh(mesh_path)
+    if geometry_review is None:
+        mesh, baked_transforms = _load_mesh(mesh_path)
+    else:
+        from photo2sim.assets.target import selected_geometry
+
+        mesh = selected_geometry(mesh_path, geometry_review)
+        baked_transforms = 0  # Already baked by the source-bound inventory loader.
     _check_geometry(mesh, mesh_path)
     orientation = Orientation.model_validate(orientation or Orientation())
+    if geometry_review is not None and geometry_review.orientation != orientation:
+        raise ValueError("Orientation changed; review target geometry again")
     rotate_mesh(mesh, orientation)
     source_centre = mesh.bounds.mean(axis=0)
     source_extents = mesh.extents.copy()
@@ -81,6 +90,7 @@ def prepare_asset(
         notes=notes,
         orientation=orientation,
         sizing_result=sizing_result,
+        geometry_review=geometry_review,
     )
 
 

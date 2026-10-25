@@ -12,6 +12,9 @@ def attempt_inputs(job: JobRecord, *, source_hash=None, legacy=False):
         properties=job.asset.properties if legacy and job.asset else job.properties,
         orientation=job.asset.orientation if legacy and job.asset else job.orientation,
         sizing_result=job.asset.sizing_result if legacy and job.asset else job.sizing_result,
+        geometry_review=(job.asset.geometry_review if job.asset else None)
+        if legacy
+        else job.geometry_review,
         mesh_path=job.mesh_path,
         source_mesh_sha256=source_hash,
         source_images=job.source_images,

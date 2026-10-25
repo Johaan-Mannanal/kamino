@@ -1,3 +1,4 @@
+import type { TargetInventory, TargetReviewRequest } from './target-review'
 import type {
   Job,
   Orientation,
@@ -9,6 +10,8 @@ import type {
 } from './types'
 
 export type Api = {
+  geometry(id: string, preview?: boolean): Promise<TargetInventory>
+  reviewGeometry(id: string, request: TargetReviewRequest): Promise<Job>
   health(): Promise<{ status: string; provider: string }>
   create(files: File[]): Promise<Job>
   get(id: string): Promise<Job>
@@ -19,6 +22,7 @@ export type Api = {
     request: {
       sizing: Sizing
       orientation: Orientation
+      geometry_context_sha256?: string | null
       dimensions_m?: Properties['dimensions_m']
     },
   ): Promise<SizingPreview>
@@ -145,6 +149,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const liveApi: Api = {
+  geometry: (id, preview = false) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/geometry?preview=${preview}`),
+  reviewGeometry: (id, review) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/geometry-review`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(review),
+    }),
   health: () => request('/api/health'),
   create: (files) => {
     const form = new FormData()

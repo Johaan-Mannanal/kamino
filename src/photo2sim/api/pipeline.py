@@ -43,7 +43,20 @@ def process_job(store: JobStore, job_id: UUID) -> None:
         if hashlib.sha256(source.read_bytes()).hexdigest() != inputs.source_mesh_sha256:
             raise ValueError("Source changed after processing claim")
         prepared = attempt / "prepared"
-        asset = prepare_asset(source, prepared, inputs.properties, orientation=inputs.orientation)
+        review = inputs.geometry_review
+        if (
+            review is None
+            or review.orientation != inputs.orientation
+            or inputs.properties.geometry_context_sha256 != review.geometry_context_sha256
+        ):
+            raise ValueError("A current source-bound target and sizing review is required")
+        asset = prepare_asset(
+            source,
+            prepared,
+            inputs.properties,
+            orientation=inputs.orientation,
+            geometry_review=review,
+        )
         asset.synthetic = job.synthetic
         (prepared / "asset.json").write_text(
             asset.model_dump_json(indent=2) + "\n", encoding="utf-8"
