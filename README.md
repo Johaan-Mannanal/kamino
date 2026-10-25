@@ -115,10 +115,12 @@ build variables, URLs or Git.
 
 ## Verification and release
 
-The deployed application source is
+The deployed advanced-physics baseline is
 [`410e88a`](https://github.com/Johaan-Mannanal/kamino/commit/410e88ac6c3e39ec5ab7a176593670d5b5fb7416).
 [GitHub CI passed](https://github.com/Johaan-Mannanal/kamino/actions/runs/40202374448).
-Later documentation commits do not imply a runtime deployment.
+Frontend follow-ups add sharing previews (`2c9d869`) and correct the stale sizing
+notice (`90e45bd`); backend behavior is unchanged. Later documentation commits do
+not imply a runtime deployment.
 
 - **492 backend tests passed, 2 optional skips; 143 shared frontend + 160 Workspace
   tests passed.** Both TypeScript checks, production builds and Ruff passed.

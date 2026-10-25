@@ -1,6 +1,6 @@
 # Public release and evidence index
 
-Application release: October 25, 2026. Both production services use
+Application release: October 25, 2026. The advanced-physics baseline is
 [`410e88ac6c3e39ec5ab7a176593670d5b5fb7416`](https://github.com/Johaan-Mannanal/kamino/commit/410e88ac6c3e39ec5ab7a176593670d5b5fb7416).
 Public `main` includes this release; later documentation commits do not redeploy
 services. The application is available at [kamino.design](https://kamino.design).
@@ -9,7 +9,8 @@ services. The application is available at [kamino.design](https://kamino.design)
 
 | Component | Railway deployment |
 | --- | --- |
-| Frontend | `c94949e9-2b73-475c-bc56-c0d3a80016d2` |
+| Frontend (advanced-physics baseline) | `c94949e9-2b73-475c-bc56-c0d3a80016d2` |
+| Frontend (notice fix `90e45bd`) | `3056c437-780d-484b-ba38-69d62bd37f7e` |
 | Backend | `e6778197-75ee-40a9-a8cf-14b3249661b1` |
 
 Production imported-source hashes and runtime matched the staging candidate.
@@ -47,11 +48,17 @@ Upload validation, cropping, demo export and saved assembly reopening also passe
 It identified its browser assets by hash rather than an independently confirmed
 Git SHA, so it supplements the record without extending exact-commit acceptance.
 
-Two known display issues remain recorded:
+The reported stale stretching notice is fixed in frontend commit
+[`90e45bd`](https://github.com/Johaan-Mannanal/kamino/commit/90e45bd): the notice now
+follows saved sizing, remains during unsaved edits or failed saves, and clears
+immediately after a successful uniform save. Regression coverage includes legacy
+and explicit independent-axis modes. Staging and production browser checks used intercepted API
+responses, with no real job writes or provider calls. Sizing/export logic is unchanged.
+This follows the sharing-card/icon update in `2c9d869`; both are frontend-only
+changes on the advanced-physics baseline.
 
-- After changing legacy independent-axis sizing to uniform sizing, the old
-  stretching notice can remain until reopening. The reported saved geometry and
-  export are correct; this is a stale notice, not evidence of new stretching.
+One previously recorded display issue remains:
+
 - The assembly canvas can overflow after a desktop-to-phone resize. That resize
   behavior predates this release; the new controls did not resolve it.
 
