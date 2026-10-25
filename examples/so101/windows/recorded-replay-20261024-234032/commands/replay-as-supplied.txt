@@ -1,0 +1,1 @@
+& "$env:USERPROFILE\lerobot-env\Scripts\lerobot-replay.exe" --robot.type=so101_follower --robot.port=COM5 --robot.id=hackathon_follower --robot.max_relative_target=5.0 --dataset.repo_id=local/so101_trajectory --dataset.root="$trajectoryRoot" --dataset.episode=0 --dataset.fps=15 --play_sounds=false

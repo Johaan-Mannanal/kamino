@@ -1,0 +1,86 @@
+{
+  ".gitattributes": {
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+    "bytes": 8
+  },
+  "commands/replay-as-supplied.txt": {
+    "sha256": "c22cef8459bc369abd25d8ed6aa4218aa05a20aca680fc7200320ee4ec69094f",
+    "bytes": 300
+  },
+  "dataset/data/chunk-000/file-000.parquet": {
+    "sha256": "3e90db28cc3abc41ae96924ec3bf9c924f47b5910678edbf8dc94bba622c5136",
+    "bytes": 41520
+  },
+  "dataset/meta/episodes/chunk-000/file-000.parquet": {
+    "sha256": "f159a9f8abe298674c58489db65cce0fead92ceb9b3803746468d34ef729fef2",
+    "bytes": 35657
+  },
+  "dataset/meta/info.json": {
+    "sha256": "3d5c6ed62cdec9a436f78599b4e7c840f2d76218d0ff7cfab14c80d87d70baa7",
+    "bytes": 1969
+  },
+  "dataset/meta/stats.json": {
+    "sha256": "01c035d89d6f9f927de8c9aa029acc1e2acef9e189dbad6693f31231cb4b6185",
+    "bytes": 7189
+  },
+  "dataset/meta/tasks.parquet": {
+    "sha256": "c27cd328d7d4b405e8ba36f4f27f924ec3b30ccb81cffdc7ba1c5af0c1e4408b",
+    "bytes": 2464
+  },
+  "episode-0-actions-observations-timestamps.jsonl": {
+    "sha256": "d1cfda9cc84a6edb8a7f1ff1a63298bc3d7d0914df921f49d77bfa1785ca34dd",
+    "bytes": 533074
+  },
+  "JOHAAN-UPDATE.md": {
+    "sha256": "fa51167c31fc0fb940dfaec04fb60ad6bbc05fe690635cf2466c0d430f8ac1e4",
+    "bytes": 1150
+  },
+  "README.md": {
+    "sha256": "8c4afc85da0626914e6a5ba654347c19e7270f28e08598945e0db822e4986fad",
+    "bytes": 2921
+  },
+  "references/hackathon_follower-current-reference.json": {
+    "sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+    "bytes": 961
+  },
+  "references/mapping-and-action-semantics.md": {
+    "sha256": "0105165309a0ffb0508de5a20492ace4f2be6dcdf4c80bf33518dc035c5d6f0f",
+    "bytes": 2045
+  },
+  "replay-report.json": {
+    "sha256": "8620f4c0fbbf6e02187f03aaeb844f6af0527ee59559c46d1b8836cdd7913f7a",
+    "bytes": 2137
+  },
+  "runtime.json": {
+    "sha256": "9dedbf2c0b103b33ff80b47a2049a9e2e1bff49413986af19db5d65bf2d1fa82",
+    "bytes": 631
+  },
+  "source/LICENSE": {
+    "sha256": "84347ca1665cbaba524ae24f1169e7eae1bc0cfdf3c0692df3de2f92f0dc11c0",
+    "bytes": 30530
+  },
+  "source/motors/motors_bus.py": {
+    "sha256": "77407044177394032c59bf5eac07f864fef6f76920be6280b16c3f576f432577",
+    "bytes": 52038
+  },
+  "source/robots/so_follower/config_so_follower.py": {
+    "sha256": "c3392a9b4d53111e48017501b2e9efef2beeb2c7fe832449f0afbe3410228fb4",
+    "bytes": 2408
+  },
+  "source/robots/so_follower/so_follower.py": {
+    "sha256": "bdf802effb63a27c05d536a80ace5a915ae4ae4ce8b28b90af997f1df6371e17",
+    "bytes": 11532
+  },
+  "source/scripts/lerobot_record.py": {
+    "sha256": "2420e7186c0b9a235ab06cfe7ec7ae9fdab872550b49492cfa34a69a06766a53",
+    "bytes": 25439
+  },
+  "source/scripts/lerobot_replay.py": {
+    "sha256": "026018eb253b22efb9520a4148107d0843984c8c5208ff775ec73d5696e304f9",
+    "bytes": 4443
+  },
+  "source/utils/cycle_timer.py": {
+    "sha256": "0618ed6849b25b8ec65afc62eade13d740c68062dc6c28fbbead0c4001dda898",
+    "bytes": 30058
+  }
+}

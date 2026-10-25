@@ -1,0 +1,50 @@
+{
+  "trajectory_directory": "trajectory-20261024-234032",
+  "local_source_path": "C:\\Users\\ypira\\so101-demos\\trajectory-20261024-234032",
+  "dataset_selection": "newest completed trajectory on disk; correspondence to the operator shell variable $trajectoryRoot awaits confirmation",
+  "episode": 0,
+  "frames": 900,
+  "metadata_fps": 30,
+  "timestamp_span_s": 29.96666717529297,
+  "contiguous_frames": true,
+  "timestamps_increasing": true,
+  "actions_observations_finite": true,
+  "channel_names": [
+    "shoulder_pan.pos",
+    "shoulder_lift.pos",
+    "elbow_flex.pos",
+    "wrist_flex.pos",
+    "wrist_roll.pos",
+    "gripper.pos"
+  ],
+  "units": {
+    "shoulder_pan.pos": "degrees",
+    "shoulder_lift.pos": "degrees",
+    "elbow_flex.pos": "degrees",
+    "wrist_flex.pos": "degrees",
+    "wrist_roll.pos": "degrees",
+    "gripper.pos": "normalized_0_100"
+  },
+  "units_basis": "installed follower use_degrees=True default for supplied command; not independently encoded units in dataset metadata",
+  "video_in_dataset": null,
+  "operation_mode": "recorded joint-command replay; not a learned policy",
+  "requested_replay_fps": 15,
+  "configured_timer_fps": 30,
+  "actual_replay_cadence": "not measured",
+  "successful_replays_of_new_recording": null,
+  "attempts_of_new_recording": null,
+  "software_restart_check": "not reported for new recording",
+  "object_identity_for_new_recording": "not separately confirmed",
+  "old_recording_result": {
+    "trajectory": "trajectory-20261024-224752",
+    "successes": 5,
+    "attempts": 5,
+    "basis": "operator reported; not transferred to new episode"
+  },
+  "observations": "saved original-recording follower observations only; no replay-run observations included",
+  "calibration_reference_sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+  "recording_time_calibration_snapshot": "not embedded; cached reference matches earlier hash",
+  "agent_hardware_actions": [],
+  "data_sha256": "3e90db28cc3abc41ae96924ec3bf9c924f47b5910678edbf8dc94bba622c5136",
+  "action_frames_differing_from_old_224752": 900
+}
