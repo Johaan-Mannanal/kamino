@@ -1,8 +1,10 @@
 """Import the pinned original can evidence into a fresh offline acceptance job.
 
 Run with ``python -m tools.ui_acceptance_fixture --archive PATH --data-dir PATH``.
-Only original uploads and raw reconstruction are copied. No manual derivative,
-provider task, saved sizing, or reviewed selection is imported.
+By default only original uploads and raw reconstruction are copied.
+--historical-state additionally copies the original bad saved state and attempt
+for review-gate acceptance. Both modes create a new job, omit the provider task,
+and never import the manual repair or mark historical geometry accepted.
 """
 
 from __future__ import annotations
@@ -44,7 +46,9 @@ def is_original_can_fixture(store: JobStore, job: JobRecord) -> bool:
         return False
 
 
-def import_can(settings, archive: Path, *, job_id: UUID | None = None) -> JobRecord:
+def import_can(
+    settings, archive: Path, *, job_id: UUID | None = None, historical_state: bool = False
+) -> JobRecord:
     from tools.ui_acceptance_server import isolated_data_dir
 
     isolated_data_dir(settings.data_dir)
@@ -60,6 +64,23 @@ def import_can(settings, archive: Path, *, job_id: UUID | None = None) -> JobRec
             if len(data) != item["bytes"] or sha256(data) != item["sha256"]:
                 raise ValueError(f"Manifest mismatch: {item['path']}")
         payload = {name: bundle.read(f"original/{name}") for name in names}
+        historical = None
+        if historical_state:
+            raw_job = bundle.read("original/job-before-repair.json")
+            historical = JobRecord.model_validate_json(raw_job)
+            if historical.status != "completed" or not historical.bundle_path:
+                raise ValueError("Expected the preserved completed historical can job")
+            attempt_root = Path(historical.bundle_path).parent
+            if len(attempt_root.parts) != 2 or attempt_root.parts[0] != "attempts":
+                raise ValueError("Unexpected historical attempt path")
+            UUID(attempt_root.parts[1])
+            for name in bundle.namelist():
+                if name.startswith("original/attempt/") and not name.endswith("/"):
+                    relative = Path(name.removeprefix("original/attempt/"))
+                    if relative.is_absolute() or ".." in relative.parts:
+                        raise ValueError("Unsafe historical archive path")
+                    payload[(attempt_root / relative).as_posix()] = bundle.read(name)
+            payload["historical/job-before-repair.json"] = raw_job
     if sha256(payload["reconstruction/mesh.glb"]) != MESH_SHA256:
         raise ValueError("Original can mesh checksum mismatch")
     store = JobStore(settings.data_dir)
@@ -86,6 +107,10 @@ def import_can(settings, archive: Path, *, job_id: UUID | None = None) -> JobRec
         mesh_path=names[0],
         legacy_sizing_allowed=False,
     )
+    if historical is not None:
+        # A labeled clone, not a rewrite of the original job. Strip the remote
+        # task identity so the acceptance worker can never resume/poll it.
+        job = historical.model_copy(update={"id": ident, "provider_task_id": None})
     try:
         for name, data in payload.items():
             destination = root / name
@@ -99,6 +124,11 @@ def import_can(settings, archive: Path, *, job_id: UUID | None = None) -> JobRec
             "offline_cached_reconstruction": True,
             "physical_measurements": False,
             "source_images": {name: sha256(payload[name]) for name in names[1:]},
+            "historical_state_replay": historical_state,
+            "historical_original_job_id": str(historical.id) if historical else None,
+            "historical_note": "Preserved bad export, not accepted geometry. New work requires review."
+            if historical
+            else None,
         }
         (root / RECEIPT).write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
         store.create(job)
@@ -114,8 +144,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--archive", type=Path, required=True)
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
+    parser.add_argument(
+        "--historical-state",
+        action="store_true",
+        help="Clone F3 saved state and bad export for review; never treat as accepted geometry",
+    )
     args = parser.parse_args()
-    job = import_can(acceptance_settings(args.data_dir, "ui-acceptance-only"), args.archive)
+    job = import_can(
+        acceptance_settings(args.data_dir, "ui-acceptance-only"),
+        args.archive,
+        historical_state=args.historical_state,
+    )
     print(
         json.dumps(
             {
@@ -123,6 +162,7 @@ def main():
                 "status": job.status,
                 "archive_sha256": ARCHIVE_SHA256,
                 "provider_calls": 0,
+                "historical_state_replay": args.historical_state,
             }
         )
     )

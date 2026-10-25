@@ -6,7 +6,9 @@ Seed a synthetic job's estimate cache in another terminal:
 
 This helper never calls Settings.from_env, reads .env, or loads provider keys.
 Only loopback network connections are permitted in the server process. It adds
-no application routes and never changes uploads, reconstruction, or properties.
+no application routes. Opt-in local replay flags simulate Gemini responses,
+one processing failure for a named job, or one synthetic reconstruction failure.
+They never contact real providers or modify original evidence.
 Use python -m tools.ui_acceptance_fixture to import the pinned original can.
 Invoke this module with python -m tools.ui_acceptance_server for fixture seeding.
 """
@@ -17,6 +19,8 @@ import argparse
 import ipaddress
 import json
 import socket
+from contextlib import asynccontextmanager
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
@@ -106,15 +110,58 @@ def blocked_gemini_transport(*args, **kwargs):
     raise AssertionError("Gemini transport is forbidden during offline UI acceptance")
 
 
-def build_app(data_dir: Path = DEFAULT_DATA_DIR, api_token: str = "ui-acceptance-only"):
+def build_app(
+    data_dir: Path = DEFAULT_DATA_DIR,
+    api_token: str = "ui-acceptance-only",
+    *,
+    gemini_replay=None,
+    fail_processing_job=None,
+    fail_processing_stage="validation",
+    fail_next_reconstruction=False,
+):
     settings = acceptance_settings(data_dir, api_token)
+    replay = None
+    if gemini_replay or fail_processing_job or fail_next_reconstruction:
+        from tools.ui_acceptance_replay import OfflineReplay
+
+        replay = OfflineReplay(
+            settings.data_dir,
+            gemini=gemini_replay,
+            processing_job=fail_processing_job,
+            stage=fail_processing_stage,
+            reconstruction=fail_next_reconstruction,
+        )
+        if gemini_replay:
+            settings = replace(
+                settings,
+                gemini_api_key="offline-fixture-not-a-provider-key",
+                gemini_model="offline-synthetic-fixture",
+                gemini_fallback_models=(),
+                gemini_max_attempts=1,
+                gemini_backoff_seconds=0,
+            )
     block_external_network(settings.data_dir.parent / "blocked-network.jsonl")
     app = create_app(
         settings=settings,
-        provider=MockProvider(),
-        gemini_transport=blocked_gemini_transport,
+        provider=replay.provider() if replay else MockProvider(),
+        gemini_transport=replay.transport if gemini_replay else blocked_gemini_transport,
     )
-    app.state.ui_acceptance = {"offline": True, "synthetic": True, "provider_keys": False}
+    if replay:
+        original_lifespan = app.router.lifespan_context
+
+        @asynccontextmanager
+        async def lifespan(application):
+            with replay.pipeline_hooks():
+                async with original_lifespan(application):
+                    yield
+
+        app.router.lifespan_context = lifespan
+    app.state.ui_acceptance = {
+        "offline": True,
+        "synthetic": True,
+        "provider_keys": False,
+        "replay": replay,
+    }
     return app
 
 
@@ -189,6 +236,26 @@ def main() -> None:
     parser.add_argument("--seed-job", type=UUID)
     parser.add_argument("--replace-seed", action="store_true")
     parser.add_argument("--unknown-seed", action="store_true")
+    from tools.ui_acceptance_replay import GEMINI_SCENARIOS
+
+    parser.add_argument(
+        "--gemini-replay",
+        choices=GEMINI_SCENARIOS,
+        help="Local response fixture for every uncached Gemini request in this run",
+    )
+    parser.add_argument(
+        "--fail-processing-job",
+        type=UUID,
+        help="Fail this job's next preparation/validation once; retry then runs normally",
+    )
+    parser.add_argument(
+        "--fail-processing-stage", choices=("preparation", "validation"), default="validation"
+    )
+    parser.add_argument(
+        "--fail-next-reconstruction",
+        action="store_true",
+        help="The next synthetic upload fails at provider polling; no remote calls",
+    )
     args = parser.parse_args()
     settings = acceptance_settings(args.data_dir, args.app_token)
     if args.seed_job is not None:
@@ -199,7 +266,14 @@ def main() -> None:
         return
     import uvicorn
 
-    app = build_app(settings.data_dir, settings.api_token)
+    app = build_app(
+        settings.data_dir,
+        settings.api_token,
+        gemini_replay=args.gemini_replay,
+        fail_processing_job=args.fail_processing_job,
+        fail_processing_stage=args.fail_processing_stage,
+        fail_next_reconstruction=args.fail_next_reconstruction,
+    )
     print(f"Offline UI acceptance: synthetic provider; data={settings.data_dir}")
     uvicorn.run(app, host=args.host, port=args.port, access_log=True)
 

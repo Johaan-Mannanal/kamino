@@ -9,6 +9,7 @@ import {
   type SizingPreview,
 } from "./backend-session";
 import { ApiError, type Api } from "../../../frontend/src/api";
+import { primaryViewer } from "./live-target-review";
 import type {
   TargetInventory,
   TargetReview,
@@ -990,6 +991,38 @@ describe("live backend session", () => {
       sizing: actualSizing,
     });
     expect(state.dirty).toBe(false);
+  });
+
+  it("replaces the unsaved preview caption with saved sizing after Save", async () => {
+    const state = session(
+      api({
+        save: vi.fn(async () => job({ sizing_result: preview.sizing_result })),
+      }),
+    );
+    await state.restore("job-a");
+    state.markDirty();
+    await state.previewSizing(sizing, orientation);
+    const view = () =>
+      primaryViewer(
+        state.job!,
+        state.target,
+        state.targetStatus,
+        state.sizingPreview,
+        null,
+      );
+    expect(view().label).toContain("Server sizing preview · unsaved");
+    const before = view().key;
+    await state.saveReviewed({
+      orientation,
+      sizing,
+      mass_kg: properties.mass_kg,
+      sliding_friction: null,
+    });
+    expect(state.dirty).toBe(false);
+    expect(view().label).toContain("saved sizing");
+    expect(view().label).not.toContain("unsaved");
+    expect(view().scale).toEqual(preview.sizing_result.scale_factors);
+    expect(view().key).toBe(before);
   });
 
   it("keeps edits during save dirty and blocks generation", async () => {

@@ -598,7 +598,8 @@ export class BackendSession {
       this.check(generation);
       if (draft === this.draft && targetVersion === this.targetDraftVersion) {
         this.dirty = false;
-        this.sizingPreview = preview;
+        // The saved job now owns this sizing; a preview is always unsaved.
+        this.sizingPreview = null;
       }
       this.setJob(job);
       return job;
