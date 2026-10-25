@@ -15,10 +15,15 @@ from PIL import Image, UnidentifiedImageError
 
 from photo2sim.api.config import Settings
 from photo2sim.api.store import JobConflict, JobStore
-from photo2sim.api.suggestions import SuggestionRequest, SuggestionsBusy, SuggestionService
+from photo2sim.api.suggestions import (
+    SuggestionRequest,
+    SuggestionsBusy,
+    SuggestionService,
+    failure_details,
+)
 from photo2sim.api.worker import JobWorker
 from photo2sim.contracts import AssetProperties, JobRecord, Orientation, bundle_path
-from photo2sim.integrations.gemini import PropertySuggestions, Transport
+from photo2sim.integrations.gemini import GeminiUnavailable, PropertySuggestions, Transport
 from photo2sim.integrations.reconstruction import MockProvider, ReconstructionProvider
 
 
@@ -190,10 +195,10 @@ def create_app(
             raise HTTPException(
                 422, "Job images are unavailable or invalid; manual entry remains available"
             ) from None
+        except GeminiUnavailable as error:
+            return JSONResponse(status_code=503, content=failure_details(error.reason))
         except Exception:
-            raise HTTPException(
-                503, "Gemini suggestions are unavailable; continue with manual properties"
-            ) from None
+            return JSONResponse(status_code=503, content=failure_details("provider"))
 
     @app.patch("/api/jobs/{job_id}/properties", response_model=JobRecord)
     def save_properties(job_id: UUID, properties: AssetProperties):

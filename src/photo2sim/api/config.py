@@ -1,3 +1,4 @@
+import math
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -33,8 +34,13 @@ class Settings:
             raise ValueError("MESHY_API_KEY is required when PHOTO2SIM_PROVIDER=meshy")
         if self.poll_interval < 0 or self.max_polls < 1:
             raise ValueError("Polling interval/count must be nonnegative/positive")
-        if (self.gemini_max_attempts < 1 or self.gemini_deadline_seconds <= 0
-                or self.gemini_backoff_seconds < 0):
+        if (
+            self.gemini_max_attempts < 1
+            or not math.isfinite(self.gemini_deadline_seconds)
+            or self.gemini_deadline_seconds <= 0
+            or not math.isfinite(self.gemini_backoff_seconds)
+            or self.gemini_backoff_seconds < 0
+        ):
             raise ValueError("Invalid Gemini retry settings")
 
     @classmethod
@@ -49,9 +55,12 @@ class Settings:
             gemini_api_key=values.get("GEMINI_API_KEY") or "",
             gemini_model=values.get("GEMINI_MODEL") or DEFAULT_MODEL,
             gemini_fallback_models=tuple(
-                item.strip() for item in
-                (values.get("GEMINI_FALLBACK_MODELS") if values.get("GEMINI_FALLBACK_MODELS") is not None
-                 else ",".join(DEFAULT_FALLBACK_MODELS)).split(",")
+                item.strip()
+                for item in (
+                    values.get("GEMINI_FALLBACK_MODELS")
+                    if values.get("GEMINI_FALLBACK_MODELS") is not None
+                    else ",".join(DEFAULT_FALLBACK_MODELS)
+                ).split(",")
                 if item.strip()
             ),
             gemini_max_attempts=int(values.get("GEMINI_MAX_ATTEMPTS") or 2),

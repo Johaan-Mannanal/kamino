@@ -15,6 +15,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from threading import BoundedSemaphore, Event, Thread
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -25,6 +26,53 @@ DEFAULT_MODEL = "gemini-3.8-flash"
 DEFAULT_FALLBACK_MODELS = ("gemini-3.6-flash",)
 SUGGESTION_NOTE = "AI suggestion — unverified"
 Transport = Callable[[httpx.Request], httpx.Response] | httpx.BaseTransport
+# A timed-out synchronous transport may still be unwinding. Keep that work bounded
+# process-wide; abandoned requests can never write a cache or confirm properties.
+_REQUEST_SLOTS = BoundedSemaphore(4)
+
+
+class _AttemptTimeout(Exception):
+    pass
+
+
+def _request_until(url, key, body, transport, deadline):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise _AttemptTimeout
+    if not _REQUEST_SLOTS.acquire(blocking=False):
+        raise GeminiUnavailable(
+            "Gemini requests are still finishing; retry shortly.", reason="busy"
+        )
+    finished = Event()
+    outcome = []
+
+    def send():
+        try:
+            with httpx.Client(transport=transport, trust_env=transport is None) as client:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    outcome.append(None)
+                    return
+                response = client.post(
+                    url, headers={"x-goog-api-key": key}, json=body, timeout=remaining
+                )
+            outcome.append(response)
+        except Exception:
+            # Transport exceptions can contain headers, URLs or provider text.
+            outcome.append(None)
+        finally:
+            _REQUEST_SLOTS.release()
+            finished.set()
+
+    worker = Thread(target=send, name="gemini-request", daemon=True)
+    try:
+        worker.start()
+    except Exception:
+        _REQUEST_SLOTS.release()
+        raise GeminiUnavailable("Gemini request could not start.", reason="provider") from None
+    if not finished.wait(max(0, deadline - time.monotonic())) or time.monotonic() >= deadline:
+        raise _AttemptTimeout
+    return outcome[0]
 
 
 class GeminiUnavailable(RuntimeError):
@@ -135,7 +183,9 @@ def _response_data(envelope: object) -> dict:
             raise ValueError
         return data
     except (KeyError, IndexError, TypeError, AttributeError, ValueError):
-        raise GeminiUnavailable("Gemini returned invalid or incomplete property JSON.") from None
+        raise GeminiUnavailable(
+            "Gemini returned invalid or incomplete property JSON.", reason="malformed"
+        ) from None
 
 
 def suggest_properties_result(
@@ -157,14 +207,24 @@ def suggest_properties_result(
     HTTP, connection, and malformed-response failures raise GeminiUnavailable with
     safe messages. Invalid local inputs raise ValueError without echoing inputs.
     """
+    deadline = time.monotonic() + deadline_seconds
     key = api_key if api_key is not None else os.environ.get("GEMINI_API_KEY", "")
     if not key.strip():
-        raise GeminiUnavailable("Set GEMINI_API_KEY or pass api_key to enable Gemini suggestions.")
+        raise GeminiUnavailable(
+            "Set GEMINI_API_KEY or pass api_key to enable Gemini suggestions.",
+            reason="not_configured",
+        )
     selected_model = model or os.environ.get("GEMINI_MODEL") or DEFAULT_MODEL
     models = tuple(dict.fromkeys((selected_model, *fallback_models)))
     if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", item) for item in models):
         raise ValueError("Gemini model must be a model ID without a URL or path.")
-    if max_attempts < 1 or deadline_seconds <= 0 or backoff_seconds < 0:
+    if (
+        max_attempts < 1
+        or not math.isfinite(deadline_seconds)
+        or deadline_seconds <= 0
+        or not math.isfinite(backoff_seconds)
+        or backoff_seconds < 0
+    ):
         raise ValueError("Gemini retry settings must be positive")
     if not 1 <= len(image_paths) <= 4:
         raise ValueError("Gemini suggestions require one to four images.")
@@ -202,54 +262,66 @@ def suggest_properties_result(
 
     if callable(transport):
         transport = httpx.MockTransport(transport)
-    deadline = time.monotonic() + deadline_seconds
     request_body = {
         "contents": [{"role": "user", "parts": parts}],
         "generationConfig": {"response_mime_type": "application/json"},
     }
-    with httpx.Client(transport=transport) as client:
-        for model_index, candidate_model in enumerate(models):
-            for attempt in range(max_attempts):
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    raise GeminiUnavailable("Gemini request deadline exceeded.", reason="deadline")
+    for model_index, candidate_model in enumerate(models):
+        now = time.monotonic()
+        # Reserve an equal share of the remaining budget for each later model.
+        model_deadline = now + (deadline - now) / (len(models) - model_index)
+        for attempt in range(max_attempts):
+            now = time.monotonic()
+            if now >= deadline:
+                raise GeminiUnavailable("Gemini request deadline exceeded.", reason="deadline")
+            if now >= model_deadline:
+                break
+            attempt_deadline = now + (model_deadline - now) / (max_attempts - attempt)
+            try:
+                response = _request_until(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/"
+                    f"{candidate_model}:generateContent",
+                    key,
+                    request_body,
+                    transport,
+                    attempt_deadline,
+                )
+            except _AttemptTimeout:
+                # Do not pile retries behind an in-flight slow primary. Give the
+                # reserved time and a free request slot to the next model.
+                if model_index == len(models) - 1:
+                    raise GeminiUnavailable(
+                        "Gemini request deadline exceeded.", reason="deadline"
+                    ) from None
+                break
+            if response is None:
+                reason, retryable = "network", True
+            elif response.is_success:
                 try:
-                    response = client.post(
-                        f"https://generativelanguage.googleapis.com/v1beta/models/"
-                        f"{candidate_model}:generateContent",
-                        headers={"x-goog-api-key": key},
-                        json=request_body,
-                        timeout=remaining,
-                    )
-                except Exception:
-                    reason = "network"
-                    retryable = True
-                    response = None
-                else:
-                    if response.is_success:
-                        try:
-                            envelope = response.json()
-                        except ValueError:
-                            raise GeminiUnavailable(
-                                "Gemini returned invalid or incomplete property JSON.", reason="malformed"
-                            ) from None
-                        suggestions = _suggestions(_response_data(envelope))
-                        actual_model = envelope.get("modelVersion") if isinstance(envelope, dict) else None
-                        if not isinstance(actual_model, str) or not actual_model:
-                            actual_model = candidate_model
-                        actual_model = actual_model.removeprefix("models/")
-                        return GeminiResult(
-                            suggestions, actual_model, selected_model, model_index > 0
-                        )
-                    reason, retryable = _failure(response)
-                if not retryable:
-                    raise GeminiUnavailable(_failure_message(reason), reason=reason) from None
-                if attempt + 1 < max_attempts:
-                    delay = min(backoff_seconds * 2**attempt, max(0, deadline - time.monotonic()))
-                    if delay:
-                        time.sleep(delay)
-                elif model_index == len(models) - 1:
-                    raise GeminiUnavailable(_failure_message(reason), reason=reason) from None
+                    envelope = response.json()
+                except ValueError:
+                    raise GeminiUnavailable(
+                        "Gemini returned invalid or incomplete property JSON.", reason="malformed"
+                    ) from None
+                suggestions = _suggestions(_response_data(envelope))
+                # Parsing and validation also consume the elapsed-time budget.
+                if time.monotonic() >= deadline:
+                    raise GeminiUnavailable("Gemini request deadline exceeded.", reason="deadline")
+                actual_model = envelope.get("modelVersion") if isinstance(envelope, dict) else None
+                if not isinstance(actual_model, str) or not actual_model:
+                    actual_model = candidate_model
+                actual_model = actual_model.removeprefix("models/")
+                return GeminiResult(suggestions, actual_model, selected_model, model_index > 0)
+            else:
+                reason, retryable = _failure(response)
+            if not retryable:
+                raise GeminiUnavailable(_failure_message(reason), reason=reason) from None
+            if attempt + 1 < max_attempts:
+                delay = min(backoff_seconds * 2**attempt, max(0, model_deadline - time.monotonic()))
+                if delay:
+                    time.sleep(delay)
+            elif model_index == len(models) - 1:
+                raise GeminiUnavailable(_failure_message(reason), reason=reason) from None
     raise GeminiUnavailable("Gemini suggestions are unavailable.")
 
 
@@ -268,9 +340,9 @@ def _failure(response: httpx.Response) -> tuple[str, bool]:
             violations = detail.get("violations", [])
             for violation in violations if isinstance(violations, list) else []:
                 if isinstance(violation, dict):
-                    quota_period += " " + str(
-                        violation.get("quotaId", violation.get("quota_id", ""))
-                    ).lower()
+                    quota_period += (
+                        " " + str(violation.get("quotaId", violation.get("quota_id", ""))).lower()
+                    )
     except (ValueError, AttributeError, TypeError):
         reason = ""
     normalized = str(reason).lower()
@@ -283,8 +355,12 @@ def _failure(response: httpx.Response) -> tuple[str, bool]:
     if status == 400:
         return "invalid_request", False
     if status == 429:
-        if ("quota" in normalized or "billing" in normalized
-                or "perday" in quota_period or "daily" in quota_period):
+        if (
+            "quota" in normalized
+            or "billing" in normalized
+            or "perday" in quota_period
+            or "daily" in quota_period
+        ):
             return "quota", False
         return "rate_limit", True
     if status == 404 and "model_not_found" in normalized:

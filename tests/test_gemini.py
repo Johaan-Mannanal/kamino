@@ -2,6 +2,7 @@ import base64
 import json
 import time
 from pathlib import Path
+from threading import BoundedSemaphore, Event
 
 import httpx
 import pytest
@@ -180,8 +181,16 @@ def test_missing_key_never_calls_transport(images, key):
         suggest_properties(images, api_key=key, transport=unexpected)
 
 
-@pytest.mark.parametrize("status,reason", [(400,"invalid_request"), (401,"authentication"),
-    (402,"billing"), (403,"permission"), (404,"provider")])
+@pytest.mark.parametrize(
+    "status,reason",
+    [
+        (400, "invalid_request"),
+        (401, "authentication"),
+        (402, "billing"),
+        (403, "permission"),
+        (404, "provider"),
+    ],
+)
 def test_terminal_http_failures_are_safe_without_retries(images, status, reason):
     calls = []
 
@@ -200,14 +209,22 @@ def test_terminal_http_failures_are_safe_without_retries(images, status, reason)
 
 def test_overload_retries_then_falls_back_and_records_actual_model(images):
     seen = []
+
     def handle(request):
         seen.append(request.url.path)
         if "primary" in request.url.path:
-            return httpx.Response(503, json={"error":{"status":"SERVICE_UNAVAILABLE"}})
-        return httpx.Response(200, json={**envelope(GOOD), "modelVersion":"models/fallback-v2"})
-    result = suggest_properties_result(images, api_key=SECRET, model="primary",
-        fallback_models=("fallback",), max_attempts=2, backoff_seconds=0,
-        transport=handle)
+            return httpx.Response(503, json={"error": {"status": "SERVICE_UNAVAILABLE"}})
+        return httpx.Response(200, json={**envelope(GOOD), "modelVersion": "models/fallback-v2"})
+
+    result = suggest_properties_result(
+        images,
+        api_key=SECRET,
+        model="primary",
+        fallback_models=("fallback",),
+        max_attempts=2,
+        backoff_seconds=0,
+        transport=handle,
+    )
     assert result.fallback_used
     assert result.requested_model == "primary"
     assert result.model == "fallback-v2"
@@ -216,70 +233,211 @@ def test_overload_retries_then_falls_back_and_records_actual_model(images):
 
 def test_total_failure_is_bounded_and_sanitized(images):
     seen = []
+
     def handle(request):
         seen.append(request.url.path)
         return httpx.Response(503, text=SECRET)
+
     with pytest.raises(GeminiUnavailable) as error:
-        suggest_properties_result(images, api_key=SECRET, model="primary",
-            fallback_models=("fallback",), max_attempts=2, backoff_seconds=0,
-            transport=handle)
+        suggest_properties_result(
+            images,
+            api_key=SECRET,
+            model="primary",
+            fallback_models=("fallback",),
+            max_attempts=2,
+            backoff_seconds=0,
+            transport=handle,
+        )
     assert error.value.reason == "overload"
     assert SECRET not in str(error.value)
     assert len(seen) == 4
 
 
-def test_total_deadline_stops_retries_and_fallback(images):
-    seen=[]
+def test_total_deadline_rejects_delayed_valid_success(images):
+    seen = []
+    completed = Event()
+
     def handle(request):
         seen.append(request.url.path)
-        time.sleep(0.02)
-        return httpx.Response(503)
-    with pytest.raises(GeminiUnavailable) as error:
-        suggest_properties_result(images,api_key=SECRET,model="primary",
-            fallback_models=("fallback",),max_attempts=3,
-            deadline_seconds=0.005,backoff_seconds=0,transport=handle)
-    assert error.value.reason == "deadline"
-    assert len(seen)==1
+        time.sleep(0.05)
+        completed.set()
+        return httpx.Response(200, json=envelope(GOOD))
+
+    try:
+        started = time.monotonic()
+        with pytest.raises(GeminiUnavailable) as error:
+            suggest_properties_result(
+                images,
+                api_key=SECRET,
+                model="primary",
+                fallback_models=(),
+                max_attempts=1,
+                deadline_seconds=0.005,
+                backoff_seconds=0,
+                transport=handle,
+            )
+        assert error.value.reason == "deadline"
+        assert time.monotonic() - started < 0.045
+        assert not completed.is_set()
+        assert len(seen) == 1
+    finally:
+        assert completed.wait(1)
 
 
-@pytest.mark.parametrize("status,error_code,reason", [
-    (429,"QUOTA_EXCEEDED","quota"), (401,"AUTHENTICATION","authentication"),
-    (402,"PAYMENT_REQUIRED","billing"), (400,"INVALID_ARGUMENT","invalid_request")])
-def test_nonretryable_errors_never_call_fallback(images,status,error_code,reason):
-    seen=[]
+def test_slow_primary_reserves_time_for_fallback(images):
+    release, completed = Event(), Event()
+    seen = []
+
     def handle(request):
         seen.append(request.url.path)
-        return httpx.Response(status,json={"error":{"status":error_code,"message":SECRET}})
+        if "primary" in request.url.path:
+            assert request.extensions["timeout"]["read"] <= 0.075
+            try:
+                assert release.wait(1)
+                return httpx.Response(200, json={**envelope(GOOD), "modelVersion": "late-primary"})
+            finally:
+                completed.set()
+        assert not completed.is_set()
+        return httpx.Response(200, json={**envelope(GOOD), "modelVersion": "fallback-actual"})
+
+    try:
+        started = time.monotonic()
+        result = suggest_properties_result(
+            images,
+            api_key=SECRET,
+            model="primary",
+            fallback_models=("fallback",),
+            max_attempts=2,
+            deadline_seconds=0.3,
+            backoff_seconds=0,
+            transport=handle,
+        )
+        assert time.monotonic() - started < 0.25
+        assert result.model == "fallback-actual"
+        assert result.fallback_used
+        assert len(seen) == 2
+    finally:
+        release.set()
+        assert completed.wait(1)
+
+
+def test_deadline_interrupts_slow_response_body(images):
+    release, completed = Event(), Event()
+
+    class SlowBody(httpx.SyncByteStream):
+        def __iter__(self):
+            yield b"{"
+            try:
+                assert release.wait(1)
+                yield b"}"
+            finally:
+                completed.set()
+
+    try:
+        with pytest.raises(GeminiUnavailable) as error:
+            suggest_properties_result(
+                images,
+                api_key=SECRET,
+                fallback_models=(),
+                max_attempts=1,
+                deadline_seconds=0.1,
+                transport=lambda _: httpx.Response(200, stream=SlowBody()),
+            )
+        assert error.value.reason == "deadline"
+        assert not completed.is_set()
+    finally:
+        release.set()
+        assert completed.wait(1)
+
+
+def test_unfinished_request_capacity_is_bounded(images, monkeypatch):
+    import photo2sim.integrations.gemini as gemini
+
+    occupied = BoundedSemaphore(1)
+    occupied.acquire()
+    monkeypatch.setattr(gemini, "_REQUEST_SLOTS", occupied)
+
+    def unexpected(_):
+        pytest.fail("Do not start more requests while worker capacity is occupied")
+
     with pytest.raises(GeminiUnavailable) as error:
-        suggest_properties_result(images,api_key=SECRET,model="primary",
-            fallback_models=("fallback",),backoff_seconds=0,transport=handle)
+        suggest_properties_result(images, api_key=SECRET, transport=unexpected)
+    assert error.value.reason == "busy"
+
+
+@pytest.mark.parametrize("budget", [float("nan"), float("inf"), -1, 0])
+def test_invalid_total_deadlines_are_rejected(images, budget):
+    with pytest.raises(ValueError):
+        suggest_properties_result(images, api_key=SECRET, deadline_seconds=budget)
+
+
+@pytest.mark.parametrize(
+    "status,error_code,reason",
+    [
+        (429, "QUOTA_EXCEEDED", "quota"),
+        (401, "AUTHENTICATION", "authentication"),
+        (402, "PAYMENT_REQUIRED", "billing"),
+        (400, "INVALID_ARGUMENT", "invalid_request"),
+    ],
+)
+def test_nonretryable_errors_never_call_fallback(images, status, error_code, reason):
+    seen = []
+
+    def handle(request):
+        seen.append(request.url.path)
+        return httpx.Response(status, json={"error": {"status": error_code, "message": SECRET}})
+
+    with pytest.raises(GeminiUnavailable) as error:
+        suggest_properties_result(
+            images,
+            api_key=SECRET,
+            model="primary",
+            fallback_models=("fallback",),
+            backoff_seconds=0,
+            transport=handle,
+        )
     assert error.value.reason == reason
-    assert len(seen)==1
+    assert len(seen) == 1
     assert SECRET not in str(error.value)
 
 
 def test_legacy_daily_quota_detail_stops_without_fallback(images):
-    calls=[]
+    calls = []
+
     def handle(request):
         calls.append(request.url.path)
-        return httpx.Response(429,json={"error":{"status":"RESOURCE_EXHAUSTED",
-            "details":[{"violations":[{"quotaId":"GenerateRequestsPerDayPerProjectPerModel"}]}]}})
+        return httpx.Response(
+            429,
+            json={
+                "error": {
+                    "status": "RESOURCE_EXHAUSTED",
+                    "details": [
+                        {"violations": [{"quotaId": "GenerateRequestsPerDayPerProjectPerModel"}]}
+                    ],
+                }
+            },
+        )
+
     with pytest.raises(GeminiUnavailable) as error:
-        suggest_properties_result(images,api_key=SECRET,model="primary",
-            fallback_models=("fallback",),transport=handle)
+        suggest_properties_result(
+            images, api_key=SECRET, model="primary", fallback_models=("fallback",), transport=handle
+        )
     assert error.value.reason == "quota"
-    assert len(calls)==1
+    assert len(calls) == 1
 
 
 def test_malformed_primary_output_does_not_fall_back(images):
-    seen=[]
+    seen = []
+
     def handle(request):
         seen.append(request.url.path)
-        return httpx.Response(200,json={"candidates":[]})
+        return httpx.Response(200, json={"candidates": []})
+
     with pytest.raises(GeminiUnavailable, match="invalid or incomplete"):
-        suggest_properties_result(images,api_key=SECRET,model="primary",
-            fallback_models=("fallback",),transport=handle)
-    assert len(seen)==1
+        suggest_properties_result(
+            images, api_key=SECRET, model="primary", fallback_models=("fallback",), transport=handle
+        )
+    assert len(seen) == 1
 
 
 def test_network_error_is_safe(images):

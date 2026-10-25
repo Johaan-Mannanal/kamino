@@ -29,6 +29,58 @@ class SuggestionsBusy(RuntimeError):
     pass
 
 
+def failure_details(reason: str) -> dict:
+    """Public allowlisted categories; never echo provider messages or exceptions."""
+    messages = {
+        "not_configured": (
+            "Gemini is not configured. Ask the server operator to configure it.",
+            False,
+        ),
+        "authentication": (
+            "Gemini authentication failed. Ask the server operator to update its API key.",
+            False,
+        ),
+        "permission": (
+            "Gemini access was denied. Ask the server operator to check API permissions.",
+            False,
+        ),
+        "billing": (
+            "Gemini billing is unavailable. Ask the server operator to check credits and billing.",
+            False,
+        ),
+        "quota": (
+            "Gemini quota is exhausted. Wait for its reset or ask the server operator to check quota.",
+            False,
+        ),
+        "invalid_request": (
+            "Gemini rejected the request. Revise the object hint or ask the server operator to check configuration.",
+            False,
+        ),
+        "malformed": (
+            "Gemini returned an invalid or incomplete response. Retry explicitly or continue manually.",
+            False,
+        ),
+        "overload": ("Gemini is overloaded. Try again shortly.", True),
+        "rate_limit": ("Gemini is temporarily rate limited. Wait before retrying.", True),
+        "deadline": ("Gemini exceeded the request time budget. Try again shortly.", True),
+        "network": ("Gemini could not be reached. Check connectivity and try again.", True),
+        "busy": ("Gemini requests are still finishing. Wait before retrying.", True),
+        "model_unavailable": (
+            "The configured Gemini models are unavailable. Ask the server operator to check model configuration.",
+            False,
+        ),
+        "provider": ("Gemini suggestions are unavailable. Try again later.", True),
+    }
+    category = reason if reason in messages else "provider"
+    message, retryable = messages[category]
+    return {
+        "detail": f"{message} Manual property entry remains available.",
+        "category": category,
+        "retryable": retryable,
+        "manual_entry_available": True,
+    }
+
+
 class SuggestionService:
     def __init__(self, store: JobStore, settings: Settings, transport: Transport | None = None):
         self.store = store
@@ -80,7 +132,7 @@ class SuggestionService:
         if cached is not None:
             return cached
         if not self.settings.gemini_api_key:
-            raise GeminiUnavailable("Gemini is not configured")
+            raise GeminiUnavailable("Gemini is not configured", reason="not_configured")
         if not self.inference_slot.acquire(blocking=False):
             raise SuggestionsBusy
         try:

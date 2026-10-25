@@ -35,6 +35,17 @@ POST with `{"object_hint": "Apple USB-C adapter"}` or no body. The response has 
 
 The endpoint sends EXIF-corrected RGB JPEG copies, at most 1024 pixels on the longest side, from the job's saved source images. Originals are preserved. Suggestions, requested model, actual responding model, fallback flag, hint and timestamp are cached under `suggestions/gemini.json`, separately from confirmed properties. Cache matching uses the requested model and configured fallback list, so a successful fallback is reused without calling the primary again. A successful refresh replaces this cache; a failed refresh preserves it. Only one uncached Gemini request runs at once per server; busy requests return 429 with Retry-After. Missing credentials, quota/provider/malformed-response failures return 503 and leave manual entry available; invalid local images return 422. Missing jobs return 404.
 
+Provider failures return HTTP 503 with a backwards-compatible string `detail` plus
+`category`, `retryable`, and `manual_entry_available: true`. Categories include
+`not_configured`, `authentication`, `permission`, `billing`, `quota`,
+`invalid_request`, `malformed`, `overload`, `rate_limit`, `deadline`, `network`,
+`busy`, `model_unavailable`, and `provider`. Messages provide safe operator or retry
+actions; upstream error bodies, credentials and exception strings are never returned.
+Provider authentication errors remain 503 so they cannot be confused with application
+bearer-token failures (401). `retryable` describes whether a later explicit request
+may succeed; it does not trigger an automatic frontend retry. The existing frontend
+displays `detail` while keeping manual drafts and saved estimates available.
+
 Applying a suggestion requires an explicit PATCH to `/properties`; the server does not do this automatically. A repeat GET or cached POST makes no new provider request. A changed hint/model or explicit refresh can make another request.
 
 ## Deployment access
