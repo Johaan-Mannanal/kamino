@@ -1,160 +1,172 @@
 # Kamino
 
-Turn photos of real objects into editable MuJoCo simulation assets. Built for Cal Hacks 13.0.
+**Turn photos of real objects into editable, portable MuJoCo simulation assets.**
 
-**Goal:** reusable conversion middleware for robotics and engineering. Photos,
-optional CAD and measurements become reviewed geometry, physical properties and
-articulation, then a runnable simulator export that can be iterated.
+Kamino brings reconstruction, geometry review, physical-property estimates and
+simulation export into one workspace. Start with object photos, inspect the
+reconstructed mesh, set a real-world reference length, review the assumptions,
+and download a runnable bundle. Corrections create new attempts while preserving
+earlier inputs and downloads.
 
-**Workflow:** Inputs → geometry/part proposals → user corrections to scale,
-properties and joints → simulation export → validation and refinement.
+[Open Kamino](https://kamino.design) · [Devpost](https://devpost.com/software/kamino) ·
+[Figma design](https://www.figma.com/design/rSOvF7zmhYyGwLxGqLRgAo/Untitled?node-id=0-1&m=dev) ·
+[Design evidence and access status](docs/FIGMA_EVIDENCE.md)
 
-The rigid-object workflow and guided component-mesh assembly workflow are working.
-Automatic photo-based part segmentation and joint inference are not implemented.
+Built for Cal Hacks 13.0 by Johaan, Atul, Srijan and Yash.
+The hosted app uses real reconstruction and estimate services. Creating jobs
+requires a team-issued access code because provider usage is metered. The separate
+**Use demo photos** experience is synthetic; its demo download is not a validated
+MuJoCo bundle.
 
-## Start here
+## What you can do
 
-- [Local demo startup](docs/DEMO.md): repeatable assembly workflow without provider calls.
-- [Ordered project phases](docs/PROJECT.md): scope, task list, and acceptance criteria.
-- [Sponsor targets](docs/SPONSORS.md): Fetch.ai, Vultr, and Gemini API.
-- [Shared Markdown folder](docs/team-notes/): upload context, research, and handoffs.
-- [Working together](CONTRIBUTING.md): branches, interfaces, and cross-computer handoffs.
-- [Shared API and asset contracts](docs/API.md): exact endpoints, units, and integration boundaries.
-- [Team environment setup](docs/ENVIRONMENT.md): which credentials each laptop needs.
-- [Vultr deployment](deploy/README.md): container, HTTPS, access token and persistence checks.
-- [Current Windows handoff](docs/handoffs/yash-articulated-demo.md); older Srijan/Atul handoffs are historical.
-- [Example provenance](examples/README.md): generated assets, synthetic fixtures and imported references.
-- [Capture workspace](hardware/README.md): photography and reference measurements.
+1. **Upload photos.** We recommend 2–4 clear views of the same object. One image is
+   still supported; four is the maximum. Cropping is optional, and originals are retained.
+2. **Inspect the reconstruction.** Compare source photos with the actual mesh,
+   switch Studio/Mesh display, orbit, pan, zoom and reset the camera. The current
+   workspace uses the entire reconstruction for viewing, sizing and export.
+3. **Review orientation and size.** Confirm one full-extent reference length in
+   the reviewed orientation. Uniform scaling preserves the reconstructed proportions;
+   the other dimensions are derived, not independently forced to match estimates.
+4. **Review physical properties.** Gemini can suggest properties and explanatory
+   notes. Other than the untouched new-job friction default, estimates require
+   explicit application. Mass remains editable. Friction starts as **estimated**:
+   a valid Gemini estimate can replace the untouched default; otherwise 0.8 is
+   disclosed as a simulator fallback with unknown contacting materials. Save commits
+   the draft; estimates are not measurements.
+5. **Prepare and download.** Generate a MuJoCo scene, local assets, metadata,
+   assumptions and validation report. Reopen a saved job, correct its inputs and
+   regenerate from cached reconstruction without overwriting earlier exports.
 
-## Current status
+The separate [assembly workbench](https://kamino.design/assembly.html) accepts
+component meshes and reviewed link/joint definitions. See the
+[guided assembly workflow](docs/GUIDED_ASSEMBLIES.md). It does not automatically
+infer a robot's articulation from photographs.
 
-The backend branch connects uploads, persistent jobs, Meshy reconstruction, explicit property confirmation, geometry preparation, MuJoCo validation, and authenticated ZIP downloads. The integrated frontend includes mesh preview, saved orientation and Gemini suggestions. The cleaned real charger completed through the API and passed Windows native-viewer and relocation checks; dimensions/mass remain estimated and collision/inertia approximate. Gemini suggestions have a successful live backend request; frontend acceptance used cached suggestions. Fetch public integration and Vultr deployment remain unfinished. Main is separate from feature integration.
+## How it works
 
-The intended articulated demo converts the SO101 itself through reusable assembly
-preparation/review/export, then compares it with the physical arm. Our existing
-[SO101 scene](examples/so101/WORKSPACE.md) uses an **imported reference model**;
-it does not prove articulated conversion. Windows combined-viewer/reset acceptance
-was reported by Yash at `74cf11a`. Physical mapping remains unverified.
-
-A [reviewed assembly format](docs/ASSEMBLIES.md) and
-[synthetic two-link export](examples/assemblies/two-link-hinge/README.md) now
-provide the articulated-conversion foundation. The workbench supports component
-mesh uploads, link grouping/naming, joint review, saved revisions, readable
-validation failures, collision overlays and authenticated portable downloads.
-New exports include standalone launch instructions, a MuJoCo version pin, a runner
-and a readable assumptions summary. A second
-[hinged-panel example](examples/assemblies/hinged-panel/README.md) verifies this
-workflow without hand-written project JSON. Photo part/joint inference remains
-future work. See [the plan](docs/PROJECT.md).
-
-## Basic infrastructure
-
-| Component | Planned tool / responsibility |
-| --- | --- |
-| Reconstruction | Meshy multi-image API; real charger generation demonstrated |
-| Geometry | trimesh and NumPy: inspection, orientation, scaling, collision proxies |
-| Simulation | MuJoCo Python and its native viewer |
-| Backend | FastAPI and Pydantic, with a background job worker |
-| Storage | Local asset files and SQLite for job state initially |
-| Interface | Uploads, progress, editable properties, preview, export |
-| AI assistance | Gemini: suggestions and requests for missing measurements |
-| Agent / hosting | Fetch workflow integration; Vultr for actual hosting or processing |
-
-Geometry generation does not establish physical accuracy. Measured values and assumptions must be distinguishable. A scene passing loading/contact checks is not proof of successful policy training or transfer to hardware.
-
-## Layout
-
-```text
-docs/
-  PROJECT.md          Ordered phases and acceptance criteria
-  SPONSORS.md         Sponsor integrations and regular award targets
-  team-notes/         Shared Markdown uploads and handoffs
-  decisions/          Agreed changes in direction
-src/photo2sim/
-  contracts.py        Shared job, property, and asset models
-  api/                Job API, SQLite persistence, background reconstruction
-  assets/             Reconstruction, asset metadata, geometry preparation
-  simulation/         MuJoCo export and validation
-  integrations/       Gemini, Fetch, and provider adapters
-frontend/             Integrated upload, properties, preview and export UI
-tools/simulation/     Standalone simulation checks and helper commands
-examples/simulation/  Small portable scenes and test fixtures
-hardware/             Capture fixtures and measurements
-tests/                Automated checks as implementation arrives
+```mermaid
+flowchart LR
+    P[Object photos] --> M[Meshy reconstruction]
+    P --> G[Gemini property suggestions]
+    M --> W[Editable workspace]
+    G --> W
+    W --> R[Saved orientation, uniform reference and properties]
+    R --> S[MuJoCo preparation and checks]
+    S --> Z[Portable ZIP and report]
+    R --> H[Revision and attempt history]
 ```
 
-## Python setup
+- **Browser:** TypeScript, Vite and Three.js. The current site lives in
+  `prototypes/kamino-ui`; the directory name is historical. Shared viewer/API code
+  and the assembly page live in `frontend`.
+- **Backend:** FastAPI and Pydantic, with SQLite and local artifact storage.
+- **Geometry and simulation:** trimesh, NumPy and MuJoCo.
+- **Hosting:** Railway frontend/backend services; `kamino.design` was registered
+  through the GoDaddy Registry event offer at Porkbun.
+- **Compatibility:** Python imports and environment variables retain the
+  `photo2sim` / `PHOTO2SIM_*` names. The public project and repository are Kamino.
 
-Use **Python 3.12** in a dedicated `.venv-sim`. Preserve the working Windows LeRobot environment separately.
+## Run locally without provider charges
 
-macOS/Linux:
+Requirements: Python 3.12+ with a compatible MuJoCo wheel, Node.js 22.12+ and
+pnpm 11.25.0. Keep this environment separate from your robot/LeRobot environment.
 
-```bash
-python3.12 -m venv .venv-sim
-source .venv-sim/bin/activate
+```sh
+git clone https://github.com/Johaan-Mannanal/kamino.git
+cd kamino
+python3 -m venv .venv
+source .venv/bin/activate
 python -m pip install -e '.[dev,simulation]'
+pnpm --dir frontend install --frozen-lockfile
+pnpm --dir prototypes/kamino-ui install --frozen-lockfile
 ```
 
-Windows PowerShell:
+On Windows, create the environment with `py -3.12 -m venv .venv` and use
+`.\.venv\Scripts\python.exe` for Python commands (or activate it in your shell).
+Intel macOS release checks used Python 3.13 and MuJoCo 3.3.7.
 
-```powershell
-py -3.12 -m venv .venv-sim
-.\.venv-sim\Scripts\python.exe -m pip install -e ".[dev,simulation]"
+Start the isolated mock API from the repository root:
+
+```sh
+python -m tools.run_demo --frontend-port 5188
 ```
 
-Use `.[dev,simulation]` for the full pipeline; `.[dev]` alone supports capture/reconstruction without simulation processing. Intel Macs can use Python 3.13 with `mujoco==3.3.7`, which has an Intel wheel; current 3.17 wheels are not available for Intel macOS. Windows/Linux should use the current simulation extra and record their actual versions. Copy `.env.example` to `.env` only if you do not already have local configuration. The backend reads `.env` from the working directory; shell variables take precedence. See [team environment setup](docs/ENVIRONMENT.md) for Gemini/Fetch/Vultr fields and their implementation status.
+In another terminal:
 
-## Run the backend
-
-With the environment active:
-
-```bash
-python -m uvicorn photo2sim.api.app:create_app --factory --host 127.0.0.1 --port 8000
+```sh
+pnpm --dir prototypes/kamino-ui dev
 ```
 
-Windows without activating:
+Open **http://127.0.0.1:5188** and enter the temporary application token printed by
+the backend when prompted. This launcher ignores `.env`, uses synthetic reconstruction
+and makes no provider calls. Generated server bundles still use real MuJoCo
+processing. For the assembly page, run `pnpm --dir frontend dev` and use the
+[assembly demo instructions](docs/DEMO.md), including its allowed frontend origin.
 
-```powershell
-.\.venv-sim\Scripts\python.exe -m uvicorn photo2sim.api.app:create_app --factory --host 127.0.0.1 --port 8000
-```
+For real photos-to-mesh requests, configure backend-only credentials and start the
+normal API as described in [environment setup](docs/ENVIRONMENT.md). Real provider
+requests can incur charges. Never put provider keys or access codes in frontend
+build variables, URLs or Git.
 
-Open `http://127.0.0.1:8000/docs` to upload 1–4 images under `images`, poll the returned job ID, PATCH confirmed properties, then POST `/api/jobs/{id}/process` with no body. Poll until `completed` or `failed`; successful jobs expose `bundle_path` for ZIP download through the files endpoint. The default provider is **mock**: uploaded images do not influence this known synthetic cube. See [API details](docs/API.md) and the [real charger bundle](examples/simulation/apple-20w-charger/README.md).
+## Verification and release
 
-Use **one server process/worker** for this in-process job executor. Do not run multiple servers against the same job database. Existing queued jobs resume on startup; saved provider task IDs are polled again. A submission interrupted before its task ID was saved is marked uncertain, with no automatic paid resubmission.
+The published application source is the released frontend `275ded8` with backend
+`8d2173f`. This main-branch publication updates documentation and CI coverage;
+no runtime deployment is needed for those documentation changes.
 
-For real reconstruction, explicitly set `PHOTO2SIM_PROVIDER=meshy` and `MESHY_API_KEY` in the server environment before starting. `MESHY_MODEL` defaults to `meshy-6`. The adapter requests untextured GLB geometry and preserves outputs locally. Provider API access/credits are separate from this software; no live generation is established by the HTTP-transport tests. [Official Meshy API reference](https://docs.meshy.ai/en/api/multi-image-to-3d).
+- Backend release checks: **440 passed, 2 optional skips** at `8d2173f`.
+- Frontend release checks: **118 shared/legacy + 149 Workspace tests passed**,
+  with both TypeScript checks and production builds at `275ded8`.
+- Browser checks exercised correction, regeneration, reopening, prior-download
+  preservation, camera controls and mobile-sized layouts. These are browser/touch
+  emulation checks, not full iOS/Android device certification.
+- Hosted checks and relocated MuJoCo loading are recorded separately from unit
+  tests. They do not establish accurate reconstruction, contact physics or grasping.
 
-## Checks
+See the [release and evidence index](docs/RELEASE.md). To run local checks:
 
-Run with the active environment, or use `.\.venv-sim\Scripts\python.exe` explicitly on Windows:
-
-```bash
+```sh
+python -m pytest -q
 python -m ruff check .
 python -m ruff format --check .
-python -c "import photo2sim"
-python -m pytest -q
+pnpm --dir frontend test
+pnpm --dir frontend build
+pnpm --dir prototypes/kamino-ui test
+pnpm --dir prototypes/kamino-ui build
 ```
 
-CI checks lint, formatting, package import, and tests on Python 3.12. Backend tests cover actual local uploads, persistence, property validation, downloads, and restart behavior; Meshy tests replace only the external HTTP transport.
+## Sponsor work and evidence
 
-Keep API keys in `.env`. Store generated assets, large captures, and local databases under ignored `artifacts/`, `outputs/`, or `data/`. Commit only small intentional example fixtures with their provenance.
+| Track / service | What Kamino actually uses | Evidence / qualification |
+| --- | --- | --- |
+| Gemini API | Photo-based property suggestions, notes, bounded retries and fallback provenance | [Implementation and sponsor status](docs/SPONSORS.md) |
+| Figma in the Workflow | Design and prototype work informing the implemented UI | [Design link, implementation links and outstanding public evidence](docs/FIGMA_EVIDENCE.md) |
+| GoDaddy Registry | The `kamino.design` domain, registered at Porkbun | [Live HTTPS site](https://kamino.design); hosting is Railway |
+| Microsoft: Built for the Real World / Customer Impact | Proposed fit for the robotics asset-preparation workflow | [Eligibility clarification](docs/handoffs/microsoft-real-world-track-assessment.md); sponsor confirmation pending |
 
-## Project name and existing clones
+No Azure integration is claimed. The inspected Microsoft rules do not specify an
+Azure requirement; they do require an AI agent, and the fit of this human-reviewed
+workflow remains unconfirmed. Bright Data, Apify, Fetch.ai and Vultr are not current
+Kamino integrations or submission claims. Historical research remains in Git.
 
-The product is **Kamino** (formerly Photo2Sim). The GitHub repository remains `Johaan-Mannanal/photo2sim`; Python imports (`photo2sim`), environment variables (`PHOTO2SIM_*`) and saved-file format identifiers are retained for compatibility. Your existing local directory can retain its name, including the Windows `calhacks-arm` directory.
+## Limits to keep in mind
 
-```bash
-git remote set-url origin https://github.com/Johaan-Mannanal/photo2sim.git
-git fetch origin
-```
+Reconstruction can invent details or distort proportions, including on familiar
+objects. Gemini recognizing an object does not constrain Meshy's independent mesh
+output. Uniform scaling cannot repair an incorrectly shaped mesh. Because the
+whole reconstruction is exported, unwanted reconstructed surroundings also remain.
 
-Preserve uncommitted work and coordinate integration on your existing branch. The scaffold's import name changed from `dummy` to `photo2sim`; update any new imports accordingly.
+A numerical physics pass establishes only the checks in its report. Collision
+proxies, estimated mass/friction and unverified geometry limit physical fidelity.
+SO-101 observation playback is a separate development demonstration; mappings and
+physical alignment remain provisional. Illustrative charger carry motion is
+scripted. Neither is evidence of validated grasp transfer or a completed
+simulation-to-arm execution pipeline.
 
-### Guided articulated assemblies
+Optional end-user CAD uploads and automatic parameter-correction proposals are
+not part of the released photo workspace. Research/import utilities and historical
+examples should not be read as shipped UI features.
 
-Open `/assembly.html` in the frontend for local part grouping, pivot/joint review
-and kinematic sliders. See [guided workflow](docs/GUIDED_ASSEMBLIES.md) and
-[SO101 CAD/template candidate](examples/assemblies/so101-guided/README.md).
-The revised candidate passes free-space motion checks with documented collision
-approximations; the original failing candidate is retained. It is CAD/template
-assisted, and physical mapping/dynamics remain unverified.
+[Current project scope](docs/PROJECT.md) · [API](docs/API.md) ·
+[Railway deployment](deploy/railway/README.md) · [Examples and provenance](examples/README.md)

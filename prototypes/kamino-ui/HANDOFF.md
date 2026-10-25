@@ -1,3 +1,5 @@
+> Historical initial UI handoff. Integration is complete; use [the current README](README.md) and [release index](../../docs/RELEASE.md). Pending items below describe the original delivery only.
+
 # Master handoff: Kamino UI
 
 The latest UI is in prototypes/kamino-ui as an additive, self-contained project. The branch is codex/kamino-ui-prototype. It starts from remote codex/backend-pipeline at c38c95c7211b790dfd7c624f7482b9eaabb0ce58; it does not replace the accepted combined sizing/Gemini source or merge deliveries again. Cherry-pick the UI delivery commit onto the accepted integration source when ready.
