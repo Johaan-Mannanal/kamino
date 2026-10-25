@@ -2,7 +2,7 @@
 set -eu
 # Fail closed before serving a publicly proxied API.
 : "${PHOTO2SIM_API_TOKEN:?Set the private application access token}"
-: "${PHOTO2SIM_PUBLIC_ORIGIN:?Set this environment's HTTPS frontend origin for browser sessions}"
+: "${PHOTO2SIM_PUBLIC_ORIGIN:?Set the environment HTTPS frontend origin for browser sessions}"
 : "${PHOTO2SIM_DATA_DIR:=/data/jobs}"
 export PHOTO2SIM_DATA_DIR
 # Railway mounts volumes at runtime as root. Prepare only this app's directory,
