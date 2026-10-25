@@ -32,12 +32,12 @@
     "bytes": 533074
   },
   "JOHAAN-UPDATE.md": {
-    "sha256": "fa51167c31fc0fb940dfaec04fb60ad6bbc05fe690635cf2466c0d430f8ac1e4",
-    "bytes": 1150
+    "sha256": "3d471800e9488576de8d2cff19098b452207fabe3c0a7736a255ee69abc2ae92",
+    "bytes": 1135
   },
   "README.md": {
-    "sha256": "8c4afc85da0626914e6a5ba654347c19e7270f28e08598945e0db822e4986fad",
-    "bytes": 2921
+    "sha256": "5090922db26caa42a09e0bb11b9b4b628c4a3caa5c8c3d18ce260ee9e4eeadf2",
+    "bytes": 2813
   },
   "references/hackathon_follower-current-reference.json": {
     "sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
@@ -48,8 +48,8 @@
     "bytes": 2045
   },
   "replay-report.json": {
-    "sha256": "8620f4c0fbbf6e02187f03aaeb844f6af0527ee59559c46d1b8836cdd7913f7a",
-    "bytes": 2137
+    "sha256": "019156318b4ed6655e49325e920831a0b25c12cc3799039ab9b32fa3218f8fe4",
+    "bytes": 2150
   },
   "runtime.json": {
     "sha256": "9dedbf2c0b103b33ff80b47a2049a9e2e1bff49413986af19db5d65bf2d1fa82",

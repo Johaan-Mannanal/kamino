@@ -1,7 +1,7 @@
 {
   "trajectory_directory": "trajectory-20261024-234032",
   "local_source_path": "C:\\Users\\ypira\\so101-demos\\trajectory-20261024-234032",
-  "dataset_selection": "newest completed trajectory on disk; correspondence to the operator shell variable $trajectoryRoot awaits confirmation",
+  "dataset_selection": "operator-confirmed active recording: $trajectoryRoot points to trajectory-20261024-234032",
   "episode": 0,
   "frames": 900,
   "metadata_fps": 30,
@@ -46,5 +46,6 @@
   "recording_time_calibration_snapshot": "not embedded; cached reference matches earlier hash",
   "agent_hardware_actions": [],
   "data_sha256": "3e90db28cc3abc41ae96924ec3bf9c924f47b5910678edbf8dc94bba622c5136",
-  "action_frames_differing_from_old_224752": 900
+  "action_frames_differing_from_old_224752": 900,
+  "operator_folder_confirmation": "yes"
 }

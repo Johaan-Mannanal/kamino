@@ -1,15 +1,13 @@
 # New recorded-command replay candidate: trajectory-20261024-234032
 
 The operator supplied a replay command pointing at `$trajectoryRoot` and says a
-new recording is in use. The agent cannot read a variable from the operator's
-separate live PowerShell session. This package preserves the **newest completed
-recording on disk**, `trajectory-20261024-234032`; its association with that shell
-variable is pending explicit confirmation. Other recent completed datasets are
+new recording is in use. The operator explicitly confirms that `$trajectoryRoot` points to
+**`trajectory-20261024-234032`**, the active recording preserved in this package. Other recent completed datasets are
 23:38:38 and 23:39:25; 23:36:50 and 23:40:16 contain zero completed episodes.
 Do not silently substitute one of them or the older recording.
 
 Episode 0 has **900 frames at stored 30 FPS**, six action and six original
-follower-observation channels, contiguous indices 0–899, increasing timestamps
+follower-observation channels, contiguous indices 0â€“899, increasing timestamps
 spanning 29.966667 seconds, and finite values. Raw files are byte-preserved under
 `dataset/`; a named-channel JSONL export is alongside them. No camera video is
 included. Raw data SHA-256:

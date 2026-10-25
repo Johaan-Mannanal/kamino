@@ -5,8 +5,8 @@ completed dataset on disk is trajectory-20261024-234032, episode 0, 900 frames
 at stored 30 FPS. Its actions differ from the older recording. The package
 contains original action/observation/timestamp data, a named export, exact
 variable-based command, runtime/source identity, calibration/mapping references
-and verified hashes. Correspondence to Yash's live `$trajectoryRoot` variable
-still awaits confirmation; the variable value is not visible to this agent.
+and verified hashes. Yash explicitly confirms that `$trajectoryRoot` points to
+`trajectory-20261024-234032`; this is the active recording.
 
 Keep the older 5/5 success report attached to trajectory-20261024-224752 only.
 No success count or restart outcome has been reported for the new recording.
