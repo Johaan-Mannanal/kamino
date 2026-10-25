@@ -15,3 +15,12 @@ recordings
 checkpoints
 frontend/node_modules
 *.egg-info
+
+# New UI build trees and local acceptance artifacts
+**/node_modules
+**/dist
+**/outputs
+**/.cache
+**/.venv*
+**/.pytest_cache
+**/.ruff_cache

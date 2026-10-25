@@ -1,3 +1,5 @@
+> Current scope update, 2026-10-25: the active sponsor targets are Gemini, Figma, GoDaddy Registry, and Microsoft Built for the Real World. See sponsor-workboard.md and microsoft-real-world-track-assessment.md. Bright Data is parked. Automatic parameter proposals and optional CAD inputs remain later improvements. The older scope below is historical where it conflicts with this update.
+
 # Confirmed demo and sponsor scope
 
 Latest user update, 2026-10-24: product name is **Kamino**. Add narrow Bright Data

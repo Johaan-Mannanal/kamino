@@ -313,7 +313,7 @@ export class BackendSession {
     ) {
       this.timer = setTimeout(() => {
         this.timer = undefined;
-        void this.refresh().catch(() => {
+        void this.readStatus(false).catch(() => {
           /* error retained for explicit retry */
         });
       }, this.pollIntervalMs);
@@ -424,7 +424,11 @@ export class BackendSession {
     });
   }
 
-  async refresh() {
+  refresh() {
+    return this.readStatus(true);
+  }
+
+  private async readStatus(revalidateGeometry: boolean) {
     const current = this.requireJob();
     if (this.busy) return current;
     const generation = this.generation,
@@ -437,7 +441,7 @@ export class BackendSession {
     this.previewRequest++;
     this.changed();
     // Start source revalidation synchronously, before waiting for metadata GET.
-    if (current.mesh_path) void this.loadGeometry(true);
+    if (revalidateGeometry && current.mesh_path) void this.loadGeometry(true);
     try {
       const job = await this.api.get(current.id);
       this.check(generation);
@@ -445,7 +449,14 @@ export class BackendSession {
         throw new SessionCancelledError();
       this.error = null;
       this.setJob(job);
-      if (job.mesh_path !== current.mesh_path && job.mesh_path)
+      // Polling a running simulation must not repeatedly parse the entire mesh.
+      // Revalidate before returning to editable state; explicit Refresh above
+      // still supersedes inventory reads immediately, even before metadata GET.
+      if (
+        job.mesh_path &&
+        (job.mesh_path !== current.mesh_path ||
+          (!revalidateGeometry && running(current) && !running(job)))
+      )
         void this.loadGeometry(true);
       return job;
     } catch (error) {

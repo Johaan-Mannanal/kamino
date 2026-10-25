@@ -7,6 +7,8 @@ Seed a synthetic job's estimate cache in another terminal:
 This helper never calls Settings.from_env, reads .env, or loads provider keys.
 Only loopback network connections are permitted in the server process. It adds
 no application routes and never changes uploads, reconstruction, or properties.
+Use python -m tools.ui_acceptance_fixture to import the pinned original can.
+Invoke this module with python -m tools.ui_acceptance_server for fixture seeding.
 """
 
 from __future__ import annotations
@@ -116,11 +118,18 @@ def build_app(data_dir: Path = DEFAULT_DATA_DIR, api_token: str = "ui-acceptance
     return app
 
 
-def seed_suggestions(settings: Settings, job_id: UUID, *, replace: bool = False) -> Path:
+def seed_suggestions(
+    settings: Settings, job_id: UUID, *, replace: bool = False, unknown: bool = False
+) -> Path:
+    from tools.ui_acceptance_fixture import is_original_can_fixture
+
+    isolated_data_dir(settings.data_dir)
     store = JobStore(settings.data_dir)
     job = store.get(job_id)
-    if not job.synthetic or job.provider != "mock":
-        raise ValueError("Only a synthetic mock job in the isolated acceptance store may be seeded")
+    if not (job.synthetic and job.provider == "mock") and not is_original_can_fixture(store, job):
+        raise ValueError(
+            "Only an isolated synthetic job or verified original can fixture may be seeded"
+        )
     suggestions = PropertySuggestions.model_validate(
         {
             "dimensions_m": {
@@ -144,6 +153,12 @@ def seed_suggestions(settings: Settings, job_id: UUID, *, replace: bool = False)
             "notes": ["Offline synthetic fixture; no Gemini request was made."],
         }
     )
+    if unknown:
+        values = suggestions.model_dump(mode="json")
+        for key in ("dimensions_m", "mass_kg", "sliding_friction"):
+            values[key] = None
+        values["notes"] = ["Offline unknown-value fixture; no Gemini request was made."]
+        suggestions = PropertySuggestions.model_validate(values)
     folder = SuggestionService(store, settings).folder(job_id)
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / "gemini.json"
@@ -173,10 +188,13 @@ def main() -> None:
     parser.add_argument("--app-token", default="ui-acceptance-only")
     parser.add_argument("--seed-job", type=UUID)
     parser.add_argument("--replace-seed", action="store_true")
+    parser.add_argument("--unknown-seed", action="store_true")
     args = parser.parse_args()
     settings = acceptance_settings(args.data_dir, args.app_token)
     if args.seed_job is not None:
-        path = seed_suggestions(settings, args.seed_job, replace=args.replace_seed)
+        path = seed_suggestions(
+            settings, args.seed_job, replace=args.replace_seed, unknown=args.unknown_seed
+        )
         print(f"Seeded offline synthetic suggestion cache: {path}")
         return
     import uvicorn

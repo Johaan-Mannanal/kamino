@@ -1,0 +1,19 @@
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:8080} {
+	encode zstd gzip
+	request_body {
+		max_size 220MB
+	}
+	@api path /api /api/*
+	handle @api {
+		reverse_proxy {$API_UPSTREAM}
+	}
+	handle {
+		root * {$WEB_ROOT:/srv}
+		file_server
+	}
+}

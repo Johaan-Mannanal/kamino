@@ -166,6 +166,33 @@ afterEach(() => {
 });
 
 describe("live backend session", () => {
+  it.each(["unchanged", "completed", "mesh-changed"] as const)(
+    "automatic processing polls revalidate geometry only when needed: %s",
+    async (transition) => {
+      vi.useFakeTimers();
+      let current = job({ status: "validating" });
+      const adapter = api({ get: vi.fn(async () => current) });
+      const state = session(adapter);
+      await state.restore("job-a");
+      await Promise.resolve();
+      vi.mocked(adapter.geometry).mockClear();
+      if (transition === "completed") current = job({ status: "completed" });
+      if (transition === "mesh-changed")
+        current = job({
+          status: "validating",
+          mesh_path: "reconstruction/replaced.glb",
+        });
+      await vi.advanceTimersByTimeAsync(25);
+      expect(adapter.geometry).toHaveBeenCalledTimes(
+        transition === "unchanged" ? 0 : 1,
+      );
+      expect(state.job?.status).toBe(current.status);
+      if (transition === "unchanged") {
+        await vi.advanceTimersByTimeAsync(100);
+        expect(adapter.geometry).not.toHaveBeenCalled();
+      }
+    },
+  );
   it.each(["inventory-first", "metadata-first"])(
     "keeps failed metadata blocked in %s order even when geometry succeeds",
     async (order) => {
