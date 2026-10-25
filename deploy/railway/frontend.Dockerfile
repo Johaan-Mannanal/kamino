@@ -5,7 +5,7 @@ RUN npm install --global pnpm@10.15.1
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 RUN npm_config_manage_package_manager_versions=false pnpm install --frozen-lockfile
 COPY frontend/ ./
-ENV VITE_API_BASE_URL=/
+ENV VITE_API_BASE_URL=/ VITE_API_MODE=live
 RUN npm_config_manage_package_manager_versions=false pnpm run build
 
 FROM caddy:2.10.2-alpine

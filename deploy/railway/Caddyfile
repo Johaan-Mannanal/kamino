@@ -6,7 +6,7 @@
 :{$PORT:8080} {
 	encode zstd gzip
 	request_body {
-		max_size 45MB
+		max_size 220MB
 	}
 	@api path /api /api/*
 	handle @api {

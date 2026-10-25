@@ -9,7 +9,7 @@ Build from the repository root with the two Dockerfiles here. This branch packag
 
 Set RAILWAY_DOCKERFILE_PATH separately on each service. Attach a volume at /data to the backend, one replica/worker. Backend healthcheck: /api/health. Frontend healthcheck: /. Start with backend 1 CPU/2 GB and frontend 1 CPU/0.5 GB. These are resource ceilings, not billing caps.
 
-The frontend build uses VITE_API_BASE_URL=/ and both Vite entries. Caddy preserves /api paths and bearer headers. Missing files return 404; there is no catch-all HTML rewrite for API errors. HTTPS terminates at Railway. No provider key or application token is compiled into JavaScript. The backend entrypoint requires an application token and drops root privileges after preparing the volume directory.
+The frontend build uses VITE_API_MODE=live and VITE_API_BASE_URL=/ and both Vite entries. The 220 MB proxy body ceiling accommodates the API's 200 MiB aggregate mesh limit plus multipart metadata. Caddy preserves /api paths and bearer headers. Missing files return 404; there is no catch-all HTML rewrite for API errors. HTTPS terminates at Railway. No provider key or application token is compiled into JavaScript. The backend entrypoint requires an application token and drops root privileges after preparing the volume directory.
 
 The pnpm v9-format lockfile was installed with pnpm 10.15.1, explicitly disabling package-manager version switching. Product package metadata remains unchanged for the UI owner.
 
