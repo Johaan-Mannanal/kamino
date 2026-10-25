@@ -9,14 +9,30 @@ services. The application is available at [kamino.design](https://kamino.design)
 
 | Component | Railway deployment |
 | --- | --- |
-| Frontend (advanced-physics baseline) | `c94949e9-2b73-475c-bc56-c0d3a80016d2` |
-| Frontend (notice fix `90e45bd`) | `3056c437-780d-484b-ba38-69d62bd37f7e` |
-| Backend | `e6778197-75ee-40a9-a8cf-14b3249661b1` |
+| Frontend (Echo `cb57f0e`) | `94c0e1c3-8827-43bf-8b29-732eeed70a8d` |
+| Backend (Echo `cb57f0e`) | `aa441527-519c-44fc-a4c4-0a4cd7ade4c6` |
 
 Production imported-source hashes and runtime matched the staging candidate.
 Linux verification used Python 3.12 and MuJoCo 3.17.0; local/relocated verification
 also covered MuJoCo 3.3.7. Dependency/runtime identities matter independently of
 source identity.
+
+## Echo branding follow-up
+
+The current shared runtime source is
+[`cb57f0e`](https://github.com/Johaan-Mannanal/kamino/commit/cb57f0e).
+Its 492 backend tests (2 optional skips), 143 shared frontend tests and 163 Workspace
+tests passed, along with both builds/typechecks, asset synchronization and Ruff.
+Independent review found no actionable issues. Local/staging/production checks
+covered responsive logo loading, home links, 200% zoom, icons, social metadata and
+saved sizing. Newly generated export guides contain a packaged local SVG; a
+production-side temporary synthetic export ran after relocation with finite state
+and zero warnings. All 15 existing production ZIP hashes remained unchanged.
+No provider calls, schema changes or recorded-motion changes were made.
+
+[Brand guide and reusable assets](brand-guidelines.md). Detailed receipts are in
+the team's local `outputs/branding/kamino-echo-final` directory. Figma/Slides and
+Devpost artwork publication remain separate team actions.
 
 ## Checks and their scope
 

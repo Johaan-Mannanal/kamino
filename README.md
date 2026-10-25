@@ -16,6 +16,14 @@ requires a team-issued access code because provider usage is metered. The separa
 **Use demo photos** experience is synthetic; its demo download is not a validated
 MuJoCo bundle.
 
+## Demo in motion
+
+![MuJoCo recorded-arm visualization beside the final SO-101 physical replay, cropped around the arm and charger and manually aligned at visible motion events.](docs/images/demo-simulation-and-arm.gif)
+
+**One shared loop, 2× playback.** Recorded arm poses with scripted charger motion
+on the left; the final physical replay on the right. Timing is visually aligned
+for presentation. [Still frame](docs/images/demo-simulation-and-arm-poster.png) ·
+[Sources, crops and timing](docs/images/README.md)
 
 ## What you can do
 
@@ -38,7 +46,20 @@ component meshes and reviewed link/joint definitions. See the
 [hinge/slider, spring and linked-motion settings](docs/advanced-physics.md#assembly-sliders-springs-and-linked-motion). It does not automatically
 infer a robot's articulation from photographs.
 
+<details>
+<summary><strong>See the workspace</strong> — synthetic mug demo</summary>
+
+![Echo-branded Kamino workspace showing source photos, a procedural mug, uniform sizing and editable physical properties.](docs/images/workspace-demo.png)
+
+The browser demo uses procedural geometry and session-only edits; its download
+is not a validated MuJoCo bundle. Real server jobs use the saved workflow above.
+
+</details>
+
 ## How it works
+
+<details>
+<summary>Architecture and implementation</summary>
 
 ```mermaid
 flowchart LR
@@ -61,6 +82,8 @@ flowchart LR
   through the GoDaddy Registry event offer at Porkbun.
 - **Compatibility:** Python imports and environment variables retain the
   `photo2sim` / `PHOTO2SIM_*` names. The public project and repository are Kamino.
+
+</details>
 
 ## Run locally without provider charges
 
@@ -106,26 +129,27 @@ build variables, URLs or Git.
 
 ## Verification and release
 
-The deployed advanced-physics baseline is
-[`410e88a`](https://github.com/Johaan-Mannanal/kamino/commit/410e88ac6c3e39ec5ab7a176593670d5b5fb7416).
-[GitHub CI passed](https://github.com/Johaan-Mannanal/kamino/actions/runs/40202374448).
-Frontend follow-ups add sharing previews (`2c9d869`) and correct the stale sizing
-notice (`90e45bd`); backend behavior is unchanged. Later documentation commits do
-not imply a runtime deployment.
+The live application includes the
+[Echo branding release `cb57f0e`](https://github.com/Johaan-Mannanal/kamino/commit/cb57f0e)
+on the advanced-physics baseline `410e88a`. README/media changes do not redeploy it.
 
-- **492 backend tests passed, 2 optional skips; 143 shared frontend + 160 Workspace
-  tests passed.** Both TypeScript checks, production builds and Ruff passed.
-- **202 local browser checks** covered desktop/mobile presentation, camera and draft
-  behavior, downloads and progress states. Hosted mobile checks also passed.
-- Hosted rigid and assembly workflows exercised advanced settings, saving,
-  reopening, regeneration and preservation of earlier exports. A relocated rigid
-  bundle ran for 10,000 MuJoCo steps with finite state and zero warnings.
-- Mobile results use Chromium touch emulation, not full iOS/Android device
-  certification. Numerical checks do not establish reconstruction or grasp accuracy.
-- These release checks made **no new Meshy or Gemini calls**. Provider reconstruction
-  quality and live-service availability remain separate from cached-workflow acceptance.
+| Check | Result and scope |
+| --- | --- |
+| Backend | **492 passed, 2 optional skips**; Ruff passed |
+| Frontend | **143 shared + 163 Workspace tests passed**; both typechecks/builds passed |
+| Browser | Responsive headers, 200% zoom, saved sizing, sharing assets and existing viewer flows checked |
+| Hosted exports | New branded export ran after relocation; **15 existing production ZIPs stayed byte-identical** |
 
-See the [release and evidence index](docs/RELEASE.md). To run local checks:
+Earlier advanced-physics acceptance also covered 202 local browser checks, hosted
+rigid/assembly regeneration and a 10,000-step relocated run. Browser mobile checks
+use Chromium emulation. Numerical validation does not establish physical accuracy.
+No new Meshy or Gemini calls were needed for these release checks.
+
+See the [release and evidence index](docs/RELEASE.md) and
+[GitHub Actions](https://github.com/Johaan-Mannanal/kamino/actions/workflows/checks.yml).
+
+<details>
+<summary>Run the verification commands</summary>
 
 ```sh
 python -m pytest -q
@@ -136,6 +160,8 @@ pnpm --dir frontend build
 pnpm --dir prototypes/kamino-ui test
 pnpm --dir prototypes/kamino-ui build
 ```
+
+</details>
 
 ## Sponsor work and evidence
 

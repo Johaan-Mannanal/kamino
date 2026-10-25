@@ -24,9 +24,10 @@ presenting and reproducing the delivered project, not changing the production ap
    prototype, genuine frame exports, the actual workflow stage log and Figma Slides.
    Follow [the evidence checklist](FIGMA_EVIDENCE.md); website screenshots alone
    are not Figma-process evidence.
-2. **Presentation media.** Add a short, locally retained demo and selected public-safe
-   product screenshots. Label synthetic inputs and scripted charger movement.
-   Link the final video from the README and Devpost once available.
+2. **Presentation media.** The README now includes a visually aligned, cropped
+   simulation/physical GIF, a still frame and a synthetic Workspace screenshot.
+   The full-quality 30-second composite is retained locally for the team. Final
+   submission-video editing and Devpost video publication remain separate steps.
 3. **Microsoft clarification and opt-in check.** Obtain a sponsor/organizer answer
    if available, and verify the actual Devpost selections for all intended tracks.
    A confirmed pursuit does not establish eligibility or submitted opt-in.
