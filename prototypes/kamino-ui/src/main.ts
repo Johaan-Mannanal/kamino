@@ -57,7 +57,7 @@ const icon = (name: string, size = 16) =>
 const brand = () =>
   `<a class="brand" href="#home" aria-label="Kamino home">${icon("c76c7.svg", 22)}<span>Kamino</span></a>`;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-type Photo = { name: string; url: string; file?: File; original?: File; crop?: CropRect; reviewed?: boolean };
+type Photo = { name: string; url: string; file?: File; original?: File; crop?: CropRect };
 let photos: Photo[] = [];
 let draft = defaults();
 let revisions: Revision[] = [];
@@ -169,13 +169,13 @@ function upload() {
   mountResume(".live-upload-links");
   const guidance = document.createElement("p");
   guidance.className = "photo-capture-guide small";
-  guidance.textContent = "Before creating a mesh, review each photo’s framing. Keep the full object and all protrusions; exclude nearby objects. Include distinct views of important faces such as ports. Hidden surfaces may be invented, and cropping does not guarantee accurate geometry.";
+  guidance.textContent = "Keep the whole object visible from different angles. Optional cropping can remove distractions; it does not guarantee accurate geometry.";
   $("#photo-list").before(guidance);
   const draw = () => {
     const demo = photos.length > 0 && photos.some((p) => !p.file);
     $("#photo-count").textContent = `· ${photos.length} of 4`;
     $<HTMLButtonElement>("#create-mesh").disabled =
-      !photos.length || uploads.pending || checkingAccess || (!demo && photos.some(p => !p.reviewed));
+      !photos.length || uploads.pending || checkingAccess;
     $<HTMLButtonElement>("#choose").disabled = uploads.pending || checkingAccess;
     $<HTMLButtonElement>("#sample-photos").disabled = uploads.pending || checkingAccess;
     if (uploads.pending)
@@ -189,7 +189,7 @@ function upload() {
     $("#photo-list").innerHTML = photos
       .map(
         (p, i) =>
-          `<div class="photo-row"><img src="${p.url}" alt="${p.reviewed ? "Image to submit" : "Original photo"} ${i + 1}"><div><strong>${esc(p.name)}</strong><small>${p.file ? (p.reviewed ? (p.file === p.original ? "Reviewed · Full original photo" : "Reviewed crop · Original kept in this tab") : "Review framing before creating mesh") : "Demo photo"}</small></div>${p.file ? `<button class="secondary compact" data-review="${i}" ${uploads.pending || checkingAccess ? "disabled" : ""}>${p.reviewed ? "Edit framing" : "Review framing"}</button>` : ""}<button class="text-button" data-remove="${i}" aria-label="Remove ${esc(p.name)}" ${uploads.pending || checkingAccess ? "disabled" : ""}>Remove ×</button></div>`,
+          `<div class="photo-row"><img src="${p.url}" alt="${p.file !== p.original ? "Cropped photo" : "Original photo"} ${i + 1}"><div><strong>${esc(p.name)}</strong><small>${p.file ? (p.file === p.original ? "Original photo" : "Cropped · Original kept in this tab") : "Demo photo"}</small></div>${p.file ? `<button class="secondary compact" data-review="${i}" ${uploads.pending || checkingAccess ? "disabled" : ""}>${p.file !== p.original ? "Edit crop" : "Crop (optional)"}</button>` : ""}<button class="text-button" data-remove="${i}" aria-label="Remove ${esc(p.name)}" ${uploads.pending || checkingAccess ? "disabled" : ""}>Remove ×</button></div>`,
       )
       .join("");
     app.querySelectorAll<HTMLButtonElement>("[data-remove]").forEach(
@@ -210,7 +210,7 @@ function upload() {
         if (!result || token !== navToken || !photos.includes(photo)) return;
         URL.revokeObjectURL(photo.url);
         photo.original ??= photo.file;
-        photo.file = result.file; photo.crop = result.crop; photo.reviewed = true;
+        photo.file = result.file; photo.crop = result.crop;
         photo.url = URL.createObjectURL(result.file);
         draw();
       };
@@ -229,7 +229,6 @@ function upload() {
       ...files.map((file) => ({
         file,
         original: file,
-        reviewed: false,
         name: file.name,
         url: URL.createObjectURL(file),
       })),
@@ -308,10 +307,6 @@ function upload() {
       prepared.clear();
       meshIdentity++;
       route("creating");
-      return;
-    }
-    if (photos.some(p => !p.reviewed)) {
-      $("#upload-error").textContent = "Review every photo’s framing before creating the mesh.";
       return;
     }
     const token = navToken;

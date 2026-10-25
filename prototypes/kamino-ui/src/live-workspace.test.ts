@@ -174,7 +174,8 @@ describe("draft from saved job", () => {
   it("defaults unknown friction to estimated without changing saved provenance", () => {
     const fresh = draftFromJob(job());
     expect(fresh.draft.frictionSource).toBe("estimated");
-    expect(toScalar(fresh.draft.friction, fresh.draft.frictionSource, null)).toBeNull();
+    expect(toScalar(fresh.draft.friction, fresh.draft.frictionSource, fresh.origins.friction))
+      .toMatchObject({ value: 0.8, source: "estimated", note: expect.stringContaining("Fallback estimate") });
     expect(toScalar("0.4", fresh.draft.frictionSource, null)).toMatchObject({
       value: 0.4,
       source: "estimated",
@@ -188,7 +189,7 @@ describe("draft from saved job", () => {
     expect(toScalar(reopened.draft.friction, reopened.draft.frictionSource, reopened.origins.friction))
       .toEqual(existing.properties!.sliding_friction);
   });
-  it("starts blank without saved values and never fabricates them", () => {
+  it("starts with a labelled friction fallback and blank mass and dimensions", () => {
     const { draft, origins, notice } = draftFromJob(job());
     expect([
       draft.mass,
@@ -196,9 +197,10 @@ describe("draft from saved job", () => {
       draft.length,
       draft.axis,
       draft.description,
-    ]).toEqual(["", "", "", "", ""]);
+    ]).toEqual(["", "0.8", "", "", ""]);
     expect(draft.acknowledged).toBe(false);
-    expect(origins).toEqual({ mass: null, friction: null });
+    expect(origins.mass).toBeNull();
+    expect(origins.friction).toMatchObject({ value: 0.8, source: "estimated" });
     expect(notice).toBeNull();
     expect(buildReviewed(draft, origins).error).toBeTruthy();
   });
@@ -480,6 +482,57 @@ describe("live workspace DOM regressions", () => {
     const cleanup = mount();
     return { state, host, adapter, mount, cleanup };
   }
+  const estimate = (value: number | null): Suggestions => ({
+    dimensions_m: null, mass_kg: null,
+    sliding_friction: value === null ? null : { value, source: "estimated", note: "Estimated plastic contact" },
+    notes: [], clarifying_questions: [],
+  });
+  it("automatically fills new-job friction and keeps an honest fallback when Gemini returns unknown", async () => {
+    const { host, state } = mounted({ cachedSuggestions: vi.fn(async () => estimate(null)) }, job());
+    await loaded(state);
+    expect($<HTMLInputElement>(host, '[name="friction"]').value).toBe("0.8");
+    expect($<HTMLSelectElement>(host, '[name="frictionSource"]').value).toBe("estimated");
+    expect(host.textContent).toContain("Fallback estimate");
+    expect(state.job!.properties).toBeNull();
+    const origin = draftFromJob(job()).origins.friction;
+    expect(origin?.note).toContain("not measured");
+  });
+  it("automatically uses cached Gemini friction without applying mass or saving", async () => {
+    const { host, state } = mounted({ cachedSuggestions: vi.fn(async () => ({ ...estimate(0.35), mass_kg: { value: 0.5, source: "estimated" } })) }, job());
+    await vi.waitFor(() => expect($<HTMLInputElement>(host, '[name="friction"]').value).toBe("0.35"));
+    expect($<HTMLInputElement>(host, '[name="mass"]').value).toBe("");
+    expect(state.job!.properties).toBeNull();
+    expect(state.dirty).toBe(true);
+  });
+  it("does not overwrite a manual friction edit or clearing with a late estimate", async () => {
+    let resolve!: (s: Suggestions) => void;
+    const { host, state } = mounted({ cachedSuggestions: vi.fn(() => new Promise<Suggestions>(r => { resolve = r; })) }, job());
+    await loaded(state);
+    type($(host, '[name="friction"]'), "");
+    resolve(estimate(0.35));
+    await vi.waitFor(() => expect(host.textContent).toContain("Estimates ready"));
+    expect($<HTMLInputElement>(host, '[name="friction"]').value).toBe("");
+  });
+  it("preserves saved unknown friction instead of replacing it with a new estimate", async () => {
+    const { host } = mounted({ cachedSuggestions: vi.fn(async () => estimate(0.35)) });
+    await vi.waitFor(() => expect(host.textContent).toContain("Estimates ready"));
+    expect($<HTMLInputElement>(host, '[name="friction"]').value).toBe("");
+  });
+  it("keeps estimated fallback usable when the suggestions service fails", async () => {
+    const { host } = mounted({ cachedSuggestions: vi.fn(async () => { throw new ApiError("Estimate unavailable", 503); }) }, job());
+    await vi.waitFor(() => expect(host.textContent).toContain("Estimate unavailable"));
+    expect($<HTMLInputElement>(host, '[name="friction"]').value).toBe("0.8");
+    expect($<HTMLSelectElement>(host, '[name="frictionSource"]').value).toBe("estimated");
+  });
+  it("accepts an explicit zero estimate and preserves it across a workspace remount", async () => {
+    const { host, cleanup, mount } = mounted({ cachedSuggestions: vi.fn(async () => estimate(0)) }, job());
+    await vi.waitFor(() => expect($<HTMLInputElement>(host, '[name="friction"]').value).toBe("0"));
+    type($(host, '[name="friction"]'), "0.21");
+    cleanup();
+    mount();
+    await vi.waitFor(() => expect(host.textContent).toContain("Estimates ready"));
+    expect($<HTMLInputElement>(host, '[name="friction"]').value).toBe("0.21");
+  });
   it("blocks actions while refreshing and retains numeric drafts when saved inputs change", async () => {
     let resolve!: (value: Job) => void;
     const waiting = new Promise<Job>((done) => {

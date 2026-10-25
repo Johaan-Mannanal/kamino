@@ -31,11 +31,10 @@ export function reviewPhoto(original: File, previous?: CropRect): Promise<Review
     const dialog = document.createElement("dialog");
     dialog.className = "photo-review-dialog";
     dialog.setAttribute("aria-labelledby", "photo-review-title");
-    dialog.innerHTML = `<h2 id="photo-review-title">Review photo framing</h2><p class="muted">Keep the whole object, including pins and protrusions. Exclude nearby objects where possible. Drag a rectangle or enter pixel bounds; use Full photo to reset.</p><p class="small">Original stays in this tab. Only the confirmed image is submitted. Cropping cannot reveal hidden faces.</p><canvas aria-label="Original photo with selected crop" tabindex="0"></canvas><form><fieldset class="crop-fields"><legend>Crop bounds in oriented photo pixels</legend>${[["x", "Left"], ["y", "Top"], ["width", "Width"], ["height", "Height"]].map(([key, label]) => `<label>${label}<input type="number" name="${key}" min="${key === "x" || key === "y" ? 0 : 1}" step="1" required></label>`).join("")}</fieldset><label class="crop-confirm"><input type="checkbox" name="confirmed"> The frame includes the entire intended object.</label><p class="error" role="alert"></p><div class="crop-actions"><button type="button" class="secondary" data-full>Full photo</button><button type="button" class="secondary" data-cancel>Cancel</button><button type="submit" class="primary" disabled>Use this framing</button></div></form>`;
+    dialog.innerHTML = `<h2 id="photo-review-title">Crop photo (optional)</h2><p class="muted">Keep the whole object, including pins and protrusions. Exclude nearby objects where possible. Drag a rectangle or enter pixel bounds; use Full photo to reset.</p><p class="small">Original stays in this tab. Your chosen image is submitted. Cropping cannot reveal hidden faces.</p><canvas aria-label="Original photo with selected crop" tabindex="0"></canvas><form><fieldset class="crop-fields"><legend>Crop bounds in oriented photo pixels</legend>${[["x", "Left"], ["y", "Top"], ["width", "Width"], ["height", "Height"]].map(([key, label]) => `<label>${label}<input type="number" name="${key}" min="${key === "x" || key === "y" ? 0 : 1}" step="1" required></label>`).join("")}</fieldset><p class="error" role="alert"></p><div class="crop-actions"><button type="button" class="secondary" data-full>Full photo</button><button type="button" class="secondary" data-cancel>Cancel</button><button type="submit" class="primary" disabled>Use this framing</button></div></form>`;
     document.body.append(dialog);
     const canvas = dialog.querySelector("canvas")!;
     const form = dialog.querySelector("form")!;
-    const confirm = form.elements.namedItem("confirmed") as HTMLInputElement;
     const submit = dialog.querySelector<HTMLButtonElement>('[type="submit"]')!;
     const error = dialog.querySelector<HTMLElement>('[role="alert"]')!;
     const image = new Image();
@@ -48,7 +47,7 @@ export function reviewPhoto(original: File, previous?: CropRect): Promise<Review
       if (!loaded) return;
       const invalid = validateCrop(crop, image.naturalWidth, image.naturalHeight);
       error.textContent = invalid ?? "";
-      submit.disabled = !!invalid || !confirm.checked || encoding;
+      submit.disabled = !!invalid || encoding;
       const ctx = canvas.getContext("2d");
       if (!ctx) { error.textContent = "Photo preview unavailable. Try another browser."; submit.disabled = true; return; }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -76,12 +75,9 @@ export function reviewPhoto(original: File, previous?: CropRect): Promise<Review
     };
     image.onerror = () => { if (!closed) error.textContent = "Could not read this photo. Cancel and choose another supported image."; };
     image.src = url; // Browser decodes EXIF orientation for both preview and crop.
-    form.addEventListener("input", event => {
+    form.addEventListener("input", () => {
       if (!loaded || encoding) return;
-      if (event.target !== confirm) {
-        crop = { x: input("x").valueAsNumber, y: input("y").valueAsNumber, width: input("width").valueAsNumber, height: input("height").valueAsNumber };
-        confirm.checked = false;
-      }
+      crop = { x: input("x").valueAsNumber, y: input("y").valueAsNumber, width: input("width").valueAsNumber, height: input("height").valueAsNumber };
       update();
     });
     let start: [number, number] | undefined;
@@ -97,19 +93,19 @@ export function reviewPhoto(original: File, previous?: CropRect): Promise<Review
       if (!start) return;
       const end = point(event);
       crop = { x: Math.min(start[0], end[0]), y: Math.min(start[1], end[1]), width: Math.abs(start[0] - end[0]), height: Math.abs(start[1] - end[1]) };
-      confirm.checked = false; fill();
+      fill();
     };
     canvas.onpointermove = drag;
     canvas.onpointerup = event => { drag(event); start = undefined; };
     canvas.onpointercancel = () => { start = undefined; };
     dialog.querySelector<HTMLButtonElement>("[data-full]")!.onclick = () => {
       if (!loaded || encoding) return;
-      crop = { x: 0, y: 0, width: image.naturalWidth, height: image.naturalHeight }; confirm.checked = false; fill();
+      crop = { x: 0, y: 0, width: image.naturalWidth, height: image.naturalHeight }; fill();
     };
     dialog.querySelector<HTMLButtonElement>("[data-cancel]")!.onclick = () => dialog.close();
     form.onsubmit = async event => {
       event.preventDefault();
-      if (!loaded || !confirm.checked || encoding || validateCrop(crop, image.naturalWidth, image.naturalHeight)) return;
+      if (!loaded || encoding || validateCrop(crop, image.naturalWidth, image.naturalHeight)) return;
       encoding = true;
       const selected = { ...crop };
       form.querySelectorAll<HTMLInputElement>("input").forEach(el => el.disabled = true);

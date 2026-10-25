@@ -2358,8 +2358,6 @@ html.live-workspace-page,
 .crop-fields legend { font-size: .85rem; color: #bbc1cb; }
 .crop-fields label { display: grid; gap: 6px; }
 .crop-fields input { width: 100%; min-width: 0; box-sizing: border-box; min-height: 44px; padding: 8px; color: #fff; background: #25282f; border: 1px solid #626976; border-radius: 6px; }
-.crop-confirm { display: flex; align-items: center; gap: 10px; min-height: 44px; }
-.crop-confirm input { width: 22px; height: 22px; flex: none; }
 .crop-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
 .crop-actions button, [data-review] { min-height: 44px; }
 @media(max-width: 600px) { .photo-review-dialog { padding: 16px; } .crop-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .photo-row { flex-wrap: wrap; } .photo-row [data-review] { margin-left: auto; } }
