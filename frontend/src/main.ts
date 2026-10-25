@@ -1,3 +1,4 @@
+import { brandLink } from './brand'
 import './style.css'
 import './workflow.css'
 import { liveApi, setApiToken, type Api } from './api'
@@ -459,7 +460,7 @@ function render() {
   const editable = !!job,
     done = job?.status === 'preparing' || job?.status === 'validating',
     canSave = job?.status === 'awaiting_properties' || job?.status === 'completed' || canRetry(job)
-  app.innerHTML = `<a class="skip" href="#workflow">Skip to content</a><header><div><strong translate="no">Kamino</strong></div></header>
+  app.innerHTML = `<a class="skip" href="#workflow">Skip to content</a><header><div>${brandLink('/')}</div></header>
   <main id="workflow"><h1>Create an asset</h1>
   ${mode === 'mock' || job?.synthetic ? `<div class="mode-note"><strong>Synthetic demo</strong><span>Synthetic geometry. This job does not demonstrate photo reconstruction.</span></div>` : ''}
   ${message ? `<div class="notice" role="status" aria-live="polite">${esc(message)} <button id="dismiss" aria-label="Dismiss">×</button></div>` : ''}

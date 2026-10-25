@@ -19,5 +19,5 @@ Source and output hashes, frame counts and durations are in
 were not changed. GIF conversion downsamples the display frames only.
 
 `workflow.png` is a schematic illustration of the product workflow, not a captured
-reconstruction or simulation result. The README banner reuses the site's branded
-sharing image from `prototypes/kamino-ui/public/social/kamino-share-v1.png`.
+reconstruction or simulation result. The README banner uses the Echo sharing artwork in `echo-banner.png`; canonical
+assets and usage are documented in [the brand guide](../brand-guidelines.md).

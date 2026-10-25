@@ -13,7 +13,8 @@
     "preview": "vite preview --configLoader native --host 127.0.0.1 --port 5188 --strictPort",
     "test": "vitest run --configLoader native",
     "test:browser": "node scripts/verify-browser.mjs",
-    "test:live": "node scripts/verify-live.cjs"
+    "test:live": "node scripts/verify-live.cjs",
+    "prebuild": "node ../../tools/branding/sync-assets.mjs --check --frontend-only"
   },
   "dependencies": {
     "three": "0.180.0"

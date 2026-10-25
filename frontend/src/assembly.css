@@ -18,7 +18,7 @@ header {
   align-items: center;
 }
 a {
-  color: #ddc487;
+  color: #75a7f8;
   text-decoration: none;
   font-weight: 650;
 }
@@ -83,7 +83,7 @@ input[type='range'] {
   width: 100%;
   padding: 0;
   margin: 12px 0 22px;
-  accent-color: #d7b567;
+  accent-color: #75a7f8;
 }
 .layout {
   display: grid;
@@ -122,7 +122,7 @@ pre {
   line-height: 1.5;
 }
 #message {
-  color: #ddc487;
+  color: #75a7f8;
 }
 details {
   margin: 22px 0;

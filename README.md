@@ -1,13 +1,14 @@
 # Kamino
 
-![Kamino — From photos to simulation. Real objects. Editable physics.](prototypes/kamino-ui/public/social/kamino-share-v1.png)
+![Kamino — From photos to simulation. Real objects. Editable physics.](docs/images/echo-banner.png)
 
 Turn object photos into editable, portable MuJoCo assets. Inspect the mesh, review
 its size and physics, then export a runnable scene—with earlier versions preserved.
 
 [Open Kamino](https://kamino.design) · [Devpost](https://devpost.com/software/kamino) ·
 [Figma design](https://www.figma.com/design/rSOvF7zmhYyGwLxGqLRgAo/Untitled?node-id=0-1&m=dev) ·
-[Design evidence and access status](docs/FIGMA_EVIDENCE.md)
+[Design evidence and access status](docs/FIGMA_EVIDENCE.md) ·
+[Echo brand assets](docs/brand-guidelines.md)
 
 Built for Cal Hacks 13.0 by Johaan, Atul, Srijan and Yash.
 The hosted app uses real reconstruction and estimate services. Creating jobs

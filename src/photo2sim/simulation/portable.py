@@ -63,6 +63,8 @@ if __name__ == "__main__":
 
 README = """# Kamino portable MuJoCo export
 
+<img src="kamino.svg" width="44" alt="Kamino Echo symbol">
+
 This folder runs without the Kamino repository. Keep `scene.xml` and its mesh
 folders together. All scene lengths are metres, angles radians, masses kilograms.
 
@@ -247,6 +249,7 @@ def write_portable_files(folder: Path, record: dict, assumptions: dict):
         "numpy": np.__version__,
         "scope": "export environment; transitive dependencies are not locked",
     }
+    (folder / "kamino.svg").write_bytes(Path(__file__).with_name("brand.svg").read_bytes())
     for filename, content in {
         "README.md": README,
         "ASSUMPTIONS.md": "\n".join(lines) + "\n",

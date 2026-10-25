@@ -9,6 +9,7 @@ RUN cd prototypes/kamino-ui && pnpm install --frozen-lockfile
 COPY frontend ./frontend
 COPY prototypes/kamino-ui ./prototypes/kamino-ui
 COPY deploy/railway/assemble-web.mjs ./deploy/railway/assemble-web.mjs
+COPY tools/branding ./tools/branding
 ARG KAMINO_PUBLIC_ORIGIN=https://kamino.design
 ENV VITE_API_BASE_URL=/ VITE_API_MODE=live
 ENV VITE_KAMINO_ASSEMBLY_URL=${KAMINO_PUBLIC_ORIGIN}/assembly.html

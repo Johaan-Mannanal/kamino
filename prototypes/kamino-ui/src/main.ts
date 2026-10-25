@@ -1,3 +1,4 @@
+import { brandLink } from "../../../frontend/src/brand";
 import "./style.css";
 import { browserAccess } from "../../../frontend/src/access";
 import { initAppearance } from "./appearance";
@@ -59,8 +60,7 @@ const esc = (text: string) =>
   );
 const icon = (name: string, size = 16) =>
   `<img class="icon" src="${asset(name)}" width="${size}" height="${size}" alt="">`;
-const brand = () =>
-  `<a class="brand" href="#home" aria-label="Kamino home">${icon("c76c7.svg", 22)}<span>Kamino</span></a>`;
+const brand = () => brandLink("#home");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 type Photo = {
   name: string;

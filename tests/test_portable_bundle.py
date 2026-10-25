@@ -38,6 +38,10 @@ def test_bundle_runs_without_repository(tmp_path, kind):
     assert "convex" in notes if kind == "assembly" else "box" in notes
     guide = (relocated / "README.md").read_text()
     assert "mjpython" in guide and "--headless" in guide
+    assert 'src="kamino.svg"' in guide
+    mark = (relocated / "kamino.svg").read_text()
+    assert "<svg" in mark and "#75A7F8" in mark
+    assert "http" not in mark.replace("http://www.w3.org/2000/svg", "")
     env = {k: v for k, v in os.environ.items() if k not in {"PYTHONPATH", "PYTHONHOME"}}
     result = subprocess.run(
         [

@@ -1,0 +1,9 @@
+{
+  "reference_sha256": "d79689386c029e9f963d1befb6742df50f8233d44d008d34ed7f4702dbf94ad6",
+  "method": "Smooth cubic symbol redraw and vector contours of selected reference lettering; flat palette, no embedded bitmap or font dependency.",
+  "palette": {
+    "blue": "#75A7F8",
+    "ink": "#17191C",
+    "off_white": "#F3F4F6"
+  }
+}
