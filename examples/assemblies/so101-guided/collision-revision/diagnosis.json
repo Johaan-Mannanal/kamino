@@ -1,0 +1,800 @@
+[
+  {
+    "variant": "baseline",
+    "initial_contacts": [
+      {
+        "a": "collision_base",
+        "b": "collision_shoulder",
+        "distance_m": -0.019000349999999996
+      },
+      {
+        "a": "collision_base",
+        "b": "collision_shoulder",
+        "distance_m": -0.019000349999999996
+      },
+      {
+        "a": "collision_base",
+        "b": "collision_shoulder",
+        "distance_m": -0.019000349999999996
+      },
+      {
+        "a": "collision_base",
+        "b": "collision_shoulder",
+        "distance_m": -0.019000349999999996
+      }
+    ],
+    "phases": [
+      {
+        "joint": "shoulder_pan",
+        "target": 0.95993,
+        "actual": 0.014034425023717286,
+        "max_error": 0.9458955749762826,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01918478530629112
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018798405513847066
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01918478530629112
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018798405513847066
+          }
+        ]
+      },
+      {
+        "joint": "shoulder_pan",
+        "target": -0.95993,
+        "actual": 0.014530139741568082,
+        "max_error": 0.974460139741568,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01918662830011032
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879637481909243
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01918662830011032
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879637481909243
+          }
+        ]
+      },
+      {
+        "joint": "shoulder_pan",
+        "target": 0.0,
+        "actual": 0.014386860860285618,
+        "max_error": 0.014386860860285618,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019184747849193513
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018798446783156824
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019184747849193513
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018798446783156824
+          }
+        ]
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": 0.87266465,
+        "actual": 0.7589658951359716,
+        "max_error": 0.11369875486402847,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01918358293797096
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018799730201406094
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01918358293797096
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018799730201406094
+          }
+        ]
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": -0.87266465,
+        "actual": -0.8726398955886912,
+        "max_error": 0.014260593756403641,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01918682325810635
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879615999062742
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01918682325810635
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879615999062742
+          }
+        ]
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": 0.0,
+        "actual": 0.0005038041090443478,
+        "max_error": 0.012736085462750334,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019165873878781818
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01881922833780772
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019165873878781818
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01881922833780772
+          }
+        ]
+      },
+      {
+        "joint": "elbow_flex",
+        "target": 0.845,
+        "actual": 0.8452970838688671,
+        "max_error": 0.01435222362641135,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.0191871823313251
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879576431258955
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.0191871823313251
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879576431258955
+          }
+        ]
+      },
+      {
+        "joint": "elbow_flex",
+        "target": -0.845,
+        "actual": -0.8447308975649466,
+        "max_error": 0.014740188365976504,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01919097645330694
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018791582819576234
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01919097645330694
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018791582819576234
+          }
+        ]
+      },
+      {
+        "joint": "elbow_flex",
+        "target": 0.0,
+        "actual": 0.0004251282457256704,
+        "max_error": 0.013014213786720113,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01917541767355726
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018808723278099345
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01917541767355726
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018808723278099345
+          }
+        ]
+      },
+      {
+        "joint": "wrist_flex",
+        "target": 0.8290315,
+        "actual": 0.8291267969712186,
+        "max_error": 0.014896579498527731,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019198088348843734
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019198088348843734
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01878374191677331
+          }
+        ]
+      },
+      {
+        "joint": "wrist_flex",
+        "target": -0.8290315,
+        "actual": -0.8289432400989413,
+        "max_error": 0.01475798909880833,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01919122516607898
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018791308676232406
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01919122516607898
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018791308676232406
+          }
+        ]
+      },
+      {
+        "joint": "wrist_flex",
+        "target": 0.0,
+        "actual": 0.0001268635490566382,
+        "max_error": 0.014127151034483303,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01919466343390199
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01919466343390199
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.018787518375930363
+          }
+        ]
+      },
+      {
+        "joint": "wrist_roll",
+        "target": 1.42060315,
+        "actual": 1.4206219642471558,
+        "max_error": 0.014238167095227159,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019190914931854066
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879165063080784
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019190914931854066
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879165063080784
+          }
+        ]
+      },
+      {
+        "joint": "wrist_roll",
+        "target": -1.37192365,
+        "actual": -1.3719270647837472,
+        "max_error": 0.012655240947626666,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019165554755488885
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.0188195794863101
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019165554755488885
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.0188195794863101
+          }
+        ]
+      },
+      {
+        "joint": "wrist_roll",
+        "target": 0.0,
+        "actual": -1.643827888445215e-06,
+        "max_error": 0.014135058464567727,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01919443477877535
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01919443477877535
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01878777046971005
+          }
+        ]
+      },
+      {
+        "joint": "gripper",
+        "target": 0.8726646,
+        "actual": 0.8726625330402793,
+        "max_error": 0.014023540479770596,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019186313763481014
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879672140787301
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019186313763481014
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879672140787301
+          }
+        ]
+      },
+      {
+        "joint": "gripper",
+        "target": -0.0872665,
+        "actual": -0.08727147961486934,
+        "max_error": 0.014530439907325679,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019189695190386144
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879299501677403
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019189695190386144
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01879299501677403
+          }
+        ]
+      },
+      {
+        "joint": "gripper",
+        "target": 0.0,
+        "actual": -4.664965492911164e-06,
+        "max_error": 0.01278950265723531,
+        "contacts": [
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019167177137608186
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01881779421329941
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.019167177137608186
+          },
+          {
+            "a": "collision_base",
+            "b": "collision_shoulder",
+            "distance_m": -0.01881779421329941
+          }
+        ]
+      }
+    ],
+    "max_error": 0.974460139741568,
+    "warnings": 0
+  },
+  {
+    "variant": "adjacent_exclusions",
+    "initial_contacts": [],
+    "phases": [
+      {
+        "joint": "shoulder_pan",
+        "target": 0.95993,
+        "actual": 0.9599299999999998,
+        "max_error": 0.0005001165018271454,
+        "contacts": []
+      },
+      {
+        "joint": "shoulder_pan",
+        "target": -0.95993,
+        "actual": -0.9599300000000034,
+        "max_error": 0.0005001165012386671,
+        "contacts": []
+      },
+      {
+        "joint": "shoulder_pan",
+        "target": 0.0,
+        "actual": -1.773509900316671e-16,
+        "max_error": 0.0005001165018299089,
+        "contacts": []
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": 0.87266465,
+        "actual": 0.7619862008148771,
+        "max_error": 0.11067844918512293,
+        "contacts": [
+          {
+            "a": "ground",
+            "b": "collision_gripper",
+            "distance_m": -0.0008402969596537566
+          }
+        ]
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": -0.87266465,
+        "actual": -0.8726389109798639,
+        "max_error": 0.00026048891186319353,
+        "contacts": []
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": 0.0,
+        "actual": 0.000500116502383092,
+        "max_error": 0.000500116502383092,
+        "contacts": []
+      },
+      {
+        "joint": "elbow_flex",
+        "target": 0.845,
+        "actual": 0.8452905844893307,
+        "max_error": 0.0003685724536865798,
+        "contacts": []
+      },
+      {
+        "joint": "elbow_flex",
+        "target": -0.845,
+        "actual": -0.8447303063464301,
+        "max_error": 0.000347675051902993,
+        "contacts": []
+      },
+      {
+        "joint": "elbow_flex",
+        "target": 0.0,
+        "actual": 0.00042207963646079467,
+        "max_error": 0.0005001165015933079,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_flex",
+        "target": 0.8290315,
+        "actual": 0.8291214891472453,
+        "max_error": 0.00045852762825782464,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_flex",
+        "target": -0.8290315,
+        "actual": -0.8289437267031405,
+        "max_error": 0.00045631090320373286,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_flex",
+        "target": 0.0,
+        "actual": 0.00013156153189962242,
+        "max_error": 0.0005001165011104881,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_roll",
+        "target": 1.42060315,
+        "actual": 1.4206028329430096,
+        "max_error": 0.0005001183498929922,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_roll",
+        "target": -1.37192365,
+        "actual": -1.3719239308698485,
+        "max_error": 0.000500114775202404,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_roll",
+        "target": 0.0,
+        "actual": -1.7207011709616553e-06,
+        "max_error": 0.0005001165018238169,
+        "contacts": []
+      },
+      {
+        "joint": "gripper",
+        "target": 0.8726646,
+        "actual": 0.8726617671581441,
+        "max_error": 0.000498706797777708,
+        "contacts": []
+      },
+      {
+        "joint": "gripper",
+        "target": -0.0872665,
+        "actual": -0.08727071196528623,
+        "max_error": 0.0005000881204388182,
+        "contacts": []
+      },
+      {
+        "joint": "gripper",
+        "target": 0.0,
+        "actual": -4.2403026121761604e-06,
+        "max_error": 0.00050011650186759,
+        "contacts": []
+      }
+    ],
+    "max_error": 0.11067844918512293,
+    "warnings": 0
+  },
+  {
+    "variant": "convex_and_adjacent",
+    "initial_contacts": [],
+    "phases": [
+      {
+        "joint": "shoulder_pan",
+        "target": 0.95993,
+        "actual": 0.9599299999999998,
+        "max_error": 0.0005001165018271454,
+        "contacts": []
+      },
+      {
+        "joint": "shoulder_pan",
+        "target": -0.95993,
+        "actual": -0.9599300000000034,
+        "max_error": 0.0005001165012386671,
+        "contacts": []
+      },
+      {
+        "joint": "shoulder_pan",
+        "target": 0.0,
+        "actual": -1.773509900316671e-16,
+        "max_error": 0.0005001165018299089,
+        "contacts": []
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": 0.87266465,
+        "actual": 0.8200207200401268,
+        "max_error": 0.052643929959873215,
+        "contacts": [
+          {
+            "a": "ground",
+            "b": "collision_gripper",
+            "distance_m": -0.0008279468897226527
+          }
+        ]
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": -0.87266465,
+        "actual": -0.8726389108677975,
+        "max_error": 0.00026048899253536365,
+        "contacts": []
+      },
+      {
+        "joint": "shoulder_lift",
+        "target": 0.0,
+        "actual": 0.0005001165023830919,
+        "max_error": 0.0005001165023830919,
+        "contacts": []
+      },
+      {
+        "joint": "elbow_flex",
+        "target": 0.845,
+        "actual": 0.8452905844893307,
+        "max_error": 0.0003685724536865798,
+        "contacts": []
+      },
+      {
+        "joint": "elbow_flex",
+        "target": -0.845,
+        "actual": -0.8447303063464301,
+        "max_error": 0.000347675051902993,
+        "contacts": []
+      },
+      {
+        "joint": "elbow_flex",
+        "target": 0.0,
+        "actual": 0.00042207963646079467,
+        "max_error": 0.0005001165015933079,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_flex",
+        "target": 0.8290315,
+        "actual": 0.8291214891472453,
+        "max_error": 0.00045852762825782464,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_flex",
+        "target": -0.8290315,
+        "actual": -0.8289437267031405,
+        "max_error": 0.00045631090320373286,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_flex",
+        "target": 0.0,
+        "actual": 0.00013156153189962242,
+        "max_error": 0.0005001165011104881,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_roll",
+        "target": 1.42060315,
+        "actual": 1.4206028329430096,
+        "max_error": 0.0005001183498929922,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_roll",
+        "target": -1.37192365,
+        "actual": -1.3719239308698485,
+        "max_error": 0.000500114775202404,
+        "contacts": []
+      },
+      {
+        "joint": "wrist_roll",
+        "target": 0.0,
+        "actual": -1.7207011709616553e-06,
+        "max_error": 0.0005001165018238169,
+        "contacts": []
+      },
+      {
+        "joint": "gripper",
+        "target": 0.8726646,
+        "actual": 0.8726617671581441,
+        "max_error": 0.000498706797777708,
+        "contacts": []
+      },
+      {
+        "joint": "gripper",
+        "target": -0.0872665,
+        "actual": -0.08727071196528623,
+        "max_error": 0.0005000881204388182,
+        "contacts": []
+      },
+      {
+        "joint": "gripper",
+        "target": 0.0,
+        "actual": -4.2403026121761604e-06,
+        "max_error": 0.00050011650186759,
+        "contacts": []
+      }
+    ],
+    "max_error": 0.052643929959873215,
+    "warnings": 0
+  }
+]

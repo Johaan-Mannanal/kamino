@@ -1,0 +1,195 @@
+{
+  "scope": "Fixed-root assembly motion smoke check; not calibrated dynamics or reconstruction accuracy",
+  "viewer_inspected": false,
+  "environment": {
+    "mujoco": "3.3.7",
+    "numpy": "2.5.4"
+  },
+  "tracking_tolerance_rad": 0.03,
+  "phase_duration_s": 2.0,
+  "original": {
+    "passed": true,
+    "checks": {
+      "reviewed_model_consistency": true,
+      "actual_joint_motion": true,
+      "tracking": true,
+      "joint_limits": true,
+      "reset_repeatable": true,
+      "no_warnings": true
+    },
+    "trials": [
+      {
+        "phases": [
+          {
+            "joint": "panel_hinge",
+            "target_rad": 0.4,
+            "actual_rad": 0.399999999999999,
+            "max_all_joint_tracking_error_rad": 9.992007221626409e-16,
+            "tracking_errors_rad": {
+              "panel_hinge": 9.992007221626409e-16
+            },
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "panel_hinge",
+            "target_rad": -0.4,
+            "actual_rad": -0.399999999999999,
+            "max_all_joint_tracking_error_rad": 9.992007221626409e-16,
+            "tracking_errors_rad": {
+              "panel_hinge": 9.992007221626409e-16
+            },
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "panel_hinge",
+            "target_rad": 0.0,
+            "actual_rad": -1.1658771423989942e-24,
+            "max_all_joint_tracking_error_rad": 1.1658771423989942e-24,
+            "tracking_errors_rad": {
+              "panel_hinge": 1.1658771423989942e-24
+            },
+            "simulated_time_s": 6.000000000000338
+          }
+        ],
+        "simulated_duration_s": 6.000000000000338
+      },
+      {
+        "phases": [
+          {
+            "joint": "panel_hinge",
+            "target_rad": 0.4,
+            "actual_rad": 0.399999999999999,
+            "max_all_joint_tracking_error_rad": 9.992007221626409e-16,
+            "tracking_errors_rad": {
+              "panel_hinge": 9.992007221626409e-16
+            },
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "panel_hinge",
+            "target_rad": -0.4,
+            "actual_rad": -0.399999999999999,
+            "max_all_joint_tracking_error_rad": 9.992007221626409e-16,
+            "tracking_errors_rad": {
+              "panel_hinge": 9.992007221626409e-16
+            },
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "panel_hinge",
+            "target_rad": 0.0,
+            "actual_rad": -1.1658771423989942e-24,
+            "max_all_joint_tracking_error_rad": 1.1658771423989942e-24,
+            "tracking_errors_rad": {
+              "panel_hinge": 1.1658771423989942e-24
+            },
+            "simulated_time_s": 6.000000000000338
+          }
+        ],
+        "simulated_duration_s": 6.000000000000338
+      }
+    ],
+    "reset_repeatable": true,
+    "warnings": 0,
+    "python_warnings": [],
+    "max_tracking_error_rad": 9.992007221626409e-16,
+    "max_limit_violation_rad": 0.0,
+    "timestep_s": 0.001,
+    "steps_per_phase": 2000,
+    "synthetic": true,
+    "wall_time_s": 1.0514215509974747
+  },
+  "relocated": {
+    "passed": true,
+    "checks": {
+      "reviewed_model_consistency": true,
+      "actual_joint_motion": true,
+      "tracking": true,
+      "joint_limits": true,
+      "reset_repeatable": true,
+      "no_warnings": true
+    },
+    "trials": [
+      {
+        "phases": [
+          {
+            "joint": "panel_hinge",
+            "target_rad": 0.4,
+            "actual_rad": 0.399999999999999,
+            "max_all_joint_tracking_error_rad": 9.992007221626409e-16,
+            "tracking_errors_rad": {
+              "panel_hinge": 9.992007221626409e-16
+            },
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "panel_hinge",
+            "target_rad": -0.4,
+            "actual_rad": -0.399999999999999,
+            "max_all_joint_tracking_error_rad": 9.992007221626409e-16,
+            "tracking_errors_rad": {
+              "panel_hinge": 9.992007221626409e-16
+            },
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "panel_hinge",
+            "target_rad": 0.0,
+            "actual_rad": -1.1658771423989942e-24,
+            "max_all_joint_tracking_error_rad": 1.1658771423989942e-24,
+            "tracking_errors_rad": {
+              "panel_hinge": 1.1658771423989942e-24
+            },
+            "simulated_time_s": 6.000000000000338
+          }
+        ],
+        "simulated_duration_s": 6.000000000000338
+      },
+      {
+        "phases": [
+          {
+            "joint": "panel_hinge",
+            "target_rad": 0.4,
+            "actual_rad": 0.399999999999999,
+            "max_all_joint_tracking_error_rad": 9.992007221626409e-16,
+            "tracking_errors_rad": {
+              "panel_hinge": 9.992007221626409e-16
+            },
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "panel_hinge",
+            "target_rad": -0.4,
+            "actual_rad": -0.399999999999999,
+            "max_all_joint_tracking_error_rad": 9.992007221626409e-16,
+            "tracking_errors_rad": {
+              "panel_hinge": 9.992007221626409e-16
+            },
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "panel_hinge",
+            "target_rad": 0.0,
+            "actual_rad": -1.1658771423989942e-24,
+            "max_all_joint_tracking_error_rad": 1.1658771423989942e-24,
+            "tracking_errors_rad": {
+              "panel_hinge": 1.1658771423989942e-24
+            },
+            "simulated_time_s": 6.000000000000338
+          }
+        ],
+        "simulated_duration_s": 6.000000000000338
+      }
+    ],
+    "reset_repeatable": true,
+    "warnings": 0,
+    "python_warnings": [],
+    "max_tracking_error_rad": 9.992007221626409e-16,
+    "max_limit_violation_rad": 0.0,
+    "timestep_s": 0.001,
+    "steps_per_phase": 2000,
+    "synthetic": true,
+    "wall_time_s": 0.8817910530051449
+  },
+  "passed": true
+}

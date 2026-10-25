@@ -1,0 +1,66 @@
+{
+  "template-check.json": {
+    "bytes": 627,
+    "sha256": "48a71d5b3deb28d8a17dfb302210c5684217e1fac75bbc0b334d33c5d2fb17e0"
+  },
+  "browser-completed.png": {
+    "bytes": 62655,
+    "sha256": "826704e81079af8f582c277568d65c299debcd038131e9066d9d80153e71d404"
+  },
+  "input-project.json": {
+    "bytes": 25076,
+    "sha256": "356dda6b55e78eea97b22011a690051fa04d186d7c903d1f9e19aa3afe04452d"
+  },
+  "acceptance.json": {
+    "bytes": 1284,
+    "sha256": "f7672ed0a0686312a41eb6e256d7ff50a16e80781091e752aa604846d965573a"
+  },
+  "browser-review.png": {
+    "bytes": 74252,
+    "sha256": "11c2687f88b11d1b42f6563beb6d40aadadb3dfddb93dfaf4ca5d0667a3c0446"
+  },
+  "README.md": {
+    "bytes": 5950,
+    "sha256": "6d3f50a7514ee09e548268a592a9e89a8130c8c268e21f187b8dcdec730594ef"
+  },
+  "api-validation.json": {
+    "bytes": 20809,
+    "sha256": "5a739112f246c722e19d6c9b801b123821d93fc2335157d2afee1e7079fc2a91"
+  },
+  "input-comparison.json": {
+    "bytes": 609,
+    "sha256": "3e997982d8a338431671999245dbe48c9ae4820b33a67c6de3e26d34f295b267"
+  },
+  "simulation.zip": {
+    "bytes": 31253228,
+    "sha256": "aff9c1a3a7690e8cafcae30eaa37ce5b33c82d7b46621dc51741fd05311344b0"
+  },
+  "download-validation.json": {
+    "bytes": 20809,
+    "sha256": "fb242b006ebd90e861bc22286b8cd3e9d960488251100902be61deb022e18d9b"
+  },
+  "reviewed-project.json": {
+    "bytes": 44931,
+    "sha256": "63d7c54bce9338c2d747c8b08e75fe4ed1767df34e08d41cfb1ab48d84c12e84"
+  },
+  "motion-demo/trace.json": {
+    "bytes": 86529,
+    "sha256": "eff1755da49032ed638811ca5f97855972a3228955e5307c11455eca6bd75696"
+  },
+  "motion-demo/report.json": {
+    "bytes": 5590,
+    "sha256": "eca37fa392ed7fa04d6da0384bab367ea6a4bbd48d386eec94936c3bcf8e6c59"
+  },
+  "motion-demo/replay.gif": {
+    "bytes": 1097999,
+    "sha256": "545dcefae41e1395d8c11e836bd683fcc16e933b66f9152ff3aa8de689d71b11"
+  },
+  "motion-demo/preflight.json": {
+    "bytes": 10544,
+    "sha256": "0b2ff03e35a577e913ff3aee7e7490e304b15398efe28f05bc5fec37e2e84b0c"
+  },
+  "motion-demo/actions.json": {
+    "bytes": 806,
+    "sha256": "aafe17f0b219facbf5cbb410a0f6c3785557f02847f630a00d1c1523d91f3a84"
+  }
+}

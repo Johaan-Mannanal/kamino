@@ -60,6 +60,14 @@ def create_app(
     if provider.name != settings.provider:
         raise ValueError("Provider implementation does not match configured provider")
     store = JobStore(settings.data_dir)
+    try:
+        from photo2sim.api.assembly_jobs import AssemblyJobs, assembly_router
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"mujoco", "numpy", "trimesh"}:
+            raise
+        assembly_jobs = None
+    else:
+        assembly_jobs = AssemblyJobs(settings.data_dir)
     suggestions = SuggestionService(store, settings, gemini_transport)
 
     @asynccontextmanager
@@ -71,6 +79,8 @@ def create_app(
             yield
         finally:
             worker.close()
+            if assembly_jobs is not None:
+                assembly_jobs.close()
 
     app = FastAPI(
         title="Photo2Sim",
@@ -101,9 +111,13 @@ def create_app(
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(settings.cors_origins),
-        allow_methods=["GET", "POST", "PATCH"],
+        allow_methods=["GET", "POST", "PATCH", "PUT"],
         allow_headers=["Content-Type", "Authorization"],
     )
+    if assembly_jobs is not None:
+        app.include_router(
+            assembly_router(assembly_jobs, settings.api_token, settings.max_asset_bytes)
+        )
 
     def get_job(job_id: UUID) -> JobRecord:
         try:

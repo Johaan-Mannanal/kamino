@@ -1,0 +1,22 @@
+{
+  "scope": "standalone zero-control smoke check; not full validation",
+  "mujoco": "3.3.7",
+  "finite_state": true,
+  "simulated_time_s": 2.9999999999997806,
+  "warning_count": 0,
+  "photo2sim_installed": false,
+  "repo_on_python_path": false,
+  "run_outside_repository": true,
+  "packages": {
+    "pip": "25.2",
+    "zipp": "4.1.2",
+    "etils": "1.14.0",
+    "numpy": "2.5.4",
+    "PyOpenGL": "3.1.10",
+    "fsspec": "2026.9.0",
+    "absl-py": "2.5.1",
+    "mujoco": "3.3.7",
+    "typing_extensions": "4.16.0",
+    "glfw": "2.11.0"
+  }
+}

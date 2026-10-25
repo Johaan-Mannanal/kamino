@@ -1,0 +1,151 @@
+{
+  "schema_version": "assembly-review-1.0",
+  "name": "two_link_hinge",
+  "synthetic": true,
+  "root_link": "base",
+  "parts": [
+    {
+      "id": "base",
+      "mesh": "meshes/base.obj",
+      "sha256": "52e557f12cd0530f649b130c95236bca6d5ddeb060795cea5a08daac0bb546d0",
+      "pose": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.25
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "source": "estimated",
+      "note": "Synthetic test geometry; vertices in link coordinates, metres",
+      "group": "base",
+      "excluded_reason": null
+    },
+    {
+      "id": "arm",
+      "mesh": "meshes/arm.obj",
+      "sha256": "bd90b97e8db71552f35ec7c909f58f419d3c0f0453e672f7979c57579fd3be6e",
+      "pose": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.31
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "source": "estimated",
+      "note": "Synthetic test geometry; vertices in link coordinates, metres",
+      "group": "arm",
+      "excluded_reason": null
+    }
+  ],
+  "groups": [
+    {
+      "name": "base",
+      "frame": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.25
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mass_kg": {
+        "value": 0.5,
+        "source": "estimated",
+        "note": "Synthetic assumption"
+      },
+      "sliding_friction": null,
+      "reviewed": false,
+      "review_note": "Synthetic fixture review"
+    },
+    {
+      "name": "arm",
+      "frame": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.31
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "mass_kg": {
+        "value": 0.1,
+        "source": "estimated",
+        "note": "Synthetic assumption"
+      },
+      "sliding_friction": null,
+      "reviewed": false,
+      "review_note": "Synthetic fixture review"
+    }
+  ],
+  "joints": [
+    {
+      "name": "hinge",
+      "parent": "base",
+      "child": "arm",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -0.8,
+        0.8
+      ],
+      "damping": {
+        "value": 0.2,
+        "source": "estimated",
+        "note": null
+      },
+      "drive": {
+        "kp": 5.0,
+        "force_limit_nm": 2.0,
+        "source": "estimated",
+        "note": null
+      },
+      "source": "user_supplied",
+      "note": "Reviewed synthetic hinge, not inferred from photos",
+      "reviewed": false,
+      "review_note": "Synthetic hinge review"
+    }
+  ],
+  "notes": [
+    "Synthetic fixture"
+  ],
+  "review_snapshot": null
+}

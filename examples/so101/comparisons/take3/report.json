@@ -1,0 +1,264 @@
+{
+  "scope": "Qualitative diagnostic FK, not a validated hardware pose or motion replay",
+  "source_commit": "d07d713c3cb57f1316bd0950fc48ba71f4478f9d",
+  "mujoco_version": "3.3.7",
+  "bundle_sha256": "aff9c1a3a7690e8cafcae30eaa37ce5b33c82d7b46621dc51741fd05311344b0",
+  "scene_sha256": "758e6995c89a3a747e676da2005b6f111e70ddc2deebff15ae1b50d9fd745b74",
+  "pairing_sha256": "cf208583644f0c2f4574a09a7655ce30db91355c8b030f3820ef6e36de501db2",
+  "measurement_followup_sha256": "97bf28da46baac3d4a3d9384d235445e7aadd70fc855fa23dddfc8d12e703766",
+  "photo_orientation_provenance": {
+    "front_oblique": {
+      "camera": "rear, operator-reported",
+      "view": "front-facing, operator-reported",
+      "orientation": "portrait",
+      "horizontal_flip": "operator_confirmed_no_left_right_flip"
+    },
+    "side_oblique": {
+      "camera": "rear, operator-reported",
+      "view": "left side, operator-reported",
+      "orientation": "landscape",
+      "horizontal_flip": "operator_confirmed_no_left_right_flip"
+    }
+  },
+  "later_jaw_measurement": {
+    "operator_reported_value_mm": 3.18,
+    "operator_reported_inches": "1/8",
+    "description": "Shortest distance between closest opposing inner gripping surfaces",
+    "source": "operator-measured, approximate",
+    "uncertainty_mm": null,
+    "measurement_photo_supplied": false,
+    "measured_after_shoulder_repositioning": true,
+    "applies_to_take3_normalized_reading": null,
+    "association_status": "Not accepted as a take-3 calibration point: operator unsure whether jaws stayed unchanged"
+  },
+  "capture_integrity_passed": true,
+  "samples": 599,
+  "elapsed_span_s": 119.84362090000286,
+  "association": "paired_by_operator_stationary_association",
+  "hardware_synchronized": false,
+  "hardware_mapping_verified": false,
+  "physical_accuracy_verified": false,
+  "dynamics_steps": 0,
+  "display_settings": {
+    "size_px": [
+      800,
+      600
+    ],
+    "headlight_ambient": 0.4,
+    "headlight_diffuse": 0.8
+  },
+  "joint_mapping_hypothesis": {
+    "shoulder_pan": {
+      "declared_unit": "degrees",
+      "minimum": -0.3956043956043956,
+      "maximum": -0.3956043956043956,
+      "span": 0.0,
+      "median": -0.3956043956043956,
+      "display_angle_rad": -0.006904599238658886,
+      "assumption": "Unverified baseline: positive sign, zero offset, degrees to radians",
+      "verified": false,
+      "model_range_rad": [
+        -1.91986,
+        1.91986
+      ],
+      "range_excess_deg": 0.0
+    },
+    "shoulder_lift": {
+      "declared_unit": "degrees",
+      "minimum": -104.17582417582418,
+      "maximum": -104.17582417582418,
+      "span": 0.0,
+      "median": -104.17582417582418,
+      "display_angle_rad": -1.81821113284684,
+      "assumption": "Unverified baseline: positive sign, zero offset, degrees to radians",
+      "verified": false,
+      "model_range_rad": [
+        -1.7453293,
+        1.7453293
+      ],
+      "range_excess_deg": 4.17582142530186
+    },
+    "elbow_flex": {
+      "declared_unit": "degrees",
+      "minimum": 96.17582417582418,
+      "maximum": 96.17582417582418,
+      "span": 0.0,
+      "median": 96.17582417582418,
+      "display_angle_rad": 1.6785847926872937,
+      "assumption": "Unverified baseline: positive sign, zero offset, degrees to radians",
+      "verified": false,
+      "model_range_rad": [
+        -1.69,
+        1.69
+      ],
+      "range_excess_deg": 0.0
+    },
+    "wrist_flex": {
+      "declared_unit": "degrees",
+      "minimum": 84.04395604395604,
+      "maximum": 84.04395604395604,
+      "span": 0.0,
+      "median": 84.04395604395604,
+      "display_angle_rad": 1.4668437493684212,
+      "assumption": "Unverified baseline: positive sign, zero offset, degrees to radians",
+      "verified": false,
+      "model_range_rad": [
+        -1.658063,
+        1.658063
+      ],
+      "range_excess_deg": 0.0
+    },
+    "wrist_roll": {
+      "declared_unit": "degrees",
+      "minimum": 4.175824175824176,
+      "maximum": 4.175824175824176,
+      "span": 0.0,
+      "median": 4.175824175824176,
+      "display_angle_rad": 0.07288188085251047,
+      "assumption": "Unverified baseline: positive sign, zero offset, degrees to radians",
+      "verified": false,
+      "model_range_rad": [
+        -2.7438473,
+        2.8412063
+      ],
+      "range_excess_deg": 0.0
+    },
+    "gripper": {
+      "declared_unit": "normalized_0_100",
+      "minimum": 0.9549795361527967,
+      "maximum": 0.9549795361527967,
+      "span": 0.0,
+      "median": 0.9549795361527967,
+      "display_angle_rad": 0.0,
+      "assumption": "Display-only zero placeholder; normalized observation is NOT converted",
+      "verified": false,
+      "model_range_rad": [
+        -0.174533,
+        1.7453292
+      ],
+      "range_excess_deg": 0.0
+    }
+  },
+  "base_origin_world_m": [
+    0.0,
+    0.0,
+    0.15
+  ],
+  "joint_anchor_positions_m": {
+    "shoulder_pan": [
+      0.0388353,
+      0.0,
+      0.21239999999999998
+    ],
+    "shoulder_lift": [
+      0.06935997526611763,
+      -0.018067471693019664,
+      0.26659999999999995
+    ],
+    "elbow_flex": [
+      -0.04663651743988413,
+      -0.018868393715867994,
+      0.26617916295340194
+    ],
+    "wrist_flex": [
+      0.08622377788842846,
+      -0.017951032043905406,
+      0.29010300823037083
+    ],
+    "wrist_roll": [
+      0.100834395673038,
+      0.00025028147332573775,
+      0.23080661682077908
+    ],
+    "gripper": [
+      0.1255006595196584,
+      0.019704388750260864,
+      0.2128579918621253
+    ]
+  },
+  "limitations": [
+    "Positive signs and zero offsets are a baseline hypothesis only.",
+    "Out-of-range angles are retained for diagnostic FK, never clipped or commanded.",
+    "Gripper zero and range endpoints are display cases, not estimated jaw opening.",
+    "Camera angles are illustrative; no intrinsics/extrinsics or pixel alignment fitted.",
+    "Photos are resized only for the comparison sheet; not flipped or perspective corrected.",
+    "Operator confirms both rear-camera originals were not flipped; cameras remain uncalibrated.",
+    "Later 3.18 mm jaw gap is unpaired with take 3 and is not used for gripper conversion.",
+    "Base height 0.15 m is the existing free-space test assumption, not tabletop calibration.",
+    "CAD structural subset omits servos, camera, wiring and mounting clamps."
+  ],
+  "render_cases": [
+    {
+      "file": "render-0.png",
+      "azimuth_deg": 0,
+      "elevation_deg": -12.0,
+      "lookat_m": [
+        0.04218481289029987,
+        3.699928800837693e-10,
+        0.21557960456961173
+      ],
+      "distance_m": 0.39457027849824117,
+      "jaw_angle_rad": 0.0
+    },
+    {
+      "file": "render-1.png",
+      "azimuth_deg": 90,
+      "elevation_deg": -12.0,
+      "lookat_m": [
+        0.04218481289029987,
+        3.699928800837693e-10,
+        0.21557960456961173
+      ],
+      "distance_m": 0.39457027849824117,
+      "jaw_angle_rad": 0.0
+    },
+    {
+      "file": "render-2.png",
+      "azimuth_deg": 180,
+      "elevation_deg": -12.0,
+      "lookat_m": [
+        0.04218481289029987,
+        3.699928800837693e-10,
+        0.21557960456961173
+      ],
+      "distance_m": 0.39457027849824117,
+      "jaw_angle_rad": 0.0
+    },
+    {
+      "file": "render-3.png",
+      "azimuth_deg": 270,
+      "elevation_deg": -12.0,
+      "lookat_m": [
+        0.04218481289029987,
+        3.699928800837693e-10,
+        0.21557960456961173
+      ],
+      "distance_m": 0.39457027849824117,
+      "jaw_angle_rad": 0.0
+    },
+    {
+      "file": "render-4.png",
+      "azimuth_deg": 90,
+      "elevation_deg": -12.0,
+      "lookat_m": [
+        0.04218481289029987,
+        3.699928800837693e-10,
+        0.21557960456961173
+      ],
+      "distance_m": 0.39457027849824117,
+      "jaw_angle_rad": -0.174533
+    },
+    {
+      "file": "render-5.png",
+      "azimuth_deg": 90,
+      "elevation_deg": -12.0,
+      "lookat_m": [
+        0.04218481289029987,
+        3.699928800837693e-10,
+        0.21557960456961173
+      ],
+      "distance_m": 0.39457027849824117,
+      "jaw_angle_rad": 1.7453292
+    }
+  ]
+}

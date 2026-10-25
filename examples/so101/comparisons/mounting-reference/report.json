@@ -1,0 +1,150 @@
+{
+  "scope": "Nominal reference-face correspondence and conditional root-height estimate",
+  "step_sha256": "f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+  "model_xml_sha256": "982c02c027ec0c62d3459d0a6eb00dfb7dc13a451992e72ce99addc71f209805",
+  "reviewed_project_sha256": "63d7c54bce9338c2d747c8b08e75fe4ed1767df34e08d41cfb1ab48d84c12e84",
+  "reviewed_project_schema": "assembly-review-1.0",
+  "exported_shoulder_sha256": "915ce146305873f46b90387c1dcfc97595ad1d06cc75f8c90bdffac6d212d38a",
+  "measurement_sha256": "97bf28da46baac3d4a3d9384d235445e7aadd70fc855fa23dddfc8d12e703766",
+  "component": "Rotation_Pitch_SO101 v8",
+  "model_link": "shoulder",
+  "face_index_zero_based_in_pinned_step_import": 37,
+  "face_selector": {
+    "plane_local_y_mm": 56.4,
+    "area_mm2": 317.69808018499685,
+    "normal_local": [
+      7.26634831679315e-16,
+      1.0,
+      -0.0
+    ]
+  },
+  "face_center_local_mm": [
+    -18.353429490586255,
+    56.39999999999999,
+    -0.024394287285459226
+  ],
+  "five_hole_features": [
+    {
+      "center_mm": [
+        -16.9497474683058,
+        56.4,
+        4.94974746830583
+      ],
+      "radius_mm": 2.69999999999999
+    },
+    {
+      "center_mm": [
+        -7.05025253169417,
+        56.4,
+        4.94974746830583
+      ],
+      "radius_mm": 2.6
+    },
+    {
+      "center_mm": [
+        -7.05025253169417,
+        56.4,
+        -4.94974746830583
+      ],
+      "radius_mm": 2.6
+    },
+    {
+      "center_mm": [
+        -12.0,
+        56.4,
+        -1.66533453693773e-14
+      ],
+      "radius_mm": 1.6
+    },
+    {
+      "center_mm": [
+        -16.9497474683058,
+        56.4,
+        -4.94974746830583
+      ],
+      "radius_mm": 2.69999999999999
+    }
+  ],
+  "part_to_shoulder_transform_m": [
+    [
+      1.0,
+      -0.0,
+      0.0,
+      0.012201
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      2.2e-05
+    ],
+    [
+      -0.0,
+      -1.0,
+      0.0,
+      0.0464
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "part_to_root_at_zero_transform_m": [
+    [
+      -1.0000000000000004,
+      0.0,
+      0.0,
+      0.0266343
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      2.2e-05
+    ],
+    [
+      0.0,
+      1.0000000000000004,
+      0.0,
+      0.01599999999999998
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "face_center_relative_to_root_m": [
+    0.044987729490586256,
+    -2.394287285459227e-06,
+    0.07239999999999999
+  ],
+  "face_normal_relative_to_root": [
+    -7.266348316793153e-16,
+    0.0,
+    1.0000000000000004
+  ],
+  "face_height_above_root_mm": 72.39999999999999,
+  "max_face_vertex_distance_to_exported_shoulder_mm": 0.08891437259232415,
+  "p95_face_vertex_distance_to_exported_shoulder_mm": 0.012182182734717287,
+  "interior_face_anchor_distance_to_exported_mesh_mm": 5.278674532495932e-15,
+  "boundary_check_scope": "Sampled analytic face vertices versus tessellated mesh; not an exhaustive surface-distance bound",
+  "operator_height_inches": 2.97,
+  "converted_height_mm": 75.438,
+  "conditional_root_height_above_table_mm": 3.038000000000011,
+  "suggested_display_root_height_mm_approx": 3,
+  "uncertainty_mm": null,
+  "applied_to_accepted_export": false,
+  "full_mounting_transform_verified": false,
+  "assumptions": [
+    "Screenshot matched by component silhouette, planar face and five-hole pattern; no source face ID was supplied.",
+    "Level base/table: model root Z is tabletop normal. Shoulder pan rotation preserves this face height.",
+    "Reported height transfers to the selected face with no known aid offset; transfer uncertainty is unmeasured.",
+    "3.038 mm is arithmetic precision, not measurement precision; report approximately 3 mm.",
+    "Single height does not determine XY, yaw, tilt, hardware joint mapping or camera extrinsics.",
+    "No rigid-body scale fitting; no model, calibration or accepted 0.15 m test scene changed."
+  ]
+}

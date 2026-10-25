@@ -1,0 +1,17 @@
+{
+  "source": "actual authenticated browser ZIP download",
+  "synthetic": true,
+  "assembly_revision": 1,
+  "mapping_version": 3,
+  "attempt": 3,
+  "offset_rad": 0.05,
+  "samples": 41,
+  "duration_s": 4,
+  "browser_zip_matches_server": true,
+  "prior_attempt_unchanged": true,
+  "sha256": "f3cc683c3626914e5b24781fecf2ba62d29b72ed16b3cc0342270fd85e7203e6",
+  "python": "3.13.7",
+  "mujoco": "3.3.7",
+  "physical_accuracy_verified": false,
+  "hardware_commands": false
+}

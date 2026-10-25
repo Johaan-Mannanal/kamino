@@ -1,7 +1,9 @@
 # SO101 through guided grouping — CAD/template assisted
 
-**Generated articulated candidate; kinematic consistency passes, dynamic motion
-validation fails.** This is not a photo-only reconstruction or a calibrated arm.
+**Original candidate: kinematics pass, dynamic motion fails.** The separate
+[collision revision](collision-revision/README.md) passes local motion/reset/relocation
+with convex hulls, joint-pair exclusions and explicitly assumed free-space clearance.
+Both are CAD/template-assisted, not photo-only reconstruction or calibrated arms.
 
 The generic STEP importer tessellated 11 nominal structural components from the
 supplied assembly. Their hashes, local geometry, CAD placements and 259 omitted

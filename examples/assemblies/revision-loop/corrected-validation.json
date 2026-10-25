@@ -1,0 +1,159 @@
+{
+  "scope": "Fixed-root assembly motion smoke check; not calibrated dynamics or reconstruction accuracy",
+  "viewer_inspected": false,
+  "environment": {
+    "mujoco": "3.3.7",
+    "numpy": "2.5.4"
+  },
+  "tracking_tolerance_rad": 0.03,
+  "phase_duration_s": 2.0,
+  "original": {
+    "passed": true,
+    "checks": {
+      "reviewed_model_consistency": true,
+      "actual_joint_motion": true,
+      "tracking": true,
+      "joint_limits": true,
+      "reset_repeatable": true,
+      "no_warnings": true
+    },
+    "trials": [
+      {
+        "phases": [
+          {
+            "joint": "hinge",
+            "target_rad": 0.3,
+            "actual_rad": 0.2999999999999994,
+            "max_all_joint_tracking_error_rad": 6.106226635438361e-16,
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "hinge",
+            "target_rad": -0.3,
+            "actual_rad": -0.2999999999999994,
+            "max_all_joint_tracking_error_rad": 6.106226635438361e-16,
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "hinge",
+            "target_rad": 0.0,
+            "actual_rad": -2.2037357418496345e-32,
+            "max_all_joint_tracking_error_rad": 2.2037357418496345e-32,
+            "simulated_time_s": 6.000000000000338
+          }
+        ],
+        "simulated_duration_s": 6.000000000000338
+      },
+      {
+        "phases": [
+          {
+            "joint": "hinge",
+            "target_rad": 0.3,
+            "actual_rad": 0.2999999999999994,
+            "max_all_joint_tracking_error_rad": 6.106226635438361e-16,
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "hinge",
+            "target_rad": -0.3,
+            "actual_rad": -0.2999999999999994,
+            "max_all_joint_tracking_error_rad": 6.106226635438361e-16,
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "hinge",
+            "target_rad": 0.0,
+            "actual_rad": -2.2037357418496345e-32,
+            "max_all_joint_tracking_error_rad": 2.2037357418496345e-32,
+            "simulated_time_s": 6.000000000000338
+          }
+        ],
+        "simulated_duration_s": 6.000000000000338
+      }
+    ],
+    "reset_repeatable": true,
+    "warnings": 0,
+    "python_warnings": [],
+    "max_tracking_error_rad": 6.106226635438361e-16,
+    "max_limit_violation_rad": 0.0,
+    "timestep_s": 0.001,
+    "steps_per_phase": 2000,
+    "synthetic": true,
+    "wall_time_s": 0.6366592739941552
+  },
+  "relocated": {
+    "passed": true,
+    "checks": {
+      "reviewed_model_consistency": true,
+      "actual_joint_motion": true,
+      "tracking": true,
+      "joint_limits": true,
+      "reset_repeatable": true,
+      "no_warnings": true
+    },
+    "trials": [
+      {
+        "phases": [
+          {
+            "joint": "hinge",
+            "target_rad": 0.3,
+            "actual_rad": 0.2999999999999994,
+            "max_all_joint_tracking_error_rad": 6.106226635438361e-16,
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "hinge",
+            "target_rad": -0.3,
+            "actual_rad": -0.2999999999999994,
+            "max_all_joint_tracking_error_rad": 6.106226635438361e-16,
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "hinge",
+            "target_rad": 0.0,
+            "actual_rad": -2.2037357418496345e-32,
+            "max_all_joint_tracking_error_rad": 2.2037357418496345e-32,
+            "simulated_time_s": 6.000000000000338
+          }
+        ],
+        "simulated_duration_s": 6.000000000000338
+      },
+      {
+        "phases": [
+          {
+            "joint": "hinge",
+            "target_rad": 0.3,
+            "actual_rad": 0.2999999999999994,
+            "max_all_joint_tracking_error_rad": 6.106226635438361e-16,
+            "simulated_time_s": 1.9999999999998905
+          },
+          {
+            "joint": "hinge",
+            "target_rad": -0.3,
+            "actual_rad": -0.2999999999999994,
+            "max_all_joint_tracking_error_rad": 6.106226635438361e-16,
+            "simulated_time_s": 3.9999999999996705
+          },
+          {
+            "joint": "hinge",
+            "target_rad": 0.0,
+            "actual_rad": -2.2037357418496345e-32,
+            "max_all_joint_tracking_error_rad": 2.2037357418496345e-32,
+            "simulated_time_s": 6.000000000000338
+          }
+        ],
+        "simulated_duration_s": 6.000000000000338
+      }
+    ],
+    "reset_repeatable": true,
+    "warnings": 0,
+    "python_warnings": [],
+    "max_tracking_error_rad": 6.106226635438361e-16,
+    "max_limit_violation_rad": 0.0,
+    "timestep_s": 0.001,
+    "steps_per_phase": 2000,
+    "synthetic": true,
+    "wall_time_s": 0.6338962529989658
+  },
+  "passed": true
+}
