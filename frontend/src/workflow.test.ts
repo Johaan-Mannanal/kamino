@@ -123,6 +123,42 @@ it('loads saved estimates without modifying drafts; failed refresh keeps estimat
   )
   expect(fetch.mock.calls.some(([url]) => url.endsWith('/properties'))).toBe(false)
 })
+it.each([
+  [
+    'authentication',
+    'Gemini authentication failed. Ask the server operator to update its API key.',
+    false,
+  ],
+  [
+    'quota',
+    'Gemini quota is exhausted. Wait for its reset or ask the server operator to check quota.',
+    false,
+  ],
+  ['overload', 'Gemini is overloaded. Try again shortly.', true],
+])(
+  'shows actionable Gemini %s errors and preserves manual drafts and saved estimates',
+  async (category, message, retryable) => {
+    const detail = `${message} Manual property entry remains available.`
+    const fetch = vi.fn(async (url: string, init?: RequestInit) =>
+      url.endsWith('/suggestions')
+        ? init?.method === 'POST'
+          ? json({ detail, category, retryable, manual_entry_available: true }, 503)
+          : json(suggestion)
+        : json(record),
+    )
+    await start(fetch)
+    change('x', '43')
+    document.querySelector<HTMLButtonElement>('#cached-suggestions')!.click()
+    await vi.waitFor(() => expect(document.body.textContent).toContain('Include the pins?'))
+    document.querySelector<HTMLButtonElement>('#refresh-suggestions')!.click()
+    await vi.waitFor(() => expect(document.body.textContent).toContain(detail))
+    expect(document.body.textContent).toContain('Include the pins?')
+    const manual = document.querySelector<HTMLInputElement>('[name="x"]')!
+    expect(manual.value).toBe('43')
+    expect(manual.disabled).toBe(false)
+    expect(fetch.mock.calls.some(([url]) => url.endsWith('/properties'))).toBe(false)
+  },
+)
 it('preserves newer orientation edits when an earlier PATCH completes and keeps processing blocked', async () => {
   let finishSave!: (response: Response) => void
   let pending = true

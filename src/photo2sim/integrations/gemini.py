@@ -35,7 +35,9 @@ class _AttemptTimeout(Exception):
     pass
 
 
-def _request_until(url, key, body, transport, deadline):
+def _request_until(
+    url: str, key: str, body: dict, transport: Transport | None, deadline: float
+) -> httpx.Response | None:
     remaining = deadline - time.monotonic()
     if remaining <= 0:
         raise _AttemptTimeout
@@ -44,9 +46,9 @@ def _request_until(url, key, body, transport, deadline):
             "Gemini requests are still finishing; retry shortly.", reason="busy"
         )
     finished = Event()
-    outcome = []
+    outcome: list[httpx.Response | None] = []
 
-    def send():
+    def send() -> None:
         try:
             with httpx.Client(transport=transport, trust_env=transport is None) as client:
                 remaining = deadline - time.monotonic()

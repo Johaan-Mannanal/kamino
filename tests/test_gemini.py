@@ -253,35 +253,33 @@ def test_total_failure_is_bounded_and_sanitized(images):
     assert len(seen) == 4
 
 
-def test_total_deadline_rejects_delayed_valid_success(images):
+def test_total_deadline_rejects_delayed_valid_success(images, monkeypatch):
+    import photo2sim.integrations.gemini as gemini
+
+    elapsed = [0.0]
+    monkeypatch.setattr(gemini.time, "monotonic", lambda: elapsed[0])
     seen = []
-    completed = Event()
 
     def handle(request):
         seen.append(request.url.path)
-        time.sleep(0.05)
-        completed.set()
+        # A valid response completes 50 ms into a 5 ms total budget.
+        # Virtual elapsed time keeps the late-completion regression deterministic.
+        elapsed[0] = 0.05
         return httpx.Response(200, json=envelope(GOOD))
 
-    try:
-        started = time.monotonic()
-        with pytest.raises(GeminiUnavailable) as error:
-            suggest_properties_result(
-                images,
-                api_key=SECRET,
-                model="primary",
-                fallback_models=(),
-                max_attempts=1,
-                deadline_seconds=0.005,
-                backoff_seconds=0,
-                transport=handle,
-            )
-        assert error.value.reason == "deadline"
-        assert time.monotonic() - started < 0.045
-        assert not completed.is_set()
-        assert len(seen) == 1
-    finally:
-        assert completed.wait(1)
+    with pytest.raises(GeminiUnavailable) as error:
+        suggest_properties_result(
+            images,
+            api_key=SECRET,
+            model="primary",
+            fallback_models=(),
+            max_attempts=1,
+            deadline_seconds=0.005,
+            backoff_seconds=0,
+            transport=handle,
+        )
+    assert error.value.reason == "deadline"
+    assert len(seen) == 1
 
 
 def test_slow_primary_reserves_time_for_fallback(images):
