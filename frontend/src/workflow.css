@@ -1,6 +1,82 @@
 html {
   color-scheme: dark;
 }
+.mesh-preview {
+  margin-bottom: 24px;
+}
+model-viewer {
+  display: block;
+  width: 100%;
+  height: 360px;
+  border: 1px solid #343638;
+  border-radius: 10px;
+  background: #1b1c1e;
+}
+.mesh-preview p,
+.suggestions p,
+.suggestions li {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #b3b0a7;
+}
+.mesh-preview button,
+.suggestions button {
+  min-height: 44px;
+  border: 1px solid #55585a;
+  border-radius: 8px;
+  background: #242527;
+  color: #e8e8e5;
+  padding: 0 14px;
+  font-size: 14px;
+}
+.suggestions {
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+.suggestions summary {
+  min-height: 44px;
+  display: list-item;
+  padding: 10px 0;
+}
+.suggestions input {
+  max-width: 100%;
+}
+.suggestion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0;
+}
+.estimate-label {
+  color: #d4c3a5;
+  margin: 22px 0 8px;
+  font-weight: 600;
+}
+.estimate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid #343638;
+  padding: 14px 0;
+}
+.estimate strong {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 550;
+}
+.suggestion-notes {
+  padding-left: 20px;
+}
+@media (max-width: 600px) {
+  model-viewer {
+    height: 280px;
+  }
+  .estimate {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
 body {
   padding-bottom: env(safe-area-inset-bottom);
 }

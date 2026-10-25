@@ -13,6 +13,13 @@ export type Properties = {
   mass_kg: Scalar
   sliding_friction: Scalar | null
 }
+export type Suggestions = {
+  dimensions_m: Properties['dimensions_m'] | null
+  mass_kg: Scalar | null
+  sliding_friction: Scalar | null
+  clarifying_questions: string[]
+  notes: string[]
+}
 export type Job = {
   schema_version: '1.0'
   id: string

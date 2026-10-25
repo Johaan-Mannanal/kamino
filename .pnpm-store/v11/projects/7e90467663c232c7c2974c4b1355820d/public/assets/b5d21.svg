@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="376" height="72" viewBox="0 0 376 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Stationary object contact shadow" filter="url(#filter0_f_0_73)">
+<ellipse cx="188" cy="36" rx="170" ry="18" fill="black" fill-opacity="0.4"/>
+</g>
+<defs>
+<filter id="filter0_f_0_73" x="0" y="0" width="376" height="72" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="9" result="effect1_foregroundBlur_0_73"/>
+</filter>
+</defs>
+</svg>

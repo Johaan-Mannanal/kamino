@@ -1,4 +1,4 @@
-import type { Job, Properties, ValidationReport } from './types'
+import type { Job, Properties, ValidationReport, Suggestions } from './types'
 
 export type Api = {
   health(): Promise<{ status: string; provider: string }>
@@ -9,13 +9,17 @@ export type Api = {
   report(id: string, path: string): Promise<ValidationReport>
   file(id: string, path: string): Promise<Blob>
   fileUrl(id: string, path: string): string
+  cachedSuggestions(id: string): Promise<Suggestions>
+  suggest(id: string, objectHint: string, refresh?: boolean): Promise<Suggestions>
 }
 
 export class ApiError extends Error {
   status?: number
-  constructor(message: string, status?: number) {
+  retryAfter?: number
+  constructor(message: string, status?: number, retryAfter?: number) {
     super(message)
     this.status = status
+    this.retryAfter = retryAfter
   }
 }
 
@@ -60,7 +64,19 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* retain HTTP status text */
     }
-    throw new ApiError(`${detail || 'Request failed'} (HTTP ${response.status})`, response.status)
+    const retryHeader = response.headers.get('Retry-After')
+    const seconds = retryHeader === null ? undefined : Number(retryHeader)
+    const retryAfter =
+      seconds !== undefined && Number.isFinite(seconds)
+        ? Math.max(0, seconds)
+        : retryHeader
+          ? Math.max(0, (Date.parse(retryHeader) - Date.now()) / 1000)
+          : undefined
+    throw new ApiError(
+      `${detail || 'Request failed'} (HTTP ${response.status})`,
+      response.status,
+      retryAfter,
+    )
   }
   return response.json() as Promise<T>
 }
@@ -101,4 +117,11 @@ export const liveApi: Api = {
     return response.blob()
   },
   fileUrl,
+  cachedSuggestions: (id) => request(`/api/jobs/${encodeURIComponent(id)}/suggestions`),
+  suggest: (id, objectHint, refresh = false) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/suggestions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ object_hint: objectHint, refresh }),
+    }),
 }

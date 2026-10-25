@@ -6,6 +6,47 @@ afterEach(() => {
   setApiToken('')
 })
 describe('shared HTTP contract', () => {
+  it('loads cached suggestions with GET and generates only through an explicit POST', async () => {
+    const fetch = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')))
+    vi.stubGlobal('fetch', fetch)
+    setApiToken('test-token')
+    await liveApi.cachedSuggestions('job-id')
+    expect(fetch.mock.calls[0][0]).toMatch(/\/api\/jobs\/job-id\/suggestions$/)
+    expect(fetch.mock.calls[0][1].method).toBeUndefined()
+    await liveApi.suggest('job-id', 'charger', true)
+    expect(fetch.mock.calls[1][1].method).toBe('POST')
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({
+      object_hint: 'charger',
+      refresh: true,
+    })
+    expect(fetch.mock.calls[1][1].headers.Authorization).toBe('Bearer test-token')
+  })
+  it('preserves Gemini busy timing and unavailability for manual-entry recovery', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ detail: 'Busy' }), {
+            status: 429,
+            headers: { 'Retry-After': '12' },
+          }),
+        ),
+    )
+    await expect(liveApi.suggest('job-id', '')).rejects.toMatchObject({
+      status: 429,
+      retryAfter: 12,
+    })
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ detail: 'Unavailable' }), { status: 503 }),
+        ),
+    )
+    await expect(liveApi.suggest('job-id', '')).rejects.toMatchObject({ status: 503 })
+  })
   it('uses repeated images fields and lets the browser set multipart Content-Type', async () => {
     const fetch = vi.fn().mockResolvedValue(new Response('{}', { status: 202 }))
     vi.stubGlobal('fetch', fetch)

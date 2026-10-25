@@ -1,7 +1,10 @@
 import type { Api } from './api'
 import type { Job, Properties, ValidationReport } from './types'
+import type { Suggestions } from './types'
+import { ApiError } from './api'
 
 const jobs = new Map<string, { record: Job; ticks: number; scenario: string }>()
+const cached = new Map<string, Suggestions>()
 const cube =
   '# Synthetic mock cube; uploaded photos were not used\no cube\nv 0 0 0\nv 1 0 0\nv 1 1 0\nv 0 1 0\nv 0 0 1\nv 1 0 1\nv 1 1 1\nv 0 1 1\nf 1 2 3 4\nf 5 8 7 6\nf 1 5 6 2\nf 2 6 7 3\nf 3 7 8 4\nf 5 1 4 8\n'
 const cubeUrl = URL.createObjectURL(new Blob([cube], { type: 'text/plain' }))
@@ -18,6 +21,34 @@ export function setMockScenario(value: typeof mockScenario) {
 }
 
 export const mockApi: Api = {
+  async cachedSuggestions(id) {
+    const result = cached.get(id)
+    if (!result) throw new ApiError('No saved suggestions for this job', 404)
+    return structuredClone(result)
+  },
+  async suggest(id) {
+    const result: Suggestions = {
+      dimensions_m: {
+        x: 0.04,
+        y: 0.05,
+        z: 0.06,
+        source: 'estimated',
+        note: 'Synthetic UI estimate — unverified',
+      },
+      mass_kg: { value: 0.08, source: 'estimated', note: 'Synthetic UI estimate — unverified' },
+      sliding_friction: null,
+      clarifying_questions: [
+        'Measure the full X/Y/Z extents after choosing the object orientation.',
+        'Weigh the object to replace the mass estimate.',
+      ],
+      notes: [
+        'Synthetic mock response. Gemini was not called.',
+        'Contact-pair friction is unknown.',
+      ],
+    }
+    cached.set(id, result)
+    return structuredClone(result)
+  },
   async health() {
     return { status: 'ok', provider: 'mock' }
   },
@@ -67,7 +98,7 @@ export const mockApi: Api = {
       } else {
         item.record.status = 'awaiting_properties'
         item.record.progress = 100
-        item.record.mesh_path = 'reconstruction/mesh.obj'
+        item.record.mesh_path = 'reconstruction/mesh.glb'
       }
       item.record.updated_at = new Date().toISOString()
     }
@@ -142,6 +173,11 @@ export const mockApi: Api = {
     }
   },
   async file(id, path) {
+    if (path.endsWith('.glb')) {
+      const response = await fetch('/mock/mesh.glb')
+      if (!response.ok) throw new Error('Mock GLB fixture is missing.')
+      return response.blob()
+    }
     if (path.endsWith('.zip')) {
       const response = await fetch('/mock/simulation.zip')
       if (!response.ok) throw new Error('Mock ZIP fixture is missing.')
