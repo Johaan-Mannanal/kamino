@@ -1,0 +1,32 @@
+{
+  "verified_at_utc": "2026-10-25T05:47:40.277231+00:00",
+  "base_commit": "c38c95c7211b790dfd7c624f7482b9eaabb0ce58",
+  "runtime": {
+    "os": "Windows",
+    "node": "24.22.1",
+    "pnpm": "11.25.0",
+    "browser": "156.0.4314.42"
+  },
+  "commands": {
+    "pnpm install --frozen-lockfile": "passed in isolated checkout; no borrowed node_modules",
+    "pnpm test": {
+      "passed": 15,
+      "skipped": 0
+    },
+    "pnpm build": "passed; existing large Three.js chunk advisory",
+    "pnpm test:browser": {
+      "passed": 100,
+      "skipped": 0,
+      "checks": {
+        "browser-results.json": 32,
+        "home-results.json": 21,
+        "appearance-results.json": 20,
+        "pause-results.json": 27
+      },
+      "browser_override": "installed Edge via KAMINO_BROWSER_EXECUTABLE"
+    }
+  },
+  "provider_requests": 0,
+  "macos_run": "not yet verified",
+  "scope": "additive UI prototype; backend integration still required"
+}

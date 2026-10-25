@@ -1,24 +1,21 @@
 """Optional Agentverse ACP endpoint, kept outside the backend routes."""
 
 import asyncio
+import os
 import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 
-from photo2sim.integrations.fetch_agent.attachments import AttachmentBridge, resource_uri
-from photo2sim.integrations.fetch_agent.identity import load_seed, settings
 from photo2sim.integrations.fetch_agent.workflow import Workflow
 
 
-def create_app(*, workflow=None, send=None, seed=None, bridge=None) -> FastAPI:
+def create_app(*, workflow=None, send=None, seed=None) -> FastAPI:
     try:
         from uagents_core.contrib.protocols.chat import (
             ChatAcknowledgement,
             ChatMessage,
-            MetadataContent,
             ResourceContent,
-            StartSessionContent,
             TextContent,
         )
         from uagents_core.envelope import Envelope
@@ -28,18 +25,11 @@ def create_app(*, workflow=None, send=None, seed=None, bridge=None) -> FastAPI:
     except ImportError as error:
         raise RuntimeError("Install fetch_agent/requirements.txt for Agentverse ACP.") from error
 
-    identity = Identity.from_seed(seed or load_seed(), 0)
-    values = settings()
+    identity = Identity.from_seed(seed or os.environ["AGENT_SEED_PHRASE"], 0)
     owns_client = workflow is None
     workflow = workflow or Workflow(
-        values.get("PHOTO2SIM_API_BASE_URL") or "http://127.0.0.1:8000",
-        api_token=values.get("PHOTO2SIM_API_TOKEN") or "",
-    )
-    owns_bridge = bridge is None
-    bridge = bridge or AttachmentBridge(
-        identity,
-        api_key=values.get("AGENTVERSE_API_KEY") or "",
-        allowed_hosts=(values.get("FETCH_ATTACHMENT_HOSTS") or "").split(","),
+        os.getenv("PHOTO2SIM_API_BASE_URL", "http://127.0.0.1:8000"),
+        api_token=os.getenv("PHOTO2SIM_API_TOKEN", ""),
     )
     send = send or send_message_to_agent
     seen = {}
@@ -49,10 +39,8 @@ def create_app(*, workflow=None, send=None, seed=None, bridge=None) -> FastAPI:
         yield
         if owns_client:
             await workflow.client.aclose()
-        if owns_bridge:
-            await bridge.client.aclose()
 
-    app = FastAPI(title="Photo2Sim ASI:One adapter", lifespan=lifespan)
+    app = FastAPI(title="Kamino ASI:One adapter", lifespan=lifespan)
 
     @app.get("/status")
     async def status():
@@ -106,54 +94,19 @@ def create_app(*, workflow=None, send=None, seed=None, bridge=None) -> FastAPI:
             raise HTTPException(503, "ACP acknowledgement delivery failed") from None
         if duplicate:
             if cached:
-                await reply(cached)
+                await reply(ChatMessage(content=[TextContent(type="text", text=cached)]))
             return {"status": "accepted"}
         resources = []
         for item in message.content:
             if isinstance(item, ResourceContent):
                 values = item.resource if isinstance(item.resource, list) else [item.resource]
-                resources.extend(resource_uri(resource) for resource in values)
-        text = message.text().strip()
-        command = text.split(" ", 1)[0].lower()
-        if resources and command not in {
-            "upload",
-            "status",
-            "confirm",
-            "process",
-            "files",
-            "help",
-            "start",
-        }:
-            text = command = "upload"
-        content = []
-        if any(isinstance(item, StartSessionContent) for item in message.content):
-            content.append(MetadataContent(type="metadata", metadata={"attachments": "true"}))
+                resources.extend(resource.uri for resource in values)
         try:
-            if command == "upload":
-                resources = await bridge.images(resources)
-            result = await workflow.run(text or "help", resources)
-            content.append(TextContent(type="text", text=result))
-            if command == "files":
-                if not bridge.can_publish:
-                    raise ValueError(
-                        "Agentverse storage is not configured; private result delivery awaits setup."
-                    )
-                job_id = text.partition(" ")[2].strip()
-                results = await workflow.download_results(job_id)
-                for name, data, mime in results:
-                    content.append(await bridge.publish(name, data, mime, envelope.sender))
-        except ValueError as error:
-            content.append(TextContent(type="text", text=str(error)))
+            result = await workflow.run(message.text(), resources)
         except Exception:
-            content.append(
-                TextContent(
-                    type="text",
-                    text="The workflow could not finish. Check the saved job status before retrying.",
-                )
-            )
-        response = ChatMessage(content=content)
-        seen[key] = response
-        await reply(response)
+            result = "The workflow could not finish. Check the saved job status before retrying."
+        seen[key] = result
+        await reply(ChatMessage(content=[TextContent(type="text", text=result)]))
         return {"status": "accepted"}
 
     return app

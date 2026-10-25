@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="photo2sim_8791ee1d-4660-4d20-b628-33efdfe2849d">
+  <compiler angle="radian" inertiafromgeom="false" />
+  <option timestep="0.0001" gravity="0 0 -9.81" integrator="implicitfast" />
+  <statistic center="0 0 0.029000000000000001" extent="0.25" />
+  <default>
+    <geom friction="0.80000000000000004 0.0050000000000000001 0.0001" solref="0.002 1" />
+  </default>
+  <asset>
+    <mesh name="prepared_visual" file="meshes/visual.obj" scale="1 1 1" />
+  </asset>
+  <worldbody>
+    <light pos="0 -0.3 1" dir="0 0 -1" />
+    <geom name="ground" type="plane" size="0 0 0.05" rgba="0.35 0.38 0.42 1" />
+    <body name="asset" pos="0 0 0.049000000000000002">
+      <freejoint name="asset_free" />
+      <inertial pos="0 0 0" mass="0.059" diaginertia="2.0123916666666662e-05 2.5630583333333331e-05 1.2675166666666662e-05" />
+      <geom name="visual" type="mesh" mesh="prepared_visual" group="2" contype="0" conaffinity="0" mass="0" rgba="0.15 0.65 0.85 1" />
+      <geom name="collision" type="box" size="0.021499999999999998 0.0135 0.029000000000000001" group="3" rgba="0.9 0.35 0.15 1" />
+    </body>
+  </worldbody>
+</mujoco>

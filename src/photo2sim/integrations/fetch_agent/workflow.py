@@ -3,7 +3,6 @@
 import base64
 import binascii
 import json
-from urllib.parse import quote
 from uuid import UUID
 
 import httpx
@@ -70,42 +69,12 @@ class Workflow:
             timeout=30, headers={"Authorization": f"Bearer {api_token}"} if api_token else {}
         )
 
-    async def download_results(self, job_id: str) -> list[tuple[str, bytes, str]]:
-        from photo2sim.contracts import bundle_path
-
-        job_id = str(UUID(job_id))
-        response = await self.client.get(f"{self.base_url}/api/jobs/{job_id}")
-        response.raise_for_status()
-        record = response.json()
-        if record["status"] != "completed" or not record.get("bundle_path"):
-            raise ValueError("A validated simulation ZIP is not ready yet.")
-        results = []
-        for field, mime in (
-            ("bundle_path", "application/zip"),
-            ("validation_path", "application/json"),
-        ):
-            path = record.get(field)
-            if not path:
-                continue
-            bundle_path(path)
-            async with self.client.stream(
-                "GET", f"{self.base_url}/api/jobs/{job_id}/files/{quote(path, safe='/')}"
-            ) as result:
-                result.raise_for_status()
-                content = bytearray()
-                async for chunk in result.aiter_bytes():
-                    content.extend(chunk)
-                    if len(content) > 100 * 1024 * 1024:
-                        raise ValueError("Result exceeds the agent's 100 MiB attachment limit.")
-            results.append((path.rsplit("/", 1)[-1], bytes(content), mime))
-        return results
-
     async def run(self, text: str, resource_uris: list[str] | None = None) -> str:
         command, _, rest = text.strip().partition(" ")
         command = command.lower()
         if command in {"help", "start", ""}:
             return (
-                "Photo2Sim commands: upload (attach 1–4 JPEG/PNG/WebP data URI resources), "
+                "Kamino commands: upload (attach 1–4 JPEG/PNG/WebP data URI resources), "
                 "status <job UUID>, confirm <job UUID> <AssetProperties JSON>, "
                 "process <job UUID>, files <job UUID>. "
                 "Dimensions are full extents in metres; mass is kilograms; unknown friction is null. "
@@ -135,12 +104,29 @@ class Workflow:
                     f"{self.base_url}/api/jobs/{job_id}/properties", json=properties
                 )
             else:
-                return "Unknown command. Send 'help' for the supported Photo2Sim workflow."
+                return "Unknown command. Send 'help' for the supported Kamino workflow."
             response.raise_for_status()
             record = response.json()
             text = summarize(record)
             if command == "files":
-                text += "\nCompleted results are delivered as recipient-only Agentverse attachments when storage is configured. The backend token is never included in chat."
+                paths = [
+                    record.get("mesh_path"),
+                    record.get("export_path"),
+                    record.get("validation_path"),
+                ]
+                if record["status"] == "completed":
+                    paths.append(record.get("bundle_path"))
+                from urllib.parse import quote
+
+                text += "\n" + "\n".join(
+                    f"{self.base_url}/api/jobs/{record['id']}/files/{quote(path, safe='/')}"
+                    for path in paths
+                    if path
+                )
+                if self.client.headers.get("Authorization"):
+                    text += (
+                        "\nDownloads require the application token; it is never included in chat."
+                    )
             return text
         except (ValueError, json.JSONDecodeError) as error:
             return f"Input error: {error}"
@@ -151,4 +137,4 @@ class Workflow:
                 detail = error.response.text
             return f"Backend rejected request (HTTP {error.response.status_code}): {detail}"
         except httpx.RequestError:
-            return "Cannot reach the Photo2Sim backend. Check the configured API URL."
+            return "Cannot reach the Kamino backend. Check the configured API URL."

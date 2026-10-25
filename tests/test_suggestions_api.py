@@ -1,5 +1,6 @@
 import base64
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from io import BytesIO
@@ -240,3 +241,155 @@ def test_request_rechecks_cache_after_waiting_to_acquire_slot(tmp_path, monkeypa
                 release_first.set()
                 resume_second.set()
         assert len(calls) == 1
+
+
+def test_fallback_cache_reuse_and_actual_model_recording(tmp_path):
+    job_id, store, _ = seed(tmp_path)
+    before = store.get(job_id)
+    calls = []
+
+    def transport(request):
+        calls.append(request.url.path)
+        if "primary" in request.url.path:
+            return httpx.Response(503, json={"error": {"status": "SERVICE_UNAVAILABLE"}})
+        response = good_response()
+        payload = response.json()
+        payload["modelVersion"] = "models/fallback-actual"
+        return httpx.Response(200, json=payload)
+
+    settings = Settings(
+        data_dir=tmp_path,
+        gemini_api_key=SECRET,
+        gemini_model="primary",
+        gemini_fallback_models=("fallback",),
+        gemini_backoff_seconds=0,
+    )
+    with TestClient(create_app(settings, gemini_transport=transport)) as client:
+        first = client.post(f"/api/jobs/{job_id}/suggestions", json={})
+        assert first.status_code == 200
+        assert client.post(f"/api/jobs/{job_id}/suggestions", json={}).json() == first.json()
+        assert len(calls) == 3
+        record = json.loads((store.job_dir(job_id) / "suggestions/gemini.json").read_text())
+        assert record["model"] == "fallback-actual"
+        assert record["requested_model"] == "primary"
+        assert record["fallback_used"] is True
+        assert store.get(job_id) == before
+
+
+def test_legacy_fallback_cache_is_reused_without_primary_call(tmp_path):
+    job_id, store, _ = seed(tmp_path)
+    cache_path = store.job_dir(job_id) / "suggestions/gemini.json"
+    cache_path.parent.mkdir()
+    cache_path.write_text(
+        json.dumps(
+            {
+                "model": "gemini-3.6-flash",
+                "object_hint": "",
+                "created_at": "2026-10-24T00:00:00Z",
+                "suggestions": {
+                    "dimensions_m": None,
+                    "mass_kg": None,
+                    "sliding_friction": None,
+                    "clarifying_questions": ["Measure mass"],
+                    "notes": [],
+                },
+            }
+        )
+    )
+
+    def unexpected(request):
+        pytest.fail("Legacy fallback cache should avoid a provider request")
+
+    with TestClient(
+        create_app(Settings(data_dir=tmp_path, gemini_api_key=SECRET), gemini_transport=unexpected)
+    ) as client:
+        result = client.post(f"/api/jobs/{job_id}/suggestions", json={})
+        assert result.status_code == 200
+        assert result.json()["clarifying_questions"] == ["Measure mass"]
+
+
+@pytest.mark.parametrize(
+    "status,provider_status,category,retryable",
+    [
+        (401, "UNAUTHENTICATED", "authentication", False),
+        (402, "PAYMENT_REQUIRED", "billing", False),
+        (403, "PERMISSION_DENIED", "permission", False),
+        (429, "QUOTA_EXCEEDED", "quota", False),
+        (400, "INVALID_ARGUMENT", "invalid_request", False),
+        (503, "UNAVAILABLE", "overload", True),
+    ],
+)
+def test_api_exposes_safe_actionable_failure_categories(
+    tmp_path, status, provider_status, category, retryable
+):
+    job_id, store, _ = seed(tmp_path)
+    before = store.get(job_id)
+
+    def transport(_):
+        return httpx.Response(
+            status, json={"error": {"status": provider_status, "message": SECRET}}
+        )
+
+    settings = Settings(
+        data_dir=tmp_path, gemini_api_key=SECRET, gemini_max_attempts=1, gemini_fallback_models=()
+    )
+    with TestClient(create_app(settings, gemini_transport=transport)) as client:
+        response = client.post(f"/api/jobs/{job_id}/suggestions", json={})
+        assert response.status_code == 503  # Provider auth is separate from application auth.
+        body = response.json()
+        assert body["category"] == category
+        assert body["retryable"] is retryable
+        assert body["manual_entry_available"] is True
+        assert "Manual property entry" in body["detail"]
+        assert category.split("_")[0] in body["detail"].lower() or category == "invalid_request"
+        assert SECRET not in response.text
+        assert provider_status not in response.text
+        assert store.get(job_id) == before
+        assert (
+            client.patch(
+                f"/api/jobs/{job_id}/properties", json=before.properties.model_dump(mode="json")
+            ).status_code
+            == 200
+        )
+
+
+def test_late_refresh_success_never_overwrites_saved_cache(tmp_path):
+    job_id, store, _ = seed(tmp_path)
+    completed = Event()
+    slow = False
+
+    def transport(_):
+        if slow:
+            time.sleep(0.05)
+            completed.set()
+        return good_response()
+
+    initial = Settings(
+        data_dir=tmp_path, gemini_api_key=SECRET, gemini_fallback_models=(), gemini_max_attempts=1
+    )
+    with TestClient(create_app(initial, gemini_transport=transport)) as client:
+        assert client.post(f"/api/jobs/{job_id}/suggestions", json={}).status_code == 200
+    settings = Settings(
+        data_dir=tmp_path,
+        gemini_api_key=SECRET,
+        gemini_fallback_models=(),
+        gemini_max_attempts=1,
+        gemini_deadline_seconds=0.02,
+    )
+    with TestClient(create_app(settings, gemini_transport=transport)) as client:
+        cache = store.job_dir(job_id) / "suggestions/gemini.json"
+        saved = cache.read_bytes()
+        slow = True
+        response = client.post(f"/api/jobs/{job_id}/suggestions", json={"refresh": True})
+        assert response.status_code == 503
+        assert response.json()["category"] == "deadline"
+        assert completed.wait(1)
+        assert cache.read_bytes() == saved
+
+
+def test_unexpected_failure_reason_cannot_escape_public_allowlist():
+    from photo2sim.api.suggestions import failure_details
+
+    body = failure_details(SECRET)
+    assert body["category"] == "provider"
+    assert SECRET not in json.dumps(body)

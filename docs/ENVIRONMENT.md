@@ -14,6 +14,10 @@ The template is shared; actual credentials are not committed. Each role needs on
 | `MESHY_MODEL` | `meshy-6` for the current geometry-only adapter | Implemented |
 | `GEMINI_API_KEY` | Google AI Studio project key; property-assistance service | Implemented by explicit cached suggestions API; never confirms properties automatically |
 | `GEMINI_MODEL` | `gemini-3.8-flash` | Real charger suggestion request succeeded through the API on Johaan's key; ongoing quota is account-dependent |
+| `GEMINI_FALLBACK_MODELS` | `gemini-3.6-flash` | Comma-separated fallback model IDs; set empty to disable |
+| `GEMINI_MAX_ATTEMPTS` | `2` | Maximum attempts per eligible model |
+| `GEMINI_DEADLINE_SECONDS` | `75` | Total deadline across retries and models |
+| `GEMINI_BACKOFF_SECONDS` | `0.5` | Initial exponential retry delay |
 | `AGENTVERSE_API_KEY` | Agentverse account registration/access key; Atul's agent machine | Reserved; agent adapter not implemented on this branch |
 | `FETCH_AGENT_SEED` | One locally generated, persistent private seed deriving the agent identity | Reserved; Atul must wire it into the adapter |
 | `FETCH_AGENT_ENDPOINT` | Public HTTPS message endpoint for the deployed ACP agent | Reserved; fill after deployment, not a guessed URL |
@@ -22,7 +26,17 @@ The template is shared; actual credentials are not committed. Each role needs on
 
 ## Gemini
 
-Set `GEMINI_MODEL=gemini-3.8-flash`. This model is listed as stable in [Google's model catalog](https://ai.google.dev/gemini-api/docs/models.md) and appeared in the current key's model-list response. A real request through `/api/jobs/{id}/suggestions` returned valid estimated dimensions/mass and questions, while preserving confirmed properties. A model listing alone would not establish this. Suggestions are optional, cached and remain unverified estimates; provider failures leave manual entry available.
+The API and standalone adapter share the same `gemini-3.8-flash` default, followed by `gemini-3.6-flash`. Both appear in [Google's model catalog](https://ai.google.dev/gemini-api/docs/models). Transient network, rate-limit and server failures use bounded retries before switching models. Authentication, billing, permissions, daily quota and invalid requests stop immediately. Malformed or blocked output also stops without fallback. The response remains unverified and does not change confirmed properties. The cache records the actual `modelVersion` when provided by Gemini, the requested model and whether fallback was used. Provider errors remain sanitized; credentials are sent only in the request header.
+
+The elapsed deadline starts before adapter input preparation and is enforced while
+waiting for each synchronous HTTP request, independently of HTTPX's per-phase socket
+timeouts. Each model receives an equal share of the remaining time; each attempt
+receives a share of that model's budget. A timed-out attempt skips further retries
+on that model so a slow primary leaves time for fallback. Late successes are discarded,
+including responses that exceed the total budget during validation, and cannot update
+the suggestion cache. A synchronous request already in progress may finish in a daemon
+worker after its caller stops waiting. At most four such request workers can exist
+process-wide; occupied capacity returns a safe `busy` category instead of adding workers.
 
 ## Fetch / Atul
 

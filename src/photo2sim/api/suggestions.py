@@ -16,7 +16,7 @@ from photo2sim.integrations.gemini import (
     GeminiUnavailable,
     PropertySuggestions,
     Transport,
-    suggest_properties,
+    suggest_properties_result,
 )
 
 
@@ -27,6 +27,58 @@ class SuggestionRequest(Contract):
 
 class SuggestionsBusy(RuntimeError):
     pass
+
+
+def failure_details(reason: str) -> dict:
+    """Public allowlisted categories; never echo provider messages or exceptions."""
+    messages = {
+        "not_configured": (
+            "Gemini is not configured. Ask the server operator to configure it.",
+            False,
+        ),
+        "authentication": (
+            "Gemini authentication failed. Ask the server operator to update its API key.",
+            False,
+        ),
+        "permission": (
+            "Gemini access was denied. Ask the server operator to check API permissions.",
+            False,
+        ),
+        "billing": (
+            "Gemini billing is unavailable. Ask the server operator to check credits and billing.",
+            False,
+        ),
+        "quota": (
+            "Gemini quota is exhausted. Wait for its reset or ask the server operator to check quota.",
+            False,
+        ),
+        "invalid_request": (
+            "Gemini rejected the request. Revise the object hint or ask the server operator to check configuration.",
+            False,
+        ),
+        "malformed": (
+            "Gemini returned an invalid or incomplete response. Retry explicitly or continue manually.",
+            False,
+        ),
+        "overload": ("Gemini is overloaded. Try again shortly.", True),
+        "rate_limit": ("Gemini is temporarily rate limited. Wait before retrying.", True),
+        "deadline": ("Gemini exceeded the request time budget. Try again shortly.", True),
+        "network": ("Gemini could not be reached. Check connectivity and try again.", True),
+        "busy": ("Gemini requests are still finishing. Wait before retrying.", True),
+        "model_unavailable": (
+            "The configured Gemini models are unavailable. Ask the server operator to check model configuration.",
+            False,
+        ),
+        "provider": ("Gemini suggestions are unavailable. Try again later.", True),
+    }
+    category = reason if reason in messages else "provider"
+    message, retryable = messages[category]
+    return {
+        "detail": f"{message} Manual property entry remains available.",
+        "category": category,
+        "retryable": retryable,
+        "manual_entry_available": True,
+    }
 
 
 class SuggestionService:
@@ -58,11 +110,19 @@ class SuggestionService:
         self, job_id: UUID, request: SuggestionRequest
     ) -> PropertySuggestions | None:
         cached = self.cached(job_id)
+        legacy_model = cached.get("model") if cached is not None else None
+        requested_model = cached.get("requested_model") if cached is not None else None
+        model_matches = (
+            requested_model == self.settings.gemini_model
+            and tuple(cached.get("fallback_models", ())) == self.settings.gemini_fallback_models
+            if requested_model is not None
+            else legacy_model in (self.settings.gemini_model, *self.settings.gemini_fallback_models)
+        )
         if (
             not request.refresh
             and cached is not None
-            and cached.get("model") == self.settings.gemini_model
-            and cached.get("object_hint") == request.object_hint
+            and model_matches
+            and (cached.get("object_hint") or None) == (request.object_hint or None)
         ):
             return PropertySuggestions.model_validate(cached["suggestions"])
         return None
@@ -72,7 +132,7 @@ class SuggestionService:
         if cached is not None:
             return cached
         if not self.settings.gemini_api_key:
-            raise GeminiUnavailable("Gemini is not configured")
+            raise GeminiUnavailable("Gemini is not configured", reason="not_configured")
         if not self.inference_slot.acquire(blocking=False):
             raise SuggestionsBusy
         try:
@@ -81,24 +141,31 @@ class SuggestionService:
             if cached is not None:
                 return cached
             paths = self.image_copies(job_id)
-            result = suggest_properties(
+            result = suggest_properties_result(
                 paths,
                 request.object_hint,
                 api_key=self.settings.gemini_api_key,
                 model=self.settings.gemini_model,
+                fallback_models=self.settings.gemini_fallback_models,
+                max_attempts=self.settings.gemini_max_attempts,
+                deadline_seconds=self.settings.gemini_deadline_seconds,
+                backoff_seconds=self.settings.gemini_backoff_seconds,
                 transport=self.transport,
             )
             record = {
-                "model": self.settings.gemini_model,
+                "model": result.model,
+                "requested_model": result.requested_model,
+                "fallback_models": list(self.settings.gemini_fallback_models),
+                "fallback_used": result.fallback_used,
                 "object_hint": request.object_hint,
                 "created_at": datetime.now(UTC).isoformat(),
-                "suggestions": result.model_dump(mode="json"),
+                "suggestions": result.suggestions.model_dump(mode="json"),
             }
             folder = self.folder(job_id)
             temporary = folder / "gemini.json.partial"
             temporary.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
             temporary.replace(folder / "gemini.json")
-            return result
+            return result.suggestions
         finally:
             self.inference_slot.release()
 

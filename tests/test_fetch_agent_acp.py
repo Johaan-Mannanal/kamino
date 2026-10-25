@@ -10,8 +10,6 @@ pytest.importorskip("uagents_core")
 from uagents_core.contrib.protocols.chat import (  # noqa: E402
     ChatAcknowledgement,
     ChatMessage,
-    MetadataContent,
-    StartSessionContent,
     TextContent,
 )
 from uagents_core.envelope import Envelope  # noqa: E402
@@ -87,20 +85,3 @@ def test_unsigned_and_wrong_target_messages_cannot_execute_tools():
         wrong_target = make_envelope("agent-wrong-target", message)
         assert client.post("/chat", json=wrong_target.model_dump(mode="json")).status_code == 401
         assert workflow.calls == []
-
-
-def test_session_advertises_attachment_support():
-    sent = []
-    app = create_app(
-        workflow=StubWorkflow(),
-        send=lambda **payload: sent.append(payload),
-        seed="photo2sim-test-session",
-    )
-    with TestClient(app) as client:
-        address = client.get("/status").json()["address"]
-        envelope = make_envelope(
-            address, ChatMessage(content=[StartSessionContent(type="start-session")])
-        )
-        assert client.post("/chat", json=envelope.model_dump(mode="json")).status_code == 200
-        metadata = [item for item in sent[1]["msg"].content if isinstance(item, MetadataContent)]
-        assert metadata[0].metadata == {"attachments": "true"}

@@ -1,0 +1,11 @@
+{
+  "received_image_references_and_hashes_valid": true,
+  "received_images": 2,
+  "operator_confirmation_recorded": true,
+  "association_method": "operator stationary confirmation",
+  "hardware_synchronization_verified": false,
+  "image_capture_times_known": false,
+  "metric_measurements_verified": false,
+  "joint_signs_zeros_verified": false,
+  "gripper_angle_conversion_verified": false
+}

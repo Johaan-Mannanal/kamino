@@ -1,0 +1,5 @@
+# Exact capture bytes are hashed; preserve Windows calibration CRLF as supplied.
+calibration.json -text whitespace=cr-at-eol
+capture.json -text
+observations.jsonl -text
+summary.json -text

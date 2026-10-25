@@ -25,6 +25,14 @@ class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class Orientation(Contract):
+    """Active right-handed rotations about fixed X, then Y, then Z, in degrees."""
+
+    x_deg: float = Field(default=0, ge=-180, le=180, allow_inf_nan=False, strict=True)
+    y_deg: float = Field(default=0, ge=-180, le=180, allow_inf_nan=False, strict=True)
+    z_deg: float = Field(default=0, ge=-180, le=180, allow_inf_nan=False, strict=True)
+
+
 def bundle_path(value: str) -> str:
     """Require a relative, forward-slash path independent of the host OS."""
     if (
@@ -55,10 +63,62 @@ class ScalarProperty(Contract):
     note: str | None = None
 
 
+class SizingReference(Contract):
+    axis: Literal["x", "y", "z"]
+    length: Annotated[float, Field(gt=0, allow_inf_nan=False, strict=True)]
+    unit: Literal["mm", "m"]
+    source: Source
+    correspondence: Literal["full_mesh_extent"]
+    description: str = Field(min_length=1, max_length=2000)
+
+    @field_validator("description")
+    @classmethod
+    def meaningful_description(cls, value):
+        if not value.strip():
+            raise ValueError("Describe the full mesh extent, including any pins/protrusions")
+        return value.strip()
+
+
+class Sizing(Contract):
+    mode: Literal["uniform", "independent_axes"]
+    reviewed_orientation: Orientation
+    reference: SizingReference | None = None
+    acknowledge_distortion: bool = Field(default=False, strict=True)
+
+    @model_validator(mode="after")
+    def explicit_mode(self):
+        if self.mode == "uniform" and self.reference is None:
+            raise ValueError("Uniform sizing requires a corresponding full mesh extent reference")
+        if self.mode == "independent_axes":
+            if not self.acknowledge_distortion or self.reference is not None:
+                raise ValueError("Advanced stretching requires acknowledgement and no reference")
+        return self
+
+
+class SizingResult(Contract):
+    mode: Literal["uniform", "independent_axes", "legacy_independent_axes"]
+    orientation: Orientation
+    source_extents_input_units: tuple[Positive, Positive, Positive]
+    scale_factors: tuple[Positive, Positive, Positive]
+    resulting_dimensions_m: Dimensions
+    reference_extent_input_units: Positive | None = None
+    geometry_review: Literal["reference_correspondence_user_supplied_not_verified"] = (
+        "reference_correspondence_user_supplied_not_verified"
+    )
+
+
+class SizingPreviewRequest(Contract):
+    sizing: Sizing
+    orientation: Orientation
+    dimensions_m: Dimensions | None = None
+
+
 class AssetProperties(Contract):
     dimensions_m: Dimensions
     mass_kg: ScalarProperty
     sliding_friction: ScalarProperty | None = None
+    # Missing in historical records: preserve their original three-axis behavior.
+    sizing: Sizing | None = None
 
     @field_validator("mass_kg")
     @classmethod
@@ -92,6 +152,8 @@ class AssetRecord(Contract):
     collision: CollisionGeometry
     synthetic: bool = False
     notes: list[str] = Field(default_factory=list)
+    orientation: Orientation = Field(default_factory=Orientation)
+    sizing_result: SizingResult | None = None
 
     _portable_mesh = field_validator("visual_mesh")(bundle_path)
 
@@ -99,6 +161,32 @@ class AssetRecord(Contract):
 class JobError(Contract):
     code: str
     message: str
+
+
+class RigidAttemptInputs(Contract):
+    input_revision: int = Field(ge=1)
+    properties: AssetProperties
+    orientation: Orientation
+    sizing_result: SizingResult | None = None
+    mesh_path: str
+    source_mesh_sha256: str | None = None
+    provider_task_id: str | None = None
+    source_images: list[str] = Field(default_factory=list)
+    provenance: Literal["processing_claim", "legacy_result_snapshot"] = "processing_claim"
+
+
+class RigidAttempt(Contract):
+    id: UUID
+    status: JobStatus
+    started_at: datetime
+    finished_at: datetime | None = None
+    inputs: RigidAttemptInputs
+    inputs_path: str | None = None
+    asset: AssetRecord | None = None
+    export_path: str | None = None
+    validation_path: str | None = None
+    bundle_path: str | None = None
+    error: JobError | None = None
 
 
 class JobRecord(Contract):
@@ -119,3 +207,10 @@ class JobRecord(Contract):
     validation_path: str | None = None
     bundle_path: str | None = None
     error: JobError | None = None
+    orientation: Orientation = Field(default_factory=Orientation)
+    sizing_result: SizingResult | None = None
+    input_revision: int = Field(default=1, ge=1)
+    attempts: list[RigidAttempt] = Field(default_factory=list)
+    active_attempt_id: UUID | None = None
+    # Absent in old persisted records. New uploads must explicitly choose sizing.
+    legacy_sizing_allowed: bool = True

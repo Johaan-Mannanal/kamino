@@ -1,9 +1,9 @@
 """Optional Gemini property hints, never confirmed physical measurements.
 
 Uses the generateContent REST API with the existing httpx dependency. The default
-model is gemini-2.5-flash; override with GEMINI_MODEL or the model argument. Keys
+model is gemini-3.8-flash; override with GEMINI_MODEL or the model argument. Keys
 come from api_key or GEMINI_API_KEY and are sent only in the x-goog-api-key header.
-No dotenv loading, retries, property persistence, or automatic confirmation occurs.
+No dotenv loading, property persistence, or automatic confirmation occurs.
 """
 
 import base64
@@ -11,21 +11,89 @@ import json
 import math
 import os
 import re
+import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
+from threading import BoundedSemaphore, Event, Thread
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from photo2sim.contracts import Dimensions, ScalarProperty
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.8-flash"
+DEFAULT_FALLBACK_MODELS = ("gemini-3.6-flash",)
 SUGGESTION_NOTE = "AI suggestion — unverified"
 Transport = Callable[[httpx.Request], httpx.Response] | httpx.BaseTransport
+# A timed-out synchronous transport may still be unwinding. Keep that work bounded
+# process-wide; abandoned requests can never write a cache or confirm properties.
+_REQUEST_SLOTS = BoundedSemaphore(4)
+# perf_counter is monotonic and uses the high-resolution Windows performance
+# counter; Python 3.12 time.monotonic can otherwise have ~16 ms granularity.
+_clock = time.perf_counter
+
+
+class _AttemptTimeout(Exception):
+    pass
+
+
+def _request_until(
+    url: str, key: str, body: dict, transport: Transport | None, deadline: float
+) -> httpx.Response | None:
+    remaining = deadline - _clock()
+    if remaining <= 0:
+        raise _AttemptTimeout
+    if not _REQUEST_SLOTS.acquire(blocking=False):
+        raise GeminiUnavailable(
+            "Gemini requests are still finishing; retry shortly.", reason="busy"
+        )
+    finished = Event()
+    outcome: list[httpx.Response | None] = []
+
+    def send() -> None:
+        try:
+            with httpx.Client(transport=transport, trust_env=transport is None) as client:
+                remaining = deadline - _clock()
+                if remaining <= 0:
+                    outcome.append(None)
+                    return
+                response = client.post(
+                    url, headers={"x-goog-api-key": key}, json=body, timeout=remaining
+                )
+            outcome.append(response)
+        except Exception:
+            # Transport exceptions can contain headers, URLs or provider text.
+            outcome.append(None)
+        finally:
+            _REQUEST_SLOTS.release()
+            finished.set()
+
+    worker = Thread(target=send, name="gemini-request", daemon=True)
+    try:
+        worker.start()
+    except Exception:
+        _REQUEST_SLOTS.release()
+        raise GeminiUnavailable("Gemini request could not start.", reason="provider") from None
+    if not finished.wait(max(0, deadline - _clock())) or _clock() >= deadline:
+        raise _AttemptTimeout
+    return outcome[0]
 
 
 class GeminiUnavailable(RuntimeError):
     """Optional assistance is unavailable; callers may continue without suggestions."""
+
+    def __init__(self, message: str, *, reason: str = "provider"):
+        super().__init__(message)
+        self.reason = reason
+
+
+@dataclass(frozen=True)
+class GeminiResult:
+    suggestions: "PropertySuggestions"
+    model: str
+    requested_model: str
+    fallback_used: bool
 
 
 class PropertySuggestions(BaseModel):
@@ -120,17 +188,23 @@ def _response_data(envelope: object) -> dict:
             raise ValueError
         return data
     except (KeyError, IndexError, TypeError, AttributeError, ValueError):
-        raise GeminiUnavailable("Gemini returned invalid or incomplete property JSON.") from None
+        raise GeminiUnavailable(
+            "Gemini returned invalid or incomplete property JSON.", reason="malformed"
+        ) from None
 
 
-def suggest_properties(
+def suggest_properties_result(
     image_paths: list[Path],
     object_hint: str | None = None,
     *,
     api_key: str | None = None,
     model: str | None = None,
+    fallback_models: tuple[str, ...] = DEFAULT_FALLBACK_MODELS,
+    max_attempts: int = 2,
+    deadline_seconds: float = 75,
+    backoff_seconds: float = 0.5,
     transport: Transport | None = None,
-) -> PropertySuggestions:
+) -> GeminiResult:
     """Request unverified suggestions for local JPEG/PNG/WebP images.
 
     transport may be a callable (httpx.Request -> httpx.Response), wrapped in
@@ -138,12 +212,25 @@ def suggest_properties(
     HTTP, connection, and malformed-response failures raise GeminiUnavailable with
     safe messages. Invalid local inputs raise ValueError without echoing inputs.
     """
+    deadline = _clock() + deadline_seconds
     key = api_key if api_key is not None else os.environ.get("GEMINI_API_KEY", "")
     if not key.strip():
-        raise GeminiUnavailable("Set GEMINI_API_KEY or pass api_key to enable Gemini suggestions.")
+        raise GeminiUnavailable(
+            "Set GEMINI_API_KEY or pass api_key to enable Gemini suggestions.",
+            reason="not_configured",
+        )
     selected_model = model or os.environ.get("GEMINI_MODEL") or DEFAULT_MODEL
-    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", selected_model):
+    models = tuple(dict.fromkeys((selected_model, *fallback_models)))
+    if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", item) for item in models):
         raise ValueError("Gemini model must be a model ID without a URL or path.")
+    if (
+        max_attempts < 1
+        or not math.isfinite(deadline_seconds)
+        or deadline_seconds <= 0
+        or not math.isfinite(backoff_seconds)
+        or backoff_seconds < 0
+    ):
+        raise ValueError("Gemini retry settings must be positive")
     if not 1 <= len(image_paths) <= 4:
         raise ValueError("Gemini suggestions require one to four images.")
 
@@ -180,24 +267,128 @@ def suggest_properties(
 
     if callable(transport):
         transport = httpx.MockTransport(transport)
+    request_body = {
+        "contents": [{"role": "user", "parts": parts}],
+        "generationConfig": {"response_mime_type": "application/json"},
+    }
+    for model_index, candidate_model in enumerate(models):
+        now = _clock()
+        # Reserve an equal share of the remaining budget for each later model.
+        model_deadline = now + (deadline - now) / (len(models) - model_index)
+        for attempt in range(max_attempts):
+            now = _clock()
+            if now >= deadline:
+                raise GeminiUnavailable("Gemini request deadline exceeded.", reason="deadline")
+            if now >= model_deadline:
+                break
+            attempt_deadline = now + (model_deadline - now) / (max_attempts - attempt)
+            try:
+                response = _request_until(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/"
+                    f"{candidate_model}:generateContent",
+                    key,
+                    request_body,
+                    transport,
+                    attempt_deadline,
+                )
+            except _AttemptTimeout:
+                # Do not pile retries behind an in-flight slow primary. Give the
+                # reserved time and a free request slot to the next model.
+                if model_index == len(models) - 1:
+                    raise GeminiUnavailable(
+                        "Gemini request deadline exceeded.", reason="deadline"
+                    ) from None
+                break
+            if response is None:
+                reason, retryable = "network", True
+            elif response.is_success:
+                try:
+                    envelope = response.json()
+                except ValueError:
+                    raise GeminiUnavailable(
+                        "Gemini returned invalid or incomplete property JSON.", reason="malformed"
+                    ) from None
+                suggestions = _suggestions(_response_data(envelope))
+                actual_model = envelope.get("modelVersion") if isinstance(envelope, dict) else None
+                if not isinstance(actual_model, str) or not actual_model:
+                    actual_model = candidate_model
+                actual_model = actual_model.removeprefix("models/")
+                # Parsing, validation and provenance extraction also consume time.
+                if _clock() >= deadline:
+                    raise GeminiUnavailable("Gemini request deadline exceeded.", reason="deadline")
+                return GeminiResult(suggestions, actual_model, selected_model, model_index > 0)
+            else:
+                reason, retryable = _failure(response)
+            if not retryable:
+                raise GeminiUnavailable(_failure_message(reason), reason=reason) from None
+            if attempt + 1 < max_attempts:
+                delay = min(backoff_seconds * 2**attempt, max(0, model_deadline - _clock()))
+                if delay:
+                    time.sleep(delay)
+            elif model_index == len(models) - 1:
+                raise GeminiUnavailable(_failure_message(reason), reason=reason) from None
+    raise GeminiUnavailable("Gemini suggestions are unavailable.")
+
+
+def _failure(response: httpx.Response) -> tuple[str, bool]:
+    status = response.status_code
+    quota_period = ""
     try:
-        with httpx.Client(timeout=60, transport=transport) as client:
-            response = client.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/"
-                f"{selected_model}:generateContent",
-                headers={"x-goog-api-key": key},
-                json={
-                    "contents": [{"role": "user", "parts": parts}],
-                    "generationConfig": {"response_mime_type": "application/json"},
-                },
-            )
-            response.raise_for_status()
-            envelope = response.json()
-    except httpx.HTTPStatusError as error:
-        raise GeminiUnavailable(
-            f"Gemini returned HTTP {error.response.status_code}. Check API access, credits, "
-            "quota, and model availability."
-        ) from None
-    except (httpx.HTTPError, ValueError):
-        raise GeminiUnavailable("Could not read a Gemini response. Try again later.") from None
-    return _suggestions(_response_data(envelope))
+        error = response.json().get("error", {})
+        reason = error.get("status", "")
+        details = error.get("details", [])
+        for detail in details if isinstance(details, list) else []:
+            if not isinstance(detail, dict):
+                continue
+            if isinstance(detail.get("reason"), str):
+                reason = detail["reason"]
+            violations = detail.get("violations", [])
+            for violation in violations if isinstance(violations, list) else []:
+                if isinstance(violation, dict):
+                    quota_period += (
+                        " " + str(violation.get("quotaId", violation.get("quota_id", ""))).lower()
+                    )
+    except (ValueError, AttributeError, TypeError):
+        reason = ""
+    normalized = str(reason).lower()
+    if status == 401:
+        return "authentication", False
+    if status == 402:
+        return "billing", False
+    if status == 403:
+        return "permission", False
+    if status == 400:
+        return "invalid_request", False
+    if status == 429:
+        if (
+            "quota" in normalized
+            or "billing" in normalized
+            or "perday" in quota_period
+            or "daily" in quota_period
+        ):
+            return "quota", False
+        return "rate_limit", True
+    if status == 404 and "model_not_found" in normalized:
+        return "model_unavailable", True
+    if status in (500, 502, 503, 504):
+        return "overload" if status == 503 else "provider", True
+    return "provider", False
+
+
+def _failure_message(reason: str) -> str:
+    return {
+        "authentication": "Gemini authentication failed.",
+        "billing": "Gemini billing is unavailable.",
+        "permission": "Gemini access is denied.",
+        "invalid_request": "Gemini rejected the request.",
+        "quota": "Gemini quota is exhausted.",
+        "rate_limit": "Gemini rate limit persists.",
+        "model_unavailable": "Gemini model is unavailable.",
+        "overload": "Gemini is overloaded.",
+        "network": "Gemini network request failed.",
+    }.get(reason, "Gemini provider is unavailable.")
+
+
+def suggest_properties(*args, **kwargs) -> PropertySuggestions:
+    """Compatibility wrapper returning only the unverified property values."""
+    return suggest_properties_result(*args, **kwargs).suggestions

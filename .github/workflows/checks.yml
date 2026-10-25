@@ -6,6 +6,25 @@ permissions:
   contents: read
 
 jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - name: Install locked frontend dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Frontend tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
   lint:
     runs-on: ubuntu-latest
     steps:

@@ -1,0 +1,19 @@
+{
+  "source_project_sha256": "d45fc0b208ea460658f7f2d8fce3a495242ac825ba86d7c59593fe06af4ead71",
+  "input_project_sha256": "356dda6b55e78eea97b22011a690051fa04d186d7c903d1f9e19aa3afe04452d",
+  "translation_m": [
+    0,
+    0,
+    0.1
+  ],
+  "assumed_root_height_m": 0.15,
+  "parts": 11,
+  "links": 7,
+  "joints": 6,
+  "all_source_hashes_match": true,
+  "same_links_and_root_as_accepted_collision_candidate": true,
+  "joint_parameters_match_except_review_notes": true,
+  "max_joint_origin_difference": 2.7755575615628914e-17,
+  "review_acknowledgements_in_input": false,
+  "hardware_mapping_verified": false
+}

@@ -1,1 +1,1 @@
-"""Photo2Sim: photos to editable MuJoCo simulation assets."""
+"""Kamino: photos to editable MuJoCo simulation assets."""

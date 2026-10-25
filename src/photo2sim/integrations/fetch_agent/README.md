@@ -1,6 +1,6 @@
 # Fetch / ASI:One adapter (experimental)
 
-This separate experimental ACP service calls the existing Photo2Sim HTTP API for upload, status, property confirmation, processing and artifact discovery. Geometry and reconstruction remain in the backend. It is locally tested, not registered or demonstrated through ASI:One.
+This separate experimental ACP service calls the existing Kamino HTTP API for upload, status, property confirmation, processing and artifact discovery. Geometry and reconstruction remain in the backend. It is locally tested, not registered or demonstrated through ASI:One.
 
 Install the root project in a Python 3.12 environment, then install the optional official dependency separately. Keep `AGENT_SEED_PHRASE` secret and stable. Set `PHOTO2SIM_API_BASE_URL` to the backend origin and, for a protected backend, `PHOTO2SIM_API_TOKEN` server-side. Run:
 

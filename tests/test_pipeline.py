@@ -103,7 +103,13 @@ def test_process_downloads_portable_validated_bundle_and_preserves_inputs(tmp_pa
             client.patch(
                 f"/api/jobs/{job_id}/properties", json=original.properties.model_dump(mode="json")
             ).status_code
-            == 409
+            == 200
+        )
+        corrected = client.get(f"/api/jobs/{job_id}").json()
+        assert corrected["status"] == "awaiting_properties"
+        assert corrected["attempts"][0]["bundle_path"] == job["bundle_path"]
+        assert (
+            client.get(f"/api/jobs/{job_id}/files/{job['bundle_path']}").content == zipped.content
         )
     shutil.rmtree(store.job_dir(job_id))
     model = mujoco.MjModel.from_xml_path(str(unpacked / "scene.xml"))
@@ -143,7 +149,9 @@ def test_overlapping_processing_is_claimed_once(tmp_path, monkeypatch):
             assert entered.wait(5)
         finally:
             release.set()
-        assert terminal(client, job_id)["status"] == "completed"
+        completed = terminal(client, job_id)
+        assert completed["status"] == "completed"
+        assert len(completed["attempts"]) == 1
 
 
 def test_failed_validation_retains_report_and_scene_and_retry_preserves_attempt(

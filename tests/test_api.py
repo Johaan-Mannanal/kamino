@@ -41,6 +41,11 @@ def properties():
     return {
         "dimensions_m": {"x": 0.04, "y": 0.05, "z": 0.06, "source": "measured"},
         "mass_kg": {"value": 0.08, "source": "user_supplied"},
+        "sizing": {
+            "mode": "independent_axes",
+            "acknowledge_distortion": True,
+            "reviewed_orientation": {"x_deg": 0, "y_deg": 0, "z_deg": 0},
+        },
     }
 
 

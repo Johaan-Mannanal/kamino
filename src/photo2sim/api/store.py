@@ -46,7 +46,14 @@ class JobStore:
             raise KeyError(str(job_id))
         return JobRecord.model_validate_json(row[0])
 
-    def update(self, job_id: UUID, *, expected_status: tuple[str, ...] | None = None, **changes):
+    def update(
+        self,
+        job_id: UUID,
+        *,
+        expected_status: tuple[str, ...] | None = None,
+        expected_input_revision: int | None = None,
+        **changes,
+    ):
         with self.connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             row = connection.execute(
@@ -57,7 +64,29 @@ class JobStore:
             values = JobRecord.model_validate_json(row[0]).model_dump()
             if expected_status is not None and values["status"] not in expected_status:
                 raise JobConflict("Job stage changed; reload its current status")
+            if (
+                expected_input_revision is not None
+                and values["input_revision"] != expected_input_revision
+            ):
+                raise JobConflict("Job inputs changed; reload their current revision")
             values.update(changes, updated_at=datetime.now(UTC))
+            values = JobRecord.model_validate(values).model_dump()
+            active = values.get("active_attempt_id")
+            if active:
+                for attempt in values["attempts"]:
+                    if str(attempt["id"]) == str(active):
+                        for key in (
+                            "status",
+                            "asset",
+                            "export_path",
+                            "validation_path",
+                            "bundle_path",
+                            "error",
+                        ):
+                            if key in changes:
+                                attempt[key] = changes[key]
+                        if changes.get("status") in {"completed", "failed"}:
+                            attempt["finished_at"] = values["updated_at"]
             result = JobRecord.model_validate(values)
             connection.execute(
                 "UPDATE jobs SET record = ? WHERE id = ?", (result.model_dump_json(), str(job_id))

@@ -1,0 +1,1682 @@
+{
+  "schema_version": "cad-inventory-1.0",
+  "source_sha256": "f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+  "units": "metres; STEP transferred in mm then scaled 0.001",
+  "tessellation": {
+    "linear_mm": 0.08,
+    "angular_rad": 0.1
+  },
+  "parts": [
+    {
+      "id": "part_0000",
+      "cad_name": "Base_SO101 v12",
+      "cad_path": "/SO101 Assembly v4[1]/Base_SO101 v12:1/Base_SO101 v12",
+      "mesh": "meshes/part_0000.stl",
+      "sha256": "27e36ae383f4b1d717128596ba757b0e579d505f81f63f61f970df76015d645e",
+      "source": "sourced",
+      "note": "Nominal STEP component: Base_SO101 v12; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          2.22044604925031e-18,
+          0.0379221534241116,
+          0.000394295534220524
+        ],
+        "quaternion_wxyz": [
+          0.7071067811865474,
+          0.7071067811865477,
+          -0.0,
+          1.9626155733547187e-17
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.0554624999999999,
+          2.9266519763204684e-16,
+          -0.016
+        ],
+        [
+          0.0554625000000002,
+          0.0720000000000003,
+          0.0710000000000002
+        ]
+      ]
+    },
+    {
+      "id": "part_0001",
+      "cad_name": "Rotation_Pitch_SO101 v8",
+      "cad_path": "/SO101 Assembly v4[2]/Rotation_Pitch_SO101 v8:1/Rotation_Pitch_SO101 v8",
+      "mesh": "meshes/part_0001.stl",
+      "sha256": "b8bf61bad990e92e4176014df55b4871e35f0c45abfa7b32a9325227b36444cd",
+      "source": "sourced",
+      "note": "Nominal STEP component: Rotation_Pitch_SO101 v8; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          -9.94324697946292e-05,
+          0.00483198039526593,
+          0.0194878785557701
+        ],
+        "quaternion_wxyz": [
+          0.497813585717997,
+          0.5021768950027374,
+          0.49781358571799056,
+          0.502176895002744
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.0598,
+          0.000199999999999992,
+          -0.023
+        ],
+        [
+          0.0,
+          0.0844,
+          0.023
+        ]
+      ]
+    },
+    {
+      "id": "part_0004",
+      "cad_name": "SOLID",
+      "cad_path": "/SO101 Assembly v4[3]/Upper_arm_SO101 v9:1/Upper_arm_SO101 v9[3]/=>[0:1:1:7]/SOLID",
+      "mesh": "meshes/part_0004.stl",
+      "sha256": "3e7fc112d9162ba1eda22df77ce24dde465c7d5de8c25cf999ca4caefbf33a85",
+      "source": "sourced",
+      "note": "Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          0.0014751431660109,
+          0.026461584890673302,
+          0.10832696597185701
+        ],
+        "quaternion_wxyz": [
+          0.4999809615320842,
+          0.5043632677491888,
+          -0.4956367322508141,
+          -0.49998096153208405
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.0650849891178812,
+          -1.65666091955785e-16,
+          -0.0356
+        ],
+        [
+          0.0770849891178812,
+          0.0245,
+          0.0317
+        ]
+      ]
+    },
+    {
+      "id": "part_0006",
+      "cad_name": "SOLID",
+      "cad_path": "/SO101 Assembly v4[4]/Under_arm_SO101 v12:1/Under_arm_SO101 v12[2]/=>[0:1:1:10]/SOLID",
+      "mesh": "meshes/part_0006.stl",
+      "sha256": "8b1dd0ad2921ea32387032f57c65153802e301635bb2395718f6cf00a4c8b17f",
+      "source": "sourced",
+      "note": "Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          0.00439896304749777,
+          0.00915348725240658,
+          0.116048099927583
+        ],
+        "quaternion_wxyz": [
+          0.49781358571799394,
+          -0.49781358571799367,
+          -0.5065400381460392,
+          0.49777550914463087
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.053849907336607404,
+          -0.044,
+          -0.0342
+        ],
+        [
+          0.0768499073366074,
+          -0.02,
+          0.0302
+        ]
+      ]
+    },
+    {
+      "id": "part_0007",
+      "cad_name": "Base_08p v18",
+      "cad_path": "/SO101 Assembly v4[5]/Base_08p v18:1/Base_08p v18",
+      "mesh": "meshes/part_0007.stl",
+      "sha256": "d0dd093624751686263a062ac717ac0785f7f6ab0d36c14f2a12a9de383aefe2",
+      "source": "sourced",
+      "note": "Nominal STEP component: Base_08p v18; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          -9.943246979511711e-05,
+          0.0379221534241116,
+          0.000394295534220879
+        ],
+        "quaternion_wxyz": [
+          0.7071067811865474,
+          0.7071067811865477,
+          -0.0,
+          -1.8696469437080723e-17
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.022350000000000002,
+          0.0381,
+          -0.020800000000000003
+        ],
+        [
+          0.02529767862785065,
+          0.0695,
+          0.0593999999999999
+        ]
+      ]
+    },
+    {
+      "id": "part_0011",
+      "cad_name": "SOLID",
+      "cad_path": "/SO101 Assembly v4[6]/Motor_holder_SO101_Base v6:1/Motor_holder_SO101_Base v6[4]/=>[0:1:1:16]/SOLID",
+      "mesh": "meshes/part_0011.stl",
+      "sha256": "76d17947689fda1683cebc23e089a210012097fcb2c6ff177f1c7f6122fa177c",
+      "source": "sourced",
+      "note": "Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          -0.000299432469795753,
+          -0.0752315775333601,
+          0.0493404304324744
+        ],
+        "quaternion_wxyz": [
+          0.0030853255836679446,
+          -0.7071000500396314,
+          -0.0030853255836493345,
+          0.7071000500396224
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.053849907336607404,
+          -0.055097056274847706,
+          -0.028880443932947805
+        ],
+        [
+          -0.0258499073366074,
+          -0.0169999999999999,
+          0.0262
+        ]
+      ]
+    },
+    {
+      "id": "part_0014",
+      "cad_name": "SOLID",
+      "cad_path": "/SO101 Assembly v4[7]/Motor_holder_SO101_Wrist v8:1/Motor_holder_SO101_Wrist v8[3]/=>[0:1:1:20]/SOLID",
+      "mesh": "meshes/part_0014.stl",
+      "sha256": "fd9c38af5690ac1b269cc89b40a4c725e1822b24e8032657ed15c88e0e3537b4",
+      "source": "sourced",
+      "note": "Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          0.00419897827798155,
+          0.00915175730870047,
+          0.116046339457035
+        ],
+        "quaternion_wxyz": [
+          0.49781358571799095,
+          -0.49781358571799056,
+          -0.5065400381460423,
+          0.4977755091446339
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.053849907336607404,
+          -0.0539000000000001,
+          -0.0301909654896632
+        ],
+        [
+          -0.0258499073366074,
+          -0.0169999999999999,
+          0.0262
+        ]
+      ]
+    },
+    {
+      "id": "part_0016",
+      "cad_name": "SOLID",
+      "cad_path": "/SO101 Assembly v4[8]/Wrist_Roll_Pitch_SO100 v15:1/Wrist_Roll_Pitch_SO100 v15[2]/=>[0:1:1:23]/SOLID",
+      "mesh": "meshes/part_0016.stl",
+      "sha256": "58fe5bb633526d946632934dcd82c74988966120325307daf21f291322a68a89",
+      "source": "sourced",
+      "note": "Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          0.00553481144893693,
+          -0.08857841352185471,
+          0.152321182116979
+        ],
+        "quaternion_wxyz": [
+          0.7101851406682601,
+          -0.7039608770746516,
+          -0.006143492519413979,
+          -0.006197339909622005
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.027100000000000003,
+          -0.0199999999999999,
+          -0.0378283863319605
+        ],
+        [
+          0.0352,
+          0.015659848162642837,
+          0.03999932301465193
+        ]
+      ]
+    },
+    {
+      "id": "part_0019",
+      "cad_name": "SOLID",
+      "cad_path": "/SO101 Assembly v4[9]/Wrist_Roll_Follower_SO101 v10:1/Wrist_Roll_Follower_SO101 v10[2]/=>[0:1:1:28]/SOLID",
+      "mesh": "meshes/part_0019.stl",
+      "sha256": "1ec88cf3342349a99223d54b5eeda44f9f575f8ab626d9169b10e78e13cc39d1",
+      "source": "sourced",
+      "note": "Nominal STEP component: SOLID; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          0.0068436258421333005,
+          -0.121177644214949,
+          0.15205705580938
+        ],
+        "quaternion_wxyz": [
+          0.4934314041238589,
+          0.49779454725938477,
+          -0.5065589104603487,
+          0.5021196156060881
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.035200000000000106,
+          -0.0242182144793536,
+          -5.029354652141314e-05
+        ],
+        [
+          0.0299999993294477,
+          0.0277817855206464,
+          0.10537500015659901
+        ]
+      ]
+    },
+    {
+      "id": "part_0020",
+      "cad_name": "Moving_Jaw_SO101 v3",
+      "cad_path": "/SO101 Assembly v4[10]/Moving_Jaw_SO101 v3:1/Moving_Jaw_SO101 v3",
+      "mesh": "meshes/part_0020.stl",
+      "sha256": "09fb80a31737156bd88f1789807b70b89b1d68868f6345ccbc7cea1165370df1",
+      "source": "sourced",
+      "note": "Nominal STEP component: Moving_Jaw_SO101 v3; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          0.00636750757195153,
+          -0.14570309075565702,
+          0.171913452562344
+        ],
+        "quaternion_wxyz": [
+          0.5000189534285616,
+          -0.49998071357945306,
+          -0.5043631851974564,
+          0.49559873857614195
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.01230000000043995,
+          -0.0820000000084802,
+          -0.024
+        ],
+        [
+          0.009999165294763636,
+          0.009999976276894569,
+          0.024
+        ]
+      ]
+    },
+    {
+      "id": "part_0268",
+      "cad_name": "WaveShare_Mounting_Plate_SO101 v4",
+      "cad_path": "/SO101 Assembly v4[96]/WaveShare_Mounting_Plate_SO101 v4:1/WaveShare_Mounting_Plate_SO101 v4",
+      "mesh": "meshes/part_0268.stl",
+      "sha256": "f9e4baef2e8da9454f4e0be4f4031049f2cca396b9e05787dfa149ca02a4a83a",
+      "source": "sourced",
+      "note": "Nominal STEP component: WaveShare_Mounting_Plate_SO101 v4; source f754be35708382b05ce65768ae33c612f91dca11ad19d14807dc637eb944ba3d",
+      "pose": {
+        "position_m": [
+          0.0007915675302052349,
+          0.06254015342411161,
+          0.0501942955342214
+        ],
+        "quaternion_wxyz": [
+          0.7071067811865408,
+          0.7071067811865541,
+          -1.4287841374022216e-14,
+          1.4296545919573378e-14
+        ]
+      },
+      "bounds_m": [
+        [
+          -0.025500000000000002,
+          -0.021,
+          0.0
+        ],
+        [
+          0.025500000000000002,
+          0.021,
+          0.0076
+        ]
+      ]
+    }
+  ],
+  "omitted": [
+    {
+      "name": "Wiring_holder v1",
+      "path": "/SO101 Assembly v4[3]/Upper_arm_SO101 v9:1/Upper_arm_SO101 v9[1]/Wiring_holder v1:1/Wiring_holder v1",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1 (1)",
+      "path": "/SO101 Assembly v4[3]/Upper_arm_SO101 v9:1/Upper_arm_SO101 v9[2]/Wiring_holder v1 (1):1/Wiring_holder v1 (1)",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1",
+      "path": "/SO101 Assembly v4[4]/Under_arm_SO101 v12:1/Under_arm_SO101 v12[1]/Wiring_holder v1:1/Wiring_holder v1",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1",
+      "path": "/SO101 Assembly v4[6]/Motor_holder_SO101_Base v6:1/Motor_holder_SO101_Base v6[1]/Wiring_holder v1:1/Wiring_holder v1",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1 (1)",
+      "path": "/SO101 Assembly v4[6]/Motor_holder_SO101_Base v6:1/Motor_holder_SO101_Base v6[2]/Wiring_holder v1 (1):1/Wiring_holder v1 (1)",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1 (2)",
+      "path": "/SO101 Assembly v4[6]/Motor_holder_SO101_Base v6:1/Motor_holder_SO101_Base v6[3]/Wiring_holder v1 (2):1/Wiring_holder v1 (2)",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1",
+      "path": "/SO101 Assembly v4[7]/Motor_holder_SO101_Wrist v8:1/Motor_holder_SO101_Wrist v8[1]/Wiring_holder v1:1/Wiring_holder v1",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1 (1)",
+      "path": "/SO101 Assembly v4[7]/Motor_holder_SO101_Wrist v8:1/Motor_holder_SO101_Wrist v8[2]/Wiring_holder v1 (1):1/Wiring_holder v1 (1)",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1",
+      "path": "/SO101 Assembly v4[8]/Wrist_Roll_Pitch_SO100 v15:1/Wrist_Roll_Pitch_SO100 v15[1]/Wiring_holder v1:1/Wiring_holder v1",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1",
+      "path": "/SO101 Assembly v4[9]/Wrist_Roll_Follower_SO101 v10:1/Wrist_Roll_Follower_SO101 v10[1]/Wrist_Roll_SO101 v6:1/Wrist_Roll_SO101 v6[1]/Wiring_holder v1:1/Wiring_holder v1",
+      "reason": "empty"
+    },
+    {
+      "name": "Wiring_holder v1 (1)",
+      "path": "/SO101 Assembly v4[9]/Wrist_Roll_Follower_SO101 v10:1/Wrist_Roll_Follower_SO101 v10[1]/Wrist_Roll_SO101 v6:1/Wrist_Roll_SO101 v6[2]/Wiring_holder v1 (1):1/Wiring_holder v1 (1)",
+      "reason": "empty"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[11]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:1/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[12]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:2/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[13]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:3/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[14]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:4/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 0-48 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[15]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 0-48 x 0.1875 Type AB Steel Grade 2 Plain v1:1/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 0-48 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 0-48 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[16]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 0-48 x 0.1875 Type AB Steel Grade 2 Plain v1:2/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 0-48 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[17]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:5/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[18]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:6/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[19]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:7/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[20]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:8/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[21]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:9/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[22]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:10/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[23]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:11/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[24]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:12/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[25]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:13/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[26]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:14/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[27]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:15/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[28]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:16/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[29]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:17/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[30]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:18/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[31]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:19/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[32]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:20/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[33]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:21/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "path": "/SO101 Assembly v4[34]/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1:22/Type I Cross Recessed Fillister Head Tapping Screw ANSI B18.6.4 1-42 x 0.1875 Type AB Steel Grade 2 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[35]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:1/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[36]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:2/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[37]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:3/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[38]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:4/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[39]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:5/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[40]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:6/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[41]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:7/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[42]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:8/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[43]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:9/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[44]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:10/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[45]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:11/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[46]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:12/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[47]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:13/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[48]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:14/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[49]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:15/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[50]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:16/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[51]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:17/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[52]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:18/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[53]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:19/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[54]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:20/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[55]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:21/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[56]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:22/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[57]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:23/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[58]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:24/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[59]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:25/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[60]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:26/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[61]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:27/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[62]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:28/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[63]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:29/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[64]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:30/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[65]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:31/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[66]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:32/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[67]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:33/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[68]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:34/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[69]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:35/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[70]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:36/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[71]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:37/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[72]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:38/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[73]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:39/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[74]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:40/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[75]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:41/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[76]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:42/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[77]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:43/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[78]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:44/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Board",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[1]/Board:1/Board",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-0603_SMD_Capacitor",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[2]/C1:1/C1[1]/User_Library-0603_SMD_Capacitor:1/User_Library-0603_SMD_Capacitor",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-0603_SMD_Capacitor",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[3]/C2:1/C2[1]/User_Library-0603_SMD_Capacitor:2/User_Library-0603_SMD_Capacitor",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-0603_SMD_Capacitor",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[4]/C3:1/C3[1]/User_Library-0603_SMD_Capacitor:3/User_Library-0603_SMD_Capacitor",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-0603_SMD_Capacitor",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[5]/C4:1/C4[1]/User_Library-0603_SMD_Capacitor:4/User_Library-0603_SMD_Capacitor",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-0603_SMD_Capacitor",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[6]/C5:1/C5[1]/User_Library-0603_SMD_Capacitor:5/User_Library-0603_SMD_Capacitor",
+      "reason": "not selected"
+    },
+    {
+      "name": "2_1_200",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[7]/C7:1/C7[1]/C_0603:1/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[1]/2_1_200:1/2_1_200",
+      "reason": "not selected"
+    },
+    {
+      "name": "_1_1_20001",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[7]/C7:1/C7[1]/C_0603:1/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[2]/_1_1_20001:1/_1_1_20001",
+      "reason": "not selected"
+    },
+    {
+      "name": "3_1_2_A",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[7]/C7:1/C7[1]/C_0603:1/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[3]/3_1_2_A:1/3_1_2_A",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-0603_SMD_Capacitor",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[8]/C6:1/C6[1]/User_Library-0603_SMD_Capacitor:6/User_Library-0603_SMD_Capacitor",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOD323",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[9]/D2:1/D2[1]/SOD323:1/SOD323",
+      "reason": "not selected"
+    },
+    {
+      "name": "dc-005-5a-20",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[10]/DC1:1/DC1[1]/dc-005-5a-20:1/dc-005-5a-20",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-DG350-3,5-02P",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[11]/H1:1/H1[1]/User_Library-DG350-3,5-02P:1/User_Library-DG350-3,5-02P",
+      "reason": "not selected"
+    },
+    {
+      "name": "X2564WV-03-N0SN",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[12]/H3:1/H3[1]/X2564WV-03-N0SN:1/X2564WV-03-N0SN",
+      "reason": "not selected"
+    },
+    {
+      "name": "X2564WV-03-N0SN",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[13]/H5:1/H5[1]/X2564WV-03-N0SN:2/X2564WV-03-N0SN",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[14]/R2:1/R2[1]/R0603:1/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[14]/R2:1/R2[1]/R0603:1/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[14]/R2:1/R2[1]/R0603:1/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[15]/R3:1/R3[1]/R0603:2/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[15]/R3:1/R3[1]/R0603:2/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[15]/R3:1/R3[1]/R0603:2/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[1]/SOLID:1/SOLID",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (1)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[2]/SOLID (1):1/SOLID (1)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[3]/SOLID (2):1/SOLID (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (3)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[4]/SOLID (3):1/SOLID (3)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (4)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[5]/SOLID (4):1/SOLID (4)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (5)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[6]/SOLID (5):1/SOLID (5)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (6)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[7]/SOLID (6):1/SOLID (6)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (7)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[8]/SOLID (7):1/SOLID (7)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (8)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[9]/SOLID (8):1/SOLID (8)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (9)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[10]/SOLID (9):1/SOLID (9)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (10)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[11]/SOLID (10):1/SOLID (10)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (11)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[12]/SOLID (11):1/SOLID (11)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (12)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[13]/SOLID (12):1/SOLID (12)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (13)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[14]/SOLID (13):1/SOLID (13)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (14)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[15]/SOLID (14):1/SOLID (14)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (15)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[16]/SOLID (15):1/SOLID (15)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (16)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[17]/SOLID (16):1/SOLID (16)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (17)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[18]/SOLID (17):1/SOLID (17)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (18)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[19]/SOLID (18):1/SOLID (18)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (19)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[20]/SOLID (19):1/SOLID (19)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (20)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[21]/SOLID (20):1/SOLID (20)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOLID (21)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[16]/Type_C1:1/Type_C1[1]/698b116-264-211:1/698b116-264-211[22]/SOLID (21):1/SOLID (21)",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-QFN-16",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[17]/U1:1/U1[1]/User_Library-QFN-16:1/User_Library-QFN-16",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-TO-223_1_1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[18]/U2:1/U2[1]/TO-223:1/TO-223[1]/User_Library-TO-223_1_1:1/User_Library-TO-223_1_1",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-TO-223_2_1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[18]/U2:1/U2[1]/TO-223:1/TO-223[2]/User_Library-TO-223_2_1:1/User_Library-TO-223_2_1",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-TO-223_3_1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[18]/U2:1/U2[1]/TO-223:1/TO-223[3]/User_Library-TO-223_3_1:1/User_Library-TO-223_3_1",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-TO-223_4_1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[18]/U2:1/U2[1]/TO-223:1/TO-223[4]/User_Library-TO-223_4_1:1/User_Library-TO-223_4_1",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-TO-223_5_1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[18]/U2:1/U2[1]/TO-223:1/TO-223[5]/User_Library-TO-223_5_1:1/User_Library-TO-223_5_1",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-0603_SMD_Capacitor",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[19]/C8:1/C8[1]/User_Library-0603_SMD_Capacitor:7/User_Library-0603_SMD_Capacitor",
+      "reason": "not selected"
+    },
+    {
+      "name": "2_1_200",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[20]/C9:1/C9[1]/C_0603:2/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[1]/2_1_200:1/2_1_200",
+      "reason": "not selected"
+    },
+    {
+      "name": "_1_1_20001",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[20]/C9:1/C9[1]/C_0603:2/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[2]/_1_1_20001:1/_1_1_20001",
+      "reason": "not selected"
+    },
+    {
+      "name": "3_1_2_A",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[20]/C9:1/C9[1]/C_0603:2/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[3]/3_1_2_A:1/3_1_2_A",
+      "reason": "not selected"
+    },
+    {
+      "name": "2_1_200",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[21]/C10:1/C10[1]/C_0603:3/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[1]/2_1_200:1/2_1_200",
+      "reason": "not selected"
+    },
+    {
+      "name": "_1_1_20001",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[21]/C10:1/C10[1]/C_0603:3/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[2]/_1_1_20001:1/_1_1_20001",
+      "reason": "not selected"
+    },
+    {
+      "name": "3_1_2_A",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[21]/C10:1/C10[1]/C_0603:3/C_0603[1]/C_0603-7177_AF0_ASM:1/C_0603-7177_AF0_ASM[1]/C_0603-683_AF0_ASM:1/C_0603-683_AF0_ASM[3]/3_1_2_A:1/3_1_2_A",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-sop-8",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[22]/M1:1/M1[1]/User_Library-sop-8:1/User_Library-sop-8",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOT-23",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[23]/Q1:1/Q1[1]/SOT-23:1/SOT-23",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[24]/R4:1/R4[1]/R0603:3/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[24]/R4:1/R4[1]/R0603:3/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[24]/R4:1/R4[1]/R0603:3/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[25]/R5:1/R5[1]/R0603:4/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[25]/R5:1/R5[1]/R0603:4/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[25]/R5:1/R5[1]/R0603:4/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[26]/R6:1/R6[1]/R0603:5/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[26]/R6:1/R6[1]/R0603:5/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[26]/R6:1/R6[1]/R0603:5/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[27]/R7:1/R7[1]/R0603:6/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[27]/R7:1/R7[1]/R0603:6/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[27]/R7:1/R7[1]/R0603:6/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[28]/R8:1/R8[1]/R0603:7/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[28]/R8:1/R8[1]/R0603:7/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[28]/R8:1/R8[1]/R0603:7/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[29]/U3:1/U3[1]/1653192640:1/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (1)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[29]/U3:1/U3[2]/736125216:1/736125216[1]/Extruded (1):1/Extruded (1)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[29]/U3:1/U3[3]/1653192640:2/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[29]/U3:1/U3[4]/1653192640:3/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[29]/U3:1/U3[5]/1653192640:4/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[29]/U3:1/U3[6]/1653192640:5/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[30]/U4:1/U4[1]/1653192640:6/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[30]/U4:1/U4[2]/1653192640:7/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[30]/U4:1/U4[3]/1653192640:8/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[30]/U4:1/U4[4]/1653192640:9/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[30]/U4:1/U4[5]/1653192640:10/1653192640[1]/Extruded:1/Extruded",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (1)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[30]/U4:1/U4[6]/736125216:2/736125216[1]/Extruded (1):1/Extruded (1)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOD323",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[31]/D1:1/D1[1]/SOD323:2/SOD323",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[32]/H2:1/H2[1]/840721760:1/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (3)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[32]/H2:1/H2[2]/840721632:1/840721632[1]/Extruded (3):1/Extruded (3)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[32]/H2:1/H2[3]/840721760:2/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[32]/H2:1/H2[4]/840721760:3/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[32]/H2:1/H2[5]/840721760:4/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (3)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[32]/H2:1/H2[6]/840721632:2/840721632[1]/Extruded (3):1/Extruded (3)",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[33]/R1:1/R1[1]/R0603:8/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[33]/R1:1/R1[1]/R0603:8/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[33]/R1:1/R1[1]/R0603:8/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (4)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[1]/1653246912:1/1653246912[1]/Extruded (4):1/Extruded (4)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[2]/840721760:5/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[3]/840721760:6/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[4]/840721760:7/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[5]/840721760:8/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (2)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[6]/840721760:9/840721760[1]/Extruded (2):1/Extruded (2)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (3)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[7]/840721632:3/840721632[1]/Extruded (3):1/Extruded (3)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (3)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[8]/840721632:4/840721632[1]/Extruded (3):1/Extruded (3)",
+      "reason": "not selected"
+    },
+    {
+      "name": "Extruded (3)",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[34]/H4:1/H4[9]/840721632:5/840721632[1]/Extruded (3):1/Extruded (3)",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOD323",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[35]/D3:1/D3[1]/SOD323:3/SOD323",
+      "reason": "not selected"
+    },
+    {
+      "name": "SOD323",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[36]/D4:1/D4[1]/SOD323:4/SOD323",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-LED_0603_R_Pocket002",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[37]/LED1:1/LED1[1]/User_Library-LED_0603_R:1/User_Library-LED_0603_R[1]/User_Library-LED_0603_R_Pocket002:1/User_Library-LED_0603_R_Pocket002",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-LED_0603_R_Pad004",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[37]/LED1:1/LED1[1]/User_Library-LED_0603_R:1/User_Library-LED_0603_R[2]/User_Library-LED_0603_R_Pad004:1/User_Library-LED_0603_R_Pad004",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-LED_0603_R_Fillet",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[37]/LED1:1/LED1[1]/User_Library-LED_0603_R:1/User_Library-LED_0603_R[3]/User_Library-LED_0603_R_Fillet:1/User_Library-LED_0603_R_Fillet",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-LED_0603_R_Pocket001",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[37]/LED1:1/LED1[1]/User_Library-LED_0603_R:1/User_Library-LED_0603_R[4]/User_Library-LED_0603_R_Pocket001:1/User_Library-LED_0603_R_Pocket001",
+      "reason": "not selected"
+    },
+    {
+      "name": "User_Library-LED_0603_R_Pad",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[37]/LED1:1/LED1[1]/User_Library-LED_0603_R:1/User_Library-LED_0603_R[5]/User_Library-LED_0603_R_Pad:1/User_Library-LED_0603_R_Pad",
+      "reason": "not selected"
+    },
+    {
+      "name": "_2_1_2_3_4_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[38]/R9:1/R9[1]/R0603:9/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[1]/_2_1_2_3_4_AF0:1/_2_1_2_3_4_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "_7_1_2_AF0",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[38]/R9:1/R9[1]/R0603:9/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[2]/_7_1_2_AF0:1/_7_1_2_AF0",
+      "reason": "not selected"
+    },
+    {
+      "name": "5_1_2_3_400",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[38]/R9:1/R9[1]/R0603:9/R0603[1]/R_0603-3615_AF0_ASM:1/R_0603-3615_AF0_ASM[1]/R_0603-3601_AF0_ASM:1/R_0603-3601_AF0_ASM[3]/5_1_2_3_400:1/5_1_2_3_400",
+      "reason": "not selected"
+    },
+    {
+      "name": "hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[39]/hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1:1/hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[40]/hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1:2/hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[41]/hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1:3/hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[42]/hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1:4/hexagonal_spacer_FF_M2.5_H06_HEX5_pass_through v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[43]/Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1:1/Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[44]/Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1:2/Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[45]/Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1:3/Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[79]/Bus Servo Adapter (A) v3:1/Bus Servo Adapter (A) v3[46]/Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1:4/Pan Head Screw DIN EN ISO 7045 - M2.5 x 4 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Hexagon Nut DIN 555 - M3 Steel 6 Plain v1",
+      "path": "/SO101 Assembly v4[80]/Hexagon Nut DIN 555 - M3 Steel 6 Plain v1:1/Hexagon Nut DIN 555 - M3 Steel 6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Hexagon Nut DIN 934 - M3 x 0.5 Steel 6 Plain v1",
+      "path": "/SO101 Assembly v4[81]/Hexagon Nut DIN 934 - M3 x 0.5 Steel 6 Plain v1:1/Hexagon Nut DIN 934 - M3 x 0.5 Steel 6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "050375033 v3",
+      "path": "/SO101 Assembly v4[82]/050375033 v3:1/050375033 v3",
+      "reason": "not selected"
+    },
+    {
+      "name": "050375033 v3",
+      "path": "/SO101 Assembly v4[83]/050375033 v3:2/050375033 v3",
+      "reason": "not selected"
+    },
+    {
+      "name": "ZK_122",
+      "path": "/SO101 Assembly v4[84]/ST3215 Servo v2:1/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[1]/ZK_122:1/ZK_122",
+      "reason": "not selected"
+    },
+    {
+      "name": "SG-ZIJI_15",
+      "path": "/SO101 Assembly v4[84]/ST3215 Servo v2:1/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[2]/SG-ZIJI_15:1/SG-ZIJI_15",
+      "reason": "not selected"
+    },
+    {
+      "name": "XG-ZIJI_16",
+      "path": "/SO101 Assembly v4[84]/ST3215 Servo v2:1/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[3]/XG-ZIJI_16:1/XG-ZIJI_16",
+      "reason": "not selected"
+    },
+    {
+      "name": "MOTOR-1723_3",
+      "path": "/SO101 Assembly v4[84]/ST3215 Servo v2:1/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[4]/MOTOR-1723_3:1/MOTOR-1723_3",
+      "reason": "not selected"
+    },
+    {
+      "name": "PCB-CHAZUO_92",
+      "path": "/SO101 Assembly v4[84]/ST3215 Servo v2:1/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[5]/PCB-CHAZUO_92:1/PCB-CHAZUO_92",
+      "reason": "not selected"
+    },
+    {
+      "name": "GE_27",
+      "path": "/SO101 Assembly v4[84]/ST3215 Servo v2:1/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[6]/GE_27:1/GE_27",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[84]/ST3215 Servo v2:1/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[7]/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[84]/ST3215 Servo v2:1/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[8]/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "ZK_122",
+      "path": "/SO101 Assembly v4[85]/ST3215 Servo v2:2/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[1]/ZK_122:1/ZK_122",
+      "reason": "not selected"
+    },
+    {
+      "name": "SG-ZIJI_15",
+      "path": "/SO101 Assembly v4[85]/ST3215 Servo v2:2/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[2]/SG-ZIJI_15:1/SG-ZIJI_15",
+      "reason": "not selected"
+    },
+    {
+      "name": "XG-ZIJI_16",
+      "path": "/SO101 Assembly v4[85]/ST3215 Servo v2:2/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[3]/XG-ZIJI_16:1/XG-ZIJI_16",
+      "reason": "not selected"
+    },
+    {
+      "name": "MOTOR-1723_3",
+      "path": "/SO101 Assembly v4[85]/ST3215 Servo v2:2/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[4]/MOTOR-1723_3:1/MOTOR-1723_3",
+      "reason": "not selected"
+    },
+    {
+      "name": "PCB-CHAZUO_92",
+      "path": "/SO101 Assembly v4[85]/ST3215 Servo v2:2/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[5]/PCB-CHAZUO_92:1/PCB-CHAZUO_92",
+      "reason": "not selected"
+    },
+    {
+      "name": "GE_27",
+      "path": "/SO101 Assembly v4[85]/ST3215 Servo v2:2/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[6]/GE_27:1/GE_27",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[85]/ST3215 Servo v2:2/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[7]/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[85]/ST3215 Servo v2:2/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[8]/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "ZK_122",
+      "path": "/SO101 Assembly v4[86]/ST3215 Servo v2:3/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[1]/ZK_122:1/ZK_122",
+      "reason": "not selected"
+    },
+    {
+      "name": "SG-ZIJI_15",
+      "path": "/SO101 Assembly v4[86]/ST3215 Servo v2:3/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[2]/SG-ZIJI_15:1/SG-ZIJI_15",
+      "reason": "not selected"
+    },
+    {
+      "name": "XG-ZIJI_16",
+      "path": "/SO101 Assembly v4[86]/ST3215 Servo v2:3/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[3]/XG-ZIJI_16:1/XG-ZIJI_16",
+      "reason": "not selected"
+    },
+    {
+      "name": "MOTOR-1723_3",
+      "path": "/SO101 Assembly v4[86]/ST3215 Servo v2:3/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[4]/MOTOR-1723_3:1/MOTOR-1723_3",
+      "reason": "not selected"
+    },
+    {
+      "name": "PCB-CHAZUO_92",
+      "path": "/SO101 Assembly v4[86]/ST3215 Servo v2:3/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[5]/PCB-CHAZUO_92:1/PCB-CHAZUO_92",
+      "reason": "not selected"
+    },
+    {
+      "name": "GE_27",
+      "path": "/SO101 Assembly v4[86]/ST3215 Servo v2:3/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[6]/GE_27:1/GE_27",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[86]/ST3215 Servo v2:3/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[7]/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[86]/ST3215 Servo v2:3/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[8]/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "ZK_122",
+      "path": "/SO101 Assembly v4[87]/ST3215 Servo v2:4/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[1]/ZK_122:1/ZK_122",
+      "reason": "not selected"
+    },
+    {
+      "name": "SG-ZIJI_15",
+      "path": "/SO101 Assembly v4[87]/ST3215 Servo v2:4/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[2]/SG-ZIJI_15:1/SG-ZIJI_15",
+      "reason": "not selected"
+    },
+    {
+      "name": "XG-ZIJI_16",
+      "path": "/SO101 Assembly v4[87]/ST3215 Servo v2:4/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[3]/XG-ZIJI_16:1/XG-ZIJI_16",
+      "reason": "not selected"
+    },
+    {
+      "name": "MOTOR-1723_3",
+      "path": "/SO101 Assembly v4[87]/ST3215 Servo v2:4/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[4]/MOTOR-1723_3:1/MOTOR-1723_3",
+      "reason": "not selected"
+    },
+    {
+      "name": "PCB-CHAZUO_92",
+      "path": "/SO101 Assembly v4[87]/ST3215 Servo v2:4/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[5]/PCB-CHAZUO_92:1/PCB-CHAZUO_92",
+      "reason": "not selected"
+    },
+    {
+      "name": "GE_27",
+      "path": "/SO101 Assembly v4[87]/ST3215 Servo v2:4/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[6]/GE_27:1/GE_27",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[87]/ST3215 Servo v2:4/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[7]/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[87]/ST3215 Servo v2:4/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[8]/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "ZK_122",
+      "path": "/SO101 Assembly v4[88]/ST3215 Servo v2:5/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[1]/ZK_122:1/ZK_122",
+      "reason": "not selected"
+    },
+    {
+      "name": "SG-ZIJI_15",
+      "path": "/SO101 Assembly v4[88]/ST3215 Servo v2:5/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[2]/SG-ZIJI_15:1/SG-ZIJI_15",
+      "reason": "not selected"
+    },
+    {
+      "name": "XG-ZIJI_16",
+      "path": "/SO101 Assembly v4[88]/ST3215 Servo v2:5/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[3]/XG-ZIJI_16:1/XG-ZIJI_16",
+      "reason": "not selected"
+    },
+    {
+      "name": "MOTOR-1723_3",
+      "path": "/SO101 Assembly v4[88]/ST3215 Servo v2:5/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[4]/MOTOR-1723_3:1/MOTOR-1723_3",
+      "reason": "not selected"
+    },
+    {
+      "name": "PCB-CHAZUO_92",
+      "path": "/SO101 Assembly v4[88]/ST3215 Servo v2:5/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[5]/PCB-CHAZUO_92:1/PCB-CHAZUO_92",
+      "reason": "not selected"
+    },
+    {
+      "name": "GE_27",
+      "path": "/SO101 Assembly v4[88]/ST3215 Servo v2:5/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[6]/GE_27:1/GE_27",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[88]/ST3215 Servo v2:5/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[7]/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "ZK_122",
+      "path": "/SO101 Assembly v4[89]/ST3215 Servo v2:6/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[1]/ZK_122:1/ZK_122",
+      "reason": "not selected"
+    },
+    {
+      "name": "SG-ZIJI_15",
+      "path": "/SO101 Assembly v4[89]/ST3215 Servo v2:6/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[2]/SG-ZIJI_15:1/SG-ZIJI_15",
+      "reason": "not selected"
+    },
+    {
+      "name": "XG-ZIJI_16",
+      "path": "/SO101 Assembly v4[89]/ST3215 Servo v2:6/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[3]/XG-ZIJI_16:1/XG-ZIJI_16",
+      "reason": "not selected"
+    },
+    {
+      "name": "MOTOR-1723_3",
+      "path": "/SO101 Assembly v4[89]/ST3215 Servo v2:6/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[4]/MOTOR-1723_3:1/MOTOR-1723_3",
+      "reason": "not selected"
+    },
+    {
+      "name": "PCB-CHAZUO_92",
+      "path": "/SO101 Assembly v4[89]/ST3215 Servo v2:6/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[5]/PCB-CHAZUO_92:1/PCB-CHAZUO_92",
+      "reason": "not selected"
+    },
+    {
+      "name": "GE_27",
+      "path": "/SO101 Assembly v4[89]/ST3215 Servo v2:6/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[6]/GE_27:1/GE_27",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[89]/ST3215 Servo v2:6/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[7]/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u9a71\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "path": "/SO101 Assembly v4[89]/ST3215 Servo v2:6/ST3215 Servo v2[1]/SCS215 v6_7:1/SCS215 v6_7[8]/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2:1/\u91d1\u5c5e\u8235\u76d8\uff08\u4ece\u52a8\uff09 v2",
+      "reason": "not selected"
+    },
+    {
+      "name": "Component1",
+      "path": "/SO101 Assembly v4[90]/Component1:1/Component1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Component2",
+      "path": "/SO101 Assembly v4[91]/Component2:1/Component2",
+      "reason": "not selected"
+    },
+    {
+      "name": "Component3",
+      "path": "/SO101 Assembly v4[92]/Component3:1/Component3",
+      "reason": "not selected"
+    },
+    {
+      "name": "Component4",
+      "path": "/SO101 Assembly v4[93]/Component4:1/Component4",
+      "reason": "not selected"
+    },
+    {
+      "name": "Component6",
+      "path": "/SO101 Assembly v4[94]/Component6:1/Component6",
+      "reason": "not selected"
+    },
+    {
+      "name": "Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "path": "/SO101 Assembly v4[95]/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1:45/Pan Head Screw DIN EN ISO 7045 - M3 x 6 - H Steel 4.6 Plain v1",
+      "reason": "not selected"
+    },
+    {
+      "name": "Component7",
+      "path": "/SO101 Assembly v4[97]/Component7:1/Component7",
+      "reason": "not selected"
+    }
+  ]
+}

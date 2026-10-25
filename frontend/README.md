@@ -1,4 +1,4 @@
-# Photo2Sim frontend
+# Kamino frontend
 
 Small Vite/TypeScript UI on port 5173. Tested with Node 24.22.1 and pnpm 11.25.0; requires Node 22.12+.
 

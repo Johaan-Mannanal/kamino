@@ -1,0 +1,50 @@
+{
+  "capture_take_id": "reference-20261024-take3",
+  "status": "paired_by_operator_stationary_association",
+  "images": [
+    {
+      "path": "photos/front-oblique.png",
+      "view": "front-oblique",
+      "format": "PNG",
+      "dimensions_px": [
+        2160,
+        2880
+      ],
+      "bytes": 6651495,
+      "sha256": "cb8a9dbc77285f7f375851042f7df2149ade154a1c2681a7d1b0e21f464b88bc",
+      "image_capture_time": null,
+      "exif_timestamp_fields": {},
+      "time_note": "Exact camera capture time unavailable; file creation/upload times are not capture times.",
+      "preservation": "Original supplied PNG copied byte-for-byte; no crop, resize or enhancement"
+    },
+    {
+      "path": "photos/side-oblique.png",
+      "view": "side-oblique",
+      "format": "PNG",
+      "dimensions_px": [
+        3840,
+        2160
+      ],
+      "bytes": 9433595,
+      "sha256": "cb992c5ff4d3de1f2d677c5d3c014b978f5f7b070f7e6eadc2e4c291157a4068",
+      "image_capture_time": null,
+      "exif_timestamp_fields": {},
+      "time_note": "Exact camera capture time unavailable; file creation/upload times are not capture times.",
+      "preservation": "Original supplied PNG copied byte-for-byte; no crop, resize or enhancement"
+    }
+  ],
+  "image_capture_times": null,
+  "operator_confirmation": {
+    "ready_before_capture": true,
+    "both_front_and_side_photos_taken_during_active_capture": true,
+    "pose_unchanged": true,
+    "verbatim": "Both photos taken; arm stayed unchanged",
+    "provenance": "User replied to the coordinated capture confirmation during the active read window; not independently image-verified."
+  },
+  "association_method": "Operator said ready before capture; after capture-active instruction confirmed both photos taken and arm unchanged. These two subsequent attachments are associated with that take by operator confirmation, not sensor timestamps.",
+  "hardware_synchronized": false,
+  "pairing_complete": true,
+  "jaw_opening_mm": null,
+  "base_table_geometry": null,
+  "scope": "Qualitative single stationary pose association only; no independent timestamp match, physical calibration or sign/zero validation."
+}

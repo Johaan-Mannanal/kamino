@@ -8,7 +8,8 @@ from uuid import uuid4
 import numpy as np
 import trimesh
 
-from photo2sim.contracts import AssetProperties, AssetRecord, CollisionGeometry
+from photo2sim.assets.sizing import resolve_sizing, rotate_mesh
+from photo2sim.contracts import AssetProperties, AssetRecord, CollisionGeometry, Orientation
 
 SUPPORTED_EXTENSIONS = {".obj": "obj", ".glb": "glb"}
 VISUAL_MESH = "meshes/visual.obj"
@@ -21,12 +22,19 @@ class AssetPreparationError(ValueError):
     """The input mesh or output location cannot produce a valid asset bundle."""
 
 
-def prepare_asset(mesh_path: Path, output_dir: Path, properties: AssetProperties) -> AssetRecord:
+def prepare_asset(
+    mesh_path: Path,
+    output_dir: Path,
+    properties: AssetProperties,
+    *,
+    orientation: Orientation | None = None,
+) -> AssetRecord:
     """Centre, scale, and export ``mesh_path`` into ``output_dir``.
 
-    Orientation is not inferred: the input's x/y/z axes are assumed to already match
-    the x/y/z of ``properties.dimensions_m``. Each axis is scaled independently to
-    the confirmed full extents, which distorts the mesh when its proportions differ.
+    Orientation is not inferred: explicit fixed-axis X/Y/Z rotations are applied
+    before centring and scaling. Omission preserves the input axes. Each axis is
+    scaled uniformly from an explicit reference, or independently only for an
+    explicit advanced request or historical properties with no sizing metadata.
     The input file is never modified, and nothing is left in ``output_dir`` on failure.
     """
     mesh_path = Path(mesh_path)
@@ -34,23 +42,45 @@ def prepare_asset(mesh_path: Path, output_dir: Path, properties: AssetProperties
     _check_output_dir(output_dir)
     mesh, baked_transforms = _load_mesh(mesh_path)
     _check_geometry(mesh, mesh_path)
-
-    dimensions = properties.dimensions_m
-    target = np.array([dimensions.x, dimensions.y, dimensions.z], dtype=float)
+    orientation = Orientation.model_validate(orientation or Orientation())
+    rotate_mesh(mesh, orientation)
     source_centre = mesh.bounds.mean(axis=0)
     source_extents = mesh.extents.copy()
-    scale = target / source_extents
+    properties, sizing_result = resolve_sizing(source_extents, properties, orientation)
+    target = np.array([getattr(properties.dimensions_m, axis) for axis in "xyz"])
+    scale = np.array(sizing_result.scale_factors)
     mesh.vertices = (mesh.vertices - source_centre) * scale
 
     _write_bundle(mesh, output_dir)
 
+    notes = _notes(mesh_path, source_extents, source_centre, target, scale, baked_transforms)
+    if sizing_result.mode == "uniform":
+        notes[2] = (
+            f"Uniform scalar {scale[0]:.12g} applied after reviewed orientation; "
+            "source proportions preserved. " + properties.dimensions_m.note
+        )
+    elif sizing_result.mode == "legacy_independent_axes":
+        notes.append(
+            "Legacy three-axis sizing retained for backward compatibility; proportions may be distorted."
+        )
+    else:
+        notes.append("Advanced independent-axis stretching explicitly acknowledged by the user.")
+    if any((orientation.x_deg, orientation.y_deg, orientation.z_deg)):
+        notes[0] = (
+            "Explicit right-handed rotation before centring and dimension scaling: "
+            f"fixed X={orientation.x_deg:g}, Y={orientation.y_deg:g}, Z={orientation.z_deg:g} "
+            "degrees, applied in X then Y then Z order (Rz @ Ry @ Rx). "
+            "Dimensions refer to the resulting axes. Orientation was not inferred."
+        )
     return AssetRecord(
         asset_id=uuid4(),
         visual_mesh=VISUAL_MESH,
         properties=properties,
         collision=CollisionGeometry(kind="box"),
         synthetic=False,
-        notes=_notes(mesh_path, source_extents, source_centre, target, scale, baked_transforms),
+        notes=notes,
+        orientation=orientation,
+        sizing_result=sizing_result,
     )
 
 

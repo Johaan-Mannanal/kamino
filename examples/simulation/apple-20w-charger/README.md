@@ -1,5 +1,7 @@
 # Real charger: integrated simulation example
 
+**Geometry review: correction required.** The source reconstruction included the iPad/case under the charger, and the pin direction does not match the estimated dimension-axis assignment. Keep this bundle as a pipeline/physics smoke test; it is not an accepted faithful charger asset. See the [correction handoff](../../../docs/handoffs/charger-geometry-correction.md). The original ZIP and reports remain unchanged.
+
 This bundle was built from the [real Meshy charger reconstruction](../../reconstruction/apple-20w-charger/README.md), using the user's requested **estimated** properties: full extents 43 × 27 × 58 mm including pins and mass 59 g. It is not a synthetic cube or a measured digital twin. No new reconstruction request was made for this integration run.
 
 - `simulation.zip`: portable bundle, with `scene.xml` at the archive root, geometry-only OBJ, `asset.json`, numerical assumptions and actual validation report.

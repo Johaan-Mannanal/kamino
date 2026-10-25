@@ -1,25 +1,79 @@
-import type { Job, Properties, ValidationReport, Suggestions } from './types'
+import type {
+  Job,
+  Orientation,
+  Properties,
+  Suggestions,
+  ValidationReport,
+  Sizing,
+  SizingPreview,
+} from './types'
 
 export type Api = {
   health(): Promise<{ status: string; provider: string }>
   create(files: File[]): Promise<Job>
   get(id: string): Promise<Job>
   save(id: string, properties: Properties): Promise<Job>
+  saveOrientation(id: string, orientation: Orientation): Promise<Job>
+  previewSizing(
+    id: string,
+    request: {
+      sizing: Sizing
+      orientation: Orientation
+      dimensions_m?: Properties['dimensions_m']
+    },
+  ): Promise<SizingPreview>
+  cachedSuggestions(id: string): Promise<Suggestions>
+  suggestions(
+    id: string,
+    request: { object_hint?: string; refresh?: boolean },
+  ): Promise<Suggestions>
   process(id: string): Promise<Job>
   report(id: string, path: string): Promise<ValidationReport>
   file(id: string, path: string): Promise<Blob>
   fileUrl(id: string, path: string): string
-  cachedSuggestions(id: string): Promise<Suggestions>
-  suggest(id: string, objectHint: string, refresh?: boolean): Promise<Suggestions>
 }
 
-export class ApiError extends Error {
-  status?: number
+export type ApiErrorDetails = {
+  category?: string
+  retryable?: boolean
+  manual_entry_available?: boolean
   retryAfter?: number
-  constructor(message: string, status?: number, retryAfter?: number) {
+  retryAfterHeader?: string
+}
+
+const suggestionErrorCategories = new Set([
+  'not_configured',
+  'authentication',
+  'permission',
+  'billing',
+  'quota',
+  'invalid_request',
+  'malformed',
+  'overload',
+  'rate_limit',
+  'deadline',
+  'network',
+  'busy',
+  'model_unavailable',
+  'provider',
+])
+
+export class ApiError extends Error implements ApiErrorDetails {
+  status?: number
+  category?: string
+  retryable?: boolean
+  manual_entry_available?: boolean
+  retryAfter?: number
+  retryAfterHeader?: string
+  constructor(message: string, status?: number, metadata: ApiErrorDetails | number = {}) {
     super(message)
+    const details = typeof metadata === 'number' ? { retryAfter: metadata } : metadata
     this.status = status
-    this.retryAfter = retryAfter
+    this.category = details.category
+    this.retryable = details.retryable
+    this.manual_entry_available = details.manual_entry_available
+    this.retryAfter = details.retryAfter
+    this.retryAfterHeader = details.retryAfterHeader
   }
 }
 
@@ -48,12 +102,29 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (!response.ok) {
     let detail = response.statusText
+    const details: ApiErrorDetails = {}
+    const retryAfter = response.headers.get('Retry-After')
+    if (retryAfter) {
+      details.retryAfterHeader = retryAfter
+      const seconds = Number(retryAfter)
+      const delay = Number.isFinite(seconds)
+        ? seconds
+        : (Date.parse(retryAfter) - Date.now()) / 1000
+      if (Number.isFinite(delay)) details.retryAfter = Math.max(0, delay)
+    }
     try {
       const body = await response.json()
+      if (body && typeof body === 'object' && !Array.isArray(body)) {
+        if (typeof body.category === 'string' && suggestionErrorCategories.has(body.category))
+          details.category = body.category
+        if (typeof body.retryable === 'boolean') details.retryable = body.retryable
+        if (typeof body.manual_entry_available === 'boolean')
+          details.manual_entry_available = body.manual_entry_available
+      }
       detail =
-        typeof body.detail === 'string'
+        typeof body?.detail === 'string'
           ? body.detail
-          : Array.isArray(body.detail)
+          : Array.isArray(body?.detail)
             ? body.detail
                 .map(
                   (item: { msg?: string; loc?: string[] }) =>
@@ -64,18 +135,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* retain HTTP status text */
     }
-    const retryHeader = response.headers.get('Retry-After')
-    const seconds = retryHeader === null ? undefined : Number(retryHeader)
-    const retryAfter =
-      seconds !== undefined && Number.isFinite(seconds)
-        ? Math.max(0, seconds)
-        : retryHeader
-          ? Math.max(0, (Date.parse(retryHeader) - Date.now()) / 1000)
-          : undefined
     throw new ApiError(
       `${detail || 'Request failed'} (HTTP ${response.status})`,
       response.status,
-      retryAfter,
+      details,
     )
   }
   return response.json() as Promise<T>
@@ -94,6 +157,25 @@ export const liveApi: Api = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(properties),
+    }),
+  saveOrientation: (id, orientation) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/orientation`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orientation),
+    }),
+  previewSizing: (id, sizing) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/sizing-preview`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sizing),
+    }),
+  cachedSuggestions: (id) => request(`/api/jobs/${encodeURIComponent(id)}/suggestions`),
+  suggestions: (id, suggestion) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/suggestions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(suggestion),
     }),
   process: (id) => request(`/api/jobs/${encodeURIComponent(id)}/process`, { method: 'POST' }),
   report: (id, path) =>
@@ -117,11 +199,4 @@ export const liveApi: Api = {
     return response.blob()
   },
   fileUrl,
-  cachedSuggestions: (id) => request(`/api/jobs/${encodeURIComponent(id)}/suggestions`),
-  suggest: (id, objectHint, refresh = false) =>
-    request(`/api/jobs/${encodeURIComponent(id)}/suggestions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ object_hint: objectHint, refresh }),
-    }),
 }

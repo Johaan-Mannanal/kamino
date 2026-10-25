@@ -1,3 +1,4 @@
+import hashlib
 import shutil
 import warnings
 from contextlib import asynccontextmanager
@@ -14,11 +15,23 @@ from fastapi.security import HTTPBearer
 from PIL import Image, UnidentifiedImageError
 
 from photo2sim.api.config import Settings
+from photo2sim.api.rigid_history import new_attempt, retained_attempts
 from photo2sim.api.store import JobConflict, JobStore
-from photo2sim.api.suggestions import SuggestionRequest, SuggestionsBusy, SuggestionService
+from photo2sim.api.suggestions import (
+    SuggestionRequest,
+    SuggestionsBusy,
+    SuggestionService,
+    failure_details,
+)
 from photo2sim.api.worker import JobWorker
-from photo2sim.contracts import AssetProperties, JobRecord, bundle_path
-from photo2sim.integrations.gemini import PropertySuggestions, Transport
+from photo2sim.contracts import (
+    AssetProperties,
+    JobRecord,
+    Orientation,
+    SizingPreviewRequest,
+    bundle_path,
+)
+from photo2sim.integrations.gemini import GeminiUnavailable, PropertySuggestions, Transport
 from photo2sim.integrations.reconstruction import MockProvider, ReconstructionProvider
 
 
@@ -55,6 +68,14 @@ def create_app(
     if provider.name != settings.provider:
         raise ValueError("Provider implementation does not match configured provider")
     store = JobStore(settings.data_dir)
+    try:
+        from photo2sim.api.assembly_jobs import AssemblyJobs, assembly_router
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"mujoco", "numpy", "trimesh"}:
+            raise
+        assembly_jobs = None
+    else:
+        assembly_jobs = AssemblyJobs(settings.data_dir)
     suggestions = SuggestionService(store, settings, gemini_transport)
 
     @asynccontextmanager
@@ -66,9 +87,11 @@ def create_app(
             yield
         finally:
             worker.close()
+            if assembly_jobs is not None:
+                assembly_jobs.close()
 
     app = FastAPI(
-        title="Photo2Sim",
+        title="Kamino",
         version="0.1.0",
         lifespan=lifespan,
         dependencies=[Depends(HTTPBearer(auto_error=False))] if settings.api_token else [],
@@ -96,15 +119,59 @@ def create_app(
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(settings.cors_origins),
-        allow_methods=["GET", "POST", "PATCH"],
+        allow_methods=["GET", "POST", "PATCH", "PUT"],
         allow_headers=["Content-Type", "Authorization"],
     )
+    if assembly_jobs is not None:
+        app.include_router(
+            assembly_router(assembly_jobs, settings.api_token, settings.max_asset_bytes)
+        )
 
     def get_job(job_id: UUID) -> JobRecord:
         try:
             return store.get(job_id)
         except KeyError:
             raise HTTPException(404, "Job not found") from None
+
+    def job_source(job):
+        if not job.mesh_path:
+            raise HTTPException(409, "Finish reconstruction before reviewing sizing")
+        root = store.job_dir(job.id).resolve()
+        try:
+            source = (root / bundle_path(job.mesh_path)).resolve(strict=True)
+            if not source.is_file() or not source.is_relative_to(root):
+                raise ValueError("Source must remain inside the job")
+            return source
+        except (OSError, ValueError):
+            raise HTTPException(422, "Saved reconstruction is unavailable or invalid") from None
+
+    def resolve_job_sizing(job, properties, orientation):
+        source = job_source(job)
+        try:
+            from photo2sim.assets.sizing import preview_sizing
+
+            return preview_sizing(source, properties, orientation)
+        except ImportError:
+            raise HTTPException(503, "Sizing requires the simulation dependencies") from None
+        except ValueError:
+            raise HTTPException(
+                422, "Review sizing and orientation; the reference or geometry is invalid"
+            ) from None
+
+    @app.post("/api/jobs/{job_id}/sizing-preview")
+    def sizing_preview(job_id: UUID, request: SizingPreviewRequest):
+        job = get_job(job_id)
+        dims = request.dimensions_m or (job.properties.dimensions_m if job.properties else None)
+        properties = AssetProperties(
+            dimensions_m=dims or {"x": 1, "y": 1, "z": 1, "source": "estimated"},
+            mass_kg={"value": 1, "source": "estimated", "note": "Preview placeholder, never saved"},
+            sizing=request.sizing,
+        )
+        properties, result = resolve_job_sizing(job, properties, request.orientation)
+        return {
+            "dimensions_m": properties.dimensions_m.model_dump(mode="json"),
+            "sizing_result": result.model_dump(mode="json"),
+        }
 
     @app.get("/api/health")
     def health():
@@ -153,6 +220,7 @@ def create_app(
             source_images=source_images,
             created_at=now,
             updated_at=now,
+            legacy_sizing_allowed=False,
         )
         try:
             (root / "uploads").mkdir(parents=True)
@@ -190,21 +258,63 @@ def create_app(
             raise HTTPException(
                 422, "Job images are unavailable or invalid; manual entry remains available"
             ) from None
+        except GeminiUnavailable as error:
+            return JSONResponse(status_code=503, content=failure_details(error.reason))
         except Exception:
-            raise HTTPException(
-                503, "Gemini suggestions are unavailable; continue with manual properties"
-            ) from None
+            return JSONResponse(status_code=503, content=failure_details("provider"))
 
     @app.patch("/api/jobs/{job_id}/properties", response_model=JobRecord)
     def save_properties(job_id: UUID, properties: AssetProperties):
         job = get_job(job_id)
-        if job.status != "awaiting_properties" and not retryable_processing(job):
+        if job.status not in {"awaiting_properties", "completed"} and not retryable_processing(job):
             raise HTTPException(409, "Properties require awaiting input or a failed simulation")
+        if properties.sizing is None and not job.legacy_sizing_allowed:
+            raise HTTPException(
+                422, "Choose uniform sizing or explicitly acknowledge advanced stretching"
+            )
+        if job.status == "completed":
+            job_source(job)
+        sizing_result = None
+        if properties.sizing is not None:
+            properties, sizing_result = resolve_job_sizing(job, properties, job.orientation)
         try:
             return store.update(
                 job_id,
                 expected_status=(job.status,),
+                expected_input_revision=job.input_revision,
+                input_revision=job.input_revision + 1,
                 properties=properties,
+                legacy_sizing_allowed=job.legacy_sizing_allowed and properties.sizing is None,
+                sizing_result=sizing_result,
+                attempts=retained_attempts(job),
+                active_attempt_id=None,
+                status="awaiting_properties",
+                error=None,
+                asset=None,
+                export_path=None,
+                validation_path=None,
+                bundle_path=None,
+            )
+        except JobConflict:
+            raise HTTPException(409, "Job stage changed; reload its current status") from None
+
+    @app.patch("/api/jobs/{job_id}/orientation", response_model=JobRecord)
+    def save_orientation(job_id: UUID, orientation: Orientation):
+        job = get_job(job_id)
+        if job.status not in {"awaiting_properties", "completed"} and not retryable_processing(job):
+            raise HTTPException(409, "Orientation requires awaiting input or a failed simulation")
+        if job.status == "completed":
+            job_source(job)
+        try:
+            return store.update(
+                job_id,
+                expected_status=(job.status,),
+                expected_input_revision=job.input_revision,
+                input_revision=job.input_revision + 1,
+                sizing_result=None,
+                attempts=retained_attempts(job),
+                active_attempt_id=None,
+                orientation=orientation,
                 status="awaiting_properties",
                 error=None,
                 asset=None,
@@ -222,10 +332,20 @@ def create_app(
             raise HTTPException(409, "Job is not ready for simulation processing")
         if job.properties is None or job.mesh_path is None:
             raise HTTPException(409, "Save confirmed properties and finish reconstruction first")
+        if job.properties.sizing is not None:
+            if job.properties.sizing.reviewed_orientation != job.orientation:
+                raise HTTPException(409, "Orientation changed; review and save sizing again")
+            # Recheck source dimensions before claiming the immutable attempt.
+            resolve_job_sizing(job, job.properties, job.orientation)
+        source = job_source(job)
+        attempt = new_attempt(job, hashlib.sha256(source.read_bytes()).hexdigest())
         try:
             claimed = store.update(
                 job_id,
                 expected_status=(job.status,),
+                expected_input_revision=job.input_revision,
+                attempts=[*retained_attempts(job), attempt],
+                active_attempt_id=attempt.id,
                 status="preparing",
                 error=None,
                 asset=None,

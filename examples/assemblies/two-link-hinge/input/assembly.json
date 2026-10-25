@@ -1,0 +1,89 @@
+{
+  "schema_version": "assembly-1.0",
+  "name": "two_link_hinge",
+  "synthetic": true,
+  "root_link": "base",
+  "root_pose": {
+    "position_m": [
+      0.0,
+      0.0,
+      0.25
+    ],
+    "quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "links": [
+    {
+      "name": "base",
+      "visual_mesh": "meshes/base.obj",
+      "geometry_source": "estimated",
+      "geometry_note": "Synthetic test geometry; vertices in link coordinates, metres",
+      "mass_kg": {
+        "value": 0.5,
+        "source": "estimated",
+        "note": "Synthetic assumption"
+      },
+      "sliding_friction": null
+    },
+    {
+      "name": "arm",
+      "visual_mesh": "meshes/arm.obj",
+      "geometry_source": "estimated",
+      "geometry_note": "Synthetic test geometry; vertices in link coordinates, metres",
+      "mass_kg": {
+        "value": 0.1,
+        "source": "estimated",
+        "note": "Synthetic assumption"
+      },
+      "sliding_friction": null
+    }
+  ],
+  "joints": [
+    {
+      "name": "hinge",
+      "parent": "base",
+      "child": "arm",
+      "kind": "revolute",
+      "origin": {
+        "position_m": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "quaternion_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "limits_rad": [
+        -0.8,
+        0.8
+      ],
+      "damping": {
+        "value": 0.2,
+        "source": "estimated",
+        "note": null
+      },
+      "drive": {
+        "kp": 5.0,
+        "force_limit_nm": 2.0,
+        "source": "estimated",
+        "note": null
+      },
+      "source": "user_supplied",
+      "note": "Reviewed synthetic hinge, not inferred from photos"
+    }
+  ],
+  "notes": []
+}

@@ -1,1 +1,1 @@
-"""Photo2Sim job API and orchestration."""
+"""Kamino job API and orchestration."""

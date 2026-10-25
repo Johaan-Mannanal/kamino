@@ -1,0 +1,52 @@
+{
+  "job_id": "fc6c27e0-0753-4e81-9b68-b037b9689bcd",
+  "attempts": [
+    {
+      "number": 1,
+      "revision": 1,
+      "status": "failed",
+      "started_at": "2026-10-24T14:02:13.774791+00:00",
+      "export_generated": true,
+      "motion_validation_passed": false,
+      "export_path": "attempts/0001/bundle/scene.xml",
+      "validation_path": "attempts/0001/bundle/validation.json",
+      "bundle_path": null,
+      "error": {
+        "code": "validation_failed",
+        "message": "Motion validation failed; inspect the retained report and export."
+      },
+      "export_config": {
+        "collision_mode": "box",
+        "exclude_joint_pairs": false
+      }
+    },
+    {
+      "number": 2,
+      "revision": 2,
+      "status": "completed",
+      "started_at": "2026-10-24T14:02:14.612398+00:00",
+      "export_generated": true,
+      "motion_validation_passed": true,
+      "export_path": "attempts/0002/bundle/scene.xml",
+      "validation_path": "attempts/0002/bundle/validation.json",
+      "bundle_path": "attempts/0002/simulation.zip",
+      "error": null,
+      "export_config": {
+        "collision_mode": "box",
+        "exclude_joint_pairs": false
+      }
+    }
+  ],
+  "zip_sha256": "828a8a485dd1dd67219717e63c56598542b1dd8eaa4410728edd0b09a625d7b7",
+  "zip_bytes": 7264,
+  "failed_report_preserved": true,
+  "stale_revision_rejected": true,
+  "exported_limits_rad": [
+    -0.6,
+    0.6
+  ],
+  "exported_joint_offset_z_m": 0.07,
+  "exported_mass_kg": 0.12,
+  "source_parts_unchanged": true,
+  "scope": "Real local HTTP API and MuJoCo, synthetic fixture; no browser or hardware acceptance in this run"
+}

@@ -1,0 +1,10 @@
+{
+  "input/meshes.zip": {
+    "bytes": 9779139,
+    "sha256": "239c935197b874c83f5b9d72a2e63a261c5b95318be1bc693eb16c8416e899cc"
+  },
+  "bundle.zip": {
+    "bytes": 10559963,
+    "sha256": "280908bdbe255d9aecedb63b850f7515873b09ac1122c5ecf5ece14470a0856f"
+  }
+}
