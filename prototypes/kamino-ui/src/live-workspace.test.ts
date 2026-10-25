@@ -27,7 +27,17 @@ import {
 } from "./live-workspace";
 
 vi.mock("../../../frontend/src/viewer", () => ({
-  mountViewer: vi.fn(() => vi.fn()),
+  mountViewer: vi.fn(() =>
+    Object.assign(vi.fn(), {
+      setMode: vi.fn(),
+      resetCamera: vi.fn(),
+      getViewState: vi.fn(() => ({
+        direction: [0, 0, 1],
+        targetOffset: [0.2, 0, 0],
+        distanceRatio: 3,
+      })),
+    }),
+  ),
 }));
 vi.mock("../../../frontend/src/target-review", async (importOriginal) => ({
   ...(await importOriginal<
@@ -180,14 +190,25 @@ describe("draft from saved job", () => {
       value: 0.4,
       source: "estimated",
     });
-    const existing = job({ properties: {
-      ...saved.properties!,
-      sliding_friction: { value: 0.3, source: "user_supplied", note: "Existing entry" },
-    } });
+    const existing = job({
+      properties: {
+        ...saved.properties!,
+        sliding_friction: {
+          value: 0.3,
+          source: "user_supplied",
+          note: "Existing entry",
+        },
+      },
+    });
     const reopened = draftFromJob(existing);
     expect(reopened.draft.frictionSource).toBe("user_supplied");
-    expect(toScalar(reopened.draft.friction, reopened.draft.frictionSource, reopened.origins.friction))
-      .toEqual(existing.properties!.sliding_friction);
+    expect(
+      toScalar(
+        reopened.draft.friction,
+        reopened.draft.frictionSource,
+        reopened.origins.friction,
+      ),
+    ).toEqual(existing.properties!.sliding_friction);
   });
   it("starts with a labelled friction fallback and blank mass and dimensions", () => {
     const { draft, origins, notice } = draftFromJob(job());
@@ -863,11 +884,19 @@ describe("live target review", () => {
     );
     expect(adapter.process).not.toHaveBeenCalled();
   });
-  it("keeps review, warnings and source photos in the scrollable inspector and restores Home scrolling", () => {
+  it("keeps photos before the viewer and inspector while retaining review and Home scrolling", () => {
     const { host, cleanup } = mounted({}, reviewed);
     expect(host.querySelector(".inspector #live-target")).not.toBeNull();
     expect(host.querySelector(".inspector .live-outputs")).not.toBeNull();
-    expect(host.querySelector(".inspector .sources")).not.toBeNull();
+    expect(host.querySelector(".inspector .sources")).toBeNull();
+    const photos = host.querySelector(".live-workspace > .sources");
+    expect(photos).not.toBeNull();
+    expect(
+      photos!.compareDocumentPosition(
+        host.querySelector(".workspace-center")!,
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(host.querySelectorAll(".sources")).toHaveLength(1);
     const inspector = host.querySelector(".inspector")!;
     expect(
       inspector
@@ -882,6 +911,123 @@ describe("live target review", () => {
     expect(
       document.documentElement.classList.contains("live-workspace-page"),
     ).toBe(false);
+  });
+
+  it("keeps all original source photos enlargable after retries and draft edits", async () => {
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute("open", "");
+    };
+    const { host, state, adapter } = mounted(
+      {},
+      { ...reviewed, source_images: ["uploads/00.png", "uploads/01.png"] },
+    );
+    await loaded(state);
+    await vi.waitFor(() =>
+      expect(host.querySelectorAll("#live-photos img")).toHaveLength(2),
+    );
+    host.querySelector<HTMLButtonElement>(".source-photo")!.click();
+    expect(
+      document.querySelector("dialog[open] img")!.getAttribute("src"),
+    ).toBe("blob:fixture");
+    document.querySelector("dialog")!.remove();
+    type($(host, '[name="mass"]'), "0.5");
+    host.querySelector<HTMLButtonElement>("#live-files-retry")!.click();
+    await vi.waitFor(() =>
+      expect(host.querySelectorAll("#live-photos img")).toHaveLength(2),
+    );
+    expect(host.querySelectorAll(".sources")).toHaveLength(1);
+    expect(adapter.file).toHaveBeenCalledWith(ID, "uploads/01.png");
+    expect(adapter.save).not.toHaveBeenCalled();
+  });
+
+  it("switches live display and resets its camera without editing or processing inputs", async () => {
+    const { host, state, adapter } = mounted({}, reviewed);
+    await loaded(state);
+    const current = vi.mocked(mountViewer).mock.results.at(-1)!.value;
+    const before = JSON.stringify(state.job);
+    const reads = vi.mocked(adapter.cachedSuggestions).mock.calls.length;
+    const mesh = host.querySelector<HTMLButtonElement>("#live-view-mesh");
+    expect(mesh).not.toBeNull();
+    mesh!.click();
+    expect(mesh!.getAttribute("aria-pressed")).toBe("true");
+    expect(
+      host.querySelector("#live-view-studio")!.getAttribute("aria-pressed"),
+    ).toBe("false");
+    expect(current.setMode).toHaveBeenCalledWith("mesh");
+    host.querySelector<HTMLButtonElement>("#live-reset-camera")!.click();
+    expect(current.resetCamera).toHaveBeenCalledOnce();
+    expect(state.dirty).toBe(false);
+    expect(JSON.stringify(state.job)).toBe(before);
+    expect(adapter.save).not.toHaveBeenCalled();
+    expect(adapter.saveOrientation).not.toHaveBeenCalled();
+    expect(adapter.process).not.toHaveBeenCalled();
+    expect(vi.mocked(adapter.cachedSuggestions).mock.calls.length).toBe(reads);
+  });
+
+  it.each(["orientation", "sizing"])(
+    "preserves camera and mesh mode across a same-target %s preview",
+    async (kind) => {
+      const { host, state } = mounted({}, reviewed);
+      await loaded(state);
+      host.querySelector<HTMLButtonElement>("#live-view-mesh")!.click();
+      if (kind === "orientation") {
+        type($(host, '[name="x"]'), "45");
+        host.querySelector<HTMLButtonElement>("#live-orient-preview")!.click();
+      } else {
+        host.querySelector<HTMLButtonElement>("#live-preview")!.click();
+      }
+      await vi.waitFor(() =>
+        expect(vi.mocked(mountViewer).mock.lastCall?.[7]).toEqual({
+          mode: "mesh",
+          initialViewState: {
+            direction: [0, 0, 1],
+            targetOffset: [0.2, 0, 0],
+            distanceRatio: 3,
+          },
+        }),
+      );
+      if (kind === "sizing")
+        expect(vi.mocked(mountViewer).mock.lastCall?.[5]).toEqual([
+          0.1, 0.1, 0.1,
+        ]);
+    },
+  );
+
+  it("fits a new target or source but preserves the camera when selected island order changes", async () => {
+    let currentInventory = inventoryFor();
+    const { state } = mounted(
+      { geometry: vi.fn(async () => currentInventory) },
+      reviewed,
+    );
+    await loaded(state);
+    const mounts = vi.mocked(mountViewer).mock.calls.length;
+    state.setTargetDraft({
+      ...state.target.draft,
+      selectedIslandIds: [handle, body],
+    });
+    expect(vi.mocked(mountViewer).mock.calls.length).toBe(mounts);
+    // An orientation preview remounts the same target even if the source selection order differs.
+    state.setTargetDraft({ ...state.target.draft, selectedIslandIds: [body] });
+    expect(
+      vi.mocked(mountViewer).mock.lastCall?.[7]?.initialViewState,
+    ).toBeNull();
+    currentInventory = inventoryFor("f".repeat(64));
+    await state.loadGeometry(true);
+    expect(
+      vi.mocked(mountViewer).mock.lastCall?.[7]?.initialViewState,
+    ).toBeNull();
+  });
+
+  it("does not reuse another job's view when remounting the workspace", async () => {
+    const { state, cleanup, mount } = mounted({}, reviewed);
+    await loaded(state);
+    cleanup();
+    state.job = { ...reviewed, id: "22222222-2222-4222-8222-222222222222" };
+    mount();
+    expect(
+      vi.mocked(mountViewer).mock.lastCall?.[7]?.initialViewState,
+    ).toBeNull();
+    expect(vi.mocked(mountViewer).mock.lastCall?.[7]?.mode).toBe("studio");
   });
 
   it("starts initial estimates once processing returns to an editable workspace", async () => {

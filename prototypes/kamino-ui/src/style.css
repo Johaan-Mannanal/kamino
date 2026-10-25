@@ -2258,7 +2258,7 @@ html:not([data-page="home"]) .cursor-glow {
   }
 }
 
-/* Keep the live mesh visible while reviewing inputs; Home keeps its own scrolling. */
+/* Live Workspace restoration: source photos / actual mesh / reviewed inputs. */
 html.live-workspace-page,
 .live-workspace-page body {
   height: 100%;
@@ -2274,8 +2274,22 @@ html.live-workspace-page,
   min-height: 0;
   height: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr) minmax(
+      280px,
+      380px
+    );
   overflow: hidden;
+}
+.live-workspace-host .sources,
+.live-workspace-host .inspector {
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.live-workspace-host .sources {
+  display: block;
 }
 .live-workspace-host .workspace-center {
   min-height: 0;
@@ -2284,65 +2298,110 @@ html.live-workspace-page,
   overflow: hidden;
 }
 .live-workspace-host .workspace-center > .viewport {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   height: 100%;
   min-height: 0;
 }
-.live-workspace-host .inspector {
-  min-height: 0;
-  min-width: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
+.live-workspace-host .viewport-toolbar {
+  position: relative;
+  inset: auto;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  margin: 14px 16px 0;
+}
+.live-workspace-host .viewer-actions {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.live-workspace-host .viewport-label {
+  position: relative;
+  inset: auto;
+  flex: 0 0 auto;
+  margin: 10px 16px 0;
+}
+.live-workspace-host .viewer {
+  position: relative;
+  inset: auto;
+  flex: 1;
+  min-height: 120px;
+  padding: 0;
+}
+.live-workspace-host .viewport-help {
+  position: relative;
+  inset: auto;
+  flex: 0 0 auto;
+  margin: 8px 16px 12px;
+  flex-wrap: wrap;
 }
 .live-workspace-host .live-suggestions {
   margin: 16px 0;
-}
-.live-workspace-host .inspector > .sources {
-  display: block;
-  border: 0;
-  border-top: 1px solid var(--line);
-  padding: 20px 0;
-}
-.live-workspace-host #live-photos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.live-workspace-host #live-photos img {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
 }
 .live-workspace-host .live-target,
 .live-workspace-host .live-outputs {
   overflow-wrap: anywhere;
 }
 @media (max-width: 760px) {
+  html.live-workspace-page,
+  .live-workspace-page body {
+    height: auto;
+    overflow: auto;
+  }
+  .live-workspace-host {
+    height: auto;
+    min-height: 100dvh;
+    display: block;
+    overflow: visible;
+  }
   .live-workspace-host .live-workspace {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(140px, 38%) minmax(0, 1fr);
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+  .live-workspace-host .sources {
+    order: 0;
+    display: block;
+    overflow: visible;
+    padding: 12px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .live-workspace-host #live-photos {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+  }
+  .live-workspace-host .source-photo {
+    flex: 0 0 auto;
+  }
+  .live-workspace-host #live-photos img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+  }
+  .live-workspace-host .sources .add-photos {
+    height: auto;
+    min-height: 32px;
+    margin-top: 8px;
+  }
+  .live-workspace-host .workspace-center {
+    order: 1;
+    display: flex;
+  }
+  .live-workspace-host .workspace-center > .viewport {
+    height: 480px;
   }
   .live-workspace-host .inspector {
+    order: 2;
+    overflow: visible;
     border-left: 0;
     border-top: 1px solid var(--line);
     padding: 16px;
   }
-  .live-workspace-host .viewport-toolbar {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .live-workspace-host .viewer-actions {
-    flex-wrap: wrap;
-    max-width: 100%;
-    gap: 4px;
-  }
   .live-workspace-host .viewport-label {
-    top: 112px;
     font-size: 10px;
-  }
-  .live-workspace-host .viewport-help {
-    display: none;
   }
   .live-workspace-host .steps .step-note {
     display: none;

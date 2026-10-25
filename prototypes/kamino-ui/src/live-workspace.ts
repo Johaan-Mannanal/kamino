@@ -2,7 +2,12 @@
 import { ApiError } from "../../../frontend/src/api";
 import { browserAccess } from "../../../frontend/src/access";
 import { makeSizing } from "../../../frontend/src/sizing";
-import { mountViewer } from "../../../frontend/src/viewer";
+import {
+  mountViewer,
+  type ViewerHandle,
+  type ViewerMode,
+  type ViewerViewState,
+} from "../../../frontend/src/viewer";
 import { canRetry } from "../../../frontend/src/pipeline";
 import type { JobStatus, Scalar, Source } from "../../../frontend/src/types";
 import {
@@ -490,7 +495,14 @@ export function mountLiveWorkspace(
   let previewError = "";
   let draftViewer: ViewerSpec | null = null;
   let viewerKey = "";
-  let disposeViewer = () => {};
+  let viewerHandle: ViewerHandle | null = null;
+  const disposeViewer = () => {
+    viewerHandle?.();
+    viewerHandle = null;
+  };
+  let viewerMode: ViewerMode = "studio";
+  let viewerContext: string | null = null;
+  let retainedView: ViewerViewState | null = null;
   let outputsKey = "";
   let reportKey = "";
   let reportSummary = "";
@@ -498,7 +510,7 @@ export function mountLiveWorkspace(
   let prompting = false;
   const urls: string[] = [];
 
-  host.innerHTML = `<header class="project-header">${ctx.brand}<span class="divider"></span><span class="project-title">Job ${esc(jobId.slice(0, 8))}</span><span id="live-saved" class="muted small"></span><div class="header-right"><span id="live-status" class="badge" role="status" aria-live="polite"></span><a class="text-button" href="${esc(assemblyUrl())}">Assembly ↗</a><button class="secondary compact" id="live-bundle" hidden>Download bundle</button><button class="primary compact" id="live-generate">Generate simulation</button></div></header>${ctx.steps}<main class="workspace live-workspace"><aside class="sources"><div class="section-line"><strong>Source photos</strong><span class="muted">${initialJob.source_images.length}/4</span></div><div id="live-photos"></div><button class="secondary add-photos" id="live-edit-photos">${icon("49255.svg", 13)}New upload</button><p class="source-note">${esc(initialJob.provider)} reconstruction${initialJob.synthetic ? " · synthetic mock geometry" : ""}<br>Z-up · fixed X → Y → Z rotations<br>Server sizing in metres</p></aside><section class="workspace-center"><div class="viewport"><div class="viewport-toolbar"><span class="badge">${initialJob.synthetic ? "Synthetic mock mesh" : "Reconstructed mesh"}</span><div class="viewer-actions"><button class="secondary compact" id="live-orient-preview" type="button">Preview draft orientation</button><button class="secondary compact" id="live-mesh" type="button">Download mesh</button><button class="square" id="live-fullscreen" type="button" aria-label="Toggle fullscreen">${icon("28ea9.svg")}</button></div></div><div class="viewport-label"><span id="live-viewer-label"></span></div><div id="live-viewer" class="viewer"></div><div class="viewport-help"><span>Geometry preview only · collision is generated during preparation and not shown</span><span>Red X · Green Y · Blue Z · Z-up</span></div></div><div id="live-target" class="live-target"></div><section class="live-outputs" aria-labelledby="live-outputs-title"><h2 id="live-outputs-title">Simulation</h2><p id="live-generate-reason" class="muted small" role="status"></p><div id="live-outputs"></div></section></section><aside class="inspector"><div class="section-line"><h2>Physical properties</h2>${icon("66491.svg")}</div><p class="muted small">Manual review · saved to the server</p>${initial.notice ? `<p class="live-notice small" role="note">${esc(initial.notice)}</p>` : ""}<form id="live-form" novalidate><section class="property-section"><h3>Orientation <span>Fixed X → Y → Z · Z-up</span></h3><div class="field-grid three">${(["x", "y", "z"] as const).map((a) => input(`${a.toUpperCase()} rotation`, a, draft[a], "°", 'min="-180" max="180"')).join("")}</div><p class="muted tiny">Active right-handed rotations about the fixed X, then Y, then Z axes.</p><div class="save-row"><span class="muted small" id="live-orientation-status" role="status"></span><button type="button" class="secondary compact" id="live-save-orientation">Save orientation</button></div></section><section class="property-section"><h3>Sizing <span>Uniform · one full-extent reference</span></h3><p id="live-target-gate" class="live-target-gate small" role="status"></p><div class="field-grid two"><label class="property-field"><span>Full extent axis</span><select name="axis" aria-label="Reference axis"><option value="">Choose axis</option>${(["x", "y", "z"] as const).map((a) => `<option value="${a}" ${draft.axis === a ? "selected" : ""}>${a.toUpperCase()} · full extent</option>`).join("")}</select></label>${input("Reference length", "length", draft.length, "", 'min="0"')}<label class="property-field"><span>Units</span><select name="unit" aria-label="Reference units"><option value="mm" ${draft.unit === "mm" ? "selected" : ""}>Millimetres</option><option value="m" ${draft.unit === "m" ? "selected" : ""}>Metres</option></select></label>${sourceSelect("referenceSource", draft.referenceSource, "Reference source")}</div><label class="property-field live-wide"><span>Describe the full extent (body, pins and other protrusions)</span><div class="input-shell"><input name="description" aria-label="Full extent description" maxlength="2000" value="${esc(draft.description)}"></div></label><label class="live-check"><input type="checkbox" name="acknowledged" ${draft.acknowledged ? "checked" : ""}> My reference matches the selected full mesh extent, including any protrusions.</label><button type="button" class="secondary compact" id="live-preview">Preview dimensions on server</button><div id="live-preview-output" class="live-preview small" role="status" aria-live="polite"></div></section><section class="property-section"><h3>Dynamics <span>Editable estimates</span></h3><div class="field-grid two">${input("Mass", "mass", draft.mass, "kg", 'min="0"')}${sourceSelect("massSource", draft.massSource, "Mass source")}${input("Friction", "friction", draft.friction, "μ", 'min="0"')}${sourceSelect("frictionSource", draft.frictionSource, "Friction source")}</div><p id="live-friction-note" class="muted tiny"></p></section><p id="live-form-error" class="error" aria-live="polite"></p><p id="live-error" class="error" role="alert"></p><button type="button" class="text-button" id="live-retry" hidden>Retry status</button><div class="save-row"><span class="muted small" id="live-save-status"></span><button class="primary compact" id="live-save" type="submit">Save reviewed properties</button></div></form><details class="suggestions live-suggestions"><summary>${icon("a4dc8.svg", 15)}Gemini suggestions</summary><p class="muted small">Friction fills automatically; other estimates need Apply. Save commits the draft.</p><label class="property-field"><span>Object hint (optional)</span><div class="input-shell"><input id="live-hint" maxlength="200" aria-label="Object hint"></div></label><div class="save-row"><button class="secondary compact" type="button" id="live-suggest">Request</button><button class="secondary compact" type="button" id="live-suggest-refresh">Refresh (new request)</button></div><div id="live-suggestions" aria-live="polite"></div></details><p class="prototype-note">Save orientation first, then save the target review, then preview and save properties against that reviewed target. Generate simulation is a separate step.</p></aside></main>`;
+  host.innerHTML = `<header class="project-header">${ctx.brand}<span class="divider"></span><span class="project-title">Job ${esc(jobId.slice(0, 8))}</span><span id="live-saved" class="muted small"></span><div class="header-right"><span id="live-status" class="badge" role="status" aria-live="polite"></span><a class="text-button" href="${esc(assemblyUrl())}">Assembly ↗</a><button class="secondary compact" id="live-bundle" hidden>Download bundle</button><button class="primary compact" id="live-generate">Generate simulation</button></div></header>${ctx.steps}<main class="workspace live-workspace"><aside class="sources"><div class="section-line"><strong>Source photos</strong><span class="muted">${initialJob.source_images.length}/4</span></div><div id="live-photos"></div><button class="secondary add-photos" id="live-edit-photos">${icon("49255.svg", 13)}New upload</button><p class="source-note">${esc(initialJob.provider)} reconstruction${initialJob.synthetic ? " · synthetic mock geometry" : ""}<br>Z-up · fixed X → Y → Z rotations<br>Server sizing in metres</p></aside><section class="workspace-center"><div class="viewport"><div class="viewport-toolbar"><span class="badge">${initialJob.synthetic ? "Synthetic mock mesh" : "Reconstructed mesh"}</span><div class="viewer-actions"><div class="segmented" role="group" aria-label="Viewport mode"><button type="button" id="live-view-studio" class="selected" aria-pressed="true">Studio</button><button type="button" id="live-view-mesh" aria-pressed="false">Mesh</button></div><button class="secondary compact" id="live-reset-camera" type="button">Reset camera</button><button class="secondary compact" id="live-orient-preview" type="button">Preview draft orientation</button><button class="secondary compact" id="live-mesh" type="button">Download mesh</button><button class="square" id="live-fullscreen" type="button" aria-label="Toggle fullscreen">${icon("28ea9.svg")}</button></div></div><div class="viewport-label"><span id="live-viewer-label"></span></div><div id="live-viewer" class="viewer"></div><div class="viewport-help"><span>Geometry preview only · collision is generated during preparation and not shown</span><span>Red X · Green Y · Blue Z · Z-up</span></div></div><div id="live-target" class="live-target"></div><section class="live-outputs" aria-labelledby="live-outputs-title"><h2 id="live-outputs-title">Simulation</h2><p id="live-generate-reason" class="muted small" role="status"></p><div id="live-outputs"></div></section></section><aside class="inspector"><div class="section-line"><h2>Physical properties</h2>${icon("66491.svg")}</div><p class="muted small">Manual review · saved to the server</p>${initial.notice ? `<p class="live-notice small" role="note">${esc(initial.notice)}</p>` : ""}<form id="live-form" novalidate><section class="property-section"><h3>Orientation <span>Fixed X → Y → Z · Z-up</span></h3><div class="field-grid three">${(["x", "y", "z"] as const).map((a) => input(`${a.toUpperCase()} rotation`, a, draft[a], "°", 'min="-180" max="180"')).join("")}</div><p class="muted tiny">Active right-handed rotations about the fixed X, then Y, then Z axes.</p><div class="save-row"><span class="muted small" id="live-orientation-status" role="status"></span><button type="button" class="secondary compact" id="live-save-orientation">Save orientation</button></div></section><section class="property-section"><h3>Sizing <span>Uniform · one full-extent reference</span></h3><p id="live-target-gate" class="live-target-gate small" role="status"></p><div class="field-grid two"><label class="property-field"><span>Full extent axis</span><select name="axis" aria-label="Reference axis"><option value="">Choose axis</option>${(["x", "y", "z"] as const).map((a) => `<option value="${a}" ${draft.axis === a ? "selected" : ""}>${a.toUpperCase()} · full extent</option>`).join("")}</select></label>${input("Reference length", "length", draft.length, "", 'min="0"')}<label class="property-field"><span>Units</span><select name="unit" aria-label="Reference units"><option value="mm" ${draft.unit === "mm" ? "selected" : ""}>Millimetres</option><option value="m" ${draft.unit === "m" ? "selected" : ""}>Metres</option></select></label>${sourceSelect("referenceSource", draft.referenceSource, "Reference source")}</div><label class="property-field live-wide"><span>Describe the full extent (body, pins and other protrusions)</span><div class="input-shell"><input name="description" aria-label="Full extent description" maxlength="2000" value="${esc(draft.description)}"></div></label><label class="live-check"><input type="checkbox" name="acknowledged" ${draft.acknowledged ? "checked" : ""}> My reference matches the selected full mesh extent, including any protrusions.</label><button type="button" class="secondary compact" id="live-preview">Preview dimensions on server</button><div id="live-preview-output" class="live-preview small" role="status" aria-live="polite"></div></section><section class="property-section"><h3>Dynamics <span>Editable estimates</span></h3><div class="field-grid two">${input("Mass", "mass", draft.mass, "kg", 'min="0"')}${sourceSelect("massSource", draft.massSource, "Mass source")}${input("Friction", "friction", draft.friction, "μ", 'min="0"')}${sourceSelect("frictionSource", draft.frictionSource, "Friction source")}</div><p id="live-friction-note" class="muted tiny"></p></section><p id="live-form-error" class="error" aria-live="polite"></p><p id="live-error" class="error" role="alert"></p><button type="button" class="text-button" id="live-retry" hidden>Retry status</button><div class="save-row"><span class="muted small" id="live-save-status"></span><button class="primary compact" id="live-save" type="submit">Save reviewed properties</button></div></form><details class="suggestions live-suggestions"><summary>${icon("a4dc8.svg", 15)}Gemini suggestions</summary><p class="muted small">Friction fills automatically; other estimates need Apply. Save commits the draft.</p><label class="property-field"><span>Object hint (optional)</span><div class="input-shell"><input id="live-hint" maxlength="200" aria-label="Object hint"></div></label><div class="save-row"><button class="secondary compact" type="button" id="live-suggest">Request</button><button class="secondary compact" type="button" id="live-suggest-refresh">Refresh (new request)</button></div><div id="live-suggestions" aria-live="polite"></div></details><p class="prototype-note">Save orientation first, then save the target review, then preview and save properties against that reviewed target. Generate simulation is a separate step.</p></aside></main>`;
 
   const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
     host.querySelector<T>(selector)!;
@@ -515,7 +527,7 @@ export function mountLiveWorkspace(
     "Saved estimates load first. If none exist, one automatic Gemini request is attempted per job. Friction fills automatically unless you have edited or saved it; other estimates require Apply. Save commits your draft.";
   inspector.insertBefore(suggestionsCard, form);
   inspector.insertBefore($("#live-target"), form);
-  inspector.append($(".live-outputs"), $(".sources"));
+  inspector.append($(".live-outputs"));
   inspector.querySelector<HTMLElement>(
     ":scope > .prototype-note",
   )!.textContent =
@@ -628,8 +640,22 @@ export function mountLiveWorkspace(
     $("#live-viewer-label").textContent = spec.label;
     if (spec.key === viewerKey || !job.mesh_path) return;
     viewerKey = spec.key;
+    const hash = session.target.inventory?.source_mesh_sha256;
+    const nextContext = hash
+      ? JSON.stringify([
+          job.id,
+          job.mesh_path,
+          hash,
+          spec.selection?.islandIds ?? null,
+        ])
+      : null;
+    retainedView =
+      nextContext && nextContext === viewerContext
+        ? (viewerHandle?.getViewState() ?? retainedView)
+        : null;
+    viewerContext = nextContext;
     disposeViewer();
-    disposeViewer = mountViewer(
+    viewerHandle = mountViewer(
       $("#live-viewer"),
       session.api,
       job.id,
@@ -637,8 +663,24 @@ export function mountLiveWorkspace(
       spec.orientation,
       spec.scale,
       spec.selection,
+      { mode: viewerMode, initialViewState: retainedView },
     );
   }
+  const setViewerMode = (mode: ViewerMode) => {
+    viewerMode = mode;
+    viewerHandle?.setMode(mode);
+    for (const value of ["studio", "mesh"] as const) {
+      const button = $<HTMLButtonElement>(`#live-view-${value}`);
+      button.setAttribute("aria-pressed", String(value === mode));
+      button.classList.toggle("selected", value === mode);
+    }
+  };
+  $("#live-view-studio").onclick = () => setViewerMode("studio");
+  $("#live-view-mesh").onclick = () => setViewerMode("mesh");
+  $("#live-reset-camera").onclick = () => {
+    retainedView = null;
+    viewerHandle?.resetCamera();
+  };
 
   // Target review: controls outside the physical-properties form, events delegated
   // to the persistent host so a structural re-render never needs re-binding.
@@ -716,7 +758,7 @@ export function mountLiveWorkspace(
       const photos = targetHost.querySelector("#target-source-photos");
       if (photos)
         photos.textContent =
-          "Compare with the uploaded Source photos below in this inspector.";
+          "Compare with the uploaded Source photos in the source panel.";
     }
     const status = session.targetStatus;
     const orientationSaved = savedOrientation(job);
