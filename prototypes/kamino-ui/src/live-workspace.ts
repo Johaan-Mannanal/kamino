@@ -180,7 +180,7 @@ export function draftFromJob(job: Job): {
       mass: text(properties?.mass_kg.value),
       massSource: properties?.mass_kg.source ?? "user_supplied",
       friction: text(properties?.sliding_friction?.value),
-      frictionSource: properties?.sliding_friction?.source ?? "user_supplied",
+      frictionSource: properties?.sliding_friction?.source ?? "estimated",
     },
     origins: {
       mass: properties?.mass_kg ?? null,

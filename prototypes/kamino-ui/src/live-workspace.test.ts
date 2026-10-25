@@ -171,6 +171,23 @@ describe("job URL state", () => {
 });
 
 describe("draft from saved job", () => {
+  it("defaults unknown friction to estimated without changing saved provenance", () => {
+    const fresh = draftFromJob(job());
+    expect(fresh.draft.frictionSource).toBe("estimated");
+    expect(toScalar(fresh.draft.friction, fresh.draft.frictionSource, null)).toBeNull();
+    expect(toScalar("0.4", fresh.draft.frictionSource, null)).toMatchObject({
+      value: 0.4,
+      source: "estimated",
+    });
+    const existing = job({ properties: {
+      ...saved.properties!,
+      sliding_friction: { value: 0.3, source: "user_supplied", note: "Existing entry" },
+    } });
+    const reopened = draftFromJob(existing);
+    expect(reopened.draft.frictionSource).toBe("user_supplied");
+    expect(toScalar(reopened.draft.friction, reopened.draft.frictionSource, reopened.origins.friction))
+      .toEqual(existing.properties!.sliding_friction);
+  });
   it("starts blank without saved values and never fabricates them", () => {
     const { draft, origins, notice } = draftFromJob(job());
     expect([
