@@ -12,7 +12,10 @@ their old “pending” statuses and branch instructions are not the current rel
 - Reviewed orientation and one uniform reference scale; derived extents and editable mass/friction.
 - Gemini assistance with estimated provenance, protected drafts and explicit saving.
 - Persistent jobs, correction/regeneration, immutable earlier attempts and portable MuJoCo exports.
-- Separate component-mesh assembly workbench with reviewed links/joints and saved revisions.
+- Optional rigid/link collision geometry, twist/rolling friction, COM/inertia and contact presets.
+- Separate component-mesh assembly workbench with reviewed links/joints, sliders,
+  springs, linked motion and saved revisions; browser motion is kinematic.
+- Mobile scroll presentation with reduced-motion support and stage-aware reconstruction progress.
 - Railway-hosted frontend/backend and HTTPS at kamino.design; session access limits provider spend.
 
 ## Demonstration boundaries

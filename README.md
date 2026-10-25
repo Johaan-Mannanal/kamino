@@ -115,18 +115,22 @@ build variables, URLs or Git.
 
 ## Verification and release
 
-The published application source is the released frontend `275ded8` with backend
-`8d2173f`. This main-branch publication updates documentation and CI coverage;
-no runtime deployment is needed for those documentation changes.
+The deployed application source is
+[`410e88a`](https://github.com/Johaan-Mannanal/kamino/commit/410e88ac6c3e39ec5ab7a176593670d5b5fb7416).
+[GitHub CI passed](https://github.com/Johaan-Mannanal/kamino/actions/runs/40202374448).
+Later documentation commits do not imply a runtime deployment.
 
-- Backend release checks: **440 passed, 2 optional skips** at `8d2173f`.
-- Frontend release checks: **118 shared/legacy + 149 Workspace tests passed**,
-  with both TypeScript checks and production builds at `275ded8`.
-- Browser checks exercised correction, regeneration, reopening, prior-download
-  preservation, camera controls and mobile-sized layouts. These are browser/touch
-  emulation checks, not full iOS/Android device certification.
-- Hosted checks and relocated MuJoCo loading are recorded separately from unit
-  tests. They do not establish accurate reconstruction, contact physics or grasping.
+- **492 backend tests passed, 2 optional skips; 143 shared frontend + 160 Workspace
+  tests passed.** Both TypeScript checks, production builds and Ruff passed.
+- **202 local browser checks** covered desktop/mobile presentation, camera and draft
+  behavior, downloads and progress states. Hosted mobile checks also passed.
+- Hosted rigid and assembly workflows exercised advanced settings, saving,
+  reopening, regeneration and preservation of earlier exports. A relocated rigid
+  bundle ran for 10,000 MuJoCo steps with finite state and zero warnings.
+- Mobile results use Chromium touch emulation, not full iOS/Android device
+  certification. Numerical checks do not establish reconstruction or grasp accuracy.
+- These release checks made **no new Meshy or Gemini calls**. Provider reconstruction
+  quality and live-service availability remain separate from cached-workflow acceptance.
 
 See the [release and evidence index](docs/RELEASE.md). To run local checks:
 
@@ -144,10 +148,14 @@ pnpm --dir prototypes/kamino-ui build
 
 | Track / service | What Kamino actually uses | Evidence / qualification |
 | --- | --- | --- |
-| Gemini API | Photo-based property suggestions, notes, bounded retries and fallback provenance | [Implementation and sponsor status](docs/SPONSORS.md) |
-| Figma in the Workflow | Design and prototype work informing the implemented UI | [Design link, implementation links and outstanding public evidence](docs/FIGMA_EVIDENCE.md) |
-| GoDaddy Registry | The `kamino.design` domain, registered at Porkbun | [Live HTTPS site](https://kamino.design); hosting is Railway |
-| Microsoft: Built for the Real World / Customer Impact | Proposed fit for the robotics asset-preparation workflow | [Eligibility clarification](docs/handoffs/microsoft-real-world-track-assessment.md); sponsor confirmation pending |
+| Google Gemini / MLH — Best Use of Gemini API | Photo-based property suggestions, notes, bounded retries and fallback provenance | [Implementation and sponsor status](docs/SPONSORS.md) |
+| Figma — Best Figma Workflow Hack | Design and prototype work informing the implemented UI | [Design link, implementation links and outstanding public evidence](docs/FIGMA_EVIDENCE.md) |
+| GoDaddy Registry / MLH — Best Domain Name | The `kamino.design` domain, registered at Porkbun | [Live HTTPS site](https://kamino.design); hosting is Railway |
+| Microsoft — Built for the Real World (including second-place Customer Impact Award) | Proposed fit for the robotics asset-preparation workflow | [Eligibility clarification](docs/handoffs/microsoft-real-world-track-assessment.md); sponsor confirmation pending |
+
+These are our four confirmed sponsor pursuits, not claims of eligibility approval
+or completed opt-in. Our general award targets are **Cal Hacks Overall
+(first/second/third)**, **Most Technically Complex Hack** and **Most Creative Hack**.
 
 No Azure integration is claimed. The inspected Microsoft rules do not specify an
 Azure requirement; they do require an AI agent, and the fit of this human-reviewed
@@ -174,3 +182,10 @@ examples should not be read as shipped UI features.
 
 [Current project scope](docs/PROJECT.md) · [API](docs/API.md) ·
 [Railway deployment](deploy/railway/README.md) · [Examples and provenance](examples/README.md)
+
+## Reuse and attribution
+
+The repository is public, but a project-wide reuse license has not yet been
+selected. Third-party robot assets retain their [upstream license](third_party/robotstudio_so101/LICENSE)
+and [source attribution](third_party/robotstudio_so101/README.md). See
+[publication status](docs/PUBLICATION.md) for outstanding presentation/evidence items.
