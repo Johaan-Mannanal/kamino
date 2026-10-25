@@ -1,0 +1,26 @@
+{
+  "simulation-demo.gif": {
+    "bytes": 1679365,
+    "size": [
+      480,
+      400
+    ],
+    "frames": 150,
+    "duration_s": 15.0,
+    "sha256": "799b5e4f9b2a25dcee8e9ea4b07d4b067f4459a9fa615a2770e5d6e6f2974bee",
+    "source_filename": "demo-preview.mp4",
+    "source_sha256": "d2d03d465574f5097f7562ecdc696412cf19d190c99e3e04bb4cd3528de1ea64"
+  },
+  "physical-arm-demo.gif": {
+    "bytes": 5963332,
+    "size": [
+      360,
+      300
+    ],
+    "frames": 139,
+    "duration_s": 17.38,
+    "sha256": "9fd8853425f00d93e92cdeb5e77c8d15f93620c5a6c2f80f90b94b218fc83108",
+    "source_filename": "Recording demo.mov",
+    "source_sha256": "7abb7833fb79a0024b666b00f11d2a1e7961bcc0c41826d9d29128ac4066559f"
+  }
+}

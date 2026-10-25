@@ -15,6 +15,16 @@ requires a team-issued access code because provider usage is metered. The separa
 **Use demo photos** experience is synthetic; its demo download is not a validated
 MuJoCo bundle.
 
+## Demo in motion
+
+| MuJoCo visualization | SO-101 physical arm |
+| :---: | :---: |
+| <img src="docs/images/simulation-demo.gif" width="480" alt="MuJoCo animation of recorded arm poses with scripted charger pickup, carry and release."> | <img src="docs/images/physical-arm-demo.gif" width="480" alt="Physical SO-101 arm performing the charger-transfer demonstration."> |
+| Recorded arm poses; **scripted charger motion**. | Physical arm recording. |
+
+Both clips loop at **2× speed**. They are separate recordings, not a
+frame-synchronized comparison. [Clip sources and rendering details](docs/images/README.md)
+
 ## What you can do
 
 ![Three steps: upload photos for Meshy reconstruction; review geometry, uniform sizing and physical properties with Gemini assistance; export a portable MuJoCo scene, meshes and report. Corrections reuse the cached mesh and preserve earlier attempts.](docs/images/workflow.png)
