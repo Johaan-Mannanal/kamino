@@ -45,3 +45,19 @@ it('does not infer joint causes from old aggregate reports or claim missing resu
       .length,
   ).toBeGreaterThan(0)
 })
+it('reports slider tracking errors using metres and its own tolerance', () => {
+  const rows = validationFindings({
+    tracking_tolerance_rad: 0.03,
+    tracking_tolerance_m: 0.003,
+    original: {
+      passed: false,
+      checks: { tracking: false },
+      trials: [{ phases: [{ tracking_errors_m: { travel: 0.01 } }] }],
+    },
+  })
+  expect(
+    rows.some(
+      (row) => row.joint === 'travel' && row.message.includes('0.0100 m; tolerance 0.003 m'),
+    ),
+  ).toBe(true)
+})

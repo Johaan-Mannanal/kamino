@@ -10,13 +10,16 @@ from xml.etree import ElementTree as ET
 
 import mujoco
 import numpy as np
+import trimesh
 
 from photo2sim.contracts import AssetRecord
+from photo2sim.physics import collision_parameters, inertia_parameters
 from photo2sim.simulation.export import (
     _check_prepared_mesh,
     _dimensions,
     _inertia,
     _local_file,
+    _placement,
     _require,
 )
 
@@ -28,6 +31,46 @@ THRESHOLDS = {
     "maximum_settled_linear_speed_m_s": 0.001,
     "maximum_settled_angular_speed_rad_s": 0.01,
 }
+
+
+def _collision_bottom(model, data, geom):
+    """Actual world-space low point, including hull pose and body rotation."""
+    rotation = data.geom_xmat[geom].reshape(3, 3)
+    if model.geom_type[geom] == mujoco.mjtGeom.mjGEOM_BOX:
+        return float(data.geom_xpos[geom, 2] - np.abs(rotation[2]) @ model.geom_size[geom])
+    mesh = model.geom_dataid[geom]
+    start, count = model.mesh_vertadr[mesh], model.mesh_vertnum[mesh]
+    return float(
+        (model.mesh_vert[start : start + count] @ rotation.T)[:, 2].min() + data.geom_xpos[geom, 2]
+    )
+
+
+def _check_convex_collision(model, data, body, collision, visual_source, offset, sides):
+    """Compare compiled hull geometry in the body frame, including mesh alignment.
+
+    MuJoCo recentres and rotates mesh vertices at compile time, so the raw
+    geom position and raw mesh vertices cannot be compared to the saved offset.
+    """
+    from scipy.spatial import cKDTree
+
+    mesh = model.geom_dataid[collision]
+    _require(mesh >= 0, "Missing convex collision mesh")
+    start, count = model.mesh_vertadr[mesh], model.mesh_vertnum[mesh]
+    world_vertices = (
+        model.mesh_vert[start : start + count] @ data.geom_xmat[collision].reshape(3, 3).T
+        + data.geom_xpos[collision]
+    )
+    actual = (world_vertices - data.xpos[body]) @ data.xmat[body].reshape(3, 3)
+    expected = trimesh.load_mesh(visual_source, process=False).convex_hull.vertices + offset
+    tolerance = max(1e-8, float(np.max(sides)) * 1e-5)
+    _require(
+        len(actual) > 0 and np.isfinite(actual).all(), "Invalid compiled convex collision vertices"
+    )
+    _require(
+        np.max(cKDTree(actual).query(expected)[0]) <= tolerance
+        and np.max(cKDTree(expected).query(actual)[0]) <= tolerance,
+        "Compiled convex collision geometry or offset disagrees with saved physics and visual hull",
+    )
 
 
 def _one_scene(scene, duration_s):
@@ -45,8 +88,8 @@ def _one_scene(scene, duration_s):
                 (root / "asset.json").read_text(encoding="utf-8")
             )
             assumptions = json.loads((root / "simulation.json").read_text(encoding="utf-8"))
-            _require(asset.collision.kind == "box", "Validator supports box exports only")
-            _check_prepared_mesh(asset, root)
+            advanced = assumptions.get("format") == "photo2sim-physics-export/1"
+            visual_source = _check_prepared_mesh(asset, root)
             xml = ET.parse(scene).getroot()
             compiler = xml.find("compiler")
             if compiler is not None:
@@ -74,6 +117,10 @@ def _one_scene(scene, duration_s):
                 "Required exported elements missing",
             )
             sides = _dimensions(asset)
+            kind, collision_sides, offset = collision_parameters(asset.properties.physics, sides)
+            com, _ = inertia_parameters(
+                asset.properties.physics, asset.properties.mass_kg.value, sides
+            )
             _require(
                 np.isclose(model.body_mass[body], asset.properties.mass_kg.value),
                 "Exported mass mismatch",
@@ -83,13 +130,28 @@ def _one_scene(scene, duration_s):
                 "Exported inertia mismatch",
             )
             _require(np.all(model.body_inertia[body] > 0), "Inertia must be positive")
-            _require(
-                np.allclose(model.geom_size[collision], sides / 2, rtol=1e-5, atol=1e-9),
-                "Collision half extents mismatch",
-            )
-            _require(
-                model.geom_type[collision] == mujoco.mjtGeom.mjGEOM_BOX, "Collision must be a box"
-            )
+            _require(np.allclose(model.body_ipos[body], com), "Exported COM mismatch")
+            _require(np.allclose(data.xpos[body], _placement(asset)), "Exported placement mismatch")
+            if kind == "box":
+                _require(
+                    np.allclose(
+                        model.geom_size[collision], collision_sides / 2, rtol=1e-5, atol=1e-9
+                    ),
+                    "Collision half extents mismatch",
+                )
+                _require(
+                    model.geom_type[collision] == mujoco.mjtGeom.mjGEOM_BOX,
+                    "Collision must be a box",
+                )
+                _require(
+                    np.allclose(model.geom_pos[collision], offset), "Collision offset mismatch"
+                )
+            else:
+                _require(
+                    model.geom_type[collision] == mujoco.mjtGeom.mjGEOM_MESH,
+                    "Collision must be a convex mesh",
+                )
+                _check_convex_collision(model, data, body, collision, visual_source, offset, sides)
             _require(
                 model.geom_contype[visual] == model.geom_conaffinity[visual] == 0,
                 "Visual mesh must not collide",
@@ -123,12 +185,28 @@ def _one_scene(scene, duration_s):
                 "Friction disagrees with assumptions",
             )
             initial_z = float(data.xpos[body, 2])
-            initial_bottom = initial_z - sides[2] / 2
+            initial_bottom = (
+                _collision_bottom(model, data, collision) if advanced else initial_z - sides[2] / 2
+            )
             _require(
                 np.isclose(initial_bottom, assumptions["initial_bottom_height_m"]),
                 "Initial drop height mismatch",
             )
-            _require(initial_bottom > 0, "Expected positive initial ground clearance")
+            if not advanced:
+                _require(initial_bottom > 0, "Expected positive initial ground clearance")
+            if advanced:
+                _require(
+                    model.geom_condim[collision] == assumptions["contact_condim"],
+                    "Contact dimension mismatch",
+                )
+                _require(
+                    np.allclose(model.geom_solref[collision], assumptions["contact_solref"]),
+                    "Contact solref mismatch",
+                )
+                _require(
+                    np.allclose(model.geom_solimp[collision], assumptions["contact_solimp"]),
+                    "Contact solimp mismatch",
+                )
             steps = int(np.ceil(duration_s / model.opt.timestep))
             _require(
                 0 < steps <= 2_000_000, "Requested validation exceeds the two-million-step budget"
@@ -142,7 +220,9 @@ def _one_scene(scene, duration_s):
                 mujoco.mj_step(model, data)
                 mujoco.mj_forward(model, data)
                 _require(
-                    np.isfinite(data.qpos).all() and np.isfinite(data.qvel).all(),
+                    np.isfinite(data.qpos).all()
+                    and np.isfinite(data.qvel).all()
+                    and np.isfinite(data.qacc).all(),
                     "Nonfinite simulation state",
                 )
                 min_z = min(min_z, float(data.xpos[body, 2]))
@@ -158,7 +238,11 @@ def _one_scene(scene, duration_s):
                     tail_linear = max(tail_linear, float(np.linalg.norm(data.qvel[:3])))
                     tail_angular = max(tail_angular, float(np.linalg.norm(data.qvel[3:])))
             loop_wall = time.perf_counter() - loop_started
-            final_bottom = float(data.xpos[body, 2]) - sides[2] / 2
+            final_bottom = (
+                _collision_bottom(model, data, collision)
+                if advanced
+                else float(data.xpos[body, 2]) - sides[2] / 2
+            )
             warning_counts = {
                 mujoco.mjtWarning(i).name: int(w.number)
                 for i, w in enumerate(data.warning)
@@ -175,6 +259,14 @@ def _one_scene(scene, duration_s):
                 "no_warnings": not warning_counts and not caught,
             }
             checks = {name: bool(value) for name, value in checks.items()}
+            if advanced:
+                # Arbitrary placement, COM, hulls and soft/bouncy contact invalidate
+                # the original upright-box resting-height and settling criteria.
+                result["observations"] = checks
+                checks = {"finite_state": True, "no_warnings": checks["no_warnings"]}
+                result["scope"] = (
+                    "Explicit physics finite-state and exported-parameter smoke test; contact/settling observations are not acceptance criteria"
+                )
             result.update(
                 passed=all(checks.values()),
                 checks=checks,
@@ -215,6 +307,8 @@ def validate_export(
         "environment": {"mujoco": mujoco.__version__, "numpy": np.__version__},
         "original": _one_scene(scene, duration_s),
     }
+    if "scope" in report["original"]:
+        report["scope"] = report["original"]["scope"]
     if check_portability:
         try:
             with tempfile.TemporaryDirectory(prefix="photo2sim-export-validation-") as temporary:

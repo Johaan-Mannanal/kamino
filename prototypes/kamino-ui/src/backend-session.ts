@@ -35,6 +35,8 @@ export type ReviewedInputs = {
   sizing: Sizing;
   mass_kg: Properties["mass_kg"];
   sliding_friction: Properties["sliding_friction"];
+  physics?: Properties["physics"];
+  placement_m?: Properties["placement_m"];
 };
 
 export class SessionCancelledError extends Error {
@@ -369,10 +371,10 @@ export class BackendSession {
       }, this.pollIntervalMs);
     }
   }
-  markDirty() {
+  markDirty(invalidateSizing = true) {
     this.draft++;
     this.dirty = true;
-    this.sizingPreview = null;
+    if (invalidateSizing) this.sizingPreview = null;
     this.changed();
   }
   setToken(value: string) {
@@ -608,6 +610,8 @@ export class BackendSession {
         sizing: properties.sizing,
         mass_kg: properties.mass_kg,
         sliding_friction: properties.sliding_friction,
+        physics: properties.physics,
+        placement_m: properties.placement_m,
       });
     }
     const context = this.reviewedContext(
@@ -667,6 +671,10 @@ export class BackendSession {
         dimensions_m: preview.dimensions_m,
         mass_kg: values.mass_kg,
         sliding_friction: values.sliding_friction,
+        ...(values.physics !== undefined ? { physics: values.physics } : {}),
+        ...(values.placement_m !== undefined
+          ? { placement_m: values.placement_m }
+          : {}),
         sizing: values.sizing,
         geometry_context_sha256: this.wholeMesh
           ? preview.geometry_context_sha256

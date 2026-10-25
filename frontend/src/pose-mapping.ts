@@ -1,4 +1,4 @@
-import type { ReviewProject } from './assembly-review'
+import { normalizeProjectDefaults, type ReviewProject } from './assembly-review'
 export type Unit = 'degrees' | 'radians' | 'normalized_0_100' | 'normalized_-100_100'
 export type Signal = { unit: Unit; median: number; minimum: number; maximum: number }
 export type Observation = { time_s: number; values: Record<string, number> }
@@ -125,7 +125,7 @@ export const unitScale = (unit: Unit): number | null =>
   unit === 'degrees' ? Math.PI / 180 : unit === 'radians' ? 1 : null
 export function createMappings(project: ReviewProject, pack: CapturePack): Mapping[] {
   return project.joints
-    .filter((j) => j.kind === 'revolute')
+    .filter((j) => j.kind === 'revolute' && !j.coupling)
     .map((j) => {
       const signal =
         [j.name + '.pos', j.name].find((n) => Object.hasOwn(pack.captures[0].signals, n)) ?? ''
@@ -157,12 +157,14 @@ export function editMapping(m: Mapping, change: Partial<Mapping>): Mapping {
   }
 }
 function validMappings(project: ReviewProject, mappings: Mapping[]) {
-  const names = project.joints.filter((j) => j.kind === 'revolute').map((j) => j.name)
+  const names = project.joints
+    .filter((j) => j.kind === 'revolute' && !j.coupling)
+    .map((j) => j.name)
   check(
     Array.isArray(mappings) &&
       names.length === mappings.length &&
       new Set(mappings.map((m) => m.joint)).size === names.length,
-    'Mapping must cover each revolute joint once',
+    'Mapping must cover each independent revolute joint once',
   )
   for (const m of mappings) {
     check(
@@ -276,10 +278,10 @@ const canonical = (value: unknown): string => {
         : v
   return JSON.stringify(sorted(value))
 }
-export const projectBinding = (p: ReviewProject) => canonical(p)
+export const projectBinding = (p: ReviewProject) => canonical(normalizeProjectDefaults(p))
 function binding(project: ReviewProject, pack: CapturePack, m: Mapping) {
   return canonical({
-    project,
+    project: normalizeProjectDefaults(project),
     captures: pack.captures,
     conversion: {
       joint: m.joint,
@@ -294,6 +296,17 @@ function binding(project: ReviewProject, pack: CapturePack, m: Mapping) {
     capture_ids: m.capture_ids,
   })
 }
+function compatibleBinding(serialized: string | null): string | null {
+  if (typeof serialized !== 'string') return null
+  try {
+    const value = JSON.parse(serialized)
+    if (!object(value) || !('project' in value)) return null
+    return canonical({ ...value, project: normalizeProjectDefaults(value.project) })
+  } catch {
+    return null
+  }
+}
+
 export function verifyMapping(
   project: ReviewProject,
   pack: CapturePack,
@@ -334,7 +347,7 @@ export function saveReview(project: ReviewProject, captures: CapturePack, mappin
   const comparisons = compareCaptures(project, captures, mappings)
   for (const m of mappings.filter((m) => m.status === 'user_verified')) {
     check(
-      m.verification_binding === binding(project, captures, m),
+      compatibleBinding(m.verification_binding) === binding(project, captures, m),
       'Stale verification; review again',
     )
     verifyMapping(project, captures, mappings, m.joint, m.reviewer, m.evidence_note, m.capture_ids)
@@ -353,7 +366,9 @@ export function loadReview(text: string, project: ReviewProject) {
   check(text.length < 50_000_000, 'Review exceeds 50 MB')
   const r = JSON.parse(text)
   check(
-    r?.format === 'photo2sim-mapping-review-1.0' && r.project_snapshot === projectBinding(project),
+    r?.format === 'photo2sim-mapping-review-1.0' &&
+      typeof r.project_snapshot === 'string' &&
+      projectBinding(JSON.parse(r.project_snapshot)) === projectBinding(project),
     'Mapping review belongs to a different project revision',
   )
   const captures = parseCaptures(JSON.stringify(r.captures))

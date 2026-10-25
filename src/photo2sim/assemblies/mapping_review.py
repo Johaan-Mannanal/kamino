@@ -9,7 +9,7 @@ import math
 import re
 from typing import Any
 
-from photo2sim.assemblies.review import ReviewProject
+from photo2sim.assemblies.review import ReviewProject, normalize_project_defaults
 
 _HASH = re.compile(r"^[a-f0-9]{64}$")
 _UNITS = {"degrees", "radians", "normalized_0_100", "normalized_-100_100"}
@@ -64,7 +64,7 @@ def _same_json(left: Any, right: Any) -> bool:
 
 
 def _project_data(project: ReviewProject) -> dict:
-    return project.model_dump(mode="json")
+    return normalize_project_defaults(project.model_dump(mode="json"))
 
 
 def _validate_captures(value: Any) -> list[dict]:
@@ -183,7 +183,11 @@ def expected_comparisons(
     project: ReviewProject, captures: list[dict], mappings: list[dict]
 ) -> list[dict]:
     """Recompute the browser's display-only comparisons before retaining them."""
-    joints = {joint.name: joint for joint in project.joints if joint.kind == "revolute"}
+    joints = {
+        joint.name: joint
+        for joint in project.joints
+        if joint.kind == "revolute" and joint.coupling is None
+    }
     calibration_conflict = len({capture["calibration_sha256"] for capture in captures}) != 1
     counts = {
         mapping["signal"]: sum(item["signal"] == mapping["signal"] for item in mappings)
@@ -245,22 +249,26 @@ def validate_mapping_review(review: Any, project: ReviewProject) -> None:
     try:
         snapshot_data = json.loads(snapshot)
         _finite_json(snapshot_data)
-        if not _same_json(snapshot_data, saved_project):
+        if not _same_json(normalize_project_defaults(snapshot_data), saved_project):
             _fail("Mapping review belongs to a different project revision")
     except json.JSONDecodeError:
         _fail("Mapping review belongs to a different project revision")
     captures = _validate_captures(review.get("captures"))
     mappings = review.get("mappings")
     if not isinstance(mappings, list):
-        _fail("Mapping must cover each revolute joint once")
-    joints = {joint.name: joint for joint in project.joints if joint.kind == "revolute"}
+        _fail("Mapping must cover each independent revolute joint once")
+    joints = {
+        joint.name: joint
+        for joint in project.joints
+        if joint.kind == "revolute" and joint.coupling is None
+    }
     mapping_joints = []
     for mapping in mappings:
         if not isinstance(mapping, dict) or not isinstance(mapping.get("joint"), str):
-            _fail("Mapping must cover each revolute joint once")
+            _fail("Mapping must cover each independent revolute joint once")
         mapping_joints.append(mapping["joint"])
     if len(mappings) != len(joints) or set(mapping_joints) != set(joints):
-        _fail("Mapping must cover each revolute joint once")
+        _fail("Mapping must cover each independent revolute joint once")
     calibration_conflict = len({capture["calibration_sha256"] for capture in captures}) != 1
     seen_signals: dict[str, int] = {}
     for mapping in mappings:
@@ -320,6 +328,8 @@ def validate_mapping_review(review: Any, project: ReviewProject) -> None:
             _finite_json(binding_data)
         except json.JSONDecodeError:
             _fail("Stale verification; review again")
+        if isinstance(binding_data, dict) and "project" in binding_data:
+            binding_data["project"] = normalize_project_defaults(binding_data["project"])
         if not _same_json(binding_data, _binding(saved_project, captures, mapping)):
             _fail("Stale verification; review again")
         if calibration_conflict or seen_signals[mapping["signal"]] > 1:

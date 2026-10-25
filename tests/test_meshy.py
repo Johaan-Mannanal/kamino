@@ -176,3 +176,30 @@ def test_success_without_glb_is_an_actionable_failure(tmp_path):
     with pytest.raises(ProviderError) as error:
         provider.poll("task")
     assert error.value.code == "missing_mesh"
+
+
+@pytest.mark.parametrize("progress", [None, "missing"])
+def test_poll_retains_unknown_progress_without_inventing_zero(tmp_path, progress):
+    body = {"status": "IN_PROGRESS"}
+    if progress is None:
+        body["progress"] = None
+    provider = MeshyProvider(
+        settings(tmp_path),
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json=body)),
+    )
+    assert provider.poll("task").progress is None
+
+
+@pytest.mark.parametrize("progress", [True, -1, 101, 0.5, "42"])
+def test_invalid_provider_percentages_fail_closed(tmp_path, progress):
+    provider = MeshyProvider(
+        settings(tmp_path),
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                200, json={"status": "IN_PROGRESS", "progress": progress}
+            )
+        ),
+    )
+    with pytest.raises(ProviderError) as error:
+        provider.poll("task")
+    assert error.value.code == "provider_response_error"

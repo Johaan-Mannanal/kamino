@@ -9,6 +9,25 @@ export type JobStatus =
   | 'completed'
   | 'failed'
 export type Scalar = { value: number; source: Source; note?: string | null }
+export type Vec3 = [number, number, number]
+export type PhysicsSettings = {
+  collision?: { kind: 'box' | 'convex_hull'; box_size_m?: Vec3 | null; offset_m?: Vec3 } | null
+  torsional_friction?: Scalar | null
+  rolling_friction?: Scalar | null
+  inertia?: {
+    mode: 'automatic' | 'manual'
+    center_of_mass_m?: Vec3
+    diagonal_kg_m2?: Vec3 | null
+    source?: Source
+    note?: string | null
+  } | null
+  contact?: {
+    compliance: 'firm' | 'soft'
+    response: 'low' | 'medium' | 'high'
+    source?: Source
+    note?: string | null
+  } | null
+}
 export type Orientation = { x_deg: number; y_deg: number; z_deg: number }
 export type Sizing = {
   mode: 'uniform' | 'independent_axes'
@@ -46,6 +65,8 @@ export type Properties = {
   mass_kg: Scalar
   sliding_friction: Scalar | null
   sizing?: Sizing | null
+  physics?: PhysicsSettings | null
+  placement_m?: Vec3 | null
 }
 export type Suggestions = {
   dimensions_m: Properties['dimensions_m'] | null
@@ -63,6 +84,12 @@ export type Job = {
   created_at: string
   updated_at: string
   progress: number
+  reconstruction_progress?: {
+    stage: 'submitting' | 'queued' | 'processing' | 'downloading' | 'ready'
+    stage_started_at: string
+    provider_progress: number | null
+    last_advanced_at: string | null
+  } | null
   source_images: string[]
   provider_task_id: string | null
   mesh_path: string | null

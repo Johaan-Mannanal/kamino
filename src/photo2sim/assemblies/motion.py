@@ -11,7 +11,7 @@ import mujoco
 import numpy as np
 from PIL import Image, ImageDraw
 
-from photo2sim.assemblies.contracts import AssemblyRecord
+from photo2sim.assemblies.contracts import AssemblyRecord, joint_limits
 from photo2sim.assemblies.validate import TRACKING_TOLERANCE_RAD, validate_assembly
 
 
@@ -26,7 +26,7 @@ def run_motion(scene: Path, phases: list[dict], output_dir: Path, *, render=Fals
         raise FileExistsError(output_dir)
     scene, output_dir = Path(scene).resolve(), output_dir.resolve()
     record = AssemblyRecord.model_validate_json((scene.parent / "assembly.json").read_text())
-    joints = {j.name: j for j in record.joints if j.kind == "revolute"}
+    joints = {j.name: j for j in record.joints if j.kind == "revolute" and j.drive is not None}
     if not joints or not isinstance(phases, list) or not 1 <= len(phases) <= 100:
         raise ValueError("Need 1–100 phases and at least one revolute joint")
     if type(fps) is not int or not 1 <= fps <= 30:
@@ -56,6 +56,11 @@ def run_motion(scene: Path, phases: list[dict], output_dir: Path, *, render=Fals
     addresses = {
         n: (int(model.joint(n).qposadr[0]), model.actuator("drive_" + n).id) for n in joints
     }
+    moving = {j.name: j for j in record.joints if j.kind != "fixed"}
+    observed_addresses = {n: int(model.joint(n).qposadr[0]) for n in moving}
+    control_addresses = {
+        n: model.actuator("drive_" + n).id for n, j in moving.items() if j.drive is not None
+    }
     assumptions = json.loads((scene.parent / "simulation.json").read_text())
     output_dir.mkdir(parents=True, exist_ok=False)
     save(output_dir / "actions.json", phases)
@@ -72,11 +77,14 @@ def run_motion(scene: Path, phases: list[dict], output_dir: Path, *, render=Fals
         "assumptions": record.notes,
         "collision_policy": assumptions["collision"],
         "tracking_tolerance_rad": TRACKING_TOLERANCE_RAD,
+        "tracking_tolerance_m": 0.003,
+        "joint_units": {n: "m" if j.kind == "prismatic" else "rad" for n, j in moving.items()},
         "timestep_s": float(model.opt.timestep),
         "phases": [],
         "warning_count": 0,
         "python_warnings": [],
         "max_joint_limit_violation_rad": 0.0,
+        "max_joint_limit_violation_m": 0.0,
         "replay": None,
     }
     trace, frames = [], []
@@ -104,13 +112,48 @@ def run_motion(scene: Path, phases: list[dict], output_dir: Path, *, render=Fals
     options.geomgroup[3] = 0
     stride = max(1, round(1 / (fps * model.opt.timestep)))
 
+    def observations():
+        actual = {n: float(data.qpos[q]) for n, q in observed_addresses.items()}
+        expected = {}
+
+        def target(name):
+            if name in expected:
+                return expected[name]
+            coupling = moving[name].coupling
+            expected[name] = (
+                coupling.offset + coupling.ratio * target(coupling.driver_joint)
+                if coupling
+                else float(data.ctrl[control_addresses[name]])
+            )
+            return expected[name]
+
+        for name in moving:
+            target(name)
+        residuals = {
+            n: abs(
+                actual[n] - j.coupling.offset - j.coupling.ratio * actual[j.coupling.driver_joint]
+            )
+            for n, j in moving.items()
+            if j.coupling is not None
+        }
+        return actual, expected, residuals
+
+    def unit_values(values, kind):
+        return {n: v for n, v in values.items() if moving[n].kind == kind}
+
     def sample(phase_index):
         mujoco.mj_forward(model, data)
+        actual, expected, residuals = observations()
         row = {
             "time_s": float(data.time),
             "phase": phase_index,
             "targets_rad": {n: float(data.ctrl[a]) for n, (_, a) in addresses.items()},
-            "observed_rad": {n: float(data.qpos[q]) for n, (q, _) in addresses.items()},
+            "observed_rad": unit_values(actual, "revolute"),
+            "expected_rad": unit_values(expected, "revolute"),
+            "coupling_residuals_rad": unit_values(residuals, "revolute"),
+            "observed_m": unit_values(actual, "prismatic"),
+            "expected_m": unit_values(expected, "prismatic"),
+            "coupling_residuals_m": unit_values(residuals, "prismatic"),
         }
         trace.append(row)
         if renderer is not None:
@@ -146,22 +189,41 @@ def run_motion(scene: Path, phases: list[dict], output_dir: Path, *, render=Fals
                     mujoco.mj_step(model, data)
                     if not all(np.isfinite(v).all() for v in (data.qpos, data.qvel, data.qacc)):
                         raise ValueError("Nonfinite simulated state")
-                    for n, (q, _) in addresses.items():
-                        lo, hi = joints[n].limits_rad
-                        report["max_joint_limit_violation_rad"] = max(
-                            report["max_joint_limit_violation_rad"],
+                    for n, q in observed_addresses.items():
+                        lo, hi = joint_limits(moving[n])
+                        key = (
+                            "max_joint_limit_violation_m"
+                            if moving[n].kind == "prismatic"
+                            else "max_joint_limit_violation_rad"
+                        )
+                        report[key] = max(
+                            report[key],
                             lo - float(data.qpos[q]),
                             float(data.qpos[q]) - hi,
                         )
                     if (step + 1) % stride == 0 or step + 1 == steps:
                         sample(index)
-                actual = {n: float(data.qpos[q]) for n, (q, _) in addresses.items()}
-                error = max(abs(actual[n] - phase["targets_rad"][n]) for n in joints)
+                actual, expected, residuals = observations()
+                errors = {n: abs(actual[n] - expected[n]) for n in moving}
+                error = max(unit_values(errors, "revolute").values(), default=0.0)
+                error_m = max(unit_values(errors, "prismatic").values(), default=0.0)
                 report["phases"].append(
                     {
                         **phase,
-                        "observed_rad": actual,
+                        "observed_rad": unit_values(actual, "revolute"),
+                        "expected_rad": unit_values(expected, "revolute"),
+                        "coupling_residuals_rad": unit_values(residuals, "revolute"),
+                        "observed_m": unit_values(actual, "prismatic"),
+                        "expected_m": unit_values(expected, "prismatic"),
+                        "coupling_residuals_m": unit_values(residuals, "prismatic"),
                         "final_max_error_rad": error,
+                        "final_max_error_m": error_m,
+                        "final_max_coupling_error_rad": max(
+                            unit_values(residuals, "revolute").values(), default=0.0
+                        ),
+                        "final_max_coupling_error_m": max(
+                            unit_values(residuals, "prismatic").values(), default=0.0
+                        ),
                         "end_time_s": float(data.time),
                     }
                 )
@@ -171,7 +233,14 @@ def run_motion(scene: Path, phases: list[dict], output_dir: Path, *, render=Fals
             not report["warning_count"]
             and not report["python_warnings"]
             and report["max_joint_limit_violation_rad"] <= TRACKING_TOLERANCE_RAD
-            and all(p["final_max_error_rad"] <= TRACKING_TOLERANCE_RAD for p in report["phases"])
+            and report["max_joint_limit_violation_m"] <= 0.003
+            and all(
+                p["final_max_error_rad"] <= TRACKING_TOLERANCE_RAD
+                and p["final_max_error_m"] <= 0.003
+                and p["final_max_coupling_error_rad"] <= TRACKING_TOLERANCE_RAD
+                and p["final_max_coupling_error_m"] <= 0.003
+                for p in report["phases"]
+            )
         )
         if frames:
             # GIF timing is quantized to 10 ms; this is a labeled approximate replay.

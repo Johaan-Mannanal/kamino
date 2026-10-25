@@ -17,13 +17,15 @@ import {
 } from "./workflow";
 import { BackendSession, SessionCancelledError } from "./backend-session";
 import { UploadNavigation } from "./live-navigation";
+import {
+  paintReconstructionBar,
+  reconstructionDisplay,
+} from "./reconstruction-progress";
 import { reviewPhoto, type CropRect } from "./photo-review";
 import {
-  STATUS_LABEL,
   assemblyUrl,
   describeError,
   isAuthError,
-  isRunning,
   jobIdFromSearch,
   meshReady,
   mountLiveWorkspace,
@@ -60,7 +62,13 @@ const icon = (name: string, size = 16) =>
 const brand = () =>
   `<a class="brand" href="#home" aria-label="Kamino home">${icon("c76c7.svg", 22)}<span>Kamino</span></a>`;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-type Photo = { name: string; url: string; file?: File; original?: File; crop?: CropRect };
+type Photo = {
+  name: string;
+  url: string;
+  file?: File;
+  original?: File;
+  crop?: CropRect;
+};
 let photos: Photo[] = [];
 let draft = defaults();
 let revisions: Revision[] = [];
@@ -85,7 +93,9 @@ const toast = (message: string) => {
 };
 const saved = () => revisions.at(-1);
 const dirty = () =>
-  !saved() || JSON.stringify(draft) !== JSON.stringify(saved()!.properties);
+  !saved() ||
+  saved()!.meshIdentity !== meshIdentity ||
+  JSON.stringify(draft) !== JSON.stringify(saved()!.properties);
 const route = (name: string) => {
   if (location.hash === `#${name}`) void render();
   else location.hash = name;
@@ -172,15 +182,18 @@ function upload() {
   mountResume(".live-upload-links");
   const guidance = document.createElement("p");
   guidance.className = "photo-capture-guide small";
-  guidance.textContent = "Keep the whole object visible from different angles. Optional cropping can remove distractions; it does not guarantee accurate geometry.";
+  guidance.textContent =
+    "Keep the whole object visible from different angles. Optional cropping can remove distractions; it does not guarantee accurate geometry.";
   $("#photo-list").before(guidance);
   const draw = () => {
     const demo = photos.length > 0 && photos.some((p) => !p.file);
     $("#photo-count").textContent = `· ${photos.length} of 4`;
     $<HTMLButtonElement>("#create-mesh").disabled =
       !photos.length || uploads.pending || checkingAccess;
-    $<HTMLButtonElement>("#choose").disabled = uploads.pending || checkingAccess;
-    $<HTMLButtonElement>("#sample-photos").disabled = uploads.pending || checkingAccess;
+    $<HTMLButtonElement>("#choose").disabled =
+      uploads.pending || checkingAccess;
+    $<HTMLButtonElement>("#sample-photos").disabled =
+      uploads.pending || checkingAccess;
     if (uploads.pending)
       $("#create-mesh").lastChild!.textContent = "Uploading…";
     $("#upload-note").textContent = demo
@@ -204,16 +217,20 @@ function upload() {
           draw();
         }),
     );
-    app.querySelectorAll<HTMLButtonElement>("[data-review]").forEach(b => {
+    app.querySelectorAll<HTMLButtonElement>("[data-review]").forEach((b) => {
       b.onclick = async () => {
         if (uploads.pending || checkingAccess) return;
         const photo = photos[Number(b.dataset.review)];
         const token = navToken;
-        const result = await reviewPhoto(photo.original ?? photo.file!, photo.crop);
+        const result = await reviewPhoto(
+          photo.original ?? photo.file!,
+          photo.crop,
+        );
         if (!result || token !== navToken || !photos.includes(photo)) return;
         URL.revokeObjectURL(photo.url);
         photo.original ??= photo.file;
-        photo.file = result.file; photo.crop = result.crop;
+        photo.file = result.file;
+        photo.crop = result.crop;
         photo.url = URL.createObjectURL(result.file);
         draw();
       };
@@ -404,13 +421,14 @@ function liveLoading(token: number, id: string) {
     }
     const error = failure ?? session.error;
     const failed = job?.status === "failed";
-    $("#live-load-status").textContent = job
-      ? `${job.synthetic ? "Synthetic mock reconstruction" : "Reconstruction"} · ${STATUS_LABEL[job.status]}${isRunning(job) ? ` · ${Math.round(job.progress)}%` : ""}`
-      : "Loading job status…";
+    const display = reconstructionDisplay(job);
+    $("#live-load-status").textContent = display.label;
+    $(".loading-note").textContent =
+      `Job ${id.slice(0, 8)} · ${display.detail}${error && !failed ? " Status updates paused; retry to check the saved task." : ""}`;
     const bar = $("#live-load-bar");
     bar.hidden = failed || (!!error && !job);
-    if (job)
-      bar.setAttribute("aria-valuenow", String(Math.round(job.progress)));
+    paintReconstructionBar(bar, display.percent);
+    bar.setAttribute("aria-valuetext", display.detail);
     $("#live-load-error").textContent = failed
       ? `Reconstruction failed${job.error ? `: ${job.error.code} — ${job.error.message}` : "."} Your selected photos are kept for another attempt.`
       : error
@@ -429,7 +447,11 @@ function liveLoading(token: number, id: string) {
     } else restore();
   };
   const unsubscribe = session.subscribe(paint);
+  // Keep elapsed waiting time current even if status reads are paused on error.
+  // This timer paints only; it never submits or polls a provider task.
+  const elapsedTimer = setInterval(paint, 1000);
   cleanup = () => {
+    clearInterval(elapsedTimer);
     unsubscribe();
   };
   if (session.job?.id === id) {
@@ -502,7 +524,9 @@ function workspace() {
         $<HTMLInputElement>(`[name="dimension${i}"]`).value = v.toFixed(1);
       });
     }
-    $("#save-status").textContent = dirty() ? "Unapplied changes" : "Applied for this session";
+    $("#save-status").textContent = dirty()
+      ? "Unapplied changes"
+      : "Applied for this session";
     $("#saved-state").textContent = dirty()
       ? "Draft / Unapplied changes"
       : "Applied for this session";
@@ -578,7 +602,9 @@ function workspace() {
     draft.mass = 0.32;
     draft.friction = 0.45;
     setForm();
-    toast("Demo values copied to draft. Apply changes to use them this session.");
+    toast(
+      "Demo values copied to draft. Apply changes to use them this session.",
+    );
   };
   $("#reset-camera").onclick = () => viewer?.resetCamera();
   $("#fullscreen").onclick = async () => {

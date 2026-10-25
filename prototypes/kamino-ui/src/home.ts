@@ -23,8 +23,8 @@ const descriptions = [
 
 export function mountHome(app: HTMLElement, options: HomeOptions) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-  const mobile = matchMedia("(max-width: 760px)");
-  let staticMode = reduced.matches || mobile.matches;
+  // Touch and narrow screens share the narrative; only an explicit motion preference opts out.
+  let staticMode = reduced.matches;
   const actions = `<a class="primary" href="#upload"><img class="icon" src="/assets/0f26a.svg" width="16" height="16" alt="">Upload your photos</a><button class="quiet" data-demo>Try the demo <img class="icon" src="/assets/55033.svg" width="16" height="16" alt=""></button>`;
   app.innerHTML = `<main class="home home-refined"><header class="site-header">${options.brand}<div><button class="text-button" data-guide>Quick guide</button><a class="accent nav-upload" href="#upload">Upload your photos ↗</a></div></header><div id="story"><div class="story-sticky"><div class="depth-stage" aria-hidden="true"><canvas class="projected-grid" aria-hidden="true"></canvas><div class="depth-horizon"></div></div><div id="story-copy">${titles.map((title, index) => `<section class="story-panel" data-story-panel="${index}" ${index ? 'aria-hidden="true" inert' : ""}><h1>${title}</h1><p>${descriptions[index]}</p>${index === 4 ? `<div id="story-actions">${actions}</div>` : ""}</section>`).join("")}</div><div class="story-stage"><img id="hero-art" src="/assets/46613.png" alt="Cream ceramic mug"><div id="story-viewer"></div><div id="capture-phone" aria-hidden="true"><div><img src="${options.photos[0].url}" alt=""></div><span></span></div><div id="capture-thumbs" aria-label="Example capture angles">${options.photos.map((p) => `<figure><img src="${p.url}" alt="${p.name} view"><figcaption>${p.name}</figcaption></figure>`).join("")}</div><div id="dimension-peek" aria-hidden="true"><span class="muted">Known length · X</span><strong>120 → 132 <small>mm</small></strong><span>132 × 110 × 99 mm</span></div></div><div class="story-bottom"><span id="scroll-label">Scroll to explore ↓</span><div id="chapters"><div class="story-progress" role="progressbar" aria-label="Homepage progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="story-progress-fill"></span></div>${titles.map((_, i) => `<button aria-label="Go to chapter ${i + 1}" class="chapter ${i === 0 ? "active" : ""}" data-chapter="${i}"></button>`).join("")}</div></div></div></div><div class="static-chapters">${titles
     .slice(1)
@@ -157,7 +157,7 @@ export function mountHome(app: HTMLElement, options: HomeOptions) {
     schedule();
   };
   const resize = () => {
-    const nextStatic = reduced.matches || mobile.matches;
+    const nextStatic = reduced.matches;
     if (nextStatic !== staticMode) {
       staticMode = nextStatic;
       if (staticMode) {
@@ -170,7 +170,8 @@ export function mountHome(app: HTMLElement, options: HomeOptions) {
     }
     story.classList.toggle("static-story", staticMode);
     q(".home").classList.toggle("static-home", staticMode);
-    step = Math.max(320, innerHeight * 0.62);
+    // Match the stable CSS viewport so collapsing mobile browser chrome cannot shift chapters.
+    step = Math.max(320, q(".story-sticky").getBoundingClientRect().height * 0.62);
     story.style.setProperty("--story-travel", `${step * 4}px`);
     origin = story.getBoundingClientRect().top + scrollY;
     if (staticMode) {
@@ -193,7 +194,6 @@ export function mountHome(app: HTMLElement, options: HomeOptions) {
   window.addEventListener("scroll", scroll, { passive: true });
   window.addEventListener("resize", resize);
   reduced.addEventListener("change", resize);
-  mobile.addEventListener("change", resize);
   resize();
   startViewer();
   paint();
@@ -207,6 +207,5 @@ export function mountHome(app: HTMLElement, options: HomeOptions) {
     window.removeEventListener("scroll", scroll);
     window.removeEventListener("resize", resize);
     reduced.removeEventListener("change", resize);
-    mobile.removeEventListener("change", resize);
   };
 }

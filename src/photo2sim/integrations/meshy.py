@@ -90,8 +90,8 @@ class MeshyProvider:
         mesh_url = urls.get("glb") if isinstance(urls, dict) else None
         if state == "succeeded" and (not isinstance(mesh_url, str) or not mesh_url):
             raise ProviderError("missing_mesh", "Completed Meshy task has no GLB output.")
-        progress = result.get("progress", 0)
-        if not isinstance(progress, int) or not 0 <= progress <= 100:
+        progress = result.get("progress")
+        if progress is not None and (type(progress) is not int or not 0 <= progress <= 100):
             raise ProviderError("provider_response_error", "Meshy returned invalid progress.")
         return ProviderSnapshot(status=state, progress=progress, mesh_url=mesh_url)
 

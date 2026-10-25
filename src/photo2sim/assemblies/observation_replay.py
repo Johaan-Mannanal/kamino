@@ -5,6 +5,7 @@ Copied into exports; depends only on Python's standard library and MuJoCo.
 
 import argparse
 import bisect
+import copy
 import json
 import math
 import time
@@ -22,9 +23,40 @@ def finite(value):
     return type(value) in (int, float) and math.isfinite(value)
 
 
+def normalize_project_defaults(value):
+    """Only new omitted/null assembly extension defaults are equivalent.
+
+    Do not omit non-default physics or normalize unrelated fields: these values
+    are also used to bind retained mapping attestations to a specific revision.
+    """
+    data = copy.deepcopy(value)
+    if not isinstance(data, dict):
+        return data
+    for key in ("groups", "links"):
+        for item in data.get(key, []) if isinstance(data.get(key), list) else []:
+            if isinstance(item, dict) and item.get("physics") is None:
+                item.pop("physics", None)
+    for joint in data.get("joints", []) if isinstance(data.get("joints"), list) else []:
+        if not isinstance(joint, dict):
+            continue
+        for key in ("limits_m", "spring", "coupling"):
+            if joint.get(key) is None:
+                joint.pop(key, None)
+        drive = joint.get("drive")
+        if isinstance(drive, dict):
+            for key in ("force_limit_n", "force_limit_nm"):
+                if drive.get(key) is None:
+                    drive.pop(key, None)
+    return data
+
+
 def replay_frames(model, review, project, capture_id):
     require(review.get("format") == "photo2sim-mapping-review-1.0", "Unsupported mapping review")
-    require(json.loads(review["project_snapshot"]) == project, "Mapping belongs to another project")
+    require(
+        normalize_project_defaults(json.loads(review["project_snapshot"]))
+        == normalize_project_defaults(project),
+        "Mapping belongs to another project",
+    )
     pack = review["captures"]
     require(pack.get("format") == "photo2sim-captures-1.0", "Unsupported capture pack")
     captures = pack["captures"]
@@ -36,24 +68,34 @@ def replay_frames(model, review, project, capture_id):
         2 <= len(rows) <= 20_000 and len(rows) == capture["samples"],
         "Timestamped observations required",
     )
-    joints = {j["name"]: j for j in project["joints"] if j["kind"] == "revolute"}
+    moving = {j["name"]: j for j in project["joints"] if j["kind"] != "fixed"}
+    joints = {n: j for n, j in moving.items() if j["kind"] == "revolute" and not j.get("coupling")}
     mappings = review["mappings"]
     require(
         len(mappings) == len(joints) and {m["joint"] for m in mappings} == set(joints),
         "Mapping joint mismatch",
     )
-    require(model.njnt == len(joints), "Scene joint count differs from project")
-    for name, joint in joints.items():
+    require(model.njnt == len(moving), "Scene joint count differs from project")
+    for name, joint in moving.items():
         idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
         require(
-            idx >= 0 and model.jnt_type[idx] == mujoco.mjtJoint.mjJNT_HINGE,
+            idx >= 0
+            and model.jnt_type[idx]
+            == (
+                mujoco.mjtJoint.mjJNT_SLIDE
+                if joint["kind"] == "prismatic"
+                else mujoco.mjtJoint.mjJNT_HINGE
+            ),
             "Scene hinge missing: " + name,
         )
         require(
             bool(model.jnt_limited[idx])
             and all(
                 math.isclose(float(a), b, abs_tol=1e-7)
-                for a, b in zip(model.jnt_range[idx], joint["limits_rad"])
+                for a, b in zip(
+                    model.jnt_range[idx],
+                    joint["limits_m"] if joint["kind"] == "prismatic" else joint["limits_rad"],
+                )
             ),
             "Scene limits differ from project: " + name,
         )
@@ -117,21 +159,58 @@ def replay_frames(model, review, project, capture_id):
             if sum(other["signal"] == source for other in mappings) > 1:
                 issues.append(name + ": duplicate source mapping")
             angles[name] = angle
-        frames.append({"time_s": t, "angles_rad": angles, "issues": issues})
+        resolved, visiting = {}, set()
+
+        def resolve(name):
+            if name in resolved:
+                return resolved[name]
+            require(name not in visiting, "Cycle in linked joint motion")
+            visiting.add(name)
+            joint = moving[name]
+            value = angles.get(name)
+            coupling = joint.get("coupling")
+            if coupling:
+                driver = coupling["driver_joint"]
+                require(
+                    driver in moving and moving[driver]["kind"] == joint["kind"],
+                    "Invalid linked driver",
+                )
+                driver_value = resolve(driver)
+                value = coupling["offset"] + coupling["ratio"] * (
+                    0 if driver_value is None else driver_value
+                )
+            elif joint["kind"] == "prismatic":
+                value = 0
+            visiting.remove(name)
+            resolved[name] = value
+            return value
+
+        for name in moving:
+            resolve(name)
+        frame = {
+            "time_s": t,
+            "angles_rad": {n: v for n, v in resolved.items() if moving[n]["kind"] == "revolute"},
+            "issues": issues,
+        }
+        if any(j["kind"] == "prismatic" for j in moving.values()):
+            frame["positions_m"] = {
+                n: v for n, v in resolved.items() if moving[n]["kind"] == "prismatic"
+            }
+        frames.append(frame)
     return {
         "format": "photo2sim-observation-replay-1.0",
         "capture_id": capture_id,
         "physical_accuracy_verified": False,
         "dynamics_tested": False,
         "mapping_status": {m["joint"]: m["status"] for m in mappings},
-        "note": "Recorded kinematic poses only; user verification is an attestation. No predicted dynamics or hardware commands. Unmapped joints display at zero. Limits are not clipped.",
+        "note": "Recorded kinematic poses only; user verification is an attestation. No predicted dynamics or hardware commands. Unmapped independent joints display at zero; linked followers are derived from their driver. Limits are not clipped.",
         "frames": frames,
     }
 
 
 def apply_frame(model, data, frame):
     mujoco.mj_resetData(model, data)
-    for name, angle in frame["angles_rad"].items():
+    for name, angle in {**frame["angles_rad"], **frame.get("positions_m", {})}.items():
         idx = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
         require(idx >= 0, "Scene joint missing")
         data.qpos[model.jnt_qposadr[idx]] = 0 if angle is None else angle

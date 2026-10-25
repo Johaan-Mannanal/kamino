@@ -11,7 +11,7 @@ from xml.etree import ElementTree as ET
 import mujoco
 import numpy as np
 
-from photo2sim.assemblies.contracts import AssemblyRecord
+from photo2sim.assemblies.contracts import AssemblyRecord, joint_limits
 from photo2sim.assemblies.inspection import inspect_model
 from photo2sim.contracts import bundle_path
 
@@ -34,8 +34,10 @@ def _one(scene):
             record = AssemblyRecord.model_validate_json(
                 (root / "assembly.json").read_text(encoding="utf-8")
             )
-            hinges = [j for j in record.joints if j.kind == "revolute"]
-            _require(hinges, "Motion validation requires at least one driven revolute joint")
+            hinges = [j for j in record.joints if j.kind != "fixed" and j.drive is not None]
+            _require(
+                hinges, "Motion validation requires at least one independently driven moving joint"
+            )
             xml = ET.parse(scene).getroot()
             _require(
                 not xml.findall(".//include"), "Self-contained exports cannot include external XML"
@@ -60,15 +62,18 @@ def _one(scene):
             trials = []
             finals = []
             warning_count = 0
-            max_error = max_limit_violation = 0.0
             moved = True
+            all_moving = [j for j in record.joints if j.kind != "fixed"]
+            limit_indices = [(j, int(m.joint(j.name).qposadr[0])) for j in all_moving]
+            unit_errors = {"rad": 0.0, "m": 0.0}
+            unit_limits = {"rad": 0.0, "m": 0.0}
             for _ in range(2):
                 mujoco.mj_resetData(m, d)
                 mujoco.mj_forward(m, d)
                 phases = []
                 for j, qi, ai in indices:
                     actuals = []
-                    targets = [j.limits_rad[1] * 0.5, j.limits_rad[0] * 0.5, 0.0]
+                    targets = [joint_limits(j)[1] * 0.5, joint_limits(j)[0] * 0.5, 0.0]
                     for target in targets:
                         d.ctrl[:] = 0
                         d.ctrl[ai] = target
@@ -83,28 +88,65 @@ def _one(scene):
                             warning_count = max(
                                 warning_count, sum(int(w.number) for w in d.warning)
                             )
-                            for other, oq, _oa in indices:
-                                lo, hi = other.limits_rad
-                                max_limit_violation = max(
-                                    max_limit_violation,
-                                    lo - float(d.qpos[oq]),
-                                    float(d.qpos[oq]) - hi,
-                                )
+                            for other, oq in limit_indices:
+                                lo, hi = joint_limits(other)
+                                violation = max(0.0, lo - float(d.qpos[oq]), float(d.qpos[oq]) - hi)
+                                unit = "m" if other.kind == "prismatic" else "rad"
+                                unit_limits[unit] = max(unit_limits[unit], violation)
                         actual = float(d.qpos[qi])
                         actuals.append(actual)
                         errors = {
                             other.name: abs(float(d.qpos[oq]) - float(d.ctrl[oa]))
                             for other, oq, oa in indices
                         }
-                        error = max(errors.values())
-                        max_error = max(max_error, error)
+                        for other, _oq, _oa in indices:
+                            unit = "m" if other.kind == "prismatic" else "rad"
+                            unit_errors[unit] = max(unit_errors[unit], errors[other.name])
+                        for other in all_moving:
+                            if other.coupling:
+                                actual_follower = d.qpos[int(m.joint(other.name).qposadr[0])]
+                                actual_driver = d.qpos[
+                                    int(m.joint(other.coupling.driver_joint).qposadr[0])
+                                ]
+                                residual = abs(
+                                    float(
+                                        actual_follower
+                                        - other.coupling.offset
+                                        - other.coupling.ratio * actual_driver
+                                    )
+                                )
+                                unit = "m" if other.kind == "prismatic" else "rad"
+                                unit_errors[unit] = max(unit_errors[unit], residual)
                         phases.append(
                             {
                                 "joint": j.name,
-                                "target_rad": target,
-                                "actual_rad": actual,
-                                "max_all_joint_tracking_error_rad": error,
-                                "tracking_errors_rad": errors,
+                                "unit": "m" if j.kind == "prismatic" else "rad",
+                                "target": target,
+                                "actual": actual,
+                                "tracking_errors": errors,
+                                **(
+                                    {"target_m": target, "actual_m": actual}
+                                    if j.kind == "prismatic"
+                                    else {"target_rad": target, "actual_rad": actual}
+                                ),
+                                "tracking_errors_rad": {
+                                    other.name: errors[other.name]
+                                    for other, _, _ in indices
+                                    if other.kind == "revolute"
+                                },
+                                "tracking_errors_m": {
+                                    other.name: errors[other.name]
+                                    for other, _, _ in indices
+                                    if other.kind == "prismatic"
+                                },
+                                "max_all_joint_tracking_error_rad": max(
+                                    [
+                                        errors[other.name]
+                                        for other, _, _ in indices
+                                        if other.kind == "revolute"
+                                    ],
+                                    default=0.0,
+                                ),
                                 "simulated_time_s": float(d.time),
                             }
                         )
@@ -117,8 +159,10 @@ def _one(scene):
             checks = {
                 "reviewed_model_consistency": True,
                 "actual_joint_motion": bool(moved),
-                "tracking": max_error <= TRACKING_TOLERANCE_RAD,
-                "joint_limits": max_limit_violation <= TRACKING_TOLERANCE_RAD,
+                "tracking": unit_errors["rad"] <= TRACKING_TOLERANCE_RAD
+                and unit_errors["m"] <= 0.003,
+                "joint_limits": unit_limits["rad"] <= TRACKING_TOLERANCE_RAD
+                and unit_limits["m"] <= 0.003,
                 "reset_repeatable": repeatable,
                 "no_warnings": warning_count == 0 and not caught,
             }
@@ -129,8 +173,11 @@ def _one(scene):
                 reset_repeatable=repeatable,
                 warnings=warning_count,
                 python_warnings=[str(w.message) for w in caught],
-                max_tracking_error_rad=max_error,
-                max_limit_violation_rad=max_limit_violation,
+                max_tracking_error_rad=unit_errors["rad"],
+                max_tracking_error_m=unit_errors["m"],
+                max_limit_violation_m=unit_limits["m"],
+                joint_units={j.name: "m" if j.kind == "prismatic" else "rad" for j in all_moving},
+                max_limit_violation_rad=unit_limits["rad"],
                 timestep_s=float(m.opt.timestep),
                 steps_per_phase=steps,
                 synthetic=record.synthetic,
@@ -145,6 +192,7 @@ def validate_assembly(scene: Path, *, check_portability: bool = True) -> dict:
     """Exercise each hinge separately, twice from reset, with optional relocation."""
     scene = Path(scene).resolve()
     report = {
+        "tracking_tolerance_m": 0.003,
         "scope": "Fixed-root assembly motion smoke check; not calibrated dynamics or reconstruction accuracy",
         "viewer_inspected": False,
         "environment": {"mujoco": mujoco.__version__, "numpy": np.__version__},

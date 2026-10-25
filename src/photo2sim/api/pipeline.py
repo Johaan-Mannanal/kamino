@@ -84,6 +84,10 @@ def process_job(store: JobStore, job_id: UUID) -> None:
             vertices=rich_mesh.vertices, faces=rich_mesh.faces, process=False
         )
         geometry.export(visual, file_type="obj", digits=17)
+        if asset.collision.mesh_path is not None:
+            collision_copy = geometry_dir / asset.collision.mesh_path
+            collision_copy.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(prepared / asset.collision.mesh_path, collision_copy)
         asset = asset.model_copy(
             update={
                 "notes": [

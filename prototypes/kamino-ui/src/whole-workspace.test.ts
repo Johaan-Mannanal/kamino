@@ -14,6 +14,7 @@ vi.mock("../../../frontend/src/viewer", () => ({
   mountViewer: vi.fn(() =>
     Object.assign(vi.fn(), {
       setMode: vi.fn(),
+      setPhysicsPreview: vi.fn(),
       resetCamera: vi.fn(),
       getViewState: () => ({
         direction: [0, 0, 1],
@@ -193,7 +194,7 @@ it("preserves the restored camera across the first full-source sizing preview", 
   await vi.waitFor(() =>
     expect(vi.mocked(mountViewer).mock.lastCall?.[5]).toEqual([0.1, 0.1, 0.1]),
   );
-  expect(vi.mocked(mountViewer).mock.lastCall?.[7]).toEqual({
+  expect(vi.mocked(mountViewer).mock.lastCall?.[7]).toMatchObject({
     mode: "mesh",
     initialViewState: {
       direction: [0, 0, 1],
@@ -240,7 +241,9 @@ it("does not apply a historical subset scale to the whole source on reopening", 
     sizing_result: preview.sizing_result,
   } as Job;
   const { host } = mounted(old);
-  expect(host.querySelector("#live-saved")!.textContent).toBe("Reference review required");
+  expect(host.querySelector("#live-saved")!.textContent).toBe(
+    "Reference review required",
+  );
   expect(vi.mocked(mountViewer).mock.lastCall?.[5]).toBeUndefined();
   expect(vi.mocked(mountViewer).mock.lastCall?.[6]).toBeUndefined();
   expect(
@@ -303,26 +306,261 @@ it("discards a pending whole-source preview after orientation refresh", async ()
   expect(api.save).not.toHaveBeenCalled();
 });
 
-
 it("labels a saved full-source job without requesting target review", async () => {
   const { host, api } = mounted();
   readyDraft(host);
   host.querySelector<HTMLButtonElement>("#live-save")!.click();
   await vi.waitFor(() => expect(api.save).toHaveBeenCalledOnce());
-  await vi.waitFor(() => expect(host.querySelector("#live-saved")!.textContent).toBe("Saved"));
+  await vi.waitFor(() =>
+    expect(host.querySelector("#live-saved")!.textContent).toBe("Saved"),
+  );
   expect(host.querySelector("#live-save-status")!.textContent).toBe("Saved");
   expect(host.querySelector("#live-target")).toBeNull();
   fill(host, "mass", "0.3");
-  expect(host.querySelector("#live-saved")!.textContent).toBe("Draft · Unsaved changes");
+  expect(host.querySelector("#live-saved")!.textContent).toBe(
+    "Draft · Unsaved changes",
+  );
   expect(api.geometry).not.toHaveBeenCalled();
 });
-
 
 it("asks only for full-extent sizing after a whole-source orientation save", async () => {
   const { host, api, toast } = mounted();
   fill(host, "x", "90");
-  vi.mocked(api.saveOrientation).mockResolvedValueOnce({ ...base, orientation: { ...orientation, x_deg: 90 } });
+  vi.mocked(api.saveOrientation).mockResolvedValueOnce({
+    ...base,
+    orientation: { ...orientation, x_deg: 90 },
+  });
   host.querySelector<HTMLButtonElement>("#live-save-orientation")!.click();
-  await vi.waitFor(() => expect(toast).toHaveBeenCalledWith("Orientation saved. Confirm the full-mesh sizing reference again."));
+  await vi.waitFor(() =>
+    expect(toast).toHaveBeenCalledWith(
+      "Orientation saved. Confirm the full-mesh sizing reference again.",
+    ),
+  );
   expect(api.geometry).not.toHaveBeenCalled();
+});
+
+function physicsField(host: HTMLElement, key: string, value: string) {
+  const input = host.querySelector<HTMLInputElement | HTMLSelectElement>(
+    `[data-physics="${key}"]`,
+  )!;
+  expect(input, `advanced physics field ${key}`).not.toBeNull();
+  input.value = value;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+it("saves complete advanced physics and restores it when the saved whole-source job is reopened", async () => {
+  const { host, api, state } = mounted();
+  readyDraft(host);
+  const values = {
+    collision: "box",
+    box_x: "0.15",
+    box_y: "0.08",
+    box_z: "0.12",
+    offset_x: "0.01",
+    offset_y: "0",
+    offset_z: "0.02",
+    torsional: "0.003",
+    torsional_source: "measured",
+    rolling: "0.0002",
+    rolling_source: "sourced",
+    inertia: "manual",
+    com_x: "0.01",
+    com_y: "-0.02",
+    com_z: "0.03",
+    diagonal_x: "0.001",
+    diagonal_y: "0.002",
+    diagonal_z: "0.0025",
+    inertia_source: "measured",
+    contact: "soft",
+    response: "high",
+    contact_source: "estimated",
+    placement: "manual",
+    placement_x: "1",
+    placement_y: "-2",
+    placement_z: "0.4",
+  };
+  Object.entries(values).forEach(([key, value]) =>
+    physicsField(host, key, value),
+  );
+  host.querySelector<HTMLButtonElement>("#live-save")!.click();
+  await vi.waitFor(() => expect(api.save).toHaveBeenCalledOnce());
+  await vi.waitFor(() => expect(state.dirty).toBe(false));
+  const expected = {
+    collision: {
+      kind: "box",
+      box_size_m: [0.15, 0.08, 0.12],
+      offset_m: [0.01, 0, 0.02],
+    },
+    torsional_friction: { value: 0.003, source: "measured" },
+    rolling_friction: { value: 0.0002, source: "sourced" },
+    inertia: {
+      mode: "manual",
+      center_of_mass_m: [0.01, -0.02, 0.03],
+      diagonal_kg_m2: [0.001, 0.002, 0.0025],
+      source: "measured",
+    },
+    contact: { compliance: "soft", response: "high", source: "estimated" },
+  };
+  expect(api.save).toHaveBeenCalledWith(
+    id,
+    expect.objectContaining({
+      geometry_scope: "whole_reconstruction",
+      physics: expected,
+      placement_m: [1, -2, 0.4],
+    }),
+  );
+  expect(api.process).not.toHaveBeenCalled();
+
+  const reopened = mounted(state.job!);
+  Object.entries(values).forEach(([key, value]) => {
+    expect(
+      reopened.host.querySelector<HTMLInputElement>(`[data-physics="${key}"]`)!
+        .value,
+    ).toBe(value);
+  });
+  expect(
+    reopened.host.querySelector<HTMLFieldSetElement>(
+      '[data-physics-section="inertia"]',
+    )!.disabled,
+  ).toBe(false);
+  expect(
+    vi.mocked(mountViewer).mock.lastCall?.[7]?.physicsPreview,
+  ).toMatchObject({
+    metric: true,
+    physics: expected,
+    placement_m: [1, -2, 0.4],
+  });
+  fill(reopened.host, "mass", "0.3");
+  reopened.host.querySelector<HTMLButtonElement>("#live-save")!.click();
+  await vi.waitFor(() => expect(reopened.api.save).toHaveBeenCalledOnce());
+  expect(reopened.api.save).toHaveBeenCalledWith(
+    id,
+    expect.objectContaining({ physics: expected, placement_m: [1, -2, 0.4] }),
+  );
+});
+
+it("blocks invalid manual inertia before saving or generating and accepts a corrected triangle", async () => {
+  const { host, api } = mounted();
+  readyDraft(host);
+  physicsField(host, "inertia", "manual");
+  physicsField(host, "diagonal_x", "1");
+  physicsField(host, "diagonal_y", "1");
+  physicsField(host, "diagonal_z", "3");
+  expect(host.querySelector("#live-form-error")!.textContent).toContain(
+    "triangle inequalities",
+  );
+  expect(host.querySelector<HTMLButtonElement>("#live-save")!.disabled).toBe(
+    true,
+  );
+  expect(
+    host.querySelector<HTMLButtonElement>("#live-generate")!.disabled,
+  ).toBe(true);
+  host
+    .querySelector("#live-form")!
+    .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+  await Promise.resolve();
+  expect(api.save).not.toHaveBeenCalled();
+  expect(api.process).not.toHaveBeenCalled();
+  expect(api.previewSizing).not.toHaveBeenCalled();
+  physicsField(host, "diagonal_z", "1.5");
+  expect(host.querySelector("#live-form-error")!.textContent).toBe("");
+  expect(host.querySelector<HTMLButtonElement>("#live-save")!.disabled).toBe(
+    false,
+  );
+  host.querySelector<HTMLButtonElement>("#live-save")!.click();
+  await vi.waitFor(() => expect(api.save).toHaveBeenCalledOnce());
+  expect(api.save).toHaveBeenCalledWith(
+    id,
+    expect.objectContaining({
+      physics: expect.objectContaining({
+        inertia: expect.objectContaining({ diagonal_kg_m2: [1, 1, 1.5] }),
+      }),
+    }),
+  );
+});
+
+it.each(["saved", "unsaved"] as const)(
+  "updates collision and world placement immediately without reloading %s sized geometry",
+  async (sizingState) => {
+    const sizedJob = {
+      ...base,
+      properties: {
+        geometry_scope: "whole_reconstruction",
+        source_mesh_sha256: hash,
+        geometry_context_sha256: binding,
+        dimensions_m: preview.dimensions_m,
+        mass_kg: { value: 0.2, source: "measured" },
+        sliding_friction: null,
+        sizing,
+      },
+      sizing_result: preview.sizing_result,
+    } as Job;
+    const { host, api } = mounted(sizingState === "saved" ? sizedJob : base);
+    if (sizingState === "unsaved") {
+      readyDraft(host);
+      host.querySelector<HTMLButtonElement>("#live-preview")!.click();
+    }
+    await vi.waitFor(() =>
+      expect(vi.mocked(mountViewer).mock.lastCall?.[5]).toEqual([
+        0.1, 0.1, 0.1,
+      ]),
+    );
+    const handle = vi.mocked(mountViewer).mock.results.at(-1)!.value;
+    const changes = vi.mocked(handle.setPhysicsPreview!);
+    const mounts = vi.mocked(mountViewer).mock.calls.length;
+    const previews = vi.mocked(api.previewSizing).mock.calls.length;
+    physicsField(host, "collision", "box");
+    physicsField(host, "box_x", "0.2");
+    physicsField(host, "box_y", "0.1");
+    physicsField(host, "box_z", "0.3");
+    physicsField(host, "offset_x", "0.04");
+    physicsField(host, "placement", "manual");
+    physicsField(host, "placement_x", "1");
+    physicsField(host, "placement_y", "2");
+    physicsField(host, "placement_z", "3");
+    host.querySelector<HTMLButtonElement>("#live-collision")!.click();
+    expect(changes).toHaveBeenLastCalledWith({
+      physics: {
+        collision: {
+          kind: "box",
+          box_size_m: [0.2, 0.1, 0.3],
+          offset_m: [0.04, 0, 0],
+        },
+      },
+      placement_m: [1, 2, 3],
+      metric: true,
+      showCollision: true,
+    });
+    expect(
+      host.querySelector("#live-collision")!.getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(vi.mocked(mountViewer).mock.calls.length).toBe(mounts);
+    expect(vi.mocked(api.previewSizing).mock.calls.length).toBe(previews);
+    expect(api.save).not.toHaveBeenCalled();
+    expect(api.process).not.toHaveBeenCalled();
+    host.querySelector<HTMLButtonElement>("#live-collision")!.click();
+    expect(changes.mock.lastCall?.[0].showCollision).toBe(false);
+    expect(vi.mocked(mountViewer).mock.calls.length).toBe(mounts);
+  },
+);
+
+it("shows collision preview errors accessibly and clears them after a successful preview", () => {
+  const { host } = mounted();
+  const onError =
+    vi.mocked(mountViewer).mock.lastCall?.[7]?.onPhysicsPreviewError;
+  expect(onError).toBeTypeOf("function");
+  const status = host.querySelector<HTMLElement>(
+    "#live-physics-preview-error",
+  )!;
+  expect(status.hidden).toBe(true);
+  onError!(
+    "Convex collision preview needs a nonzero-volume three-dimensional mesh.",
+  );
+  expect(status.hidden).toBe(false);
+  expect(status.getAttribute("role")).toBe("status");
+  expect(status.textContent).toContain("Collision overlay unavailable");
+  expect(status.textContent).toContain("nonzero-volume");
+  onError!(null);
+  expect(status.hidden).toBe(true);
+  expect(status.textContent).toBe("");
 });

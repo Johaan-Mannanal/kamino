@@ -586,3 +586,53 @@ it('restores retained mapping evidence and saves it with revision/version precon
   document.querySelector<HTMLElement>('#approve')!.click()
   expect(document.querySelector<HTMLButtonElement>('#save-mapping-job')!.disabled).toBe(true)
 })
+
+it('applies optional per-link physics, blocks invalid values and restores the selected record', async () => {
+  await load()
+  const advanced = document.querySelector<HTMLDetailsElement>('#fields details.advanced-physics')!
+  expect(advanced.open).toBe(false)
+  const rolling = document.querySelector<HTMLInputElement>('[data-physics="rolling"]')!
+  rolling.value = '-.1'
+  rolling.dispatchEvent(new Event('input', { bubbles: true }))
+  expect(document.querySelector<HTMLButtonElement>('#apply')!.disabled).toBe(true)
+  rolling.value = '.02'
+  rolling.dispatchEvent(new Event('input', { bubbles: true }))
+  expect(document.querySelector<HTMLButtonElement>('#apply')!.disabled).toBe(false)
+  document.querySelector<HTMLButtonElement>('#apply')!.click()
+  const record = JSON.parse(document.querySelector<HTMLTextAreaElement>('#editor')!.value)
+  expect(record.physics.rolling_friction).toEqual({ value: 0.02, source: 'user_supplied' })
+  const saved = JSON.parse(document.querySelector<HTMLTextAreaElement>('#full')!.value)
+  expect(saved.groups[0].physics).toEqual(record.physics)
+  expect(document.querySelector<HTMLInputElement>('[data-physics="rolling"]')!.value).toBe('0.02')
+  expect(document.querySelector('[data-physics="placement"]')).toBeNull()
+})
+
+it('edits slider spring fields in metres and newtons and previews travel without a hinge-only label', async () => {
+  await load()
+  for (const [id, value] of [
+    ['new-link-name', 'carriage'],
+    ['new-joint-name', 'travel'],
+    ['new-kind', 'prismatic'],
+  ])
+    (document.getElementById(id) as HTMLInputElement).value = value
+  document.querySelector<HTMLButtonElement>('#add-link')!.click()
+  const selection = document.querySelector<HTMLSelectElement>('#selection')!
+  selection.value = 'joint:0'
+  selection.dispatchEvent(new Event('change'))
+  expect(document.querySelector('[aria-label="Lower limit (m)"]')).not.toBeNull()
+  expect(document.querySelector('[aria-label="Force limit (N)"]')).not.toBeNull()
+  expect(document.querySelector('[aria-label="Torque limit (Nm)"]')).toBeNull()
+  const stiffness = document.querySelector<HTMLInputElement>(
+    '[aria-label="Spring stiffness (N/m; blank = none)"]',
+  )!
+  const rest = document.querySelector<HTMLInputElement>('[aria-label="Spring rest (m)"]')!
+  stiffness.value = '12'
+  stiffness.dispatchEvent(new Event('input'))
+  rest.value = '.02'
+  rest.dispatchEvent(new Event('input'))
+  document.querySelector<HTMLButtonElement>('#apply')!.click()
+  const record = JSON.parse(document.querySelector<HTMLTextAreaElement>('#editor')!.value)
+  expect(record.spring).toMatchObject({ stiffness: 12, rest: 0.02, source: 'estimated' })
+  expect(record.drive).toMatchObject({ force_limit_n: 2 })
+  expect(document.querySelector('#sliders')?.textContent).toContain('m')
+})

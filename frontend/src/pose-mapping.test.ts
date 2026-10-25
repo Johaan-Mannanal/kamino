@@ -177,3 +177,34 @@ it('rejects invalid observation timelines and preserves stationary packs', () =>
     expect(() => parseCaptures(JSON.stringify(raw))).toThrow(/observation/i)
   }
 })
+it('loads and saves legacy mapping attestations after only new defaults are expanded', () => {
+  const single = structuredClone(project)
+  single.joints = [single.joints[0]]
+  single.joints[0].limits_rad = [-2, 2]
+  single.joints[0].drive = { kp: 5, force_limit_nm: 2, source: 'estimated' }
+  const captures = parseCaptures(JSON.stringify(pack))
+  const mapped = createMappings(single, captures)
+  mapped[0] = verifyMapping(
+    single,
+    captures,
+    mapped,
+    mapped[0].joint,
+    'Reviewer',
+    'Two fixture poses',
+    captures.captures.map((c) => c.id),
+  )
+  const review = saveReview(single, captures, mapped)
+  const legacy = JSON.parse(JSON.stringify(review))
+  // Recreate pre-extension binding text rather than using the new writer.
+  const binding = JSON.parse(legacy.mappings[0].verification_binding)
+  legacy.mappings[0].verification_binding = JSON.stringify(binding)
+  legacy.project_snapshot = JSON.stringify(single)
+  const expanded = structuredClone(single)
+  Object.assign(expanded.joints[0], { limits_m: null, spring: null, coupling: null })
+  expanded.joints[0].drive!.force_limit_n = null
+  const loaded = loadReview(JSON.stringify(legacy), expanded)
+  expect(loaded.mappings[0].status).toBe('user_verified')
+  expect(loaded.mappings[0].verification_binding).toBe(legacy.mappings[0].verification_binding)
+  expanded.joints[0].spring = { stiffness: 1, rest: 0, source: 'estimated' }
+  expect(() => loadReview(JSON.stringify(legacy), expanded)).toThrow(/different project/)
+})

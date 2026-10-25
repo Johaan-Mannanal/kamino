@@ -7,6 +7,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from photo2sim.physics import PhysicsSettings, Vector3
+
 Source = Literal["measured", "user_supplied", "sourced", "estimated"]
 ProviderName = Literal["mock", "meshy"]
 JobStatus = Literal[
@@ -156,6 +158,9 @@ class AssetProperties(Contract):
     sliding_friction: ScalarProperty | None = None
     # Missing in historical records: preserve their original three-axis behavior.
     sizing: Sizing | None = None
+    physics: PhysicsSettings | None = None
+    # Explicit local body-origin world position in metres; null retains the 20 mm drop.
+    placement_m: Vector3 | None = None
 
     @field_validator("mass_kg")
     @classmethod
@@ -228,6 +233,15 @@ class RigidAttempt(Contract):
     error: JobError | None = None
 
 
+class ReconstructionProgress(Contract):
+    """Provider-reported milestones, separate from local artifact readiness."""
+
+    stage: Literal["submitting", "queued", "processing", "downloading", "ready"]
+    stage_started_at: datetime
+    provider_progress: Annotated[int, Field(ge=0, le=100, strict=True)] | None = None
+    last_advanced_at: datetime | None = None
+
+
 class JobRecord(Contract):
     schema_version: Literal["1.0"] = "1.0"
     id: UUID
@@ -237,6 +251,7 @@ class JobRecord(Contract):
     created_at: datetime
     updated_at: datetime
     progress: Annotated[int, Field(ge=0, le=100)] = 0
+    reconstruction_progress: ReconstructionProgress | None = None
     source_images: list[str] = Field(default_factory=list)
     provider_task_id: str | None = None
     mesh_path: str | None = None

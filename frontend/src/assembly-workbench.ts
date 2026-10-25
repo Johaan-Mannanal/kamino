@@ -5,6 +5,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import {
   assignPart,
   frames,
+  jointLimits,
+  jointValues,
   invalidateReview,
   matrix,
   parsePackage,
@@ -16,6 +18,12 @@ import { addConnectedLink, renameLink, changeJointKind } from './assembly-builde
 import { validationFindings } from './assembly-diagnostics'
 import { buildCollisionPreviews, type CollisionMode } from './assembly-collision'
 import { createMappingPanel } from './pose-mapping-panel'
+import {
+  createPhysicsDraft,
+  advancedPhysicsControls,
+  readAdvancedPhysics,
+  validateAdvancedPhysics,
+} from './advanced-physics'
 import './assembly.css'
 
 const root = document.querySelector<HTMLDivElement>('#assembly-app')!
@@ -26,8 +34,8 @@ root.innerHTML = `<header><a href="/">Kamino</a><span>Guided assembly review</sp
 <label class="load">Open review package <input id="load" type="file" accept=".json,application/json"></label>
 <p id="message" role="status">Import a project and its meshes, open a saved job, or load an offline review package.</p>
 <div id="workspace" hidden><div class="layout"><section class="stage"><div id="viewer"></div><button id="reset">Reset preview pose</button><label><input id="show-collision" type="checkbox"> Show collision approximation</label><p id="collision-preview-note"></p><p id="collision-preview-warning" role="status"></p><p id="summary"></p><div id="sliders"></div></section>
-<section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div><details><summary>Add a link and connection</summary><div class="guided-grid"><label>New link name <input id="new-link-name"></label><label>Parent link <select id="new-parent"></select></label><label>New joint name <input id="new-joint-name"></label><label>Connection type <select id="new-kind"><option value="revolute">Revolute hinge</option><option value="fixed">Fixed</option></select></label></div><button id="add-link">Add link and joint</button><p>Assign at least one part to the new link, then review its pivot, mass and joint parameters. A hinge starts on local Z with estimated drive settings.</p></details>
-<h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; limits are radians. Pivot edits change joint frames while preserving source geometry at the reference pose; they do not translate the entire scene. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
+<section class="edit"><h2>1. Group parts</h2><p>Colors identify rigid links. Unassigned parts need an exclusion reason. Reassignment preserves their reference position.</p><div id="parts"></div><details><summary>Add a link and connection</summary><div class="guided-grid"><label>New link name <input id="new-link-name"></label><label>Parent link <select id="new-parent"></select></label><label>New joint name <input id="new-joint-name"></label><label>Connection type <select id="new-kind"><option value="revolute">Revolute hinge</option><option value="prismatic">Prismatic slider</option><option value="fixed">Fixed</option></select></label></div><button id="add-link">Add link and joint</button><p>Assign at least one part to the new link, then review its pivot, mass and joint parameters. A moving joint starts on local Z with estimated drive settings.</p></details>
+<h2>2. Review links and joints</h2><label>Review item <select id="selection"></select></label><p>Edit the selected record below. Link frames are common-reference pivots in metres; joint axes are local unit vectors; hinge limits are radians and slider travel is metres. Pivot edits change joint frames while preserving source geometry at the reference pose; they do not translate the entire scene. Source and review notes travel with the export.</p><div id="fields"></div><details><summary>Advanced selected record JSON</summary><textarea id="editor" spellcheck="false" aria-label="Selected review record"></textarea></details><button id="apply">Apply edit</button><button id="approve">Acknowledge this item</button><p>Write a review_note before acknowledging. Any geometry, grouping or parameter edit clears all acknowledgements. This does not mark estimates as measurements.</p>
 <h2>3. Save and process</h2><button id="save-revision">Save revision to job</button><label>Collision geometry <select id="collision-mode"><option value="box">Box (historical default)</option><option value="convex_mesh">Convex mesh</option></select></label><label><input id="exclude-joint-pairs" type="checkbox"> Exclude direct parent-child collision pairs</label><button id="process">Run preparation, export and validation</button><p>These export settings are recorded per attempt and do not alter the reviewed source project. Save the review before processing. To change a completed result, apply edits, acknowledge the revised inputs and save a new revision. Previous attempts remain available after a revision or failed validation.</p><button id="save">Download project JSON</button><button id="save-package">Download review package</button>
 <div id="mapping-review"></div><button id="save-mapping-job" disabled>Save mapping to job</button><p>Mapping evidence is retained for this saved revision. Existing attempt ZIPs remain unchanged. A newly saved mapping can be exported in a new attempt on this revision.</p><details><summary>Advanced: full project / add links and joints</summary><textarea id="full" aria-label="Full project JSON" spellcheck="false"></textarea><button id="apply-full">Apply full project</button></details><details><summary>Provenance and limitations</summary><pre id="notes"></pre></details></section></div></div></main>`
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
@@ -62,20 +70,21 @@ const mappingPanel = createMappingPanel(
     values = { ...pose }
     const sliders = el('sliders').querySelectorAll<HTMLInputElement>('input[type=range]')
     payload?.project.joints
-      .filter((j) => j.kind === 'revolute')
-      .forEach((j, i) => {
-        const angle = values[j.name] ?? 0
-        sliders[i].disabled = !!capture
+      .filter((j) => j.kind !== 'fixed')
+      .forEach((j) => {
+        const slider = Array.from(sliders).find((s) => s.dataset.joint === j.name)!
+        const angle = jointValues(payload!.project, values)[j.name]
+        slider.disabled = !!capture || !!j.coupling
         // A range input clamps values, so keep candidate truth in the label and values map.
-        sliders[i].value = capture ? '0' : String(angle)
-        sliders[i].hidden = !!capture
-        sliders[i].parentElement!.querySelector('span')!.textContent =
-          `${j.name} · ${angle.toFixed(5)} rad${capture ? ' · capture candidate (unclipped)' : ''}`
+        slider.value = capture ? '0' : String(angle)
+        slider.hidden = !!capture
+        slider.parentElement!.querySelector('span')!.textContent =
+          `${j.name} · ${angle.toFixed(5)} ${j.kind === 'prismatic' ? 'm' : 'rad'}${capture ? ' · capture candidate (unclipped)' : ''}${j.coupling ? ' · linked follower' : ''}`
       })
     updateView?.()
     message(
       capture
-        ? `Previewing ${capture}. Unmapped joints display at zero; no physical mapping or accuracy implied.`
+        ? `Previewing ${capture}. Unmapped independent joints display at zero; linked followers use their driver. No physical mapping or accuracy implied.`
         : 'Capture preview reset.',
     )
   },
@@ -264,6 +273,7 @@ function select(draft = selection()) {
   const item = structuredClone(draft)
   const editor = el<HTMLTextAreaElement>('editor')
   editor.value = JSON.stringify(item, null, 2)
+  el<HTMLButtonElement>('apply').disabled = false
   const fields = el('fields')
   fields.replaceChildren()
   function input(label: string, value: number | string, update: (value: string) => void) {
@@ -343,6 +353,26 @@ function select(draft = selection()) {
       frictionNote = v
       if (item.sliding_friction) item.sliding_friction.note = v
     })
+    const physicsHost = document.createElement('div')
+    let physicsDraft = createPhysicsDraft(item.physics)
+    physicsHost.innerHTML = advancedPhysicsControls(physicsDraft, { placement: false })
+      .replace('Default bounding box', 'Use export collision setting')
+      .replace('Collision offset from body centre', 'Collision offset from mesh bounds centre')
+    const updatePhysics = () => {
+      physicsDraft = readAdvancedPhysics(physicsHost, physicsDraft)
+      const checked = validateAdvancedPhysics(physicsDraft, { placement: false })
+      if (checked.ok) {
+        item.physics = checked.physics
+        editor.value = JSON.stringify(item, null, 2)
+        el<HTMLButtonElement>('apply').disabled = false
+      } else {
+        el<HTMLButtonElement>('apply').disabled = true
+        message(checked.error)
+      }
+    }
+    physicsHost.addEventListener('input', updatePhysics)
+    physicsHost.addEventListener('change', updatePhysics)
+    fields.append(physicsHost)
   } else {
     input('Joint name', item.name, (v) => {
       item.name = v
@@ -353,8 +383,10 @@ function select(draft = selection()) {
     kind.setAttribute('aria-label', 'Joint type')
     kind.add(new Option('Fixed', 'fixed'))
     kind.add(new Option('Revolute hinge', 'revolute'))
+    kind.add(new Option('Prismatic slider', 'prismatic'))
     kind.value = item.kind
-    kind.onchange = () => select(changeJointKind(item, kind.value as 'fixed' | 'revolute'))
+    kind.onchange = () =>
+      select(changeJointKind(item, kind.value as 'fixed' | 'revolute' | 'prismatic'))
     kindLabel.append(kind)
     fields.append(kindLabel)
     input('Parent link', item.parent, (v) => {
@@ -369,24 +401,125 @@ function select(draft = selection()) {
           item.axis![i] = Number(v)
         }),
       )
-    if (item.limits_rad)
+    const limits = jointLimits(item)
+    const unit = item.kind === 'prismatic' ? 'm' : 'rad'
+    if (limits)
       ['Lower', 'Upper'].forEach((label, i) =>
-        input(`${label} limit (rad)`, item.limits_rad![i], (v) => {
-          item.limits_rad![i] = Number(v)
+        input(`${label} limit (${unit})`, limits[i], (v) => {
+          limits[i] = Number(v)
         }),
       )
     if (item.drive) {
-      input('Position gain (Nm/rad)', item.drive.kp, (v) => {
-        item.drive!.kp = Number(v)
-      })
-      input('Torque limit (Nm)', item.drive.force_limit_nm, (v) => {
-        item.drive!.force_limit_nm = Number(v)
-      })
+      input(
+        item.kind === 'prismatic' ? 'Position gain (N/m)' : 'Position gain (Nm/rad)',
+        item.drive.kp,
+        (v) => {
+          item.drive!.kp = Number(v)
+        },
+      )
+      input(
+        item.kind === 'prismatic' ? 'Force limit (N)' : 'Torque limit (Nm)',
+        (item.kind === 'prismatic' ? item.drive.force_limit_n : item.drive.force_limit_nm)!,
+        (v) => {
+          if (item.kind === 'prismatic') item.drive!.force_limit_n = Number(v)
+          else item.drive!.force_limit_nm = Number(v)
+        },
+      )
     }
     if (item.damping)
-      input('Damping (Nm s/rad)', item.damping.value, (v) => {
-        item.damping!.value = Number(v)
+      input(
+        item.kind === 'prismatic' ? 'Damping (N s/m)' : 'Damping (Nm s/rad)',
+        item.damping.value,
+        (v) => {
+          item.damping!.value = Number(v)
+        },
+      )
+    if (item.kind !== 'fixed') {
+      const advanced = document.createElement('details')
+      const summary = document.createElement('summary')
+      summary.textContent = 'Advanced joint physics'
+      advanced.append(summary)
+      const start = fields.childElementCount
+      input(
+        `Spring stiffness (${item.kind === 'prismatic' ? 'N/m' : 'Nm/rad'}; blank = none)`,
+        item.spring?.stiffness ?? '',
+        (v) => {
+          item.spring =
+            v.trim() === ''
+              ? null
+              : {
+                  stiffness: Number(v),
+                  rest: item.spring?.rest ?? 0,
+                  source: item.spring?.source ?? 'estimated',
+                  note: item.spring?.note,
+                }
+        },
+      )
+      input(`Spring rest (${unit})`, item.spring?.rest ?? 0, (v) => {
+        item.spring = {
+          stiffness: item.spring?.stiffness ?? 0,
+          rest: Number(v),
+          source: item.spring?.source ?? 'estimated',
+          note: item.spring?.note,
+        }
       })
+      provenance('Spring provenance', item.spring?.source ?? 'estimated', (v) => {
+        if (item.spring) item.spring.source = v
+      })
+      input('Spring note', item.spring?.note ?? '', (v) => {
+        if (item.spring) item.spring.note = v
+      })
+      const driverLabel = document.createElement('label')
+      driverLabel.textContent = 'Linked motion driver'
+      const driver = document.createElement('select')
+      driver.setAttribute('aria-label', 'Linked motion driver')
+      driver.add(new Option('Independent position drive', ''))
+      payload!.project.joints
+        .filter((j) => j.name !== item.name && j.kind === item.kind)
+        .forEach((j) => driver.add(new Option(j.name, j.name)))
+      driver.value = item.coupling?.driver_joint ?? ''
+      driver.onchange = () => {
+        item.coupling = driver.value
+          ? {
+              driver_joint: driver.value,
+              ratio: item.coupling?.ratio ?? 1,
+              offset: item.coupling?.offset ?? 0,
+              source: item.coupling?.source ?? 'estimated',
+              note: item.coupling?.note,
+            }
+          : null
+        item.drive = item.coupling
+          ? null
+          : {
+              kp: 5,
+              ...(item.kind === 'prismatic' ? { force_limit_n: 2 } : { force_limit_nm: 2 }),
+              source: 'estimated',
+            }
+        select(item)
+      }
+      driverLabel.append(driver)
+      fields.append(driverLabel)
+      if (item.coupling) {
+        input('Linked motion ratio (follower / driver)', item.coupling.ratio, (v) => {
+          item.coupling!.ratio = Number(v)
+        })
+        input(`Linked motion offset (${unit})`, item.coupling.offset, (v) => {
+          item.coupling!.offset = Number(v)
+        })
+        provenance('Linked motion provenance', item.coupling.source, (v) => {
+          item.coupling!.source = v
+        })
+        input('Linked motion note', item.coupling.note ?? '', (v) => {
+          item.coupling!.note = v
+        })
+      }
+      while (fields.childElementCount > start) advanced.append(fields.children[start])
+      const caption = document.createElement('p')
+      caption.textContent =
+        'Springs act in the regenerated simulator export. Linked followers use one equality constraint and no competing actuator. This preview only moves geometry.'
+      advanced.append(caption)
+      fields.append(advanced)
+    }
     provenance('Joint provenance', item.source, (v) => {
       item.source = v
     })
@@ -458,20 +591,31 @@ function render() {
   const sliders = el('sliders')
   sliders.replaceChildren()
   for (const j of p.joints) {
-    if (j.kind !== 'revolute' || !j.limits_rad) continue
+    const limits = jointLimits(j)
+    if (j.kind === 'fixed' || !limits) continue
     const label = document.createElement('label')
     const title = document.createElement('span')
-    title.textContent = j.name + ' · 0.000 rad'
+    const unit = j.kind === 'prismatic' ? 'm' : 'rad'
+    title.textContent = `${j.name} · ${jointValues(p, values)[j.name].toFixed(3)} ${unit}${j.coupling ? ' · linked follower' : ''}`
     const slider = document.createElement('input')
     slider.type = 'range'
-    slider.min = String(j.limits_rad[0])
-    slider.max = String(j.limits_rad[1])
+    slider.min = String(limits[0])
+    slider.max = String(limits[1])
     slider.step = 'any'
-    slider.value = '0'
-    slider.setAttribute('aria-label', j.name + ' angle')
+    slider.value = String(jointValues(p, values)[j.name])
+    slider.dataset.joint = j.name
+    slider.disabled = !!j.coupling
+    slider.setAttribute('aria-label', j.name + (j.kind === 'prismatic' ? ' position' : ' angle'))
     slider.oninput = () => {
       values[j.name] = +slider.value
-      title.textContent = j.name + ' · ' + (+slider.value).toFixed(3) + ' rad'
+      const resolved = jointValues(p, values)
+      sliders.querySelectorAll<HTMLInputElement>('input[data-joint]').forEach((input) => {
+        const joint = p.joints.find((j) => j.name === input.dataset.joint)!
+        const position = resolved[joint.name]
+        input.value = String(position)
+        input.parentElement!.querySelector('span')!.textContent =
+          `${joint.name} · ${position.toFixed(3)} ${joint.kind === 'prismatic' ? 'm' : 'rad'}${joint.coupling ? ' · linked follower' : ''}`
+      })
       updateView?.()
     }
     label.append(title, slider)
@@ -582,7 +726,7 @@ function mount() {
       axes.push(a)
     }
     for (const j of p.joints) {
-      if (j.kind !== 'revolute' || !j.axis) continue
+      if (j.kind === 'fixed' || !j.axis) continue
       const a = new THREE.ArrowHelper(
         new THREE.Vector3(0, 0, 1),
         new THREE.Vector3(),
@@ -621,7 +765,7 @@ function mount() {
         })
         let n = 0
         for (const j of p.joints) {
-          if (j.kind !== 'revolute' || !j.axis) continue
+          if (j.kind === 'fixed' || !j.axis) continue
           const t = transforms[j.child]
           arrows[n].position.setFromMatrixPosition(t)
           arrows[n++].setDirection(new THREE.Vector3(...j.axis).transformDirection(t))
@@ -713,7 +857,7 @@ el('add-link').onclick = () => {
       el<HTMLInputElement>('new-link-name').value.trim(),
       el<HTMLSelectElement>('new-parent').value,
       el<HTMLInputElement>('new-joint-name').value.trim(),
-      el<HTMLSelectElement>('new-kind').value as 'fixed' | 'revolute',
+      el<HTMLSelectElement>('new-kind').value as 'fixed' | 'revolute' | 'prismatic',
     )
     payload = parsePackage(JSON.stringify(next))
     render()

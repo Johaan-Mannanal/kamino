@@ -19,7 +19,7 @@ try {
     }
     if (!ready) throw new Error('Preview server did not become ready within 15 seconds.');
   }
-  for (const file of ['browser-check.cjs', 'home-check.cjs', 'appearance-check.cjs', 'pause-check.cjs']) {
+  for (const file of ['browser-check.cjs', 'home-check.cjs', 'home-mobile-check.cjs', 'appearance-check.cjs', 'pause-check.cjs']) {
     const code = await new Promise((resolve, reject) => {
       const child = spawn(process.execPath, [file], { cwd: root, env: { ...process.env, KAMINO_BASE_URL: baseUrl }, stdio: 'inherit', windowsHide: true });
       child.once('error', reject);

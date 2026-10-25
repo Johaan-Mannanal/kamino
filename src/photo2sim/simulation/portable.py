@@ -135,7 +135,7 @@ def write_portable_files(folder: Path, record: dict, assumptions: dict):
         "Source labels describe the supplied evidence; review does not turn estimates into measurements.",
         "",
         f"- Collision: {_cell(assumptions['collision'])}.",
-        "- Inertia: uniform solid cuboid approximation; not measured inertia.",
+        "- Inertia: inspect per-body applied settings below; automatic uses a uniform solid cuboid approximation, not measured inertia.",
         f"- Gravity (m/s²): {assumptions['gravity_m_s2']}; timestep (s): {assumptions['timestep_s']}.",
         f"- Contact solref: {assumptions['contact_solref']} (numerical assumption).",
     ]
@@ -160,6 +160,13 @@ def write_portable_files(folder: Path, record: dict, assumptions: dict):
     members = record["links"] if assembly else [{"name": "object", **record["properties"]}]
     for member in members:
         name = member["name"]
+        if member.get("physics"):
+            row(
+                name + " advanced physics (SI)",
+                json.dumps(member["physics"], sort_keys=True),
+                "per-field source in saved settings",
+                "Full box sizes and offsets m; manual COM m; diagonal inertia kg*m^2; torsional/rolling friction m. Contact response is not a restitution coefficient.",
+            )
         scalar(name + " mass (kg)", member["mass_kg"])
         if member.get("sliding_friction") is None:
             value = (
@@ -190,15 +197,31 @@ def write_portable_files(folder: Path, record: dict, assumptions: dict):
                 joint["source"],
                 joint.get("note"),
             )
-            if joint["kind"] == "revolute":
-                scalar(joint["name"] + " damping", joint["damping"])
-                drive = joint["drive"]
-                row(
-                    joint["name"] + " drive",
-                    f"kp={drive['kp']} Nm/rad; torque limit={drive['force_limit_nm']} Nm",
-                    drive["source"],
-                    drive.get("note"),
+            if joint["kind"] != "fixed":
+                slider = joint["kind"] == "prismatic"
+                scalar(
+                    joint["name"] + (" damping (N*s/m)" if slider else " damping (Nm*s/rad)"),
+                    joint["damping"],
                 )
+                drive = joint.get("drive")
+                if drive is not None:
+                    units = "N/m" if slider else "Nm/rad"
+                    limit = drive["force_limit_n" if slider else "force_limit_nm"]
+                    row(
+                        joint["name"] + " drive",
+                        f"kp={drive['kp']} {units}; limit={limit} {'N' if slider else 'Nm'}",
+                        drive["source"],
+                        drive.get("note"),
+                    )
+                for field in ("spring", "coupling"):
+                    supplied = joint.get(field)
+                    if supplied is not None:
+                        row(
+                            joint["name"] + " " + field,
+                            json.dumps(supplied, sort_keys=True),
+                            supplied.get("source", "user_supplied"),
+                            supplied.get("note"),
+                        )
     else:
         dimensions = record["properties"]["dimensions_m"]
         row(
@@ -210,7 +233,7 @@ def write_portable_files(folder: Path, record: dict, assumptions: dict):
     lines.extend(
         [
             "",
-            "Torsional/rolling friction, contact settings and box inertia are simulation assumptions.",
+            "Omitted torsional/rolling friction, contact settings and automatic box inertia are simulation assumptions.",
             "Read the full JSON records for frames, limits, notes and retained provenance.",
             "",
             "No measured physical accuracy or calibrated hardware response is established.",

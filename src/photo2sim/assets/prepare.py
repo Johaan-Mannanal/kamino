@@ -13,6 +13,7 @@ from photo2sim.contracts import AssetProperties, AssetRecord, CollisionGeometry,
 
 SUPPORTED_EXTENSIONS = {".obj": "obj", ".glb": "glb"}
 VISUAL_MESH = "meshes/visual.obj"
+COLLISION_MESH = "meshes/collision.obj"
 DISTORTION_TOLERANCE = 0.01
 # Relative to the largest extent; below this an axis or the surface is treated as collapsed.
 DEGENERATE_TOLERANCE = 1e-9
@@ -60,9 +61,28 @@ def prepare_asset(
     scale = np.array(sizing_result.scale_factors)
     mesh.vertices = (mesh.vertices - source_centre) * scale
 
-    _write_bundle(mesh, output_dir)
+    collision_settings = properties.physics.collision if properties.physics else None
+    hull = None
+    if collision_settings and collision_settings.kind == "convex_hull":
+        try:
+            hull = mesh.convex_hull
+            if not np.isfinite(hull.volume) or hull.volume <= 0 or not hull.is_watertight:
+                raise ValueError("Hull must enclose a finite positive volume")
+        except Exception as error:
+            raise AssetPreparationError(
+                f"Could not compute convex hull from prepared vertices: {error}"
+            ) from error
+    _write_bundle(mesh, output_dir, hull)
 
     notes = _notes(mesh_path, source_extents, source_centre, target, scale, baked_transforms)
+    if collision_settings:
+        notes[-1] = (
+            "Collision is a convex hull computed from the prepared mesh vertices; concavities "
+            "are filled, not measured contact geometry."
+            if hull is not None
+            else "Collision uses the explicit box dimensions (or confirmed extents when omitted) "
+            "and body-local offset in metres; not measured contact geometry."
+        )
     if sizing_result.mode == "uniform":
         notes[2] = (
             f"Uniform scalar {scale[0]:.12g} applied after reviewed orientation; "
@@ -85,7 +105,9 @@ def prepare_asset(
         asset_id=uuid4(),
         visual_mesh=VISUAL_MESH,
         properties=properties,
-        collision=CollisionGeometry(kind="box"),
+        collision=CollisionGeometry(kind="convex_mesh", mesh_path=COLLISION_MESH)
+        if hull is not None
+        else CollisionGeometry(kind="box"),
         synthetic=False,
         notes=notes,
         orientation=orientation,
@@ -159,7 +181,7 @@ def _check_geometry(mesh: trimesh.Trimesh, mesh_path: Path) -> None:
         )
 
 
-def _write_bundle(mesh: trimesh.Trimesh, output_dir: Path) -> None:
+def _write_bundle(mesh: trimesh.Trimesh, output_dir: Path, hull=None) -> None:
     output_dir.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=".photo2sim-prepare-", dir=output_dir.parent))
     created_output = not output_dir.exists()
@@ -168,6 +190,8 @@ def _write_bundle(mesh: trimesh.Trimesh, output_dir: Path) -> None:
         target = staging.joinpath(*VISUAL_MESH.split("/"))
         target.parent.mkdir(parents=True)
         mesh.export(target, file_type="obj", digits=17)
+        if hull is not None:
+            hull.export(staging / COLLISION_MESH, file_type="obj", digits=17)
         output_dir.mkdir(exist_ok=True)
         for child in staging.iterdir():
             destination = output_dir / child.name

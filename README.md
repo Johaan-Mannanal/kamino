@@ -33,14 +33,18 @@ MuJoCo bundle.
    explicit application. Mass remains editable. Friction starts as **estimated**:
    a valid Gemini estimate can replace the untouched default; otherwise 0.8 is
    disclosed as a simulator fallback with unknown contacting materials. Save commits
-   the draft; estimates are not measurements.
+   the draft; estimates are not measurements. Optional advanced controls cover
+   collision geometry, twist/rolling friction, inertia, contact response and initial
+   placement; see [advanced physics and progress](docs/advanced-physics.md) for units
+   and validation scope.
 5. **Prepare and download.** Generate a MuJoCo scene, local assets, metadata,
    assumptions and validation report. Reopen a saved job, correct its inputs and
    regenerate from cached reconstruction without overwriting earlier exports.
 
 The separate [assembly workbench](https://kamino.design/assembly.html) accepts
 component meshes and reviewed link/joint definitions. See the
-[guided assembly workflow](docs/GUIDED_ASSEMBLIES.md). It does not automatically
+[guided assembly workflow](docs/GUIDED_ASSEMBLIES.md) and the
+[hinge/slider, spring and linked-motion settings](docs/advanced-physics.md#assembly-sliders-springs-and-linked-motion). It does not automatically
 infer a robot's articulation from photographs.
 
 ## How it works

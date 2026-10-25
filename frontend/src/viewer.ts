@@ -5,6 +5,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import type { Api } from './api'
 import type { Orientation } from './types'
+import { collisionPreview, type PhysicsPreview } from './physics-preview'
 import { orientationMatrix } from './orientation'
 
 export type ViewerMode = 'studio' | 'mesh'
@@ -13,10 +14,16 @@ export type ViewerViewState = {
   targetOffset: [number, number, number]
   distanceRatio: number
 }
-export type ViewerOptions = { mode?: ViewerMode; initialViewState?: ViewerViewState | null }
+export type ViewerOptions = {
+  mode?: ViewerMode
+  initialViewState?: ViewerViewState | null
+  physicsPreview?: PhysicsPreview
+  onPhysicsPreviewError?: (message: string | null) => void
+}
 export interface ViewerHandle {
   (): void
   setMode(mode: ViewerMode): void
+  setPhysicsPreview?(settings: PhysicsPreview): void
   resetCamera(): void
   getViewState(): ViewerViewState | null
 }
@@ -40,11 +47,18 @@ export function mountViewer(
   let frame = 0
   let camera: THREE.PerspectiveCamera | undefined
   let extent = 0
+  let centredVisual: THREE.Object3D | undefined
+  let displayRoot: THREE.Group | undefined
+  let overlay: THREE.Object3D | null = null
+  let previewSettings = options.physicsPreview
+  let previewKey = ''
+  const viewCenter = new THREE.Vector3()
+  let visualExtent = 0
   let mode = options.mode ?? 'studio'
   let initialViewState = options.initialViewState
   const applyMode = () => {
     model?.traverse((item) => {
-      if (!(item instanceof THREE.Mesh)) return
+      if (!(item instanceof THREE.Mesh) || item.userData.physicsOverlay) return
       for (const material of Array.isArray(item.material) ? item.material : [item.material]) {
         if ('wireframe' in material) material.wireframe = mode === 'mesh'
       }
@@ -56,7 +70,7 @@ export function mountViewer(
     const damping = controls.enableDamping
     controls.enableDamping = false
     controls.update()
-    controls.target.set(0, 0, 0)
+    controls.target.copy(viewCenter)
     camera.aspect = (host.clientWidth || 300) / (host.clientHeight || 320)
     const halfVertical = THREE.MathUtils.degToRad(camera.fov / 2)
     const halfHorizontal = Math.atan(Math.tan(halfVertical) * camera.aspect)
@@ -66,7 +80,7 @@ export function mountViewer(
       extent * Math.sqrt(4.25),
       (extent * 0.55) / Math.sin(Math.min(halfVertical, halfHorizontal)),
     )
-    camera.position.set(1, -1.5, 1).normalize().multiplyScalar(distance)
+    camera.position.set(1, -1.5, 1).normalize().multiplyScalar(distance).add(viewCenter)
     updateClipping()
     controls.update()
     controls.enableDamping = damping
@@ -128,6 +142,46 @@ export function mountViewer(
       if (typeof ImageBitmap !== 'undefined' && source instanceof ImageBitmap) source.close()
     })
     materials.forEach((material) => material.dispose())
+  }
+  const applyPhysicsPreview = () => {
+    if (!displayRoot || !centredVisual || !previewSettings) return
+    const relevant = {
+      metric: previewSettings.metric,
+      showCollision: previewSettings.showCollision,
+      collision: previewSettings.physics?.collision,
+      placement_m: previewSettings.placement_m,
+    }
+    const key = JSON.stringify(relevant)
+    if (key === previewKey) return
+    previewKey = key
+    if (overlay) {
+      displayRoot.remove(overlay)
+      release(overlay)
+      overlay = null
+    }
+    // Build in the local body frame before applying world placement.
+    displayRoot.position.set(0, 0, 0)
+    displayRoot.updateMatrixWorld(true)
+    const bounds = new THREE.Box3().setFromObject(centredVisual, true)
+    const sides = bounds.getSize(new THREE.Vector3())
+    try {
+      overlay = collisionPreview(centredVisual, previewSettings)
+      if (overlay) displayRoot.add(overlay)
+      delete host.dataset.physicsPreviewError
+      options.onPhysicsPreviewError?.(null)
+    } catch (error) {
+      host.dataset.physicsPreviewError = (error as Error).message
+      options.onPhysicsPreviewError?.((error as Error).message)
+    }
+    if (previewSettings.metric) {
+      const position = previewSettings.placement_m ?? [0, 0, sides.z / 2 + 0.02]
+      displayRoot.position.set(...position)
+    }
+    displayRoot.updateMatrixWorld(true)
+    const allBounds = new THREE.Box3().setFromObject(displayRoot, true)
+    viewCenter.copy(allBounds.getCenter(new THREE.Vector3()))
+    extent = Math.max(visualExtent, allBounds.getSize(new THREE.Vector3()).length())
+    updateClipping()
   }
   const cleanup = () => {
     cancelAnimationFrame(frame)
@@ -205,15 +259,19 @@ export function mountViewer(
         oriented.scale.set(scaleFactors[0], scaleFactors[1], scaleFactors[2])
       }
       oriented.updateMatrixWorld(true)
-      const box = new THREE.Box3().setFromObject(oriented)
+      const box = new THREE.Box3().setFromObject(oriented, true)
       if (box.isEmpty()) throw new Error('The mesh contains no visible geometry.')
       const center = box.getCenter(new THREE.Vector3())
       extent = box.getSize(new THREE.Vector3()).length()
       if (!Number.isFinite(extent) || extent <= 0) throw new Error('The mesh has invalid bounds.')
       oriented.position.sub(center)
+      centredVisual = oriented
+      visualExtent = extent
+      displayRoot = new THREE.Group()
+      displayRoot.add(oriented)
       const scene = new THREE.Scene()
       scene.background = new THREE.Color('#151719')
-      scene.add(oriented, new THREE.HemisphereLight(0xffffff, 0x777777, 3))
+      scene.add(displayRoot, new THREE.HemisphereLight(0xffffff, 0x777777, 3))
       const light = new THREE.DirectionalLight(0xffffff, 3)
       light.position.set(extent, -extent, extent * 2)
       scene.add(light)
@@ -221,6 +279,7 @@ export function mountViewer(
       scene.add(axes)
       // Include viewer helpers in disposal.
       model = scene
+      applyPhysicsPreview()
       applyMode()
       camera = new THREE.PerspectiveCamera(40, 1, extent / 1000, extent * 100)
       camera.up.set(0, 0, 1)
@@ -272,6 +331,11 @@ export function mountViewer(
         if (disposed) return
         mode = next
         applyMode()
+      },
+      setPhysicsPreview(settings: PhysicsPreview) {
+        if (disposed) return
+        previewSettings = settings
+        applyPhysicsPreview()
       },
       resetCamera() {
         if (disposed) return

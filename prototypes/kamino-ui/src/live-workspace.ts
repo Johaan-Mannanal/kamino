@@ -8,6 +8,14 @@ import {
   type ViewerMode,
   type ViewerViewState,
 } from "../../../frontend/src/viewer";
+import {
+  createPhysicsDraft,
+  advancedPhysicsControls,
+  readAdvancedPhysics,
+  writeAdvancedPhysics,
+  validateAdvancedPhysics,
+  type PhysicsDraft,
+} from "../../../frontend/src/advanced-physics";
 import { canRetry } from "../../../frontend/src/pipeline";
 import type { JobStatus, Scalar, Source } from "../../../frontend/src/types";
 import {
@@ -49,6 +57,7 @@ export type Draft = {
   massSource: Source;
   friction: string;
   frictionSource: Source;
+  physics?: PhysicsDraft;
 };
 /** Saved or explicitly applied values whose notes survive an unchanged save. */
 export type Origins = { mass: Scalar | null; friction: Scalar | null };
@@ -196,6 +205,7 @@ export function draftFromJob(job: Job): {
       massSource: properties?.mass_kg.source ?? "user_supplied",
       friction: text(friction?.value),
       frictionSource: friction?.source ?? "estimated",
+      physics: createPhysicsDraft(properties?.physics, properties?.placement_m),
     },
     origins: {
       mass: properties?.mass_kg ?? null,
@@ -276,8 +286,19 @@ export function buildReviewed(
   );
   if (friction && (!Number.isFinite(friction.value) || friction.value < 0))
     return { error: "Friction must be zero or greater, or blank if unknown." };
+  const advanced = validateAdvancedPhysics(
+    draft.physics ?? createPhysicsDraft(),
+    { placement: true },
+  );
+  if (!advanced.ok) return { error: advanced.error };
   return {
-    value: { ...sized.value, mass_kg: mass, sliding_friction: friction },
+    value: {
+      ...sized.value,
+      mass_kg: mass,
+      sliding_friction: friction,
+      physics: advanced.physics,
+      placement_m: advanced.placement_m ?? null,
+    },
   };
 }
 
@@ -522,7 +543,7 @@ export function mountLiveWorkspace(
   let prompting = false;
   const urls: string[] = [];
 
-  host.innerHTML = `<header class="project-header">${ctx.brand}<span class="divider"></span><span class="project-title">Job ${esc(jobId.slice(0, 8))}</span><span id="live-saved" class="muted small"></span><div class="header-right"><span id="live-status" class="badge" role="status" aria-live="polite"></span><a class="text-button" href="${esc(assemblyUrl())}">Assembly ↗</a><button class="secondary compact" id="live-bundle" hidden>Download bundle</button><button class="primary compact" id="live-generate">Generate simulation</button></div></header>${ctx.steps}<main class="workspace live-workspace"><aside class="sources"><div class="section-line"><strong>Source photos</strong><span class="muted">${initialJob.source_images.length}/4</span></div><div id="live-photos"></div><button class="secondary add-photos" id="live-edit-photos">${icon("49255.svg", 13)}New upload</button><p class="source-note">${esc(initialJob.provider)} reconstruction${initialJob.synthetic ? " · synthetic mock geometry" : ""}<br>Z-up · fixed X → Y → Z rotations<br>Server sizing in metres</p></aside><section class="workspace-center"><div class="viewport"><div class="viewport-toolbar"><span class="badge">${initialJob.synthetic ? "Synthetic mock mesh" : "Reconstructed mesh"}</span><div class="viewer-actions"><div class="segmented" role="group" aria-label="Viewport mode"><button type="button" id="live-view-studio" class="selected" aria-pressed="true">Studio</button><button type="button" id="live-view-mesh" aria-pressed="false">Mesh</button></div><button class="secondary compact" id="live-reset-camera" type="button">Reset camera</button><button class="secondary compact" id="live-orient-preview" type="button">Preview draft orientation</button><button class="secondary compact" id="live-mesh" type="button">Download mesh</button><button class="square" id="live-fullscreen" type="button" aria-label="Toggle fullscreen">${icon("28ea9.svg")}</button></div></div><div class="viewport-label"><span id="live-viewer-label"></span></div><div id="live-viewer" class="viewer"></div><div class="viewport-help"><span>Geometry preview only · collision is generated during preparation and not shown</span><span>Red X · Green Y · Blue Z · Z-up</span></div></div><div id="live-target" class="live-target"></div><section class="live-outputs" aria-labelledby="live-outputs-title"><h2 id="live-outputs-title">Simulation</h2><p id="live-generate-reason" class="muted small" role="status"></p><div id="live-outputs"></div></section></section><aside class="inspector"><div class="section-line"><h2>Physical properties</h2>${icon("66491.svg")}</div><p class="muted small">Manual review · saved to the server</p>${initial.notice ? `<p class="live-notice small" role="note">${esc(initial.notice)}</p>` : ""}<form id="live-form" novalidate><section class="property-section"><h3>Orientation <span>Fixed X → Y → Z · Z-up</span></h3><div class="field-grid three">${(["x", "y", "z"] as const).map((a) => input(`${a.toUpperCase()} rotation`, a, draft[a], "°", 'min="-180" max="180"')).join("")}</div><p class="muted tiny">Active right-handed rotations about the fixed X, then Y, then Z axes.</p><div class="save-row"><span class="muted small" id="live-orientation-status" role="status"></span><button type="button" class="secondary compact" id="live-save-orientation">Save orientation</button></div></section><section class="property-section"><h3>Sizing <span>Uniform · one full-extent reference</span></h3><p id="live-target-gate" class="live-target-gate small" role="status"></p><div class="field-grid two"><label class="property-field"><span>Full extent axis</span><select name="axis" aria-label="Reference axis"><option value="">Choose axis</option>${(["x", "y", "z"] as const).map((a) => `<option value="${a}" ${draft.axis === a ? "selected" : ""}>${a.toUpperCase()} · full extent</option>`).join("")}</select></label>${input("Reference length", "length", draft.length, "", 'min="0"')}<label class="property-field"><span>Units</span><select name="unit" aria-label="Reference units"><option value="mm" ${draft.unit === "mm" ? "selected" : ""}>Millimetres</option><option value="m" ${draft.unit === "m" ? "selected" : ""}>Metres</option></select></label>${sourceSelect("referenceSource", draft.referenceSource, "Reference source")}</div><label class="property-field live-wide"><span>Describe the full extent (body, pins and other protrusions)</span><div class="input-shell"><input name="description" aria-label="Full extent description" maxlength="2000" value="${esc(draft.description)}"></div></label><label class="live-check"><input type="checkbox" name="acknowledged" ${draft.acknowledged ? "checked" : ""}> My reference matches the selected full mesh extent, including any protrusions.</label><button type="button" class="secondary compact" id="live-preview">Preview dimensions on server</button><div id="live-preview-output" class="live-preview small" role="status" aria-live="polite"></div></section><section class="property-section"><h3>Dynamics <span>Editable estimates</span></h3><div class="field-grid two">${input("Mass", "mass", draft.mass, "kg", 'min="0"')}${sourceSelect("massSource", draft.massSource, "Mass source")}${input("Friction", "friction", draft.friction, "μ", 'min="0"')}${sourceSelect("frictionSource", draft.frictionSource, "Friction source")}</div><p id="live-friction-note" class="muted tiny"></p></section><p id="live-form-error" class="error" aria-live="polite"></p><p id="live-error" class="error" role="alert"></p><button type="button" class="text-button" id="live-retry" hidden>Retry status</button><div class="save-row"><span class="muted small" id="live-save-status"></span><button class="primary compact" id="live-save" type="submit">Save reviewed properties</button></div></form><details class="suggestions live-suggestions"><summary>${icon("a4dc8.svg", 15)}Gemini suggestions</summary><p class="muted small">Friction fills automatically; other estimates need Apply. Save commits the draft.</p><label class="property-field"><span>Object hint (optional)</span><div class="input-shell"><input id="live-hint" maxlength="200" aria-label="Object hint"></div></label><div class="save-row"><button class="secondary compact" type="button" id="live-suggest">Request</button><button class="secondary compact" type="button" id="live-suggest-refresh">Refresh (new request)</button></div><div id="live-suggestions" aria-live="polite"></div></details><p class="prototype-note">Save orientation first, then save the target review, then preview and save properties against that reviewed target. Generate simulation is a separate step.</p></aside></main>`;
+  host.innerHTML = `<header class="project-header">${ctx.brand}<span class="divider"></span><span class="project-title">Job ${esc(jobId.slice(0, 8))}</span><span id="live-saved" class="muted small"></span><div class="header-right"><span id="live-status" class="badge" role="status" aria-live="polite"></span><a class="text-button" href="${esc(assemblyUrl())}">Assembly ↗</a><button class="secondary compact" id="live-bundle" hidden>Download bundle</button><button class="primary compact" id="live-generate">Generate simulation</button></div></header>${ctx.steps}<main class="workspace live-workspace"><aside class="sources"><div class="section-line"><strong>Source photos</strong><span class="muted">${initialJob.source_images.length}/4</span></div><div id="live-photos"></div><button class="secondary add-photos" id="live-edit-photos">${icon("49255.svg", 13)}New upload</button><p class="source-note">${esc(initialJob.provider)} reconstruction${initialJob.synthetic ? " · synthetic mock geometry" : ""}<br>Z-up · fixed X → Y → Z rotations<br>Server sizing in metres</p></aside><section class="workspace-center"><div class="viewport"><div class="viewport-toolbar"><span class="badge">${initialJob.synthetic ? "Synthetic mock mesh" : "Reconstructed mesh"}</span><div class="viewer-actions"><div class="segmented" role="group" aria-label="Viewport mode"><button type="button" id="live-view-studio" class="selected" aria-pressed="true">Studio</button><button type="button" id="live-view-mesh" aria-pressed="false">Mesh</button></div><button class="secondary compact" id="live-collision" type="button" aria-pressed="false">Collision overlay</button><button class="secondary compact" id="live-reset-camera" type="button">Reset camera</button><button class="secondary compact" id="live-orient-preview" type="button">Preview draft orientation</button><button class="secondary compact" id="live-mesh" type="button">Download mesh</button><button class="square" id="live-fullscreen" type="button" aria-label="Toggle fullscreen">${icon("28ea9.svg")}</button></div></div><div class="viewport-label"><span id="live-viewer-label"></span></div><div id="live-viewer" class="viewer"></div><p id="live-physics-preview-error" class="error small" role="status" hidden></p><div class="viewport-help"><span><span id="live-physics-preview-note">Geometry preview · dynamics apply after regeneration</span></span><span>Red X · Green Y · Blue Z · Z-up</span></div></div><div id="live-target" class="live-target"></div><section class="live-outputs" aria-labelledby="live-outputs-title"><h2 id="live-outputs-title">Simulation</h2><p id="live-generate-reason" class="muted small" role="status"></p><div id="live-outputs"></div></section></section><aside class="inspector"><div class="section-line"><h2>Physical properties</h2>${icon("66491.svg")}</div><p class="muted small">Manual review · saved to the server</p>${initial.notice ? `<p class="live-notice small" role="note">${esc(initial.notice)}</p>` : ""}<form id="live-form" novalidate><section class="property-section"><h3>Orientation <span>Fixed X → Y → Z · Z-up</span></h3><div class="field-grid three">${(["x", "y", "z"] as const).map((a) => input(`${a.toUpperCase()} rotation`, a, draft[a], "°", 'min="-180" max="180"')).join("")}</div><p class="muted tiny">Active right-handed rotations about the fixed X, then Y, then Z axes.</p><div class="save-row"><span class="muted small" id="live-orientation-status" role="status"></span><button type="button" class="secondary compact" id="live-save-orientation">Save orientation</button></div></section><section class="property-section"><h3>Sizing <span>Uniform · one full-extent reference</span></h3><p id="live-target-gate" class="live-target-gate small" role="status"></p><div class="field-grid two"><label class="property-field"><span>Full extent axis</span><select name="axis" aria-label="Reference axis"><option value="">Choose axis</option>${(["x", "y", "z"] as const).map((a) => `<option value="${a}" ${draft.axis === a ? "selected" : ""}>${a.toUpperCase()} · full extent</option>`).join("")}</select></label>${input("Reference length", "length", draft.length, "", 'min="0"')}<label class="property-field"><span>Units</span><select name="unit" aria-label="Reference units"><option value="mm" ${draft.unit === "mm" ? "selected" : ""}>Millimetres</option><option value="m" ${draft.unit === "m" ? "selected" : ""}>Metres</option></select></label>${sourceSelect("referenceSource", draft.referenceSource, "Reference source")}</div><label class="property-field live-wide"><span>Describe the full extent (body, pins and other protrusions)</span><div class="input-shell"><input name="description" aria-label="Full extent description" maxlength="2000" value="${esc(draft.description)}"></div></label><label class="live-check"><input type="checkbox" name="acknowledged" ${draft.acknowledged ? "checked" : ""}> My reference matches the selected full mesh extent, including any protrusions.</label><button type="button" class="secondary compact" id="live-preview">Preview dimensions on server</button><div id="live-preview-output" class="live-preview small" role="status" aria-live="polite"></div></section><section class="property-section"><h3>Dynamics <span>Editable estimates</span></h3><div class="field-grid two">${input("Mass", "mass", draft.mass, "kg", 'min="0"')}${sourceSelect("massSource", draft.massSource, "Mass source")}${input("Friction", "friction", draft.friction, "μ", 'min="0"')}${sourceSelect("frictionSource", draft.frictionSource, "Friction source")}</div><p id="live-friction-note" class="muted tiny"></p></section>${advancedPhysicsControls(draft.physics ?? createPhysicsDraft(), { placement: true })}<p id="live-form-error" class="error" aria-live="polite"></p><p id="live-error" class="error" role="alert"></p><button type="button" class="text-button" id="live-retry" hidden>Retry status</button><div class="save-row"><span class="muted small" id="live-save-status"></span><button class="primary compact" id="live-save" type="submit">Save reviewed properties</button></div></form><details class="suggestions live-suggestions"><summary>${icon("a4dc8.svg", 15)}Gemini suggestions</summary><p class="muted small">Friction fills automatically; other estimates need Apply. Save commits the draft.</p><label class="property-field"><span>Object hint (optional)</span><div class="input-shell"><input id="live-hint" maxlength="200" aria-label="Object hint"></div></label><div class="save-row"><button class="secondary compact" type="button" id="live-suggest">Request</button><button class="secondary compact" type="button" id="live-suggest-refresh">Refresh (new request)</button></div><div id="live-suggestions" aria-live="polite"></div></details><p class="prototype-note">Save orientation first, then save the target review, then preview and save properties against that reviewed target. Generate simulation is a separate step.</p></aside></main>`;
 
   const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
     host.querySelector<T>(selector)!;
@@ -648,6 +669,27 @@ export function mountLiveWorkspace(
   retryFiles.onclick = retryArtifacts;
   $(".viewer-actions").append(retryFiles);
 
+  let collisionVisible = false;
+  function previewPhysics(metric: boolean) {
+    const parsed = validateAdvancedPhysics(
+      draft.physics ?? createPhysicsDraft(),
+      { placement: true },
+    );
+    const note = $("#live-physics-preview-note");
+    note.textContent = !parsed.ok
+      ? `Physics preview unchanged: ${parsed.error}`
+      : !metric
+        ? "Unscaled geometry · preview sizing to show metre-based placement and collision settings"
+        : "Draft geometry/placement preview · dynamics apply after Save and regeneration";
+    return parsed.ok
+      ? {
+          physics: parsed.physics,
+          placement_m: parsed.placement_m,
+          metric,
+          showCollision: collisionVisible,
+        }
+      : null;
+  }
   function syncViewer(job: Job) {
     // Selected target only; the all-surface review view lives in #live-target.
     const spec = primaryViewer(
@@ -659,7 +701,11 @@ export function mountLiveWorkspace(
       wholeMesh,
     );
     $("#live-viewer-label").textContent = spec.label;
-    if (spec.key === viewerKey || !job.mesh_path) return;
+    const physicsPreview = previewPhysics(!!spec.scale);
+    if (spec.key === viewerKey || !job.mesh_path) {
+      if (physicsPreview) viewerHandle?.setPhysicsPreview?.(physicsPreview);
+      return;
+    }
     viewerKey = spec.key;
     const hash = wholeMesh
       ? (session.sizingPreview?.source_mesh_sha256 ??
@@ -694,7 +740,18 @@ export function mountLiveWorkspace(
       spec.orientation,
       spec.scale,
       spec.selection,
-      { mode: viewerMode, initialViewState: retainedView },
+      {
+        mode: viewerMode,
+        initialViewState: retainedView,
+        ...(physicsPreview ? { physicsPreview } : {}),
+        onPhysicsPreviewError(message) {
+          const error = $("#live-physics-preview-error");
+          error.textContent = message
+            ? `Collision overlay unavailable: ${message}`
+            : "";
+          error.hidden = !message;
+        },
+      },
     );
   }
   const setViewerMode = (mode: ViewerMode) => {
@@ -705,6 +762,12 @@ export function mountLiveWorkspace(
       button.setAttribute("aria-pressed", String(value === mode));
       button.classList.toggle("selected", value === mode);
     }
+  };
+  $("#live-collision").onclick = () => {
+    collisionVisible = !collisionVisible;
+    $("#live-collision").setAttribute("aria-pressed", String(collisionVisible));
+    const job = currentJob();
+    if (job) syncViewer(job);
   };
   $("#live-view-studio").onclick = () => setViewerMode("studio");
   $("#live-view-mesh").onclick = () => setViewerMode("mesh");
@@ -842,9 +905,11 @@ export function mountLiveWorkspace(
       massSource: get("massSource") as Source,
       friction: get("friction"),
       frictionSource: get("frictionSource") as Source,
+      physics: readAdvancedPhysics(form, draft.physics ?? createPhysicsDraft()),
     };
   }
   function writeDraft(next: Draft) {
+    writeAdvancedPhysics(form, next.physics ?? createPhysicsDraft());
     for (const [key, value] of Object.entries(next)) {
       const el = form.elements.namedItem(key) as
         | HTMLInputElement
@@ -867,9 +932,22 @@ export function mountLiveWorkspace(
       (form.elements.namedItem("acknowledged") as HTMLInputElement).checked =
         false;
     }
+    const sizingChanged = (
+      [
+        "x",
+        "y",
+        "z",
+        "axis",
+        "length",
+        "unit",
+        "referenceSource",
+        "description",
+        "acknowledged",
+      ] as const
+    ).some((key) => next[key] !== draft[key]);
     draft = next;
     previewError = "";
-    session.markDirty();
+    session.markDirty(sizingChanged);
   };
   form.addEventListener("input", onEdit);
   form.addEventListener("change", onEdit);
@@ -1124,7 +1202,7 @@ export function mountLiveWorkspace(
           note: friction.note || "Gemini estimate; not measured.",
         };
         writeDraft(draft);
-        session.markDirty();
+        session.markDirty(false);
       }
       suggestionState = cached
         ? "Estimates ready. Friction fills automatically when untouched; other fields need Apply."
@@ -1214,7 +1292,7 @@ export function mountLiveWorkspace(
         if (checked("sg-friction")) frictionTouched = true;
         origins = result.origins;
         writeDraft(draft);
-        session.markDirty();
+        session.markDirty(!!axis);
         toast(
           `Applied ${result.applied.join(", ")} to the draft. Review${axis ? ", confirm the reference correspondence" : ""} and save.`,
         );

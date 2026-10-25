@@ -9,29 +9,45 @@ function name(value: string) {
       'Use a name starting with a letter, then letters, digits, underscores or hyphens (up to 64 characters).',
     )
 }
-export function changeJointKind(joint: Joint, kind: 'fixed' | 'revolute'): Joint {
+export function changeJointKind(joint: Joint, kind: 'fixed' | 'revolute' | 'prismatic'): Joint {
   const next = structuredClone(joint)
   next.kind = kind
   next.reviewed = false
   if (kind === 'fixed') {
     next.axis = null
     next.limits_rad = null
+    next.limits_m = null
+    next.spring = null
+    next.coupling = null
     next.damping = null
     next.drive = null
   } else {
     next.axis ??= [0, 0, 1]
-    next.limits_rad ??= [-0.8, 0.8]
+    if (kind === 'prismatic') {
+      next.limits_m ??= [-0.05, 0.05]
+      next.limits_rad = null
+    } else {
+      next.limits_rad ??= [-0.8, 0.8]
+      next.limits_m = null
+    }
+    if (joint.kind !== kind) {
+      next.spring = null
+      next.coupling = null
+      next.drive = null
+      next.damping = null
+    }
     next.damping ??= {
-      value: 0.2,
+      value: kind === 'prismatic' ? 1.5 : 0.2,
       source: 'estimated',
       note: 'Starting assumption; review before export',
     }
-    next.drive ??= {
-      kp: 5,
-      force_limit_nm: 2,
-      source: 'estimated',
-      note: 'Starting assumption; not calibrated to hardware',
-    }
+    if (!next.coupling)
+      next.drive ??= {
+        kp: 5,
+        ...(kind === 'prismatic' ? { force_limit_n: 2 } : { force_limit_nm: 2 }),
+        source: 'estimated',
+        note: 'Starting assumption; not calibrated to hardware',
+      }
   }
   return next
 }
@@ -40,7 +56,7 @@ export function addConnectedLink(
   link: string,
   parent: string,
   joint: string,
-  kind: 'fixed' | 'revolute',
+  kind: 'fixed' | 'revolute' | 'prismatic',
 ): ReviewProject {
   name(link)
   name(joint)

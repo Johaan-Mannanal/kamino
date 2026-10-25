@@ -11,8 +11,14 @@ import mujoco
 import numpy as np
 import trimesh
 
-from photo2sim.assemblies.contracts import AssemblyRecord
+from photo2sim.assemblies.contracts import AssemblyRecord, joint_force_limit, joint_limits
 from photo2sim.contracts import bundle_path
+from photo2sim.physics import (
+    collision_parameters,
+    contact_attributes,
+    friction_parameters,
+    inertia_parameters,
+)
 from photo2sim.simulation.portable import write_portable_files
 
 TIMESTEP_S = 0.001
@@ -115,6 +121,18 @@ def export_assembly(
         for j in record.joints:
             ET.SubElement(contact, "exclude", body1=j.parent, body2=j.child)
     actuators = ET.SubElement(root, "actuator")
+    coupled = [j for j in record.joints if j.coupling is not None]
+    if coupled:
+        equality = ET.SubElement(root, "equality")
+        for j in coupled:
+            ET.SubElement(
+                equality,
+                "joint",
+                name=f"linked_{j.name}",
+                joint1=j.name,
+                joint2=j.coupling.driver_joint,
+                polycoef=numbers([j.coupling.offset, j.coupling.ratio, 0, 0, 0]),
+            )
     links = {link.name: link for link in record.links}
     children = {name: [] for name in links}
     for j in record.joints:
@@ -127,12 +145,35 @@ def export_assembly(
         centre = mesh.bounds.mean(axis=0)
         inertia = link.mass_kg.value * (np.sum(sides**2) - sides**2) / 12
         friction = link.sliding_friction.value if link.sliding_friction is not None else 0.8
+        link_mode = collision_mode
+        collision_sides, collision_centre = sides, centre
+        if link.physics is not None:
+            kind, collision_sides, offset = collision_parameters(link.physics, sides)
+            if link.physics.collision is not None:
+                link_mode = "convex_mesh" if kind == "convex_hull" else "box"
+                collision_centre = centre + offset
+            inertia_centre, inertia = inertia_parameters(link.physics, link.mass_kg.value, sides)
+            centre_inertia = (
+                inertia_centre
+                if link.physics.inertia and link.physics.inertia.mode == "manual"
+                else centre + inertia_centre
+            )
+        else:
+            centre_inertia = centre
+        friction_values, condim = friction_parameters(link.physics, friction)
+        contact = {"solref": ".02 1", **contact_attributes(link.physics)}
+        if link.physics is not None and (
+            link.physics.torsional_friction is not None or link.physics.rolling_friction is not None
+        ):
+            contact["priority"] = "1"
         assumptions["links"][name] = {
             "bounds_m": mesh.bounds.tolist(),
             "mass_kg": link.mass_kg.value,
             "inertia_kg_m2": inertia.tolist(),
-            "inertia_centre_m": centre.tolist(),
-            "friction": [friction, 0.005, 0.0001],
+            "inertia_centre_m": centre_inertia.tolist(),
+            "physics": link.physics.model_dump(mode="json") if link.physics else None,
+            "collision_mode": link_mode,
+            "friction": friction_values.tolist(),
             "sliding_friction_defaulted": link.sliding_friction is None,
             "source_mesh_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         }
@@ -147,33 +188,41 @@ def export_assembly(
         ET.SubElement(
             body,
             "inertial",
-            pos=numbers(centre),
+            pos=numbers(centre_inertia),
             mass=str(link.mass_kg.value),
             diaginertia=numbers(inertia),
         )
-        if joint is not None and joint.kind == "revolute":
+        if joint is not None and joint.kind != "fixed":
+            spring = (
+                {"stiffness": str(joint.spring.stiffness), "springref": str(joint.spring.rest)}
+                if joint.spring
+                else {}
+            )
             ET.SubElement(
                 body,
                 "joint",
                 name=joint.name,
-                type="hinge",
+                type="slide" if joint.kind == "prismatic" else "hinge",
                 pos="0 0 0",
                 axis=numbers(joint.axis),
                 limited="true",
-                range=numbers(joint.limits_rad),
+                range=numbers(joint_limits(joint)),
                 damping=str(joint.damping.value),
+                **spring,
             )
-            ET.SubElement(
-                actuators,
-                "position",
-                name=f"drive_{joint.name}",
-                joint=joint.name,
-                kp=str(joint.drive.kp),
-                ctrllimited="true",
-                ctrlrange=numbers(joint.limits_rad),
-                forcelimited="true",
-                forcerange=numbers([-joint.drive.force_limit_nm, joint.drive.force_limit_nm]),
-            )
+            if joint.drive is not None:
+                force = joint_force_limit(joint)
+                ET.SubElement(
+                    actuators,
+                    "position",
+                    name=f"drive_{joint.name}",
+                    joint=joint.name,
+                    kp=str(joint.drive.kp),
+                    ctrllimited="true",
+                    ctrlrange=numbers(joint_limits(joint)),
+                    forcelimited="true",
+                    forcerange=numbers([-force, force]),
+                )
         ET.SubElement(
             body,
             "geom",
@@ -191,13 +240,22 @@ def export_assembly(
             "geom",
             name=f"collision_{name}",
             **(
-                {"type": "box", "pos": numbers(centre), "size": numbers(sides / 2)}
-                if collision_mode == "box"
-                else {"type": "mesh", "mesh": f"mesh_{name}"}
+                {
+                    "type": "box",
+                    "pos": numbers(collision_centre),
+                    "size": numbers(collision_sides / 2),
+                }
+                if link_mode == "box"
+                else {
+                    "type": "mesh",
+                    "mesh": f"mesh_{name}",
+                    "pos": numbers(collision_centre - centre),
+                }
             ),
             group="3",
-            friction=numbers([friction, 0.005, 0.0001]),
-            solref=".02 1",
+            friction=numbers(friction_values),
+            condim=str(condim),
+            **contact,
             rgba=".9 .35 .15 1",
         )
         for child in children[name]:

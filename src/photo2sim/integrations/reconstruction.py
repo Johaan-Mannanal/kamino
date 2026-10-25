@@ -9,7 +9,8 @@ from uuid import uuid4
 @dataclass(frozen=True)
 class ProviderSnapshot:
     status: Literal["pending", "running", "succeeded", "failed"]
-    progress: int = 0
+    # None means no percentage was reported, not zero percent complete.
+    progress: int | None = None
     mesh_url: str | None = None
 
 

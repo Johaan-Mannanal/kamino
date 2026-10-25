@@ -6,9 +6,11 @@ from typing import Annotated, Literal
 from pydantic import Field, field_validator, model_validator
 
 from photo2sim.contracts import Contract, ScalarProperty, Source, bundle_path
+from photo2sim.physics import PhysicsSettings
 
 Finite = Annotated[float, Field(allow_inf_nan=False)]
 Positive = Annotated[float, Field(gt=0, allow_inf_nan=False)]
+StrictFinite = Annotated[float, Field(allow_inf_nan=False, strict=True)]
 Name = Annotated[str, Field(pattern=r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")]
 Vector3 = tuple[Finite, Finite, Finite]
 
@@ -29,9 +31,61 @@ class Pose(Contract):
 
 class PositionDrive(Contract):
     kp: Positive
-    force_limit_nm: Positive
+    force_limit_nm: Positive | None = None
+    force_limit_n: Annotated[float, Field(gt=0, allow_inf_nan=False, strict=True)] | None = None
     source: Source
     note: str | None = None
+
+
+class JointSpring(Contract):
+    stiffness: Annotated[float, Field(ge=0, allow_inf_nan=False, strict=True)]
+    rest: StrictFinite = 0
+    source: Source
+    note: str | None = None
+
+
+class JointCoupling(Contract):
+    driver_joint: Name
+    ratio: StrictFinite = 1
+    offset: StrictFinite = 0
+    source: Source
+    note: str | None = None
+
+
+def joint_limits(joint):
+    return joint.limits_m if joint.kind == "prismatic" else joint.limits_rad
+
+
+def joint_force_limit(joint):
+    return joint.drive.force_limit_n if joint.kind == "prismatic" else joint.drive.force_limit_nm
+
+
+def validate_couplings(joints):
+    by_name = {j.name: j for j in joints}
+    visiting, visited = set(), set()
+
+    def visit(j):
+        if j.name in visiting:
+            raise ValueError("Cycle in linked joint motion")
+        if j.name in visited:
+            return
+        visiting.add(j.name)
+        if j.coupling is not None:
+            driver = by_name.get(j.coupling.driver_joint)
+            if driver is None or driver.kind == "fixed" or driver.kind != j.kind:
+                raise ValueError(
+                    "Linked motion requires an existing driver of the same moving joint type"
+                )
+            visit(driver)
+            mapped = [j.coupling.offset + j.coupling.ratio * v for v in joint_limits(driver)]
+            lo, hi = joint_limits(j)
+            if min(mapped) < lo - 1e-12 or max(mapped) > hi + 1e-12:
+                raise ValueError("Linked motion exceeds follower limits across driver travel")
+        visiting.remove(j.name)
+        visited.add(j.name)
+
+    for joint in joints:
+        visit(joint)
 
 
 class Link(Contract):
@@ -41,6 +95,7 @@ class Link(Contract):
     geometry_note: str
     mass_kg: ScalarProperty
     sliding_friction: ScalarProperty | None = None
+    physics: PhysicsSettings | None = None
 
     _path = field_validator("visual_mesh")(bundle_path)
 
@@ -56,10 +111,13 @@ class Joint(Contract):
     name: Name
     parent: Name
     child: Name
-    kind: Literal["fixed", "revolute"]
+    kind: Literal["fixed", "revolute", "prismatic"]
     origin: Pose = Field(default_factory=Pose)
     axis: Vector3 | None = None
     limits_rad: tuple[Finite, Finite] | None = None
+    limits_m: tuple[StrictFinite, StrictFinite] | None = None
+    spring: JointSpring | None = None
+    coupling: JointCoupling | None = None
     damping: ScalarProperty | None = None
     drive: PositionDrive | None = None
     source: Source
@@ -67,18 +125,54 @@ class Joint(Contract):
 
     @model_validator(mode="after")
     def joint_parameters(self):
-        parameters = (self.axis, self.limits_rad, self.damping, self.drive)
+        parameters = (
+            self.axis,
+            self.limits_rad,
+            self.limits_m,
+            self.damping,
+            self.drive,
+            self.spring,
+            self.coupling,
+        )
         if self.kind == "fixed":
             if any(p is not None for p in parameters):
-                raise ValueError("Fixed joints cannot specify hinge parameters")
+                raise ValueError("Fixed joints cannot specify moving joint parameters")
         else:
-            if any(p is None for p in parameters):
-                raise ValueError("Revolute joints require axis, limits, damping and position drive")
+            limits = joint_limits(self)
+            if self.axis is None or limits is None or self.damping is None:
+                raise ValueError("Moving joints require axis, limits and damping")
+            if (
+                self.kind == "prismatic"
+                and self.limits_rad is not None
+                or self.kind == "revolute"
+                and self.limits_m is not None
+            ):
+                raise ValueError("Joint limits must use the units of the joint type")
             if not math.isclose(sum(x * x for x in self.axis), 1, abs_tol=1e-6):
                 raise ValueError("Joint axis must have unit length")
-            lo, hi = self.limits_rad
+            lo, hi = limits
             if not lo < hi or not lo <= 0 <= hi:
                 raise ValueError("Joint limits must be ordered and contain the reference q=0")
+            if self.coupling is not None:
+                if self.drive is not None:
+                    raise ValueError("Linked followers cannot have a competing position drive")
+            elif self.drive is None:
+                raise ValueError("Independent moving joints require a position drive")
+            if self.drive is not None:
+                correct = (
+                    self.drive.force_limit_n
+                    if self.kind == "prismatic"
+                    else self.drive.force_limit_nm
+                )
+                incorrect = (
+                    self.drive.force_limit_nm
+                    if self.kind == "prismatic"
+                    else self.drive.force_limit_n
+                )
+                if correct is None or incorrect is not None:
+                    raise ValueError("Slider force limits use N; hinge torque limits use Nm")
+            if self.spring is not None and not lo <= self.spring.rest <= hi:
+                raise ValueError("Spring rest must lie within joint travel")
         return self
 
 
@@ -99,6 +193,7 @@ class AssemblyRecord(Contract):
             raise ValueError("Duplicate link names")
         if self.root_link not in names:
             raise ValueError("Root link is missing")
+        validate_couplings(self.joints)
         joint_names = [joint.name for joint in self.joints]
         if len(set(joint_names)) != len(joint_names):
             raise ValueError("Duplicate joint names")

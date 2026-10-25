@@ -38,19 +38,22 @@ export function validationFindings(value: unknown): Finding[] {
       if (passed === false)
         rows.push({ section, message: labels[check] ?? `Failed check: ${check}` })
     }
-    const tolerance = report.tracking_tolerance_rad
-    const maxima = new Map<string, number>()
+    const maxima = new Map<string, { error: number; unit: string }>()
     for (const trial of Array.isArray(run.trials) ? run.trials : []) {
       for (const phase of Array.isArray(object(trial).phases)
         ? (object(trial).phases as unknown[])
         : []) {
-        for (const [joint, error] of Object.entries(object(object(phase).tracking_errors_rad))) {
-          if (typeof error === 'number' && Number.isFinite(error))
-            maxima.set(joint, Math.max(maxima.get(joint) ?? 0, error))
-        }
+        for (const unit of ['rad', 'm'])
+          for (const [joint, error] of Object.entries(
+            object(object(phase)[`tracking_errors_${unit}`]),
+          )) {
+            if (typeof error === 'number' && Number.isFinite(error))
+              maxima.set(joint, { error: Math.max(maxima.get(joint)?.error ?? 0, error), unit })
+          }
       }
     }
-    for (const [joint, error] of maxima)
+    for (const [joint, { error, unit }] of maxima) {
+      const tolerance = report[`tracking_tolerance_${unit}`]
       if (
         typeof tolerance === 'number' &&
         Number.isFinite(tolerance) &&
@@ -60,8 +63,9 @@ export function validationFindings(value: unknown): Finding[] {
         rows.push({
           section,
           joint,
-          message: `${joint}: maximum tracking error ${error.toPrecision(3)} rad; tolerance ${tolerance} rad. Review this joint and its connected links.`,
+          message: `${joint}: maximum tracking error ${error.toPrecision(3)} ${unit}; tolerance ${tolerance} ${unit}. Review this joint and its connected links.`,
         })
+    }
     if (run.passed === true)
       rows.push({
         section,

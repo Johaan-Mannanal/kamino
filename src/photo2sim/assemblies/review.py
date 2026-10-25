@@ -1,5 +1,6 @@
 """Guided, source-preserving rigid grouping in a shared reference frame."""
 
+import copy
 import hashlib
 import json
 import tempfile
@@ -10,9 +11,10 @@ import numpy as np
 import trimesh
 from pydantic import Field, field_validator, model_validator
 
-from photo2sim.assemblies.contracts import AssemblyRecord, Joint, Name, Pose
+from photo2sim.assemblies.contracts import AssemblyRecord, Joint, Name, Pose, validate_couplings
 from photo2sim.assemblies.export import local_mesh
 from photo2sim.contracts import Contract, ScalarProperty, Source, bundle_path
+from photo2sim.physics import PhysicsSettings
 
 
 class Part(Contract):
@@ -33,6 +35,7 @@ class Group(Contract):
     frame: Pose = Field(default_factory=Pose)
     mass_kg: ScalarProperty
     sliding_friction: ScalarProperty | None = None
+    physics: PhysicsSettings | None = None
     reviewed: bool = False
     review_note: str = ""
 
@@ -68,6 +71,7 @@ class ReviewProject(Contract):
         ):
             if len(set(values)) != len(values):
                 raise ValueError("Duplicate part, group or joint identifiers")
+        validate_couplings(self.joints)
         names = {g.name for g in self.groups}
         if self.root_link not in names:
             raise ValueError("Root group missing")
@@ -100,6 +104,33 @@ def checked_parts(project: ReviewProject, source: Path):
             raise ValueError(f"Source hash changed for part {part.id}; re-import and review")
         result[part.id] = mesh
     return result
+
+
+def normalize_project_defaults(value):
+    """Only new omitted/null assembly extension defaults are equivalent.
+
+    Do not omit non-default physics or normalize unrelated fields: these values
+    are also used to bind retained mapping attestations to a specific revision.
+    """
+    data = copy.deepcopy(value)
+    if not isinstance(data, dict):
+        return data
+    for key in ("groups", "links"):
+        for item in data.get(key, []) if isinstance(data.get(key), list) else []:
+            if isinstance(item, dict) and item.get("physics") is None:
+                item.pop("physics", None)
+    for joint in data.get("joints", []) if isinstance(data.get("joints"), list) else []:
+        if not isinstance(joint, dict):
+            continue
+        for key in ("limits_m", "spring", "coupling"):
+            if joint.get(key) is None:
+                joint.pop(key, None)
+        drive = joint.get("drive")
+        if isinstance(drive, dict):
+            for key in ("force_limit_n", "force_limit_nm"):
+                if drive.get(key) is None:
+                    drive.pop(key, None)
+    return data
 
 
 def review_snapshot(project: ReviewProject) -> str:
@@ -140,6 +171,7 @@ def assembly_record(project: ReviewProject) -> AssemblyRecord:
                 + " | ".join(f"{p.id} ({p.source}): {p.note}" for p in parts),
                 "mass_kg": g.mass_kg,
                 "sliding_friction": g.sliding_friction,
+                "physics": g.physics,
             }
         )
     joints = []

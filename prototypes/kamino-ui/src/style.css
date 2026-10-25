@@ -1674,7 +1674,95 @@ button:not(:disabled):hover {
     height: 46px;
   }
 }
+/* The story is decorative: gestures over its canvas keep native page scrolling. */
+.home-refined .story-stage,
+.home-refined .depth-stage {
+  pointer-events: none;
+}
+.home-refined canvas {
+  touch-action: pan-y pinch-zoom;
+}
 @media (max-width: 760px) {
+  .home-refined:not(.static-home) .story-sticky {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 12px;
+    padding: 96px 24px 72px;
+  }
+  .home-refined:not(.static-home) #story-copy {
+    min-height: 0;
+    max-width: none;
+  }
+  .home-refined:not(.static-home) #story-copy h1 {
+    font-size: clamp(30px, 9vw, 42px);
+    letter-spacing: -1.6px;
+  }
+  .home-refined:not(.static-home) #story-copy p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-top: 12px;
+  }
+  .home-refined:not(.static-home) #story-actions {
+    margin-top: 16px;
+  }
+  .home-refined:not(.static-home) #story-actions .primary,
+  .home-refined:not(.static-home) #story-actions .quiet {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  .home-refined:not(.static-home) .story-stage {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+  .home-refined:not(.static-home) #story-viewer {
+    inset: 0 0 84px 78px;
+  }
+  .home-refined:not(.static-home) #capture-phone {
+    width: 62px;
+    height: 118px;
+    top: 15%;
+    padding: 9px 4px 16px;
+    border-radius: 14px;
+  }
+  .home-refined:not(.static-home) #capture-phone > div {
+    border-radius: 8px;
+  }
+  .home-refined:not(.static-home) #capture-thumbs {
+    left: 78px;
+    bottom: 0;
+    height: 64px;
+    gap: 8px;
+  }
+  .home-refined:not(.static-home) #capture-thumbs img {
+    width: clamp(40px, 12vw, 54px);
+    height: 40px;
+  }
+  .home-refined:not(.static-home) #dimension-peek {
+    width: min(210px, 100%);
+    right: 0;
+    bottom: 0;
+    padding: 12px;
+    gap: 8px;
+  }
+  .home-refined:not(.static-home) .story-bottom {
+    left: 24px;
+    right: 24px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    font-size: 11px;
+  }
+  .home-refined:not(.static-home) #chapters,
+  .home-refined:not(.static-home) .chapter {
+    height: 44px;
+  }
+  .home-refined:not(.static-home) #chapters {
+    width: 132px;
+  }
+  .home-refined:not(.static-home) .story-progress {
+    top: 21px;
+  }
   .home-refined.static-home .story-sticky {
     min-height: 0;
     height: auto;
@@ -1691,6 +1779,82 @@ button:not(:disabled):hover {
   }
   .home-refined .static-actions .primary {
     margin-top: 0;
+  }
+}
+@media (max-width: 360px) {
+  .home-refined:not(.static-home) #story-actions {
+    gap: 4px;
+  }
+  .home-refined:not(.static-home) #story-actions .primary,
+  .home-refined:not(.static-home) #story-actions .quiet {
+    padding: 0 8px;
+    font-size: 11px;
+  }
+}
+/* Short touch landscapes keep the copy beside the object rather than squeezing both vertically. */
+@media (max-width: 1000px) and (max-height: 500px) and (orientation: landscape) {
+  .home-refined:not(.static-home) .story-sticky {
+    min-height: 0;
+    grid-template-columns: minmax(0, 0.44fr) minmax(0, 0.56fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 76px 24px 56px;
+  }
+  .home-refined:not(.static-home) #story-copy {
+    min-height: 0;
+  }
+  .home-refined:not(.static-home) #story-copy h1 {
+    font-size: 30px;
+    letter-spacing: -1.3px;
+  }
+  .home-refined:not(.static-home) #story-copy p {
+    font-size: 13px;
+    line-height: 1.4;
+    margin-top: 10px;
+  }
+  .home-refined:not(.static-home) #story-actions {
+    margin-top: 12px;
+    gap: 4px;
+  }
+  .home-refined:not(.static-home) #story-actions .primary,
+  .home-refined:not(.static-home) #story-actions .quiet {
+    min-height: 36px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .home-refined:not(.static-home) .story-stage {
+    height: 100%;
+    min-height: 0;
+  }
+  .home-refined:not(.static-home) #story-viewer {
+    inset: 0 0 68px 70px;
+  }
+  .home-refined:not(.static-home) #capture-phone {
+    width: 54px;
+    height: 104px;
+    top: 12%;
+    padding: 8px 4px 14px;
+    border-radius: 12px;
+  }
+  .home-refined:not(.static-home) #capture-thumbs {
+    left: 70px;
+    bottom: 0;
+    height: 52px;
+    gap: 8px;
+  }
+  .home-refined:not(.static-home) #capture-thumbs img {
+    width: 40px;
+    height: 32px;
+  }
+  .home-refined:not(.static-home) #dimension-peek {
+    bottom: 0;
+    right: 0;
+    padding: 10px;
+    gap: 6px;
+  }
+  .home-refined:not(.static-home) .story-bottom {
+    bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
 @media (prefers-reduced-motion: reduce) {

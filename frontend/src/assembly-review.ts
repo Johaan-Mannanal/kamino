@@ -1,4 +1,6 @@
 import { Matrix4, Quaternion, Vector3 } from 'three'
+import type { PhysicsSettings } from './types'
+import { createPhysicsDraft, validateAdvancedPhysics } from './advanced-physics'
 export type Pose = {
   position_m: [number, number, number]
   quaternion_wxyz: [number, number, number, number]
@@ -19,6 +21,7 @@ export type Group = {
   frame: Pose
   mass_kg: Scalar
   sliding_friction: Scalar | null
+  physics?: PhysicsSettings | null
   reviewed: boolean
   review_note: string
 }
@@ -26,14 +29,29 @@ export type Joint = {
   name: string
   parent: string
   child: string
-  kind: 'fixed' | 'revolute'
+  kind: 'fixed' | 'revolute' | 'prismatic'
   origin: Pose
   axis: [number, number, number] | null
   limits_rad: [number, number] | null
+  limits_m?: [number, number] | null
+  spring?: { stiffness: number; rest: number; source: string; note?: string | null } | null
+  coupling?: {
+    driver_joint: string
+    ratio: number
+    offset: number
+    source: string
+    note?: string | null
+  } | null
   source: string
   note: string | null
   damping: Scalar | null
-  drive: { kp: number; force_limit_nm: number; source: string; note?: string | null } | null
+  drive: {
+    kp: number
+    force_limit_nm?: number | null
+    force_limit_n?: number | null
+    source: string
+    note?: string | null
+  } | null
   reviewed: boolean
   review_note: string
 }
@@ -53,6 +71,28 @@ export type ReviewPackage = {
   project: ReviewProject
   geometry: Record<string, { vertices: number[][]; faces: number[][]; bounds_m: number[][] }>
 }
+// Omitted and null new extension defaults have identical meaning in historical
+// review/mapping snapshots. Preserve every non-default value and unrelated key.
+export function normalizeProjectDefaults<T>(project: T): T {
+  const data = structuredClone(project) as unknown as Record<string, unknown>
+  if (!data || typeof data !== 'object') return project
+  for (const key of ['groups', 'links']) {
+    if (!Array.isArray(data[key])) continue
+    for (const item of data[key])
+      if (item && typeof item === 'object' && item.physics == null) delete item.physics
+  }
+  if (Array.isArray(data.joints))
+    for (const joint of data.joints) {
+      if (!joint || typeof joint !== 'object') continue
+      for (const key of ['limits_m', 'spring', 'coupling'])
+        if (joint[key] == null) delete joint[key]
+      if (joint.drive && typeof joint.drive === 'object')
+        for (const key of ['force_limit_n', 'force_limit_nm'])
+          if (joint.drive[key] == null) delete joint.drive[key]
+    }
+  return data as T
+}
+
 export function matrix(p: Pose): Matrix4 {
   if (
     !p ||
@@ -70,7 +110,37 @@ export function matrix(p: Pose): Matrix4 {
     new Vector3(1, 1, 1),
   )
 }
+export function jointLimits(j: Joint): [number, number] | null | undefined {
+  return j.kind === 'prismatic' ? j.limits_m : j.limits_rad
+}
+export function jointValues(p: ReviewProject, q: Record<string, number>): Record<string, number> {
+  const result: Record<string, number> = Object.create(null)
+  const visiting = new Set<string>()
+  const byName = new Map(p.joints.map((j) => [j.name, j]))
+  function value(j: Joint): number {
+    if (j.name in result) return result[j.name]
+    if (visiting.has(j.name)) throw Error('Linked joint motion has a cycle')
+    visiting.add(j.name)
+    let v = q[j.name] ?? 0
+    if (j.coupling) {
+      const driver = byName.get(j.coupling.driver_joint)
+      if (!driver || driver.kind === 'fixed' || driver.kind !== j.kind)
+        throw Error('Linked motion requires an existing driver of the same moving joint type')
+      v = j.coupling.offset + j.coupling.ratio * value(driver)
+      const mapped = jointLimits(driver)!.map((x) => j.coupling!.offset + j.coupling!.ratio * x)
+      const limits = jointLimits(j)!
+      if (Math.min(...mapped) < limits[0] - 1e-12 || Math.max(...mapped) > limits[1] + 1e-12)
+        throw Error('Linked motion exceeds follower limits')
+    }
+    if (!Number.isFinite(v)) throw Error('Joint preview values must be finite')
+    visiting.delete(j.name)
+    return (result[j.name] = v)
+  }
+  p.joints.forEach(value)
+  return result
+}
 export function frames(p: ReviewProject, q: Record<string, number>): Record<string, Matrix4> {
+  const resolved = jointValues(p, q)
   const groups = new Map(p.groups.map((g) => [g.name, g]))
   const result: Record<string, Matrix4> = Object.create(null)
   const parents = new Map<string, Joint>()
@@ -96,7 +166,7 @@ export function frames(p: ReviewProject, q: Record<string, number>): Record<stri
       const j = parents.get(name)
       if (!j) throw Error('Disconnected group: ' + name)
       const relative = matrix(groups.get(j.parent)!.frame).invert().multiply(matrix(g.frame))
-      if (j.kind === 'revolute') {
+      if (j.kind !== 'fixed') {
         if (
           !j.axis ||
           j.axis.length !== 3 ||
@@ -104,7 +174,14 @@ export function frames(p: ReviewProject, q: Record<string, number>): Record<stri
           Math.abs(new Vector3(...j.axis).length() - 1) > 1e-6
         )
           throw Error('Joint axis must be unit length')
-        relative.multiply(new Matrix4().makeRotationAxis(new Vector3(...j.axis), q[j.name] ?? 0))
+        const axis = new Vector3(...j.axis)
+        relative.multiply(
+          j.kind === 'prismatic'
+            ? new Matrix4().makeTranslation(
+                ...(axis.multiplyScalar(resolved[j.name]).toArray() as [number, number, number]),
+              )
+            : new Matrix4().makeRotationAxis(axis, resolved[j.name]),
+        )
       }
       result[name] = visit(j.parent).clone().multiply(relative)
     }
@@ -235,6 +312,19 @@ function validateProject(p: ReviewProject) {
     matrix(g.frame)
     scalar(g.mass_kg, true)
     if (g.sliding_friction != null) scalar(g.sliding_friction)
+    if (g.physics != null) {
+      const collision = g.physics.collision
+      require(collision?.kind !== 'convex_hull' ||
+        collision.box_size_m == null, 'Box size only applies to box collision')
+      const inertia = g.physics.inertia
+      if (inertia?.mode === 'automatic')
+        require(inertia.diagonal_kg_m2 == null &&
+          (inertia.center_of_mass_m ?? [0, 0, 0]).every(
+            (v) => v === 0,
+          ), 'Automatic inertia uses the collision centre; choose manual for custom COM')
+      const checked = validateAdvancedPhysics(createPhysicsDraft(g.physics))
+      require(checked.ok, checked.ok ? '' : checked.error)
+    }
     review(g)
   }
   for (const j of p.joints) {
@@ -246,9 +336,9 @@ function validateProject(p: ReviewProject) {
       j.origin.quaternion_wxyz.every(
         (v, i) => v === (i === 0 ? 1 : 0),
       ), 'Joint origin is derived from group frames')
-    require(j.kind === 'fixed' || j.kind === 'revolute', 'Unsupported joint kind')
+    require(['fixed', 'revolute', 'prismatic'].includes(j.kind), 'Unsupported joint kind')
     if (j.kind === 'fixed')
-      require([j.axis, j.limits_rad, j.damping, j.drive].every(
+      require([j.axis, j.limits_rad, j.limits_m, j.damping, j.drive, j.spring, j.coupling].every(
         (v) => v == null,
       ), 'Fixed joint has hinge parameters')
     else {
@@ -256,20 +346,48 @@ function validateProject(p: ReviewProject) {
         j.axis.length === 3 &&
         j.axis.every(Number.isFinite) &&
         Math.abs(j.axis.reduce((s, v) => s + v * v, 0) - 1) <= 1e-6, 'Invalid joint axis')
-      require(j.limits_rad &&
-        j.limits_rad.length === 2 &&
-        j.limits_rad.every(Number.isFinite) &&
-        j.limits_rad[0] < j.limits_rad[1] &&
-        j.limits_rad[0] <= 0 &&
-        j.limits_rad[1] >= 0, 'Invalid joint limits')
-      require(j.damping && j.drive, 'Hinge requires damping and drive')
+      const limits = jointLimits(j)
+      require(limits &&
+        limits.length === 2 &&
+        limits.every(Number.isFinite) &&
+        limits[0] < limits[1] &&
+        limits[0] <= 0 &&
+        limits[1] >= 0, 'Invalid joint limits')
+      require(j.kind === 'prismatic'
+        ? j.limits_rad == null
+        : j.limits_m == null, 'Joint limits use incorrect units')
+      require(j.damping, 'Moving joint requires damping')
       scalar(j.damping!)
-      require(Number.isFinite(j.drive!.kp) &&
-        j.drive!.kp > 0 &&
-        Number.isFinite(j.drive!.force_limit_nm) &&
-        j.drive!.force_limit_nm > 0, 'Invalid position drive')
-      source(j.drive!.source)
-      note(j.drive!.note)
+      if (j.coupling) {
+        require(j.drive == null, 'Linked followers cannot have a competing position drive')
+        require(name(j.coupling.driver_joint) &&
+          Number.isFinite(j.coupling.ratio) &&
+          Number.isFinite(j.coupling.offset), 'Invalid linked joint motion')
+        source(j.coupling.source)
+        note(j.coupling.note)
+      } else {
+        require(j.drive, 'Independent moving joint requires a drive')
+        const force = j.kind === 'prismatic' ? j.drive!.force_limit_n : j.drive!.force_limit_nm
+        require(Number.isFinite(j.drive!.kp) &&
+          j.drive!.kp > 0 &&
+          typeof force === 'number' &&
+          Number.isFinite(force) &&
+          force > 0, 'Invalid position drive')
+        require(j.kind === 'prismatic'
+          ? j.drive!.force_limit_nm == null
+          : j.drive!.force_limit_n == null, 'Slider force limits use N; hinge torque limits use Nm')
+        source(j.drive!.source)
+        note(j.drive!.note)
+      }
+      if (j.spring) {
+        require(Number.isFinite(j.spring.stiffness) &&
+          j.spring.stiffness >= 0 &&
+          Number.isFinite(j.spring.rest) &&
+          j.spring.rest >= limits![0] &&
+          j.spring.rest <= limits![1], 'Invalid spring stiffness or rest')
+        source(j.spring.source)
+        note(j.spring.note)
+      }
     }
   }
 }
@@ -293,7 +411,7 @@ function snapshotMatches(p: ReviewProject): boolean {
                 .map(([k, x]) => [k, sorted(x)]),
             )
           : v
-    return JSON.stringify(sorted(data))
+    return JSON.stringify(sorted(normalizeProjectDefaults(data)))
   }
   try {
     return content(p) === content(JSON.parse(p.review_snapshot))

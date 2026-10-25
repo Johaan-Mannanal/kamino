@@ -1030,7 +1030,7 @@ describe("live target review", () => {
         host.querySelector<HTMLButtonElement>("#live-preview")!.click();
       }
       await vi.waitFor(() =>
-        expect(vi.mocked(mountViewer).mock.lastCall?.[7]).toEqual({
+        expect(vi.mocked(mountViewer).mock.lastCall?.[7]).toMatchObject({
           mode: "mesh",
           initialViewState: {
             direction: [0, 0, 1],
