@@ -1,5 +1,6 @@
 import base64
 import json
+import time
 from pathlib import Path
 
 import httpx
@@ -13,6 +14,7 @@ from photo2sim.integrations.gemini import (
     GeminiUnavailable,
     PropertySuggestions,
     suggest_properties,
+    suggest_properties_result,
 )
 
 SECRET = "test-secret-never-echo"
@@ -178,8 +180,9 @@ def test_missing_key_never_calls_transport(images, key):
         suggest_properties(images, api_key=key, transport=unexpected)
 
 
-@pytest.mark.parametrize("status", [400, 401, 402, 403, 404, 429, 500, 503])
-def test_http_failures_are_safe_unavailable_errors_without_retries(images, status):
+@pytest.mark.parametrize("status,reason", [(400,"invalid_request"), (401,"authentication"),
+    (402,"billing"), (403,"permission"), (404,"provider")])
+def test_terminal_http_failures_are_safe_without_retries(images, status, reason):
     calls = []
 
     def handle(request):
@@ -188,11 +191,82 @@ def test_http_failures_are_safe_unavailable_errors_without_retries(images, statu
 
     with pytest.raises(GeminiUnavailable) as error:
         suggest_properties(images, api_key=SECRET, transport=handle)
-    assert str(status) in str(error.value)
+    assert error.value.reason == reason
     assert SECRET not in str(error.value)
     assert SECRET not in repr(error.value)
     assert error.value.__suppress_context__
     assert len(calls) == 1
+
+
+def test_overload_retries_then_falls_back_and_records_actual_model(images):
+    seen = []
+    def handle(request):
+        seen.append(request.url.path)
+        if "primary" in request.url.path:
+            return httpx.Response(503, json={"error":{"status":"SERVICE_UNAVAILABLE"}})
+        return httpx.Response(200, json={**envelope(GOOD), "modelVersion":"models/fallback-v2"})
+    result = suggest_properties_result(images, api_key=SECRET, model="primary",
+        fallback_models=("fallback",), max_attempts=2, backoff_seconds=0,
+        transport=handle)
+    assert result.fallback_used
+    assert result.requested_model == "primary"
+    assert result.model == "fallback-v2"
+    assert ["primary" in path for path in seen] == [True, True, False]
+
+
+def test_total_failure_is_bounded_and_sanitized(images):
+    seen = []
+    def handle(request):
+        seen.append(request.url.path)
+        return httpx.Response(503, text=SECRET)
+    with pytest.raises(GeminiUnavailable) as error:
+        suggest_properties_result(images, api_key=SECRET, model="primary",
+            fallback_models=("fallback",), max_attempts=2, backoff_seconds=0,
+            transport=handle)
+    assert error.value.reason == "overload"
+    assert SECRET not in str(error.value)
+    assert len(seen) == 4
+
+
+def test_total_deadline_stops_retries_and_fallback(images):
+    seen=[]
+    def handle(request):
+        seen.append(request.url.path)
+        time.sleep(0.02)
+        return httpx.Response(503)
+    with pytest.raises(GeminiUnavailable) as error:
+        suggest_properties_result(images,api_key=SECRET,model="primary",
+            fallback_models=("fallback",),max_attempts=3,
+            deadline_seconds=0.005,backoff_seconds=0,transport=handle)
+    assert error.value.reason == "deadline"
+    assert len(seen)==1
+
+
+@pytest.mark.parametrize("status,error_code,reason", [
+    (429,"QUOTA_EXCEEDED","quota"), (401,"AUTHENTICATION","authentication"),
+    (402,"PAYMENT_REQUIRED","billing"), (400,"INVALID_ARGUMENT","invalid_request")])
+def test_nonretryable_errors_never_call_fallback(images,status,error_code,reason):
+    seen=[]
+    def handle(request):
+        seen.append(request.url.path)
+        return httpx.Response(status,json={"error":{"status":error_code,"message":SECRET}})
+    with pytest.raises(GeminiUnavailable) as error:
+        suggest_properties_result(images,api_key=SECRET,model="primary",
+            fallback_models=("fallback",),backoff_seconds=0,transport=handle)
+    assert error.value.reason == reason
+    assert len(seen)==1
+    assert SECRET not in str(error.value)
+
+
+def test_malformed_primary_output_does_not_fall_back(images):
+    seen=[]
+    def handle(request):
+        seen.append(request.url.path)
+        return httpx.Response(200,json={"candidates":[]})
+    with pytest.raises(GeminiUnavailable, match="invalid or incomplete"):
+        suggest_properties_result(images,api_key=SECRET,model="primary",
+            fallback_models=("fallback",),transport=handle)
+    assert len(seen)==1
 
 
 def test_network_error_is_safe(images):

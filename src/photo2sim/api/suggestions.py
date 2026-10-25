@@ -16,7 +16,7 @@ from photo2sim.integrations.gemini import (
     GeminiUnavailable,
     PropertySuggestions,
     Transport,
-    suggest_properties,
+    suggest_properties_result,
 )
 
 
@@ -61,7 +61,8 @@ class SuggestionService:
         if (
             not request.refresh
             and cached is not None
-            and cached.get("model") == self.settings.gemini_model
+            and cached.get("requested_model", cached.get("model")) == self.settings.gemini_model
+            and tuple(cached.get("fallback_models", ())) == self.settings.gemini_fallback_models
             and cached.get("object_hint") == request.object_hint
         ):
             return PropertySuggestions.model_validate(cached["suggestions"])
@@ -81,24 +82,31 @@ class SuggestionService:
             if cached is not None:
                 return cached
             paths = self.image_copies(job_id)
-            result = suggest_properties(
+            result = suggest_properties_result(
                 paths,
                 request.object_hint,
                 api_key=self.settings.gemini_api_key,
                 model=self.settings.gemini_model,
+                fallback_models=self.settings.gemini_fallback_models,
+                max_attempts=self.settings.gemini_max_attempts,
+                deadline_seconds=self.settings.gemini_deadline_seconds,
+                backoff_seconds=self.settings.gemini_backoff_seconds,
                 transport=self.transport,
             )
             record = {
-                "model": self.settings.gemini_model,
+                "model": result.model,
+                "requested_model": result.requested_model,
+                "fallback_models": list(self.settings.gemini_fallback_models),
+                "fallback_used": result.fallback_used,
                 "object_hint": request.object_hint,
                 "created_at": datetime.now(UTC).isoformat(),
-                "suggestions": result.model_dump(mode="json"),
+                "suggestions": result.suggestions.model_dump(mode="json"),
             }
             folder = self.folder(job_id)
             temporary = folder / "gemini.json.partial"
             temporary.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
             temporary.replace(folder / "gemini.json")
-            return result
+            return result.suggestions
         finally:
             self.inference_slot.release()
 

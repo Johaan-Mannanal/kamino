@@ -240,3 +240,30 @@ def test_request_rechecks_cache_after_waiting_to_acquire_slot(tmp_path, monkeypa
                 release_first.set()
                 resume_second.set()
         assert len(calls) == 1
+
+
+def test_fallback_cache_reuse_and_actual_model_recording(tmp_path):
+    job_id, store, _ = seed(tmp_path)
+    before = store.get(job_id)
+    calls = []
+    def transport(request):
+        calls.append(request.url.path)
+        if "primary" in request.url.path:
+            return httpx.Response(503, json={"error":{"status":"SERVICE_UNAVAILABLE"}})
+        response = good_response()
+        payload = response.json()
+        payload["modelVersion"] = "models/fallback-actual"
+        return httpx.Response(200, json=payload)
+    settings = Settings(data_dir=tmp_path, gemini_api_key=SECRET,
+        gemini_model="primary", gemini_fallback_models=("fallback",),
+        gemini_backoff_seconds=0)
+    with TestClient(create_app(settings, gemini_transport=transport)) as client:
+        first = client.post(f"/api/jobs/{job_id}/suggestions", json={})
+        assert first.status_code == 200
+        assert client.post(f"/api/jobs/{job_id}/suggestions", json={}).json() == first.json()
+        assert len(calls) == 3
+        record = json.loads((store.job_dir(job_id)/"suggestions/gemini.json").read_text())
+        assert record["model"] == "fallback-actual"
+        assert record["requested_model"] == "primary"
+        assert record["fallback_used"] is True
+        assert store.get(job_id) == before
