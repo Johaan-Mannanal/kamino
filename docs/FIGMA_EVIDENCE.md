@@ -12,12 +12,14 @@ The [original UI delivery](https://github.com/Johaan-Mannanal/kamino/commit/9600
 and [integrated Workspace delivery](https://github.com/Johaan-Mannanal/kamino/commit/2cdc3824a58b4da273d30bd61893828c6962b243)
 provide code history; later released changes are documented in [RELEASE.md](RELEASE.md).
 
-**Access check, October 25:** the supplied design URL showed “Sign up or Log in”
-in the review browser. Public file/prototype access could not be verified.
-No permission settings were changed. Actual exported Figma screenshots, a shared
-click-through prototype and the workflow Slides have not yet been supplied for
-this publication. They must not be replaced by screenshots falsely described as
-Figma output.
+**Access check, October 25:** the design and prototype URLs still show “Sign up or
+Log in” in a signed-out review browser. Public design/prototype access remains
+unverified; no permission setting was changed. The [five-slide workflow deck](https://www.figma.com/slides/wqDC8D4N5ycsDvkgEisqoS)
+opened in that signed-out browser. It includes genuine before/after and Figma
+workflow images plus prototype, repository and product links. The editor requires
+account access to add an interactive prototype embed, so that specific requirement
+remains outstanding. The [PNG evidence index](evidence/figma/README.md) and
+[stage log](evidence/figma/WORKFLOW_STAGE_LOG.md) are independently reviewable.
 
 ## What Atul should supply
 
