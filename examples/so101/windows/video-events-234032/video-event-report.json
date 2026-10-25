@@ -1,0 +1,104 @@
+{
+  "video": {
+    "source": "C:\\Users\\ypira\\Downloads\\Video Demo final.mov",
+    "sha256": "994cb33a6331cc2ecde403f4f2059ca47b3698903ba9d11d33f43f623b382861",
+    "fps": 29.997366341848828,
+    "frame_count": 1139,
+    "duration_s": 37.97,
+    "width": 1920.0,
+    "height": 1080.0,
+    "orientation_meta": 0.0,
+    "orientation_auto": 1.0
+  },
+  "operator_confirmations": {
+    "shows_replay_of": "trajectory-20261024-234032",
+    "not_original_teleop_recording": true,
+    "same_reconstruction_charger": true,
+    "same_starting_arrangement_intended_for_live_demo": true,
+    "confirmation": "Yes\u2014all three are correct"
+  },
+  "start_of_video": {
+    "charger": "upright on A, pins upward, unsupported by gripper",
+    "gripper": "clear of charger; approach occurs later",
+    "not_a_confirmed_dataset_frame_zero_timestamp": true
+  },
+  "video_events": [
+    {
+      "event": "fingers positioned around housing / closure",
+      "video_interval_s": [
+        17.5,
+        20.0
+      ],
+      "confidence": "approximate visual interval; initial contact and force cannot be measured"
+    },
+    {
+      "event": "first visible lift",
+      "video_interval_s": [
+        20.0,
+        20.5
+      ],
+      "confidence": "charger at A at 20.0; clearly airborne by 20.5"
+    },
+    {
+      "event": "secure grip demonstrated by carry",
+      "video_interval_s": [
+        20.5,
+        22.0
+      ],
+      "screenshot_s": 21.5,
+      "confidence": "charger visibly follows gripper off paper; not a force measurement"
+    },
+    {
+      "event": "release at B",
+      "video_interval_s": [
+        30.0,
+        31.5
+      ],
+      "confidence": "opening and withdrawal visible; released object remains standing by 31.5"
+    },
+    {
+      "event": "retract and return toward base",
+      "video_interval_s": [
+        31.5,
+        37.0
+      ],
+      "confidence": "retract begins after release; back near starting area by 34\u201337; exact joint equality not established"
+    }
+  ],
+  "contact_review": {
+    "near_face": "visible finger overlaps central strip of near broad housing face",
+    "location_along_housing": "upper/middle body region; exact patch not resolved",
+    "opposite_face": "inferred opposing contact behind housing, exact far face/patch occluded",
+    "pins": "not used as the visible contact; point upward at starting placement",
+    "grip_pads": "none distinctly identifiable; presence/material/thickness unconfirmed"
+  },
+  "recording_relation": {
+    "dataset": "trajectory-20261024-234032",
+    "episode": 0,
+    "frames": 900,
+    "stored_fps": 30,
+    "recorded_span_s": 29.96666717529297,
+    "video_span_s": 37.97,
+    "shared_clock": false,
+    "time_offset_s": null,
+    "time_scale": null,
+    "video_frame_to_dataset_frame_map": null,
+    "reason": "operator identifies replay, but no shared trigger or timestamp trace; video includes waiting/startup and actual replay cadence is not measured",
+    "actual_replay_observations_saved": false
+  },
+  "native_acceptance_context": {
+    "source": "Johaan supplied message, not independently rerun here",
+    "frozen_zip_sha256_reported": "760e340d1002e57d2362e29dd9fee5e76312aac300f63e9e1393b24581f9b77c",
+    "expected_manifest_sha256_reported": "2c665b219cc5612cd56353c3ac4164202282f92b49a24f3e4ec62eba557741af",
+    "scope": "native launch and player controls accepted separately; not physical alignment",
+    "frozen_package_modified": false
+  },
+  "unresolved": [
+    "Exact video-to-dataset timing and phase alignment",
+    "Calibrated camera pose and metric object/base placement",
+    "Far contact patch and grip-pad properties",
+    "Joint mapping and gripper closed-angle zero remain unverified"
+  ],
+  "agent_hardware_actions": [],
+  "annotation_method": "SVG vector callouts around unchanged embedded extracted PNG; image generation attempt failed and no generated photo is used"
+}

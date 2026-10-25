@@ -1,0 +1,42 @@
+{
+  ".gitattributes": {
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+    "bytes": 8
+  },
+  "first-clear-lift-frame.png": {
+    "sha256": "1bbb50dc5bdb8a9a8310c7ec629a35f2ecd79114695d37b49a9d09beecf92d8e",
+    "bytes": 2676947
+  },
+  "pre-lift-frame.png": {
+    "sha256": "23836677106c30d7d7d7540190487caf02185a24ff43c86a07711654ecc7bde1",
+    "bytes": 2810541
+  },
+  "README.md": {
+    "sha256": "71438617d429d2c047deed09179d46c582a873379f71abf7d57ad7e7f6693ea0",
+    "bytes": 4233
+  },
+  "release-frame.png": {
+    "sha256": "eef915245588bbc2d6c1d759e9f5d97ee1b761a0dc012c38a79f81763257f2fb",
+    "bytes": 2743076
+  },
+  "return-frame.png": {
+    "sha256": "201502d8ba3c4c290aa8ab8c392d18d6b4f58a74fb6604b467ce2b2c2adc9f32",
+    "bytes": 2856805
+  },
+  "secure-grip-annotated.svg": {
+    "sha256": "b727672ad4ca8a05e58ed9f9f7b8b4c6df967b412b8eddab4c59fd7d8388f33a",
+    "bytes": 3542425
+  },
+  "secure-grip-frame.png": {
+    "sha256": "c7f9c8889202a135c5fe8b63044b050c895e04b9461cc5cd2398f93e2227c459",
+    "bytes": 2654622
+  },
+  "start-frame.png": {
+    "sha256": "9ea354f041803b73bfa2a74cf596a97e00a7eebf73a1fc84df0454c460956baa",
+    "bytes": 2465361
+  },
+  "video-event-report.json": {
+    "sha256": "dac28ace11509be14ab324290042576f8a614fd9e47672d8e046ab7c7d624b6d",
+    "bytes": 3988
+  }
+}
