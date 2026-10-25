@@ -883,6 +883,32 @@ describe("live target review", () => {
     return { state, host, adapter, mount, cleanup };
   }
 
+  it("clears the legacy sizing notice only after a successful uniform save", async () => {
+    const legacy = {
+      ...reviewed,
+      properties: { ...reviewed.properties!, sizing: null },
+    };
+    const save = vi
+      .fn()
+      .mockRejectedValueOnce(new ApiError("Save failed", 500))
+      .mockResolvedValueOnce({ ...reviewed, input_revision: 4 });
+    const { host, state } = mounted({ save }, legacy);
+    await loaded(state);
+    const notice = () => host.querySelector<HTMLElement>(".live-notice");
+    expect(notice()?.textContent).toContain("legacy three-axis sizing");
+    type($(host, '[name="length"]'), "300");
+    expect(notice()?.textContent).toContain("legacy three-axis sizing");
+    await expect(state.saveProperties(reviewed.properties!)).rejects.toThrow(
+      "Save failed",
+    );
+    expect(notice()?.textContent).toContain("legacy three-axis sizing");
+    await state.saveProperties(reviewed.properties!);
+    expect(state.job?.properties?.sizing?.mode).toBe("uniform");
+    expect(notice()?.textContent ?? "").toBe("");
+    expect(notice()?.hidden ?? true).toBe(true);
+    expect($<HTMLInputElement>(host, '[name="length"]').value).toBe("300");
+  });
+
   it.each(["awaiting_properties", "failed"] as const)(
     "explicitly saves edited inputs before generating from %s",
     async (status) => {

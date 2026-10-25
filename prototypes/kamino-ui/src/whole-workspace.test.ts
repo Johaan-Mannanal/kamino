@@ -564,3 +564,40 @@ it("shows collision preview errors accessibly and clears them after a successful
   expect(status.hidden).toBe(true);
   expect(status.textContent).toBe("");
 });
+
+it.each([
+  null,
+  {
+    mode: "independent_axes",
+    reviewed_orientation: orientation,
+    acknowledge_distortion: true,
+  },
+] as (Sizing | null)[])(
+  "updates the saved sizing notice after whole-mesh uniform conversion from %j",
+  async (sizing) => {
+    const { host, state } = mounted({
+      ...base,
+      properties: {
+        dimensions_m: preview.dimensions_m,
+        mass_kg: { value: 0.2, source: "estimated" },
+        sliding_friction: null,
+        sizing,
+      },
+    });
+    const notice = host.querySelector<HTMLElement>("#live-sizing-notice")!;
+    expect(notice.hidden).toBe(false);
+    readyDraft(host);
+    expect(notice.hidden).toBe(false);
+    host
+      .querySelector<HTMLFormElement>("#live-form")!
+      .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    await vi.waitFor(() =>
+      expect(state.job?.properties?.sizing?.mode).toBe("uniform"),
+    );
+    expect(notice.hidden).toBe(true);
+    expect(notice.textContent).toBe("");
+    expect(host.querySelector<HTMLInputElement>('[name="length"]')!.value).toBe(
+      "100",
+    );
+  },
+);
