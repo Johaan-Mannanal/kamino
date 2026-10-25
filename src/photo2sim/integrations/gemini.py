@@ -255,14 +255,22 @@ def suggest_properties_result(
 
 def _failure(response: httpx.Response) -> tuple[str, bool]:
     status = response.status_code
+    quota_period = ""
     try:
         error = response.json().get("error", {})
         reason = error.get("status", "")
         details = error.get("details", [])
         for detail in details if isinstance(details, list) else []:
-            if isinstance(detail, dict) and isinstance(detail.get("reason"), str):
+            if not isinstance(detail, dict):
+                continue
+            if isinstance(detail.get("reason"), str):
                 reason = detail["reason"]
-                break
+            violations = detail.get("violations", [])
+            for violation in violations if isinstance(violations, list) else []:
+                if isinstance(violation, dict):
+                    quota_period += " " + str(
+                        violation.get("quotaId", violation.get("quota_id", ""))
+                    ).lower()
     except (ValueError, AttributeError, TypeError):
         reason = ""
     normalized = str(reason).lower()
@@ -275,7 +283,8 @@ def _failure(response: httpx.Response) -> tuple[str, bool]:
     if status == 400:
         return "invalid_request", False
     if status == 429:
-        if "quota" in normalized or "billing" in normalized:
+        if ("quota" in normalized or "billing" in normalized
+                or "perday" in quota_period or "daily" in quota_period):
             return "quota", False
         return "rate_limit", True
     if status == 404 and "model_not_found" in normalized:

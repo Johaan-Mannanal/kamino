@@ -258,6 +258,19 @@ def test_nonretryable_errors_never_call_fallback(images,status,error_code,reason
     assert SECRET not in str(error.value)
 
 
+def test_legacy_daily_quota_detail_stops_without_fallback(images):
+    calls=[]
+    def handle(request):
+        calls.append(request.url.path)
+        return httpx.Response(429,json={"error":{"status":"RESOURCE_EXHAUSTED",
+            "details":[{"violations":[{"quotaId":"GenerateRequestsPerDayPerProjectPerModel"}]}]}})
+    with pytest.raises(GeminiUnavailable) as error:
+        suggest_properties_result(images,api_key=SECRET,model="primary",
+            fallback_models=("fallback",),transport=handle)
+    assert error.value.reason == "quota"
+    assert len(calls)==1
+
+
 def test_malformed_primary_output_does_not_fall_back(images):
     seen=[]
     def handle(request):
