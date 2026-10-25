@@ -1,4 +1,4 @@
-# Photo2Sim project plan
+# Kamino project plan
 
 ## Product goal
 Reusable conversion middleware for robotics and engineering: photos, optional
@@ -8,7 +8,7 @@ information, assumptions, geometry and articulation, then revise and regenerate.
 
 The SO101 itself is the intended articulated demonstration input. The charger
 remains our proven rigid-object example. Running an imported SO101 model does
-not demonstrate robot reconstruction by Photo2Sim. We aim for a guided workflow,
+not demonstrate robot reconstruction by Kamino. We aim for a guided workflow,
 not automatic physical accuracy for arbitrary objects from photographs alone.
 
 ## Workflow

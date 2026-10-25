@@ -101,7 +101,7 @@ On macOS the native viewer requires `mjpython` in place of `python`. Space pause
 R resets. Headless replay writes recorded angles and conflicts, using `mj_forward`
 and no dynamics steps. The runner checks the reviewed project and scene joint
 names/limits, but does not authenticate hardware evidence or certify physical
-accuracy. It requires the bundled dependencies, not the Photo2Sim package.
+accuracy. It requires the bundled dependencies, not the Kamino package.
 
 Mapping evidence remains separate from assembly acknowledgements. No calibrated
 SO101 mapping is supplied; its candidate remains unverified pending independent

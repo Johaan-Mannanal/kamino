@@ -1,7 +1,7 @@
 # Yash: physical reference evidence while articulated conversion is built
 
 ## Purpose and completed work
-Photo2Sim is reusable conversion middleware. We intend to convert the SO101
+Kamino is reusable conversion middleware. We intend to convert the SO101
 itself through a guided assembly workflow, with CAD/measurements as supporting
 inputs. The existing Menagerie robot is an imported comparison reference, not
 output of our conversion. Johaan is building the generic links/joints format and

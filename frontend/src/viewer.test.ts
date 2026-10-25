@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   context: vi.fn(),
   controlsDispose: vi.fn(),
   disconnect: vi.fn(),
+  render: vi.fn(),
 }))
 vi.mock('three', async () => {
   const actual = await vi.importActual<typeof import('three')>('three')
@@ -17,7 +18,7 @@ vi.mock('three', async () => {
       domElement = document.createElement('canvas')
       setPixelRatio() {}
       setSize() {}
-      render() {}
+      render = mocks.render
       dispose = mocks.dispose
       forceContextLoss = mocks.context
     },
@@ -61,6 +62,24 @@ function mesh() {
   return new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial())
 }
 const orientation = { x_deg: 90, y_deg: 0, z_deg: 0 }
+it('previews sizing after orientation so prepared geometry matches the reported extents', async () => {
+  const object = new THREE.Mesh(new THREE.BoxGeometry(1, 3, 2), new THREE.MeshStandardMaterial())
+  mocks.parse.mockResolvedValue({ scene: object })
+  const cleanup = mountViewer(
+    document.querySelector('#host')!,
+    { file: async () => ({ arrayBuffer: async () => new ArrayBuffer(4) }) } as unknown as Api,
+    'job',
+    'mesh.glb',
+    orientation,
+    [2, 4, 6],
+  )
+  await vi.waitFor(() => expect(mocks.render).toHaveBeenCalled())
+  const size = new THREE.Box3().setFromObject(object).getSize(new THREE.Vector3())
+  expect(size.toArray()).toEqual(
+    expect.arrayContaining([expect.closeTo(2), expect.closeTo(8), expect.closeTo(18)]),
+  )
+  cleanup()
+})
 it('releases a parsed mesh that finishes after its mount was disposed, without creating a stale canvas', async () => {
   let resolve!: (value: { scene: THREE.Object3D }) => void
   mocks.parse.mockReturnValue(

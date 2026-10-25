@@ -4,7 +4,7 @@
 > current Windows work is in [yash-articulated-demo.md](yash-articulated-demo.md).
 > Preserve this note as context, not a new task assignment.
 
-You own geometry preparation for **Photo2Sim**, a Cal Hacks project turning object photos into editable MuJoCo assets. You are working alongside three other agents; preserve their work and stay in your scope.
+You own geometry preparation for **Kamino**, a Cal Hacks project turning object photos into editable MuJoCo assets. You are working alongside three other agents; preserve their work and stay in your scope.
 
 ## Get the code
 

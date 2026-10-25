@@ -86,7 +86,12 @@ def test_saved_orientation_survives_restart_and_reaches_export_zip(tmp_path):
         response = client.get(f"/api/jobs/{job_id}/files/{job['bundle_path']}")
         with ZipFile(BytesIO(response.content)) as z:
             assert json.loads(z.read("asset.json"))["orientation"]["x_deg"] == 90
-        assert client.patch(f"/api/jobs/{job_id}/orientation", json={}).status_code == 409
+        corrected = client.patch(f"/api/jobs/{job_id}/orientation", json={})
+        assert corrected.status_code == 200
+        assert corrected.json()["attempts"][0]["inputs"]["orientation"]["x_deg"] == 90
+        assert (
+            client.get(f"/api/jobs/{job_id}/files/{job['bundle_path']}").content == response.content
+        )
     assert source.read_bytes() == before
 
 

@@ -1,1 +1,1 @@
-"""ASI:One chat adapter for the existing Photo2Sim HTTP API."""
+"""ASI:One chat adapter for the existing Kamino HTTP API."""

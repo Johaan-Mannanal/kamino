@@ -1,4 +1,12 @@
-import type { Job, Orientation, Properties, Suggestions, ValidationReport } from './types'
+import type {
+  Job,
+  Orientation,
+  Properties,
+  Suggestions,
+  ValidationReport,
+  Sizing,
+  SizingPreview,
+} from './types'
 
 export type Api = {
   health(): Promise<{ status: string; provider: string }>
@@ -6,6 +14,14 @@ export type Api = {
   get(id: string): Promise<Job>
   save(id: string, properties: Properties): Promise<Job>
   saveOrientation(id: string, orientation: Orientation): Promise<Job>
+  previewSizing(
+    id: string,
+    request: {
+      sizing: Sizing
+      orientation: Orientation
+      dimensions_m?: Properties['dimensions_m']
+    },
+  ): Promise<SizingPreview>
   cachedSuggestions(id: string): Promise<Suggestions>
   suggestions(
     id: string,
@@ -90,6 +106,12 @@ export const liveApi: Api = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orientation),
+    }),
+  previewSizing: (id, sizing) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/sizing-preview`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sizing),
     }),
   cachedSuggestions: (id) => request(`/api/jobs/${encodeURIComponent(id)}/suggestions`),
   suggestions: (id, suggestion) =>

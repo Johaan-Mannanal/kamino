@@ -8,6 +8,7 @@ from uuid import uuid4
 import numpy as np
 import trimesh
 
+from photo2sim.assets.sizing import resolve_sizing, rotate_mesh
 from photo2sim.contracts import AssetProperties, AssetRecord, CollisionGeometry, Orientation
 
 SUPPORTED_EXTENSIONS = {".obj": "obj", ".glb": "glb"}
@@ -32,8 +33,8 @@ def prepare_asset(
 
     Orientation is not inferred: explicit fixed-axis X/Y/Z rotations are applied
     before centring and scaling. Omission preserves the input axes. Each axis is
-    scaled independently to the confirmed full extents, which distorts the mesh
-    when its proportions differ.
+    scaled uniformly from an explicit reference, or independently only for an
+    explicit advanced request or historical properties with no sizing metadata.
     The input file is never modified, and nothing is left in ``output_dir`` on failure.
     """
     mesh_path = Path(mesh_path)
@@ -42,26 +43,28 @@ def prepare_asset(
     mesh, baked_transforms = _load_mesh(mesh_path)
     _check_geometry(mesh, mesh_path)
     orientation = Orientation.model_validate(orientation or Orientation())
-    x, y, z = np.deg2rad([orientation.x_deg, orientation.y_deg, orientation.z_deg])
-    cx, cy, cz = np.cos([x, y, z])
-    sx, sy, sz = np.sin([x, y, z])
-    rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
-    ry = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
-    rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
-    rotation = rz @ ry @ rx
-    rotation[np.abs(rotation) < 1e-15] = 0
-    mesh.vertices = mesh.vertices @ rotation.T
-
-    dimensions = properties.dimensions_m
-    target = np.array([dimensions.x, dimensions.y, dimensions.z], dtype=float)
+    rotate_mesh(mesh, orientation)
     source_centre = mesh.bounds.mean(axis=0)
     source_extents = mesh.extents.copy()
-    scale = target / source_extents
+    properties, sizing_result = resolve_sizing(source_extents, properties, orientation)
+    target = np.array([getattr(properties.dimensions_m, axis) for axis in "xyz"])
+    scale = np.array(sizing_result.scale_factors)
     mesh.vertices = (mesh.vertices - source_centre) * scale
 
     _write_bundle(mesh, output_dir)
 
     notes = _notes(mesh_path, source_extents, source_centre, target, scale, baked_transforms)
+    if sizing_result.mode == "uniform":
+        notes[2] = (
+            f"Uniform scalar {scale[0]:.12g} applied after reviewed orientation; "
+            "source proportions preserved. " + properties.dimensions_m.note
+        )
+    elif sizing_result.mode == "legacy_independent_axes":
+        notes.append(
+            "Legacy three-axis sizing retained for backward compatibility; proportions may be distorted."
+        )
+    else:
+        notes.append("Advanced independent-axis stretching explicitly acknowledged by the user.")
     if any((orientation.x_deg, orientation.y_deg, orientation.z_deg)):
         notes[0] = (
             "Explicit right-handed rotation before centring and dimension scaling: "
@@ -77,6 +80,7 @@ def prepare_asset(
         synthetic=False,
         notes=notes,
         orientation=orientation,
+        sizing_result=sizing_result,
     )
 
 

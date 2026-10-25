@@ -120,7 +120,7 @@ def run_motion(scene: Path, phases: list[dict], output_dir: Path, *, render=Fals
             draw.rectangle((0, 0, 640, 48), fill="#15191c")
             draw.text(
                 (10, 6),
-                "Photo2Sim | simulated actuator motion | physical accuracy unverified",
+                "Kamino | simulated actuator motion | physical accuracy unverified",
                 fill="white",
             )
             draw.text(

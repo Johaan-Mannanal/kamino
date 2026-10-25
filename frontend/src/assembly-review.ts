@@ -135,7 +135,7 @@ export function parsePackage(text: string): ReviewPackage {
     !Array.isArray(r.project.groups) ||
     !Array.isArray(r.project.joints)
   )
-    throw Error('Choose a Photo2Sim review package JSON')
+    throw Error('Choose a Kamino review package JSON')
   if (r.project.parts.length > 2000 || r.project.groups.length > 128)
     throw Error('Project exceeds review limits')
   validateProject(r.project)

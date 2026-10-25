@@ -62,6 +62,11 @@ def check_backend(client: httpx.Client, *, run_mock: bool = False) -> dict:
                 "note": "Synthetic smoke fixture",
             },
             "mass_kg": {"value": 0.08, "source": "estimated", "note": "Synthetic assumed mass"},
+            "sizing": {
+                "mode": "independent_axes",
+                "acknowledge_distortion": True,
+                "reviewed_orientation": {"x_deg": 0, "y_deg": 0, "z_deg": 0},
+            },
         },
     )
     saved.raise_for_status()

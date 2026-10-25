@@ -3,7 +3,15 @@ import './workflow.css'
 import { liveApi, setApiToken, type Api } from './api'
 import { mockApi, setMockScenario } from './mock'
 import { applySuggestionToDraft, makeProperties, validatePhotos } from './properties'
-import type { Job, Source, Suggestions, Orientation, ValidationReport } from './types'
+import type {
+  Job,
+  Source,
+  Suggestions,
+  Orientation,
+  ValidationReport,
+  SizingPreview,
+} from './types'
+import { makeSizing, sizingControls, sizingMode } from './sizing'
 import { makeOrientation } from './orientation'
 import { mountViewer } from './viewer'
 import { canRetry, canDownloadBundle, preparedMeshPath } from './pipeline'
@@ -27,6 +35,8 @@ let suggestions: Suggestions | null = null,
   suggestionMessage = '',
   objectHint = ''
 let orientationDraft: Record<string, string> = {}
+let sizingPreview: SizingPreview | null = null
+let sizingDraftVersion = 0
 let viewerKey = '',
   viewerNode: HTMLElement | null = null,
   disposeViewer: (() => void) | undefined
@@ -76,6 +86,56 @@ function propertySummary() {
   const row = (name: string, display: string, source: Source | null, note?: string | null) =>
     `<tr><th scope="row">${name}</th><td>${display}${note ? `<span class="property-note">${esc(note)}</span>` : ''}</td><td>${source ? names[source] : ''}</td></tr>`
   return `<table class="property-summary"><caption class="sr-only">Confirmed object data</caption><tbody>${row('Dimensions', `${number(dimensions.x * 1000)} × ${number(dimensions.y * 1000)} × ${number(dimensions.z * 1000)} mm`, dimensions.source, dimensions.note)}${row('Mass', `${number(properties.mass_kg.value * 1000)} g`, properties.mass_kg.source, properties.mass_kg.note)}${row('Sliding friction', friction ? number(friction.value) : 'Unknown', friction?.source || null, friction?.note)}</tbody></table>`
+}
+function sizingForm() {
+  const props = job?.properties || null
+  const selected = draft.sizing_mode || sizingMode(props)
+  return (
+    sizingControls(props, draft) +
+    (selected === 'uniform'
+      ? ''
+      : `
+    <div class="field-head">Full dimensions <span>millimetres</span></div>
+    <div class="grid three">${(['x', 'y', 'z'] as const).map((a) => input(a, a.toUpperCase(), props ? props.dimensions_m[a] * 1000 : '', false, true)).join('')}</div>
+    <div class="grid two gap"><label>Dimension source ${select('dimensions_source', props?.dimensions_m.source || 'estimated', false)}</label>${input('dimensions_note', 'Note · optional', props?.dimensions_m.note || '', false)}</div>`)
+  )
+}
+function attemptHistory() {
+  if (!job?.attempts?.length) return ''
+  return `<details><summary>Prior processing attempts (${job.attempts.length})</summary>${job.attempts
+    .map(
+      (a) => `
+    <div><p>Revision ${a.inputs.input_revision} · ${esc(a.status)} · ${esc(a.inputs.properties.sizing?.mode || 'legacy_independent_axes')}</p>
+    ${a.inputs_path ? link(a.inputs_path, 'Saved attempt inputs') : ''}${a.bundle_path ? link(a.bundle_path, 'Retained simulation ZIP') : ''}${a.validation_path ? link(a.validation_path, 'Attempt numerical report') : ''}</div>`,
+    )
+    .join('')}</details>`
+}
+const readPropertyForm = () =>
+  Object.fromEntries(
+    [...new FormData(document.querySelector<HTMLFormElement>('#properties')!)].map(([k, v]) => [
+      k,
+      String(v),
+    ]),
+  )
+async function previewSizing(values: Record<string, string>) {
+  if (!job) throw Error('Open a reconstructed job first.')
+  if (Object.keys(orientationDraft).length)
+    throw Error('Save the reviewed orientation before sizing.')
+  const sizing = makeSizing(values, job.orientation)
+  if (!sizing || sizing.mode !== 'uniform') return null
+  const id = job.id,
+    version = sizingDraftVersion,
+    revision = job.input_revision,
+    orientation = JSON.stringify(job.orientation)
+  const result = await api.previewSizing(id, { sizing, orientation: job.orientation })
+  if (
+    job?.id !== id ||
+    version !== sizingDraftVersion ||
+    job.input_revision !== revision ||
+    JSON.stringify(job.orientation) !== orientation
+  )
+    throw Error('Inputs changed during preview; review and preview again.')
+  return result
 }
 function reportView() {
   if (reportError)
@@ -152,7 +212,7 @@ function suggestionView(canSave: boolean) {
 function orientationView(canSave: boolean, done: boolean) {
   if (!job?.mesh_path) return ''
   const orientation = job.orientation || zeroOrientation
-  return `<section><h2>Mesh preview & orientation</h2><div class="body"><div id="mesh-viewer" class="mesh-viewer"></div><p class="hint">Drag to orbit · scroll to zoom · red X, green Y, blue Z. Raw reconstruction preview with the displayed rotation, before dimension scaling. Prepared downloads already include saved rotation.</p>${done ? `<p>Saved rotation: X ${orientation.x_deg}°, Y ${orientation.y_deg}°, Z ${orientation.z_deg}°.</p>` : `<form id="orientation"><p>Right-handed, fixed X then Y then Z (Rz × Ry × Rx), before centring and scaling. Dimensions describe the final axes.</p><div class="grid three">${(['x_deg', 'y_deg', 'z_deg'] as const).map((axis) => `<label>${axis[0].toUpperCase()} · degrees<input name="${axis}" type="number" min="-180" max="180" step="any" required value="${esc(orientationDraft[axis] ?? String(orientation[axis]))}"></label>`).join('')}</div><div class="suggestion-actions"><button type="button" id="preview-orientation">Preview rotation</button><button type="submit" ${!canSave || busy ? 'disabled' : ''}>Save orientation</button></div>${Object.keys(orientationDraft).length ? '<p class="hint">Rotation draft is not saved. Save before processing.</p>' : ''}</form>`}</div></section>`
+  return `<section><h2>Mesh preview & orientation</h2><div class="body"><div id="mesh-viewer" class="mesh-viewer"></div><p class="hint">Drag to orbit · scroll to zoom · red X, green Y, blue Z. Preview uses the reviewed rotation and the latest previewed or saved sizing. While edits are unsaved it shows raw proportions; preview dimensions again before saving. Prepared downloads include saved rotation and sizing.</p>${done ? `<p>Saved rotation: X ${orientation.x_deg}°, Y ${orientation.y_deg}°, Z ${orientation.z_deg}°.</p>` : `<form id="orientation"><p>Right-handed, fixed X then Y then Z (Rz × Ry × Rx), before centring and scaling. Dimensions describe the final axes.</p><div class="grid three">${(['x_deg', 'y_deg', 'z_deg'] as const).map((axis) => `<label>${axis[0].toUpperCase()} · degrees<input name="${axis}" type="number" min="-180" max="180" step="any" required value="${esc(orientationDraft[axis] ?? String(orientation[axis]))}"></label>`).join('')}</div><div class="suggestion-actions"><button type="button" id="preview-orientation">Preview rotation</button><button type="submit" ${!canSave || busy ? 'disabled' : ''}>Save orientation</button></div>${Object.keys(orientationDraft).length ? '<p class="hint">Rotation draft is not saved. Save before processing.</p>' : ''}</form>`}</div></section>`
 }
 function syncViewer() {
   const host = document.querySelector<HTMLElement>('#mesh-viewer')
@@ -169,7 +229,12 @@ function syncViewer() {
   } catch {
     /* retain saved preview until valid */
   }
-  const key = JSON.stringify([job.id, job.mesh_path, orientation])
+  const scales =
+    sizingPreview?.sizing_result.scale_factors ||
+    (Object.keys(draft).length === 0 && Object.keys(orientationDraft).length === 0
+      ? job.sizing_result?.scale_factors
+      : undefined)
+  const key = JSON.stringify([job.id, job.mesh_path, orientation, scales])
   if (key === viewerKey && viewerNode) {
     host.replaceWith(viewerNode)
     return
@@ -177,7 +242,7 @@ function syncViewer() {
   disposeViewer?.()
   viewerNode = host
   viewerKey = key
-  disposeViewer = mountViewer(host, api, job.id, job.mesh_path, orientation)
+  disposeViewer = mountViewer(host, api, job.id, job.mesh_path, orientation, scales)
 }
 function render() {
   const focus = document.activeElement as HTMLInputElement | HTMLSelectElement | null
@@ -187,21 +252,36 @@ function render() {
       ? [focus.selectionStart, focus.selectionEnd]
       : null
   const editable = !!job,
-    done =
-      job?.status === 'completed' || job?.status === 'preparing' || job?.status === 'validating',
-    canSave = job?.status === 'awaiting_properties' || canRetry(job)
-  app.innerHTML = `<a class="skip" href="#workflow">Skip to content</a><header><div><strong translate="no">Photo2Sim</strong></div></header>
+    done = job?.status === 'preparing' || job?.status === 'validating',
+    canSave = job?.status === 'awaiting_properties' || job?.status === 'completed' || canRetry(job)
+  app.innerHTML = `<a class="skip" href="#workflow">Skip to content</a><header><div><strong translate="no">Kamino</strong></div></header>
   <main id="workflow"><h1>Create an asset</h1>
-  ${mode === 'mock' || job?.synthetic ? `<div class="mode-note"><strong>Synthetic demo</strong><span>The mock creates a known cube. Photos do not affect the result.</span></div>` : ''}
+  ${mode === 'mock' || job?.synthetic ? `<div class="mode-note"><strong>Synthetic demo</strong><span>Synthetic geometry. This job does not demonstrate photo reconstruction.</span></div>` : ''}
   ${message ? `<div class="notice" role="status" aria-live="polite">${esc(message)} <button id="dismiss" aria-label="Dismiss">×</button></div>` : ''}
   ${mode === 'live' ? '<details class="access"><summary>API access</summary><label>Application token<input id="api-token" type="password" autocomplete="off" placeholder="Only needed for a protected backend"></label><button id="connect" type="button">Set token</button></details>' : ''}
   <section><h2><span>1</span>Photos</h2><div class="body"><label class="drop" id="drop" for="photos">Drop photos here or choose files <span>1–4 JPEG, PNG, or WebP · 10 MiB each · 25 MP</span></label><input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>${files.map((f, i) => `<div class="selected"><span>${esc(f.name)}</span><button type="button" data-index="${i}" class="remove" aria-label="Remove ${esc(f.name)}">Remove</button></div>`).join('')}${mode === 'mock' ? `<label class="demo">Demo result ${selectScenario()}</label>` : ''}<button class="primary" id="upload" ${busy || !files.length ? 'disabled' : ''}>${busyAction === 'upload' ? '<span class="spinner" aria-hidden="true"></span>' : ''}${job ? 'Start new job' : 'Upload photos'}</button></div></section>
-  <section><h2><span>2</span>Object data</h2><div class="body">${editable && !done ? suggestionView(!!canSave) : ''}${done ? propertySummary() : editable ? `<form id="properties"><div class="field-head">Full dimensions <span>millimetres</span></div><div class="grid three">${(['x', 'y', 'z'] as const).map((a) => input(a, a.toUpperCase(), job?.properties ? job.properties.dimensions_m[a] * 1000 : '', !!done, true)).join('')}</div><div class="grid two gap"><label>Dimension source ${select('dimensions_source', job?.properties?.dimensions_m.source || 'measured', !!done)}</label>${input('dimensions_note', 'Note · optional', job?.properties?.dimensions_m.note || '', !!done)}</div><div class="grid two gap">${input('mass', 'Mass · grams', job?.properties ? job.properties.mass_kg.value * 1000 : '', !!done, true)}<label>Mass source ${select('mass_source', job?.properties?.mass_kg.source || 'user_supplied', !!done)}</label></div>${input('mass_note', 'Mass note · optional', job?.properties?.mass_kg.note || '', !!done)}<div class="grid two gap"><label>Sliding friction · blank if unknown<input name="friction" type="number" min="0" step="any" value="${val('friction', job?.properties?.sliding_friction?.value ?? '')}" ${done ? 'disabled' : ''}></label><label>Friction source ${select('friction_source', job?.properties?.sliding_friction?.source || 'estimated', !!done)}</label></div>${input('friction_note', 'Friction note · optional', job?.properties?.sliding_friction?.note || '', !!done)}<div class="form-end"><span>mm → m and g → kg when saved</span>${!done ? `<button class="primary" ${!canSave || busy ? 'disabled' : ''}>${busy ? 'Saving…' : 'Save properties'}</button>` : ''}</div>${!canSave && !done ? `<p class="hint">${job ? 'Enter measurements now. Save after reconstruction.' : 'Upload photos to start.'}</p>` : ''}</form>` : '<p class="empty">Upload photos to add measurements.</p>'}</div></section>
+  <section><h2><span>2</span>Object data</h2><div class="body">${editable && !done ? suggestionView(!!canSave) : ''}${done ? propertySummary() : editable ? `<form id="properties">${sizingForm()}<div class="grid two gap">${input('mass', 'Mass · grams', job?.properties ? job.properties.mass_kg.value * 1000 : '', !!done, true)}<label>Mass source ${select('mass_source', job?.properties?.mass_kg.source || 'user_supplied', !!done)}</label></div>${input('mass_note', 'Mass note · optional', job?.properties?.mass_kg.note || '', !!done)}<div class="grid two gap"><label>Sliding friction · blank if unknown<input name="friction" type="number" min="0" step="any" value="${val('friction', job?.properties?.sliding_friction?.value ?? '')}" ${done ? 'disabled' : ''}></label><label>Friction source ${select('friction_source', job?.properties?.sliding_friction?.source || 'estimated', !!done)}</label></div>${input('friction_note', 'Friction note · optional', job?.properties?.sliding_friction?.note || '', !!done)}<div class="form-end"><span>mm → m and g → kg when saved</span>${!done ? `<button id="save-properties" type="submit" class="primary" ${!canSave || busy ? 'disabled' : ''}>${busy ? 'Saving…' : 'Save properties'}</button>` : ''}</div>${!canSave && !done ? `<p class="hint">${job ? 'Enter measurements now. Save after reconstruction.' : 'Upload photos to start.'}</p>` : ''}</form>` : '<p class="empty">Upload photos to add measurements.</p>'}</div></section>
   ${orientationView(!!canSave, !!done)}
-  <section><h2><span>3</span>Process</h2><div class="body"><div class="stages" aria-label="Processing stages">${stages()}</div>${job ? `<div class="jobline"><span>Job ${esc(job.id.slice(0, 8))} · ${esc(job.provider)} · ${job.synthetic ? 'Synthetic' : 'Provider generated'}</span><button id="refresh" ${busy ? 'disabled' : ''}>Refresh</button></div>` : ''}${job?.status === 'failed' ? `<div class="failure"><strong>${esc(job.error?.code || 'Failed')}</strong><p>${esc(job.error?.message || 'The provider did not finish.')}</p></div>` : ''}${(job?.status === 'awaiting_properties' && job.properties) || canRetry(job) ? `<button class="primary" id="process" ${busy ? 'disabled' : ''}>${canRetry(job) ? 'Retry simulation' : 'Generate simulation'}</button>` : ''}${reportView()}</div></section>
+  <section><h2><span>3</span>Process</h2><div class="body"><div class="stages" aria-label="Processing stages">${stages()}</div>${job ? `<div class="jobline"><span>Job ${esc(job.id.slice(0, 8))} · ${esc(job.provider)} · ${job.synthetic ? 'Synthetic' : 'Provider generated'}</span><button id="refresh" ${busy ? 'disabled' : ''}>Refresh</button></div>` : ''}${job?.status === 'failed' ? `<div class="failure"><strong>${esc(job.error?.code || 'Failed')}</strong><p>${esc(job.error?.message || 'The provider did not finish.')}</p></div>` : ''}${(job?.status === 'awaiting_properties' && job.properties) || canRetry(job) ? `<button class="primary" id="process" ${busy ? 'disabled' : ''}>${canRetry(job) ? 'Retry simulation' : 'Generate simulation'}</button>` : ''}<p>Geometry review: reference correspondence and physical accuracy remain unverified. Numerical validation reports simulation smoke checks separately.</p>${reportView()}${attemptHistory()}</div></section>
   <section><h2><span>4</span>Files</h2><div class="body">${job?.mesh_path || job?.export_path ? `<div class="files">${job?.mesh_path ? link(job.mesh_path, 'Reconstructed mesh') : ''}${preparedMeshPath(job) ? link(preparedMeshPath(job)!, 'Prepared mesh') : ''}${job?.export_path ? link(job.export_path, canDownloadBundle(job) ? 'MuJoCo scene' : 'Diagnostic scene') : ''}${job?.validation_path ? link(job.validation_path, 'Validation report') : ''}${canDownloadBundle(job) ? link(job!.bundle_path!, 'Simulation ZIP') : ''}</div>` : '<p class="empty">Files appear when available.</p>'}${job?.status === 'completed' && mode === 'mock' ? '<p class="hint">Synthetic UI demo. No geometry or simulation validation was run.</p>' : ''}</div></section></main>`
   bind()
   syncViewer()
+  const sizingStatus = document.querySelector('#sizing-preview')
+  if (sizingStatus) {
+    const result =
+      sizingPreview ||
+      (Object.keys(draft).length === 0 &&
+      Object.keys(orientationDraft).length === 0 &&
+      job?.sizing_result
+        ? {
+            dimensions_m: job.sizing_result.resulting_dimensions_m,
+            sizing_result: job.sizing_result,
+          }
+        : null)
+    sizingStatus.textContent = result
+      ? `Resulting full dimensions X/Y/Z: ${(['x', 'y', 'z'] as const).map((a) => (result.dimensions_m[a] * 1000).toFixed(3)).join(' × ')} mm. Oriented source extents: ${result.sizing_result.source_extents_input_units.join(' × ')} input units. Scale: ${result.sizing_result.scale_factors.join(' : ')}. Reference correspondence remains user-supplied; physical accuracy is unverified.`
+      : 'No dimensions previewed. Choose a corresponding reference; do not infer one from estimates.'
+  }
   if (focusName) {
     const field = document.querySelector<HTMLInputElement | HTMLSelectElement>(
       `[name="${focusName}"]`,
@@ -244,6 +324,10 @@ async function refresh() {
   try {
     const updated = await api.get(id)
     if (job?.id !== id || generation !== jobGeneration) return
+    if (updated.input_revision !== job.input_revision) {
+      sizingPreview = null
+      sizingDraftVersion++
+    }
     job = updated
     message = ''
     render()
@@ -256,7 +340,7 @@ async function refresh() {
   }
 }
 function bind() {
-  const saveButton = document.querySelector<HTMLButtonElement>('#properties button')
+  const saveButton = document.querySelector<HTMLButtonElement>('#save-properties')
   if (saveButton)
     saveButton.innerHTML = `${busyAction === 'save' ? '<span class="spinner" aria-hidden="true"></span>' : ''}Save properties`
   const processButton = document.querySelector<HTMLButtonElement>('#process')
@@ -318,6 +402,8 @@ function bind() {
       files = []
       draft = {}
       orientationDraft = {}
+      sizingPreview = null
+      sizingDraftVersion++
       suggestions = null
       suggestionMessage = ''
       if (mode === 'live') {
@@ -380,6 +466,8 @@ function bind() {
     render()
   })
   document.querySelector('#orientation')?.addEventListener('input', (event) => {
+    sizingPreview = null
+    sizingDraftVersion++
     const target = event.target as HTMLInputElement
     const saved = job?.orientation || zeroOrientation
     orientationDraft = {
@@ -416,6 +504,8 @@ function bind() {
       busy = true
       render()
       job = await api.saveOrientation(job.id, orientation)
+      sizingPreview = null
+      sizingDraftVersion++
       const hasNewerEdits = (['x_deg', 'y_deg', 'z_deg'] as const).some(
         (axis) => orientationDraft[axis] !== values[axis],
       )
@@ -435,30 +525,77 @@ function bind() {
   })
   document.querySelector<HTMLFormElement>('#properties')?.addEventListener('input', (e) => {
     const t = e.target as HTMLInputElement | HTMLSelectElement
-    if (t.name) draft[t.name] = t.value
+    if (t.name)
+      draft[t.name] =
+        t instanceof HTMLInputElement && t.type === 'checkbox' ? (t.checked ? 'on' : '') : t.value
+    sizingPreview = null
+    sizingDraftVersion++
+    const status = document.querySelector('#sizing-preview')
+    if (status) status.textContent = 'Inputs changed; preview resulting dimensions again.'
   })
   document.querySelector<HTMLFormElement>('#properties')?.addEventListener('change', (e) => {
     const t = e.target as HTMLInputElement | HTMLSelectElement
-    if (t.name) draft[t.name] = t.value
+    if (t.name)
+      draft[t.name] =
+        t instanceof HTMLInputElement && t.type === 'checkbox' ? (t.checked ? 'on' : '') : t.value
+    if (t.name === 'sizing_mode') {
+      sizingPreview = null
+      sizingDraftVersion++
+      render()
+    }
+  })
+  document.querySelector('#preview-sizing')?.addEventListener('click', async () => {
+    if (busy) return
+    try {
+      const values = readPropertyForm()
+      sizingPreview = await previewSizing(values)
+      message =
+        'Sizing preview only; save properties to retain the reference and resulting dimensions.'
+    } catch (error) {
+      message = (error as Error).message
+    }
+    render()
   })
   document.querySelector<HTMLFormElement>('#properties')?.addEventListener('submit', async (e) => {
     e.preventDefault()
-    if (!job || (job.status !== 'awaiting_properties' && !canRetry(job))) return
+    if (
+      !job ||
+      busy ||
+      (job.status !== 'awaiting_properties' && job.status !== 'completed' && !canRetry(job))
+    )
+      return
     draft = Object.fromEntries(
       [...new FormData(e.target as HTMLFormElement)].map(([k, v]) => [k, String(v)]),
     )
     try {
-      const properties = makeProperties(draft)
+      if (Object.keys(orientationDraft).length)
+        throw Error('Save the reviewed orientation before properties.')
+      const submitted = { ...draft },
+        version = sizingDraftVersion
+      const sizing = makeSizing(draft, job.orientation)
+      const preview = await previewSizing(draft)
+      const values = { ...draft }
+      if (preview) {
+        for (const a of ['x', 'y', 'z'] as const) values[a] = String(preview.dimensions_m[a] * 1000)
+        values.dimensions_source = preview.dimensions_m.source
+        values.dimensions_note = preview.dimensions_m.note || ''
+      }
+      const properties = { ...makeProperties(values), ...(sizing ? { sizing } : {}) }
       busyAction = 'save'
       jobGeneration++
       busy = true
       render()
       job = await api.save(job.id, properties)
-      draft = {}
+      const newerEdits =
+        version !== sizingDraftVersion || JSON.stringify(draft) !== JSON.stringify(submitted)
+      if (!newerEdits) draft = {}
+      sizingPreview = newerEdits ? null : preview
       validation = null
       reportPath = ''
       reportError = ''
-      message = 'Properties saved. Generate the simulation when ready.'
+      message = newerEdits
+        ? 'Properties saved. Newer edits remain unsaved; preview and save them before processing.'
+        : 'Properties saved. Generate the simulation when ready.'
     } catch (error) {
       message = (error as Error).message
     } finally {

@@ -77,7 +77,7 @@ def _numbers(values):
 
 def _write_scene(asset, folder, assumptions):
     sides = _dimensions(asset)
-    root = ET.Element("mujoco", model=f"photo2sim_{asset.asset_id}")
+    root = ET.Element("mujoco", model=f"kamino_{asset.asset_id}")
     ET.SubElement(root, "compiler", angle="radian", inertiafromgeom="false")
     ET.SubElement(
         root, "option", timestep=str(TIMESTEP_S), gravity="0 0 -9.81", integrator="implicitfast"

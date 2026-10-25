@@ -13,6 +13,7 @@ export function mountViewer(
   id: string,
   path: string,
   orientation: Orientation,
+  scaleFactors?: number[],
 ): () => void {
   let disposed = false
   let renderer: THREE.WebGLRenderer | undefined
@@ -79,9 +80,18 @@ export function mountViewer(
         return
       }
       // Parent rotation happens after existing node transforms, before centring.
+      const rotated = new THREE.Group()
+      rotated.add(model)
+      rotated.applyMatrix4(orientationMatrix(orientation))
       const oriented = new THREE.Group()
-      oriented.add(model)
-      oriented.applyMatrix4(orientationMatrix(orientation))
+      oriented.add(rotated)
+      // A parent scale acts on the reviewed world axes AFTER rotation, matching
+      // preparation even when advanced scaling and arbitrary rotations combine.
+      if (scaleFactors) {
+        if (scaleFactors.length !== 3 || scaleFactors.some((s) => !Number.isFinite(s) || s <= 0))
+          throw Error('Invalid sizing preview scale')
+        oriented.scale.set(scaleFactors[0], scaleFactors[1], scaleFactors[2])
+      }
       oriented.updateMatrixWorld(true)
       const box = new THREE.Box3().setFromObject(oriented)
       if (box.isEmpty()) throw new Error('The mesh contains no visible geometry.')

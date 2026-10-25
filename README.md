@@ -1,4 +1,4 @@
-# Photo2Sim
+# Kamino
 
 Turn photos of real objects into editable MuJoCo simulation assets. Built for Cal Hacks 13.0.
 
@@ -139,9 +139,9 @@ CI checks lint, formatting, package import, and tests on Python 3.12. Backend te
 
 Keep API keys in `.env`. Store generated assets, large captures, and local databases under ignored `artifacts/`, `outputs/`, or `data/`. Commit only small intentional example fixtures with their provenance.
 
-## Existing clones after the rename
+## Project name and existing clones
 
-The GitHub repository is now `Johaan-Mannanal/photo2sim`. Your existing local directory can retain its name, including the Windows `calhacks-arm` directory.
+The product is **Kamino** (formerly Photo2Sim). The GitHub repository remains `Johaan-Mannanal/photo2sim`; Python imports (`photo2sim`), environment variables (`PHOTO2SIM_*`) and saved-file format identifiers are retained for compatibility. Your existing local directory can retain its name, including the Windows `calhacks-arm` directory.
 
 ```bash
 git remote set-url origin https://github.com/Johaan-Mannanal/photo2sim.git

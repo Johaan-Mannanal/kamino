@@ -9,10 +9,37 @@ export type JobStatus =
   | 'failed'
 export type Scalar = { value: number; source: Source; note?: string | null }
 export type Orientation = { x_deg: number; y_deg: number; z_deg: number }
+export type Sizing = {
+  mode: 'uniform' | 'independent_axes'
+  reviewed_orientation: Orientation
+  reference?: {
+    axis: 'x' | 'y' | 'z'
+    length: number
+    unit: 'mm' | 'm'
+    source: Source
+    correspondence: 'full_mesh_extent'
+    description: string
+  } | null
+  acknowledge_distortion?: boolean
+}
+export type SizingResult = {
+  mode: Sizing['mode'] | 'legacy_independent_axes'
+  orientation: Orientation
+  source_extents_input_units: number[]
+  scale_factors: number[]
+  resulting_dimensions_m: Properties['dimensions_m']
+  reference_extent_input_units: number | null
+  geometry_review: string
+}
+export type SizingPreview = {
+  dimensions_m: Properties['dimensions_m']
+  sizing_result: SizingResult
+}
 export type Properties = {
   dimensions_m: { x: number; y: number; z: number; source: Source; note?: string | null }
   mass_kg: Scalar
   sliding_friction: Scalar | null
+  sizing?: Sizing | null
 }
 export type Suggestions = {
   dimensions_m: Properties['dimensions_m'] | null
@@ -47,6 +74,17 @@ export type Job = {
   bundle_path: string | null
   error: { code: string; message: string } | null
   orientation: Orientation
+  sizing_result?: SizingResult | null
+  input_revision?: number
+  attempts?: {
+    id: string
+    status: JobStatus
+    inputs_path: string | null
+    inputs: { input_revision: number; properties: Properties; orientation: Orientation }
+    export_path: string | null
+    validation_path: string | null
+    bundle_path: string | null
+  }[]
 }
 
 export type ValidationRun = {

@@ -74,7 +74,7 @@ class Workflow:
         command = command.lower()
         if command in {"help", "start", ""}:
             return (
-                "Photo2Sim commands: upload (attach 1–4 JPEG/PNG/WebP data URI resources), "
+                "Kamino commands: upload (attach 1–4 JPEG/PNG/WebP data URI resources), "
                 "status <job UUID>, confirm <job UUID> <AssetProperties JSON>, "
                 "process <job UUID>, files <job UUID>. "
                 "Dimensions are full extents in metres; mass is kilograms; unknown friction is null. "
@@ -104,7 +104,7 @@ class Workflow:
                     f"{self.base_url}/api/jobs/{job_id}/properties", json=properties
                 )
             else:
-                return "Unknown command. Send 'help' for the supported Photo2Sim workflow."
+                return "Unknown command. Send 'help' for the supported Kamino workflow."
             response.raise_for_status()
             record = response.json()
             text = summarize(record)
@@ -137,4 +137,4 @@ class Workflow:
                 detail = error.response.text
             return f"Backend rejected request (HTTP {error.response.status_code}): {detail}"
         except httpx.RequestError:
-            return "Cannot reach the Photo2Sim backend. Check the configured API URL."
+            return "Cannot reach the Kamino backend. Check the configured API URL."

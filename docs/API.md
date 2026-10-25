@@ -9,7 +9,8 @@ Authoritative Python models: `src/photo2sim/contracts.py`. Backend owns this fil
 - `GET /api/jobs/{id}`: returns `JobRecord`; poll while reconstruction runs.
 - `POST /api/jobs/{id}/suggestions`: optional JSON `{object_hint, refresh}`; asks Gemini for unverified `PropertySuggestions` from the saved photos. Same hint/model uses cache unless `refresh: true`. No automatic calls, confirmation, processing or property changes.
 - `GET /api/jobs/{id}/suggestions`: returns saved suggestions, or 404 when absent. Survives server restart.
-- `PATCH /api/jobs/{id}/properties`: JSON `AssetProperties`; accepted at `awaiting_properties` or after a simulation-stage failure. Saving corrected properties returns to `awaiting_properties` and clears current result pointers while retaining prior attempt files. Saves confirmed inputs. Processing starts with a separate explicit request.
+- `PATCH /api/jobs/{id}/properties`: JSON `AssetProperties`; accepted at `awaiting_properties`, `completed`, or after a simulation-stage failure. Saving corrected properties returns to `awaiting_properties` and clears current result pointers while retaining prior attempt inputs/files/downloads. Explicit sizing is required for new uploads. Processing starts with a separate explicit request.
+- `POST /api/jobs/{id}/sizing-preview`: authenticated read-only geometry sizing; JSON `{sizing, orientation, dimensions_m?}`. Returns authoritative `dimensions_m` and `sizing_result`, without changing the job or making provider calls. Requires saved reconstruction and simulation dependencies. See [rigid sizing](RIGID_SIZING.md).
 - `PATCH /api/jobs/{id}/orientation`: JSON `Orientation`, for example `{"x_deg":90,"y_deg":0,"z_deg":0}`. Saves rotation before dimension scaling; accepted at the same stages as property edits. Returns the updated job. It clears current result pointers and retains old attempt files; it never submits reconstruction or starts processing.
 - `POST /api/jobs/{id}/process`: no body. Requires a reconstructed mesh and saved properties. Returns **202** with status `preparing`, then runs preparation, export and headless validation asynchronously. Duplicate/running/completed requests return **409**. Failed simulation attempts can be retried with this endpoint; existing attempt files are retained. Reconstruction failures require separate diagnosis, not this retry.
 - `GET /api/jobs/{id}/files/{path}`: job-relative artifact download, e.g. `reconstruction/mesh.glb` or `uploads/00.png`.
@@ -21,7 +22,21 @@ State sequence: `queued → reconstructing → awaiting_properties → preparing
 
 The provider is configured server-side (`mock` by default). Never accept API keys or arbitrary provider download URLs from the browser. Mock jobs have `synthetic: true`; they produce a known cube and make no claim of photo reconstruction. CORS defaults to `http://localhost:5173` and `http://127.0.0.1:5173`; override exact origins with comma-separated `PHOTO2SIM_CORS_ORIGINS`. Authorization and Content-Type headers are permitted.
 
-`JobRecord` contains `schema_version`, `id`, `status`, `provider`, `synthetic`, timestamps, `progress`, `source_images`, `provider_task_id`, `mesh_path`, `properties`, `orientation`, `asset`, `export_path`, `validation_path`, `bundle_path`, and `error`. Nullable fields are initially null; orientation defaults to zero rotation. Top-level paths in responses are relative to that job's artifact directory, never Windows/Mac absolute paths. Missing jobs/files return 404, invalid properties or orientation return 422, and wrong-stage updates return 409.
+`JobRecord` additionally records `sizing_result`, `input_revision`, `attempts`,
+`active_attempt_id` and `legacy_sizing_allowed`. Nullable fields are initially
+null; orientation defaults to zero. Each new process claim snapshots its full
+properties, orientation, sizing, source mesh hash and provider identity. Its
+`inputs.json` is downloadable and included in the new ZIP. Old results without
+an attempt index are retained as explicitly labeled legacy snapshots on first
+correction; their old files are not rewritten and no historical source hash is
+invented. Top-level paths are job-relative. Missing jobs/files return 404,
+invalid input returns 422, and active/stale processing claims return 409.
+
+`attempts[].inputs_path` is null until the worker atomically materializes the
+snapshot. This occurs before source validation, so a later source disappearance
+or hash mismatch retains downloadable inputs. A snapshot-publication failure
+remains retryable as `preparation_failed`, preserves the inputs in job history,
+and leaves the pointer null instead of advertising a missing file.
 
 After processing, `export_path` names `attempts/{attempt}/bundle/scene.xml`, `validation_path` names its `validation-report.json`, and `bundle_path` names `attempts/{attempt}/simulation.zip`. Download each using `/api/jobs/{id}/files/{path}`. The ZIP contains `scene.xml` at its root with relative meshes, `asset.json`, `simulation.json` and the actual validation report. Failed validation can expose its diagnostic scene/report but never sets `bundle_path`. Only show a successful download action for `status == completed` and non-null `bundle_path`.
 
@@ -33,7 +48,18 @@ Restarting while preparing/validating marks the job `failed` with `processing_in
 
 POST with `{"object_hint": "Apple USB-C adapter"}` or no body. The response has nullable `dimensions_m`, `mass_kg`, `sliding_friction`, plus `clarifying_questions` and `notes`. Property shapes match the existing contract, but every suggested property remains `source: estimated` with an unverified note. Null means unknown; display the questions and allow manual input. The real charger response is at `examples/api/apple-20w-gemini-suggestions.json`.
 
-The endpoint sends EXIF-corrected RGB JPEG copies, at most 1024 pixels on the longest side, from the job's saved source images. Originals are preserved. Suggestions/model/hint/timestamp are cached under `suggestions/gemini.json`, separately from confirmed properties. A successful refresh replaces this cache; a failed refresh preserves it. Only one uncached Gemini request runs at once per server; busy requests return 429 with Retry-After. Missing credentials, quota/provider/malformed-response failures return 503 and leave manual entry available; invalid local images return 422. Missing jobs return 404.
+The endpoint sends EXIF-corrected RGB JPEG copies, at most 1024 pixels on the longest side, from the job's saved source images. Originals are preserved. Suggestions, requested model, actual responding model, fallback flag, hint and timestamp are cached under `suggestions/gemini.json`, separately from confirmed properties. Cache matching uses the requested model and configured fallback list, so a successful fallback is reused without calling the primary again. A successful refresh replaces this cache; a failed refresh preserves it. Only one uncached Gemini request runs at once per server; busy requests return 429 with Retry-After. Missing credentials, quota/provider/malformed-response failures return 503 and leave manual entry available; invalid local images return 422. Missing jobs return 404.
+
+Provider failures return HTTP 503 with a backwards-compatible string `detail` plus
+`category`, `retryable`, and `manual_entry_available: true`. Categories include
+`not_configured`, `authentication`, `permission`, `billing`, `quota`,
+`invalid_request`, `malformed`, `overload`, `rate_limit`, `deadline`, `network`,
+`busy`, `model_unavailable`, and `provider`. Messages provide safe operator or retry
+actions; upstream error bodies, credentials and exception strings are never returned.
+Provider authentication errors remain 503 so they cannot be confused with application
+bearer-token failures (401). `retryable` describes whether a later explicit request
+may succeed; it does not trigger an automatic frontend retry. The existing frontend
+displays `detail` while keeping manual drafts and saved estimates available.
 
 Applying a suggestion requires an explicit PATCH to `/properties`; the server does not do this automatically. A repeat GET or cached POST makes no new provider request. A changed hint/model or explicit refresh can make another request.
 
@@ -55,7 +81,7 @@ Existing saved records without orientation load with zero rotation.
 
 Rotations are active, right-handed, about **fixed X, then fixed Y, then fixed Z**
 axes: `Rz @ Ry @ Rx` on column vectors. They apply after GLB scene transforms are
-baked, before bounding-box centring and per-axis scaling. Dimensions describe
+baked, before bounding-box centring and selected sizing. Dimensions describe
 the final axes. For the reviewed cleaned charger, use `x_deg: 90`: raw +Y pins
 become +Z, raw +Z becomes -Y, and raw X stays X. This is a manually selected
 setting for this asset, not a rule applied to all GLBs.
@@ -63,15 +89,16 @@ setting for this asset, not a rule applied to all GLBs.
 Save properties and orientation, await both responses, then POST `/process`.
 GET job responses expose the saved orientation. A retry always starts from the
 unchanged raw reconstruction; rotations do not accumulate. Edits during active
-processing or after completion return 409. On eligible simulation failures,
+processing return 409. Completed jobs can save a correction and explicitly
+process again using their existing reconstruction. On eligible simulation failures,
 correct orientation and retry with the cached reconstruction. Previous artifact
 files remain available, while current job result pointers are cleared.
 
-The raw GLB preview stays in the provider frame. A frontend preview applying
-rotation must use these fixed-axis semantics (and avoid applying the rotation
-again to the already-prepared simulation mesh). The frontend orientation control
-is not implemented by this backend change; no automatic orientation review or
-visual confirmation is claimed. Default zero preserves previous clients.
+The frontend uses these fixed-axis semantics and applies the latest previewed
+or saved sizing after rotation. Unsaved sizing/orientation edits invalidate that
+preview. An explicit sizing request records its `reviewed_orientation`; changing
+orientation requires reviewing and saving sizing again before processing.
+Default zero preserves old records. Orientation is not inferred automatically.
 
 ```json
 {
@@ -97,7 +124,14 @@ def prepare_asset(
 ) -> AssetRecord: ...
 ```
 
-Input is a local reconstructed OBJ or GLB. Explicit orientation is applied before centring and scaling; omission preserves input axes. It does not infer upright orientation or automatically convert glTF +Y-up to MuJoCo +Z-up. It centres the bounding box, independently scales each axis to the supplied full extents, and warns about distortion. It returns a self-contained mesh, saved orientation, unchanged property provenance and box collision metadata. The orchestrator propagates `job.synthetic` and preserves textured preparation while supplying a separate geometry-only copy to the first simulation exporter. Source geometry is preserved; dimensions and mass are never inferred during preparation.
+Input is a local reconstructed OBJ or GLB. Scene transforms are baked, then explicit
+orientation is applied. Uniform sizing uses one positive scalar from a reviewed
+full-extent reference; other full dimensions are derived and labeled estimated.
+Independent scaling requires explicit advanced acknowledgement, except when
+preserving legacy records without sizing metadata. Original meshes, mass and
+friction are unchanged. The returned asset stores the sizing result and consistent
+box collision dimensions; approximate cuboid inertia uses those same dimensions.
+No upright orientation, physical fidelity or measurement is inferred.
 
 ## Simulation boundary — Yash
 

@@ -111,7 +111,7 @@ def build_workspace(
         object_scene = export_asset(asset, asset_dir, stage / "object")
         assumptions = json.loads((stage / "object/simulation.json").read_text())
         root = ET.parse(stage / "robot/so101.xml").getroot()
-        root.set("model", "photo2sim_so101_workspace")
+        root.set("model", "kamino_so101_workspace")
         root.find("compiler").set("meshdir", ".")
         root.find("option").set("timestep", str(assumptions["timestep_s"]))
         for mesh in root.findall("./asset/mesh"):

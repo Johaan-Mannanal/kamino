@@ -7,7 +7,7 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-RUNNER = '''"""Run the adjacent scene.xml with MuJoCo; no Photo2Sim installation needed."""
+RUNNER = '''"""Run the adjacent scene.xml with MuJoCo; no Kamino installation needed."""
 import argparse
 import json
 import math
@@ -61,9 +61,9 @@ if __name__ == "__main__":
     raise SystemExit(main())
 '''
 
-README = """# Photo2Sim portable MuJoCo export
+README = """# Kamino portable MuJoCo export
 
-This folder runs without the Photo2Sim repository. Keep `scene.xml` and its mesh
+This folder runs without the Kamino repository. Keep `scene.xml` and its mesh
 folders together. All scene lengths are metres, angles radians, masses kilograms.
 
 ## Install in a separate environment
@@ -99,7 +99,7 @@ Close the viewer to stop; rerunning starts from the saved initial state.
 
 The runner resolves `scene.xml` beside itself, even from another working directory.
 It starts with zero control targets. The headless mode only checks finite state
-and simulator warnings; it does not repeat Photo2Sim's tracking/contact/relocation
+and simulator warnings; it does not repeat Kamino's tracking/contact/relocation
 validation. It does not issue hardware commands.
 
 ## Interpret the result
@@ -114,7 +114,7 @@ validation. It does not issue hardware commands.
   input/review history. They are not required by the standalone scene runner.
 
 Record edits as a new experiment. Changing metadata JSON alone does not regenerate
-`scene.xml`; re-export through Photo2Sim or deliberately edit the simulator scene.
+`scene.xml`; re-export through Kamino or deliberately edit the simulator scene.
 Existing reports apply only to the original exported files. Simulation acceptance
 is not measured physical accuracy, hardware calibration or successful sim-to-real.
 """

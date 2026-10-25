@@ -18,6 +18,11 @@ export function setMockScenario(value: typeof mockScenario) {
 }
 
 export const mockApi: Api = {
+  async previewSizing() {
+    throw new Error(
+      'Sizing calculations require live backend geometry. Standalone mock does not calculate geometry.',
+    )
+  },
   async health() {
     return { status: 'ok', provider: 'mock' }
   },
@@ -95,7 +100,7 @@ export const mockApi: Api = {
   },
   async save(id, properties: Properties) {
     const item = jobs.get(id)
-    if (!item || !['awaiting_properties', 'failed'].includes(item.record.status))
+    if (!item || !['awaiting_properties', 'completed', 'failed'].includes(item.record.status))
       throw new Error(
         'Properties can only be saved while awaiting input or after simulation failure.',
       )
@@ -111,7 +116,7 @@ export const mockApi: Api = {
   },
   async saveOrientation(id, orientation) {
     const item = jobs.get(id)
-    if (!item || !['awaiting_properties', 'failed'].includes(item.record.status))
+    if (!item || !['awaiting_properties', 'completed', 'failed'].includes(item.record.status))
       throw new Error('Orientation cannot be saved at this stage.')
     item.record.orientation = structuredClone(orientation)
     item.record.status = 'awaiting_properties'

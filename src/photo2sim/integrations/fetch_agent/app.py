@@ -40,7 +40,7 @@ def create_app(*, workflow=None, send=None, seed=None) -> FastAPI:
         if owns_client:
             await workflow.client.aclose()
 
-    app = FastAPI(title="Photo2Sim ASI:One adapter", lifespan=lifespan)
+    app = FastAPI(title="Kamino ASI:One adapter", lifespan=lifespan)
 
     @app.get("/status")
     async def status():
