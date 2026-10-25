@@ -267,3 +267,20 @@ def test_fallback_cache_reuse_and_actual_model_recording(tmp_path):
         assert record["requested_model"] == "primary"
         assert record["fallback_used"] is True
         assert store.get(job_id) == before
+
+
+def test_legacy_fallback_cache_is_reused_without_primary_call(tmp_path):
+    job_id, store, _ = seed(tmp_path)
+    cache_path = store.job_dir(job_id)/"suggestions/gemini.json"
+    cache_path.parent.mkdir()
+    cache_path.write_text(json.dumps({
+        "model":"gemini-3.6-flash", "object_hint":"", "created_at":"2026-10-24T00:00:00Z",
+        "suggestions":{"dimensions_m":None,"mass_kg":None,"sliding_friction":None,
+            "clarifying_questions":["Measure mass"],"notes":[]}}))
+    def unexpected(request):
+        pytest.fail("Legacy fallback cache should avoid a provider request")
+    with TestClient(create_app(Settings(data_dir=tmp_path, gemini_api_key=SECRET),
+                               gemini_transport=unexpected)) as client:
+        result=client.post(f"/api/jobs/{job_id}/suggestions",json={})
+        assert result.status_code==200
+        assert result.json()["clarifying_questions"]==["Measure mass"]

@@ -58,12 +58,19 @@ class SuggestionService:
         self, job_id: UUID, request: SuggestionRequest
     ) -> PropertySuggestions | None:
         cached = self.cached(job_id)
+        legacy_model = cached.get("model") if cached is not None else None
+        requested_model = cached.get("requested_model") if cached is not None else None
+        model_matches = (
+            requested_model == self.settings.gemini_model
+            and tuple(cached.get("fallback_models", ())) == self.settings.gemini_fallback_models
+            if requested_model is not None
+            else legacy_model in (self.settings.gemini_model, *self.settings.gemini_fallback_models)
+        )
         if (
             not request.refresh
             and cached is not None
-            and cached.get("requested_model", cached.get("model")) == self.settings.gemini_model
-            and tuple(cached.get("fallback_models", ())) == self.settings.gemini_fallback_models
-            and cached.get("object_hint") == request.object_hint
+            and model_matches
+            and (cached.get("object_hint") or None) == (request.object_hint or None)
         ):
             return PropertySuggestions.model_validate(cached["suggestions"])
         return None
