@@ -1,9 +1,9 @@
-# Combined acceptance candidate. Native clean installs/builds verified; container build pending.
+# Combined Kamino UI with explicit pnpm build-script approvals.
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
 RUN npm install --global pnpm@11.25.0
-COPY frontend/package.json frontend/pnpm-lock.yaml ./frontend/
-COPY prototypes/kamino-ui/package.json prototypes/kamino-ui/pnpm-lock.yaml ./prototypes/kamino-ui/
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./frontend/
+COPY prototypes/kamino-ui/package.json prototypes/kamino-ui/pnpm-lock.yaml prototypes/kamino-ui/pnpm-workspace.yaml ./prototypes/kamino-ui/
 RUN cd frontend && pnpm install --frozen-lockfile
 RUN cd prototypes/kamino-ui && pnpm install --frozen-lockfile
 COPY frontend ./frontend
