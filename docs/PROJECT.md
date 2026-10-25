@@ -18,13 +18,20 @@ their old “pending” statuses and branch instructions are not the current rel
 - Mobile scroll presentation with reduced-motion support and stage-aware reconstruction progress.
 - Railway-hosted frontend/backend and HTTPS at kamino.design; session access limits provider spend.
 
+## Robotics prototype: demonstrated trajectory transfer
+
+Kamino connects simulation with physical robotics. We used the SO-101 leader arm to record an initial joint trajectory, brought that motion into MuJoCo, and previewed and adjusted it for the charger demonstration. We then exported the joint motion and executed it on the physical SO-101 follower arm, iterating between simulation and hardware to account for real-world differences. The prototype demonstrates corresponding, working motions side by side, powered by our software. Precise calibration and contact-rich manipulation remain ongoing work.
+
+See [the robotics demonstration](ROBOTICS_DEMO.md). This describes the team’s hardware prototype; it does not imply that the hosted photo workspace exposes hardware execution controls.
+
 ## Demonstration boundaries
 
 Synthetic demo geometry, imported/CAD reference models, reconstructed meshes and
-physical observations are distinct evidence types. Observation-driven SO-101
-playback and a scripted charger presentation are separate from the website.
-Physical mapping/alignment, contact fidelity and grasp transfer remain unverified.
-No simulation-to-arm execution claim is made by this release.
+physical observations are distinct evidence types. Earlier observation-only SO-101
+playback and illustrative charger animations retain their original scope. The
+robotics prototype also demonstrates exported joint-motion execution on the
+physical follower arm after simulation review and adjustment. Precise calibration,
+contact fidelity and reliable contact-rich manipulation remain ongoing work.
 
 The photo workspace does not ship optional CAD uploads or automatic parameter
 correction. Low-level CAD utilities and examples are research tools. No immediate

@@ -1,5 +1,7 @@
 # Generated SO101 scripted simulation replay
 
+> Historical artifact scope: this page describes the specific earlier export or replay retained here. Kamino’s broader prototype also demonstrated leader-recorded motion refined in simulation, exported and executed on the physical SO-101 follower arm, with iteration between simulation and hardware. See [the current robotics account](../../../../../docs/ROBOTICS_DEMO.md). Precise calibration and contact-rich manipulation remain ongoing work.
+
 Eight simulated seconds: shoulder pan +0.45 rad, then -0.45 rad; shoulder lift
 -0.35 rad; return to zero targets. Each phase lasts two seconds; all unspecified
 motion axes are explicitly commanded to zero in actions.json. These are simulator

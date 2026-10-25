@@ -105,6 +105,10 @@ a full backend rollback requires its matched snapshot and preservation of any
 post-cutover jobs before restoration. Documentation publication does not change
 services, data or rollback artifacts.
 
-The illustrative arm presentation remains separate: it preserves recorded arm
-poses but scripts charger transfer. Joint mappings, physical alignment and
-contact/grasp accuracy are not established by these software checks.
+The robotics prototype demonstrates trajectory transfer: initial leader-arm joint
+recordings were previewed and adjusted in MuJoCo, exported, and executed on the
+SO-101 follower arm, with iteration between simulation and hardware. See
+[the robotics demonstration](ROBOTICS_DEMO.md). This account was clarified by the
+team on October 25, 2026; it does not extend the software test results above into
+physical calibration or contact/grasp accuracy claims. Earlier illustrative
+animations and observation-only playback retain their original artifact scope.

@@ -56,6 +56,14 @@ is not a validated MuJoCo bundle. Real server jobs use the saved workflow above.
 
 </details>
 
+## Simulation to physical robotics
+
+Kamino connects simulation with physical robotics. We used the SO-101 leader arm to record an initial joint trajectory, brought that motion into MuJoCo, and previewed and adjusted it for the charger demonstration. We then exported the joint motion and executed it on the physical SO-101 follower arm, iterating between simulation and hardware to account for real-world differences. The prototype demonstrates corresponding, working motions side by side, powered by our software. Precise calibration and contact-rich manipulation remain ongoing work.
+
+**Workflow:** leader-arm recording → simulation preview and adjustment → joint-motion export → follower-arm execution → iteration between simulation and hardware.
+
+See [the robotics demonstration](docs/ROBOTICS_DEMO.md) for the workflow and its scope. This prototype is distinct from the controls exposed in the hosted photo workspace.
+
 ## How it works
 
 <details>
@@ -190,10 +198,12 @@ whole reconstruction is exported, unwanted reconstructed surroundings also remai
 
 A numerical physics pass establishes only the checks in its report. Collision
 proxies, estimated mass/friction and unverified geometry limit physical fidelity.
-SO-101 observation playback is a separate development demonstration; mappings and
-physical alignment remain provisional. Illustrative charger carry motion is
-scripted. Neither is evidence of validated grasp transfer or a completed
-simulation-to-arm execution pipeline.
+The SO-101 prototype demonstrates trajectory transfer: leader-recorded motion is
+previewed and adjusted in simulation, exported, and executed on the follower arm,
+with iteration between simulation and hardware. Precise calibration, physical
+alignment and contact-rich manipulation remain ongoing work. Earlier observation
+playback and illustrative animations are separate artifacts; their limitations
+do not describe the full trajectory-transfer demonstration.
 
 Optional end-user CAD uploads and automatic parameter-correction proposals are
 not part of the released photo workspace. Research/import utilities and historical

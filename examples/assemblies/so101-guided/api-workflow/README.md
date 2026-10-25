@@ -1,5 +1,7 @@
 # SO101 saved-job workflow — CAD/template-assisted
 
+> Historical artifact scope: this page describes the specific earlier export or replay retained here. Kamino’s broader prototype also demonstrated leader-recorded motion refined in simulation, exported and executed on the physical SO-101 follower arm, with iteration between simulation and hardware. See [the current robotics account](../../../../docs/ROBOTICS_DEMO.md). Precise calibration and contact-rich manipulation remain ongoing work.
+
 The accepted free-space SO101 candidate passed the real browser/API workflow:
 source import → guided review → saved revision → preparation/export → motion
 validation → authenticated browser ZIP download. This is a generated articulated

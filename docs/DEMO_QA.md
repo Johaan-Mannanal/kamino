@@ -9,6 +9,10 @@ Kamino connects reconstruction, review of size and physical assumptions,
 editable simulation models, and portable MuJoCo exports. It retains the inputs
 and assumptions needed to understand a result and revise it.
 
+**Does Kamino transfer motion from simulation to the real arm?**
+Yes. Kamino connects simulation with physical robotics. We used the SO-101 leader arm to record an initial joint trajectory, brought that motion into MuJoCo, and previewed and adjusted it for the charger demonstration. We then exported the joint motion and executed it on the physical SO-101 follower arm, iterating between simulation and hardware to account for real-world differences. The prototype demonstrates corresponding, working motions side by side, powered by our software. Precise calibration and contact-rich manipulation remain ongoing work.
+See [the robotics demonstration](ROBOTICS_DEMO.md). The leader supplied the initial motion; the follower executed the exported trajectory after simulation adjustments and hardware iteration. This is a human-reviewed prototype, not a claim of autonomous motion planning or calibrated contact prediction.
+
 **What does the AI do?**
 Meshy produces the photo-derived geometry. Gemini proposes properties for human
 review. Our workflow prepares geometry, records corrections and evidence, and
@@ -43,7 +47,9 @@ measurement of an Apple A2940 charger. It is a provisional reference, not a
 measurement of our specimen. The matching mesh extent and variant uncertainty
 must be reviewed. See [the dimension sources](CHARGER_DIMENSIONS_REFERENCE.md).
 
-**What does Yash's arm evidence establish?**
+**What does the earlier stationary-pose evidence establish?**
+The following answer concerns the earlier stationary-pose comparison only. It does not summarize the later trajectory-transfer demonstration described above.
+
 It supplies two stationary poses, readings and operator-paired photos for an
 offline comparison. The wrist, elbow and shoulder pan all changed. It is not an
 isolated wrist experiment or a recorded moving trajectory. The completed offline
