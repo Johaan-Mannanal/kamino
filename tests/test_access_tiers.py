@@ -239,3 +239,34 @@ def test_assembly_paths_and_trailing_slashes_cannot_bypass_admission():
     assert request_action("POST", "/api/assembly-jobs/from-meshes") == "simulation"
     assert request_action("POST", f"/api/assembly-jobs/{uuid4()}/process") == "simulation"
     assert request_action("GET", f"/api/jobs/{uuid4()}/suggestions") is None
+
+
+def test_failed_cache_write_after_gemini_does_not_refund_provider_allowance(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    import httpx
+    from test_gemini import GOOD, envelope
+
+    calls = []
+
+    def transport(request):
+        calls.append(request)
+        return httpx.Response(200, json=envelope(GOOD))
+
+    original = Path.write_text
+
+    def fail_cache(path, *args, **kwargs):
+        if path.name == "gemini.json.partial":
+            raise OSError("Test cache storage failure after inference")
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", fail_cache)
+    app = create_app(settings(tmp_path, gemini_api_key="test-only-key"), gemini_transport=transport)
+    with TestClient(app, base_url="https://kamino.test") as client:
+        sign_in(client, "friend-test-code")
+        job = upload(client).json()["id"]
+        url = f"/api/jobs/{job}/suggestions"
+        assert client.post(url, headers={"Origin": "https://kamino.test"}).status_code == 422
+        assert len(calls) == 1
+        assert client.post(url, headers={"Origin": "https://kamino.test"}).status_code == 429
+        assert len(calls) == 1

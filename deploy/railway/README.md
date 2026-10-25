@@ -36,8 +36,10 @@ not per browser or sign-in. Admission is atomic and persisted in
 `PHOTO2SIM_DATA_DIR/access-usage.sqlite3`; preserve this file with the job data.
 Assembly creation and processing count as simulation submissions, as does rigid
 processing. Cached reads, previews, manual edits and downloads do not consume these
-quotas. Rejected 3xx/4xx requests refund admission; 5xx failures conservatively keep
-it because a provider may already have received work. A successful cached POST to
+quotas. Rejected 3xx/4xx requests refund admission except Gemini 422 responses:
+those may indicate cache-write failure after inference. Gemini 422 and all 5xx
+failures conservatively keep admission because a provider may already have received
+work. This also counts malformed Gemini requests that return 422. A successful cached POST to
 suggestions counts as a request; use GET for free cached reads. The API returns 429
 with a human-readable wait time and `Retry-After`. Refresh, re-sign-in and server
 restart do not reset allowance. Expiry does not cancel accepted background work:

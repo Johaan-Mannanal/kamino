@@ -109,6 +109,7 @@ def create_app(
         @app.middleware("http")
         async def application_access(request, call_next):
             reservation = None
+            action = None
             if (
                 request.method != "OPTIONS"
                 and request.url.path.startswith("/api/")
@@ -131,10 +132,11 @@ def create_app(
                         content={"detail": "Use the Kamino website for this action"},
                     )
                 try:
+                    action = request_action(request.method, request.url.path)
                     reservation = await run_in_threadpool(
                         access_limits.reserve,
                         role,
-                        request_action(request.method, request.url.path),
+                        action,
                     )
                 except HTTPException as error:
                     return JSONResponse(
@@ -143,9 +145,11 @@ def create_app(
                         headers=error.headers,
                     )
             response = await call_next(request)
-            # Rejected/redirected requests did not enqueue work. Keep 5xx reservations:
-            # a provider may already have received the request before an error.
-            if 300 <= response.status_code < 500:
+            # Gemini cache-write errors currently return 422 after inference, so
+            # conservatively retain Gemini 422 as well as all provider-ambiguous 5xx.
+            if 300 <= response.status_code < 500 and not (
+                action == "gemini" and response.status_code == 422
+            ):
                 await run_in_threadpool(access_limits.refund, reservation)
             return response
 
