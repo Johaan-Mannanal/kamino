@@ -2,7 +2,7 @@
 
 Status: API configurations created; product integration and sourced-dimension acceptance are not complete.
 
-Created kamino_specs_search (SERP API) and kamino_specs_pages (Web Unlocker). UI quoted $1.50 per 1,000 successful requests for both. User approved up to $1 combined public-specification test usage. Three requests were submitted through the signed-in playground: two search requests returned HTTP 200, and one page request returned HTTP 403. No product photographs or private job files were transmitted. No provider secret is stored in this report. Actual invoiced usage has not yet been reconciled.
+Created kamino_specs_search (SERP API) and kamino_specs_pages (Web Unlocker). UI quoted $1.50 per 1,000 successful requests for both. User approved up to $1 combined public-specification test usage. Three requests were submitted through the signed-in playground: two search requests returned HTTP 200, and one page request returned HTTP 403. No product photographs or private job files were transmitted. No provider secret is stored in this report. The API list later showed two recorded requests and rounded spend $0. Actual invoiced usage has not yet been reconciled.
 
 The first search, site:apple.com AirPods Pro 2 charging case dimensions, returned unrelated results. A second structured search, Apple AirPods Pro 2 USB-C technical specifications dimensions, returned JSON but the inspected results did not establish the exact product. HTTP success is not product-identification acceptance.
 

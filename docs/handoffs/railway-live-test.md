@@ -1,8 +1,9 @@
 # Kamino Railway test — 2026-10-24 Pacific
 
-Status: Railway HTTPS preview and authenticated mock workflows passed. Final can/UI acceptance remains separate. Custom domain DNS is saved; trusted HTTPS remains pending at this report's first publication.
+Status: Railway HTTPS preview and authenticated mock workflows passed. Final can/UI acceptance remains separate. Custom-domain DNS and trusted HTTPS passed.
 
-Preview: https://kamino-app-production.up.railway.app
+Preview: https://kamino.design
+Railway fallback: https://kamino-app-production.up.railway.app
 Project: https://railway.com/project/bd72545f-1366-49f1-9592-349121a32413
 
 ## Exact source and infrastructure
@@ -34,8 +35,8 @@ Evidence: outputs/railway-test-20261024 (ignored local artifacts). No credential
 
 Railway custom-domain ID 4b8f0258-4597-484e-87f6-e17ac81a7fc3, port 8080. Porkbun apex ALIAS changed from pixie.porkbun.com to Railway's exact ogd491jp.up.railway.app target; TTL 600. Added the exact _railway-verify TXT supplied by Railway UI. Its older CLI omitted this TXT requirement, so UI was used as the complete record source. Existing wildcard parking, nameservers, renewal, privacy and lock settings remain unchanged. Root ALIAS flattening follows Porkbun's documented root-domain method: https://kb.porkbun.com/article/85-how-to-connect-your-root-domain-when-your-web-host-wont-provide-an-ip-address
 
-At last check, the TXT was published but Railway still showed Waiting for DNS update and curl rejected the custom-domain certificate. No TLS bypass was used. Recheck trusted HTTPS before calling kamino.design live. The Railway-provided hostname is verified.
+After DNS propagation, trusted HTTPS passed on kamino.design. Root page, /assembly.html, /api/health and authenticated saved-job GET all returned 200; unauthenticated job GET returned 401. The browser reopened the saved synthetic job on the custom domain. No TLS bypass was used. The initial certificate mismatch remains historical diagnostic evidence, not the final state.
 
-User authorized up to $10 additional usage and subsequently approved keeping this preview running for 24 hours, through 2026-10-26 05:38 UTC (October 25, 10:38 p.m. Pacific). Hourly follow-up kamino-preview-budget-and-shutdown checks the budget and stops compute before/at that deadline unless instructions change. It preserves the volume and DNS. This is an app-scheduled follow-up, not a Railway-enforced billing cap; the desktop must remain available. Actual bill reconciliation is still pending. No unrelated Railway service was modified.
+User authorized up to $10 additional usage and subsequently approved keeping this preview running for 24 hours, through 2026-10-26 05:38 UTC (October 25, 10:38 p.m. Pacific). Hourly follow-up kamino-preview-budget-and-shutdown checks the budget and stops compute before/at that deadline unless instructions change. It preserves the volume and DNS. This is an app-scheduled follow-up, not a Railway-enforced billing cap; the desktop must remain available. At the initial usage readback, Railway attributed $0.0004 to Kamino; this is a lagging snapshot, not the final bill. Actual bill reconciliation is still pending. No unrelated Railway service was modified.
 
 Next integration: carry deploy/railway onto the accepted can/UI branch, identify exact source, rebuild both services and repeat hosted smoke checks. Srijan remains owner of Windows can acceptance. Bright Data evidence and company-verification blocker are in bright-data-live-feasibility.md. Optional CAD and automatic parameter proposals remain later improvements.
