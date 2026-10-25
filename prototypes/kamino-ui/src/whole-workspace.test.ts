@@ -116,18 +116,19 @@ function mounted(current: Job = base) {
   sessions.push(state);
   const host = document.createElement("div");
   document.body.append(host);
+  const toast = vi.fn();
   cleanups.push(
     mountLiveWorkspace(host, {
       session: state,
       brand: "",
       steps: "",
       icon: () => "",
-      toast: vi.fn(),
+      toast,
       onEditPhotos: vi.fn(),
       onLeave: vi.fn(),
     }),
   );
-  return { api, state, host };
+  return { api, state, host, toast };
 }
 function fill(host: HTMLElement, name: string, value: string) {
   const input = host.querySelector<HTMLInputElement>(`[name="${name}"]`)!;
@@ -239,6 +240,7 @@ it("does not apply a historical subset scale to the whole source on reopening", 
     sizing_result: preview.sizing_result,
   } as Job;
   const { host } = mounted(old);
+  expect(host.querySelector("#live-saved")!.textContent).toBe("Reference review required");
   expect(vi.mocked(mountViewer).mock.lastCall?.[5]).toBeUndefined();
   expect(vi.mocked(mountViewer).mock.lastCall?.[6]).toBeUndefined();
   expect(
@@ -299,4 +301,28 @@ it("discards a pending whole-source preview after orientation refresh", async ()
   await rejected;
   expect(state.sizingPreview).toBeNull();
   expect(api.save).not.toHaveBeenCalled();
+});
+
+
+it("labels a saved full-source job without requesting target review", async () => {
+  const { host, api } = mounted();
+  readyDraft(host);
+  host.querySelector<HTMLButtonElement>("#live-save")!.click();
+  await vi.waitFor(() => expect(api.save).toHaveBeenCalledOnce());
+  await vi.waitFor(() => expect(host.querySelector("#live-saved")!.textContent).toBe("Saved"));
+  expect(host.querySelector("#live-save-status")!.textContent).toBe("Saved");
+  expect(host.querySelector("#live-target")).toBeNull();
+  fill(host, "mass", "0.3");
+  expect(host.querySelector("#live-saved")!.textContent).toBe("Draft · Unsaved changes");
+  expect(api.geometry).not.toHaveBeenCalled();
+});
+
+
+it("asks only for full-extent sizing after a whole-source orientation save", async () => {
+  const { host, api, toast } = mounted();
+  fill(host, "x", "90");
+  vi.mocked(api.saveOrientation).mockResolvedValueOnce({ ...base, orientation: { ...orientation, x_deg: 90 } });
+  host.querySelector<HTMLButtonElement>("#live-save-orientation")!.click();
+  await vi.waitFor(() => expect(toast).toHaveBeenCalledWith("Orientation saved. Confirm the full-mesh sizing reference again."));
+  expect(api.geometry).not.toHaveBeenCalled();
 });

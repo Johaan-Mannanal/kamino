@@ -2312,6 +2312,8 @@ html.live-workspace-page,
   margin: 14px 16px 0;
 }
 .live-workspace-host .viewer-actions {
+  min-width: 0;
+  max-width: 100%;
   flex-wrap: wrap;
   gap: 6px;
 }
@@ -2342,7 +2344,32 @@ html.live-workspace-page,
 .live-workspace-host .live-outputs {
   overflow-wrap: anywhere;
 }
-@media (max-width: 760px) {
+@media (max-width: 1100px), (pointer: coarse) {
+  .live-workspace-host .project-header button,
+  .live-workspace-host .viewer-actions button,
+  .live-workspace-host .inspector button,
+  .live-workspace-host .live-suggestions summary,
+  .live-workspace-host .property-field select,
+  .live-workspace-host .input-shell {
+    min-height: 44px;
+  }
+  .live-workspace-host .square {
+    min-width: 44px;
+  }
+  .live-workspace-host .live-target label:has(input[type="checkbox"]),
+  .live-workspace-host .live-check {
+    min-height: 44px;
+    align-items: center;
+    cursor: pointer;
+  }
+  .live-workspace-host input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin: 0;
+  }
+}
+@media (max-width: 760px), (max-height: 600px) {
   html.live-workspace-page,
   .live-workspace-page body {
     height: auto;

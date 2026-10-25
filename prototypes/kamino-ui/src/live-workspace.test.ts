@@ -767,6 +767,59 @@ describe("live workspace DOM regressions", () => {
 });
 
 describe("live target review", () => {
+  it.each(["selection", "note", "acknowledgement"])(
+    "labels an unsaved target %s accurately without changing inputs or downloads",
+    async (edit) => {
+      const { host, state, adapter } = mounted(
+        {},
+        {
+          ...reviewed,
+          status: "completed",
+          bundle_path: "attempts/a/bundle.zip",
+        },
+      );
+      await loaded(state);
+      expect($(host, "#live-saved").textContent).toBe("Saved");
+      const original = structuredClone(state.target.draft);
+      state.setTargetDraft({
+        ...original,
+        ...(edit === "selection"
+          ? { selectedIslandIds: [body] }
+          : edit === "note"
+            ? { reviewNote: "A revised review note" }
+            : { acknowledged: false }),
+      });
+      expect(state.dirty).toBe(false);
+      expect($(host, "#live-saved").textContent).toBe(
+        "Draft · Unsaved changes",
+      );
+      expect($(host, "#live-save-status").textContent).toBe(
+        "Draft · Unsaved changes",
+      );
+      expect(generateDisabled(host)).toBe(true);
+      if (edit === "selection")
+        expect($<HTMLInputElement>(host, '[name="acknowledged"]').checked).toBe(
+          false,
+        );
+      expect($<HTMLInputElement>(host, '[name="mass"]').value).toBe("0.4");
+      expect($<HTMLInputElement>(host, '[name="length"]').value).toBe("300");
+      expect($(host, "#live-bundle").hidden).toBe(false);
+      expect(
+        host.querySelector('#live-outputs [data-kind="bundle"]'),
+      ).toBeTruthy();
+      state.setTargetDraft(original);
+      // Restoring a selection still requires explicit target acknowledgement.
+      if (edit === "selection") state.setTargetDraft(original);
+      expect(state.targetStatus.status).toBe("reviewed");
+      expect($(host, "#live-saved").textContent).toBe(
+        edit === "selection" ? "Reference review required" : "Saved",
+      );
+      expect(generateDisabled(host)).toBe(true);
+      expect(adapter.save).not.toHaveBeenCalled();
+      expect(adapter.process).not.toHaveBeenCalled();
+    },
+  );
+
   const cleanups: (() => void)[] = [];
   const sessions: BackendSession[] = [];
   afterEach(() => {

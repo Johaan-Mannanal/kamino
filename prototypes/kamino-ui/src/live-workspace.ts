@@ -960,7 +960,9 @@ export function mountLiveWorkspace(
       draftViewer = null;
       update();
       toast(
-        "Orientation saved. Review the target again, then confirm the reference full extent.",
+        wholeMesh
+          ? "Orientation saved. Confirm the full-mesh sizing reference again."
+          : "Orientation saved. Review the target again, then confirm the reference full extent.",
       );
     } catch (error) {
       await handleError(error, "Orientation not saved");
@@ -1271,13 +1273,20 @@ export function mountLiveWorkspace(
       session.error && session.error !== suggestionError ? session.error : null;
     if (globalError && isAuthError(globalError)) void handleError(globalError);
     $("#live-status").textContent = STATUS_LABEL[job.status];
+    const targetStatus = session.targetStatus;
     const savedText = working
       ? "Working…"
-      : session.dirty
+      : session.dirty || (!wholeMesh && targetStatus.status === "unsaved")
         ? "Draft · Unsaved changes"
-        : job.properties
-          ? "Saved"
-          : "Not yet saved";
+        : !wholeMesh && targetStatus.status === "loading"
+          ? "Checking target…"
+          : !wholeMesh && targetStatus.status !== "reviewed"
+            ? "Target review required"
+            : job.properties
+              ? draft.acknowledged && targetStatus.referenceReady
+                ? "Saved"
+                : "Reference review required"
+              : "Not yet saved";
     $("#live-friction-note").textContent =
       toScalar(draft.friction, draft.frictionSource, origins.friction)?.note ??
       (draft.friction === ""
