@@ -1,14 +1,64 @@
 {
-  "status": "incomplete",
+  "status": "operator-confirmed stationary pairing; not synchronized",
   "motion_method": "leader teleoperation, operator reported",
   "helper_executed": false,
-  "photo_files": [],
+  "photo_files": [
+    {
+      "file": "photos/baseline-front.png",
+      "attachment_number": 1,
+      "source_filename": "codex-clipboard-f589bca7-cd6b-456e-9248-4bbfe06299be.png",
+      "dimensions_px": [
+        832,
+        1154
+      ],
+      "sha256": "91f702956da5cc21de8f3943fa0ad512268f3a3c95791aca8c3fe438b9b5e00e",
+      "provenance": "Exact bytes of supplied clipboard PNG attachment; not asserted to be original phone camera file"
+    },
+    {
+      "file": "photos/baseline-side.png",
+      "attachment_number": 2,
+      "source_filename": "codex-clipboard-898c2d74-cef3-45ab-9a69-af7466a841b1.png",
+      "dimensions_px": [
+        2880,
+        2160
+      ],
+      "sha256": "7832bb1884425a4a820a0233da8d039d8a3a92d6d5983e4b791f705a0b0e88e3",
+      "provenance": "Exact bytes of supplied clipboard PNG attachment; not asserted to be original phone camera file"
+    },
+    {
+      "file": "photos/changed-front.png",
+      "attachment_number": 3,
+      "source_filename": "codex-clipboard-bf10445c-3c05-4cdb-925b-065f80cff6d0.png",
+      "dimensions_px": [
+        2160,
+        2880
+      ],
+      "sha256": "e7538e4c73113758e32211b6dea8880a45116003216f45e9f4b01cff777b04d9",
+      "provenance": "Exact bytes of supplied clipboard PNG attachment; not asserted to be original phone camera file"
+    },
+    {
+      "file": "photos/changed-side.png",
+      "attachment_number": 4,
+      "source_filename": "codex-clipboard-3ef5b46a-097e-49bc-9880-b2691059632d.png",
+      "dimensions_px": [
+        2880,
+        2160
+      ],
+      "sha256": "079dcbe9f3aac73bcfb986191f423eeb35d08f632250b8fbfec565c49b248151",
+      "provenance": "Exact bytes of supplied clipboard PNG attachment; not asserted to be original phone camera file"
+    }
+  ],
   "photo_count_reported_by_operator": 4,
-  "baseline_capture_for_photos": "unconfirmed: two candidate baselines preserved",
-  "unchanged_pose_and_jaws_between_capture_and_photos": "not yet confirmed in accessible records",
+  "baseline_capture_for_photos": "wrist-baseline-20261024-155719",
+  "unchanged_pose_and_jaws_between_capture_and_photos": "operator confirmed for each capture and its photo pair",
   "photo_mirroring": "unconfirmed for these new photos",
   "rear_camera_use": "unconfirmed; not inferred from take 3 or take 5",
   "synchronization": "no hardware synchronization established",
   "current_state": "unknown; no hardware access made during packaging",
-  "repeat_test_requested": false
+  "repeat_test_requested": false,
+  "changed_capture_for_photos": "wrist-changed-20261024-160156",
+  "intentional_motion": "wrist_flex only, operator reported",
+  "other_motion_explanation": "Operator suggests environmental effects; cause not independently verified",
+  "operator_confirmation": "yes exactly",
+  "confirmation_question": "Are photos 1\u20132 the baseline and photos 3\u20134 the changed pose? Does that baseline match the 3:57 p.m. capture (rather than 3:52 p.m.), and did the arm and jaw opening stay unchanged between each capture and its two photos?"
 }

@@ -44,20 +44,36 @@
     "bytes": 2967
   },
   "examples/so101/windows/wrist-comparison-20261024/pairing.json": {
-    "sha256": "35495728da19c27cfed42c89e3eb7778e32a0886a418caeb5bd45cf31072404d",
-    "bytes": 676
+    "sha256": "6b21e4fe094ddf728a82af1623b43c39dde823d7233537852e5dd3907a094717",
+    "bytes": 3040
+  },
+  "examples/so101/windows/wrist-comparison-20261024/photos/baseline-front.png": {
+    "sha256": "91f702956da5cc21de8f3943fa0ad512268f3a3c95791aca8c3fe438b9b5e00e",
+    "bytes": 1297274
+  },
+  "examples/so101/windows/wrist-comparison-20261024/photos/baseline-side.png": {
+    "sha256": "7832bb1884425a4a820a0233da8d039d8a3a92d6d5983e4b791f705a0b0e88e3",
+    "bytes": 6325010
+  },
+  "examples/so101/windows/wrist-comparison-20261024/photos/changed-front.png": {
+    "sha256": "e7538e4c73113758e32211b6dea8880a45116003216f45e9f4b01cff777b04d9",
+    "bytes": 5204480
+  },
+  "examples/so101/windows/wrist-comparison-20261024/photos/changed-side.png": {
+    "sha256": "079dcbe9f3aac73bcfb986191f423eeb35d08f632250b8fbfec565c49b248151",
+    "bytes": 5556005
   },
   "examples/so101/windows/wrist-comparison-20261024/README.md": {
-    "sha256": "066c1b5a43fd29640b11a2a2f40e315e4a7860a0495fb522663cd074782fa085",
-    "bytes": 2230
+    "sha256": "e6a940c461f97133737eebff448fb326d7e57dd39e8cf95b7d876c40e85d0503",
+    "bytes": 2933
   },
   "examples/so101/windows/wrist-comparison-20261024/wrist-capture-comparison.json": {
-    "sha256": "6125c24c0edd83a5b40ce0c5ce411edd815f132d4e43504f1fb644c5075a242f",
-    "bytes": 6118
+    "sha256": "beb0f85eb33fa8d7cbb343dc38f73551635b69ee0b034ea3eaa8d3271ab77f10",
+    "bytes": 6302
   },
   "examples/so101/windows/wrist-comparison-20261024/wrist-capture-comparison.md": {
-    "sha256": "701b223440282393660908f41a8d398e86732d8376c3a7c080cadb887cf324eb",
-    "bytes": 3818
+    "sha256": "add68237f137643ace56734fa39ba3ebc7aa125493e45742626d5bb4497a6200",
+    "bytes": 4652
   },
   "tools/so101/move_wrist_relative.py": {
     "sha256": "477e1eda34297ae2d1b19d0277737ae6983d211596d6cdbc55f33e2a85d8fcf3",

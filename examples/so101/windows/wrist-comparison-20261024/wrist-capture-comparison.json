@@ -161,8 +161,11 @@
     }
   },
   "helper_executed": false,
-  "photo_status": "Four photos reported captured by operator; files not yet located for packaging or pixel inspection",
-  "selected_baseline": "wrist-baseline-20261024-155719 (chronological choice, pairing unconfirmed)",
+  "photo_status": "Four supplied clipboard PNGs preserved byte-for-byte; visually inspected",
+  "selected_baseline": "wrist-baseline-20261024-155719 (operator-confirmed pairing)",
   "current_state": "Not verified; historical statements do not establish current pose, power or torque",
-  "mapping_verified": false
+  "mapping_verified": false,
+  "pairing": "operator-confirmed stationary association, not hardware-synchronized",
+  "intentional_motion": "wrist_flex only, operator reported",
+  "other_joint_motion_cause": "unverified; operator suggests environment"
 }
