@@ -18,10 +18,10 @@ MuJoCo bundle.
 
 ## Demo in motion
 
-| MuJoCo visualization | SO-101 physical arm |
+| MuJoCo visualization |
 | :---: | :---: |
-| <img src="docs/images/simulation-demo.gif" width="480" alt="MuJoCo animation of recorded arm poses with scripted charger pickup, carry and release."> | <img src="docs/images/physical-arm-demo.gif" width="480" alt="Physical SO-101 arm performing the charger-transfer demonstration."> |
-| Recorded arm poses; **scripted charger motion**. | Physical arm recording. |
+| <img src="docs/images/simulation-demo.gif" width="480" alt="MuJoCo animation of recorded arm poses with scripted charger pickup, carry and release."> |
+| Recorded arm poses |
 
 Both clips loop at **2× speed**. They are separate recordings, not a
 frame-synchronized comparison. [Clip sources and rendering details](docs/images/README.md)
