@@ -1,0 +1,48 @@
+{
+  "tested_application_sha": "a834763920176f34cafd07a49aa5ea9064bdc545",
+  "date_local": "2026-10-25",
+  "timezone": "America/Los_Angeles",
+  "finalized_at_utc": "2026-10-25T09:30:05.138284+00:00",
+  "original_results_commit": "63afa513f1a56a2a8e5122a00571e7ae42e5fc14",
+  "original_run_unchanged": true,
+  "original_counts": {
+    "PASS": 20,
+    "FAIL": 0,
+    "BLOCKED": 8,
+    "NOT RUN": 0
+  },
+  "addendum_results": {
+    "S02": "PASS",
+    "O01": "PASS",
+    "Z03": "PASS",
+    "D03": "PASS"
+  },
+  "combined_counts": {
+    "PASS": 24,
+    "FAIL": 0,
+    "BLOCKED": 4,
+    "NOT RUN": 0
+  },
+  "remaining_blocked": [
+    "O04",
+    "P05",
+    "R03",
+    "R04"
+  ],
+  "release_acceptance": "BLOCKED; original native backend failures and remaining candidate gates are not waived",
+  "application_edits": 0,
+  "new_generations": 0,
+  "new_saved_revisions": 0,
+  "provider_calls_observed": 0,
+  "human_assisted": true,
+  "native_runtime_observed_time_s": 9.997,
+  "native_rest_contacts": 4,
+  "separate_relocated_smoke": {
+    "scope": "standalone zero-control smoke check; not full validation",
+    "mujoco": "3.17.0",
+    "finite_state": true,
+    "simulated_time_s": 3.0000000000019065,
+    "warning_count": 0
+  },
+  "physical_and_grasp_accuracy": "unverified"
+}
