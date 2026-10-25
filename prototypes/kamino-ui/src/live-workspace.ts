@@ -1153,13 +1153,22 @@ export function mountLiveWorkspace(
       session.error && session.error !== suggestionError ? session.error : null;
     if (globalError && isAuthError(globalError)) void handleError(globalError);
     $("#live-status").textContent = STATUS_LABEL[job.status];
+    // Target edits have their own draft state; they must not make saved
+    // numeric inputs look like a fully saved, currently reviewed workspace.
+    const targetStatus = session.targetStatus;
     const savedText = working
       ? "Working…"
-      : session.dirty
+      : session.dirty || targetStatus.status === "unsaved"
         ? "Draft · Unsaved changes"
-        : job.properties
-          ? "Saved"
-          : "Not yet saved";
+        : targetStatus.status === "loading"
+          ? "Checking target…"
+          : targetStatus.status !== "reviewed"
+            ? "Target review required"
+            : job.properties
+              ? draft.acknowledged && targetStatus.referenceReady
+                ? "Saved"
+                : "Reference review required"
+              : "Not yet saved";
     $("#live-saved").textContent = savedText;
     $("#live-save-status").textContent = editable
       ? savedText

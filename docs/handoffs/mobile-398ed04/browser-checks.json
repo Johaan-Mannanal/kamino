@@ -1,0 +1,55 @@
+{
+  "sourceBaseline": "398ed042a473b1ffeb725667423ba617f16bc3b1",
+  "device": "Windows desktop in-app browser; viewport emulation; mouse and keyboard; no real phone",
+  "checks": [
+    {
+      "viewport": {
+        "height": 568,
+        "scrollWidth": 320,
+        "width": 320
+      },
+      "controlMinHeight": 44,
+      "checkboxRowMin": 44,
+      "toolbarContained": true,
+      "saveEnabled": true,
+      "generateEnabled": true
+    },
+    {
+      "viewport": {
+        "height": 844,
+        "scrollWidth": 390,
+        "width": 390
+      },
+      "controlMinHeight": 44,
+      "checkboxRowMin": 44,
+      "toolbarContained": true,
+      "saveEnabled": true,
+      "generateEnabled": true
+    },
+    {
+      "viewport": {
+        "height": 932,
+        "scrollWidth": 430,
+        "width": 430
+      },
+      "controlMinHeight": 44,
+      "checkboxRowMin": 44,
+      "toolbarContained": true,
+      "saveEnabled": true,
+      "generateEnabled": true
+    },
+    {
+      "viewport": {
+        "height": 390,
+        "scrollWidth": 844,
+        "width": 844
+      },
+      "controlMinHeight": 44,
+      "checkboxRowMin": 44,
+      "toolbarContained": true,
+      "saveEnabled": true,
+      "generateEnabled": true
+    }
+  ],
+  "manual": "Target-only labels, explicit target/reference acknowledgements, numeric draft retention, two-attempt history and existing bundle download; no save/process/reconstruction/Gemini request was submitted"
+}

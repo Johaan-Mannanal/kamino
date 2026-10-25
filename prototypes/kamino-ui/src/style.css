@@ -2318,10 +2318,54 @@ html.live-workspace-page,
 .live-workspace-host .live-outputs {
   overflow-wrap: anywhere;
 }
+/* Wrap against the viewer column, which can be narrow even in landscape.
+   Keep the status after the toolbar in normal flow so wrapped controls and
+   the review message cannot cover each other. The mesh remains behind both. */
+.live-workspace-host .viewport-toolbar {
+  position: relative;
+  inset: auto;
+  margin: 14px;
+  flex-wrap: wrap;
+}
+.live-workspace-host .viewer-actions {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+.live-workspace-host .viewport-label {
+  position: relative;
+  inset: auto;
+  margin: 8px 14px 0;
+}
+@media (max-width: 1100px), (pointer: coarse) {
+  .live-workspace-host .project-header button,
+  .live-workspace-host .viewer-actions button,
+  .live-workspace-host .inspector button,
+  .live-workspace-host .live-suggestions summary,
+  .live-workspace-host .property-field select,
+  .live-workspace-host .input-shell {
+    min-height: 44px;
+  }
+  .live-workspace-host .square {
+    min-width: 44px;
+  }
+  .live-workspace-host .live-target label:has(input[type="checkbox"]),
+  .live-workspace-host .live-check {
+    min-height: 44px;
+    align-items: center;
+    cursor: pointer;
+  }
+  .live-workspace-host input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin: 0;
+  }
+}
 @media (max-width: 760px) {
   .live-workspace-host .live-workspace {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(140px, 38%) minmax(0, 1fr);
+    grid-template-rows: minmax(184px, 38%) minmax(0, 1fr);
   }
   .live-workspace-host .inspector {
     border-left: 0;
@@ -2338,7 +2382,6 @@ html.live-workspace-page,
     gap: 4px;
   }
   .live-workspace-host .viewport-label {
-    top: 112px;
     font-size: 10px;
   }
   .live-workspace-host .viewport-help {
