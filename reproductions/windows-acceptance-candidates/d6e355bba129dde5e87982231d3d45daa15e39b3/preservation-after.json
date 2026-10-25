@@ -1,0 +1,26 @@
+{
+  "checked_at_utc": "2026-10-25T09:50:55.545162+00:00",
+  "baseline_file_count": 12086,
+  "verified_files": 12086,
+  "changed": [],
+  "missing": [],
+  "errors": [],
+  "checkouts": {
+    "original_application": {
+      "path": "C:\\Users\\srija\\calhacks-arm\\outputs\\acceptance-checkouts\\kamino-a834763",
+      "head": "a834763920176f34cafd07a49aa5ea9064bdc545",
+      "status": "",
+      "head_exit": 0,
+      "status_exit": 0,
+      "stderr": ""
+    },
+    "candidate": {
+      "path": "C:\\Users\\srija\\calhacks-arm\\outputs\\d6",
+      "head": "d6e355bba129dde5e87982231d3d45daa15e39b3",
+      "status": "",
+      "head_exit": 0,
+      "status_exit": 0,
+      "stderr": ""
+    }
+  }
+}

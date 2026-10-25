@@ -1,0 +1,28 @@
+{
+  "sha": "d6e355bba129dde5e87982231d3d45daa15e39b3",
+  "ui_reconstruction_failure": "PASS",
+  "ui_explicit_fresh_upload_recovery": "PASS",
+  "photos_byte_identical": {
+    "uploads/00.jpg": {
+      "can": "ffbb884fddd1b97a146ecb8eb95c1b384d692ea33f674d175ef560b06ecac5e2",
+      "failed": "ffbb884fddd1b97a146ecb8eb95c1b384d692ea33f674d175ef560b06ecac5e2",
+      "recovered": "ffbb884fddd1b97a146ecb8eb95c1b384d692ea33f674d175ef560b06ecac5e2"
+    },
+    "uploads/01.jpg": {
+      "can": "6fadf382f206e023313c6050b0de4768de7faa65dd26fd9f48bf0eca8f4d2c7f",
+      "failed": "6fadf382f206e023313c6050b0de4768de7faa65dd26fd9f48bf0eca8f4d2c7f",
+      "recovered": "6fadf382f206e023313c6050b0de4768de7faa65dd26fd9f48bf0eca8f4d2c7f"
+    },
+    "uploads/02.jpg": {
+      "can": "4d363cad0c1738a0c6fc3a15c8ec08e167e3e28bf2ce78e417ec5680054fa479",
+      "failed": "4d363cad0c1738a0c6fc3a15c8ec08e167e3e28bf2ce78e417ec5680054fa479",
+      "recovered": "4d363cad0c1738a0c6fc3a15c8ec08e167e3e28bf2ce78e417ec5680054fa479"
+    }
+  },
+  "jobs": {
+    "can": "7f021e56-94b6-43f9-bc35-ef226a5b0a7a",
+    "failed": "07f5637a-23fb-4487-9a07-b96d5f497241",
+    "recovered": "a83eed6c-396a-4f33-b1f4-6aa974317d8d"
+  },
+  "mock_cube_quality_not_accepted": true
+}

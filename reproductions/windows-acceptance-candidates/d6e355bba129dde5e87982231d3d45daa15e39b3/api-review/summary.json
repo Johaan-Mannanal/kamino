@@ -1,0 +1,73 @@
+{
+  "sha": "d6e355bba129dde5e87982231d3d45daa15e39b3",
+  "transport": "in-process TestClient using supplied guarded acceptance build_app; no production settings or credentials",
+  "checks": {
+    "O04": {
+      "api": "PASS",
+      "historical_export_sha256": "53ab115fe9b364f14b6fc0ec3f309c73e2d009fef34c7e74480ca0f19425cf13",
+      "initial_and_unreviewed_correction_gate": 409,
+      "legacy_extreme_dimensions": {
+        "x": 0.057,
+        "y": 0.057,
+        "z": 0.131,
+        "source": "estimated",
+        "note": null
+      },
+      "corrected_dimensions": {
+        "x": 0.02979368293108149,
+        "y": 0.029806611520258652,
+        "z": 0.131,
+        "source": "estimated",
+        "note": "Derived mesh extents from uniform sizing; reference 131 mm on full Z extent (estimated). Prior reviewed estimated full Z extent including lid/rim and base; not physical measurement. Other dimensions are not independent measurements."
+      },
+      "old_export_unchanged": true,
+      "manual_visual": "PENDING parent"
+    },
+    "P05": {
+      "api": "PASS",
+      "scenarios": [
+        "positive",
+        "unknown",
+        "malformed",
+        "truncated",
+        "quota",
+        "overload"
+      ],
+      "saved_properties_retained": true,
+      "manual_drafts": "API does not observe browser drafts; parent UI checks required"
+    },
+    "R03-preparation": {
+      "api": "PASS",
+      "job_id": "abffae92-1259-4eca-a163-8d26c532bb08",
+      "failed_attempt": "a42cc464-8e83-48e6-84ed-dacdd211acae",
+      "retry_attempt": "f13288c0-009d-4c3e-a84a-e65e83c9ea83",
+      "bundle_sha256": "94cbc3060e42e3cccbd732489df8b1ba44770b9d690ca8fb3d325cc6f39d618f",
+      "real_validation": true,
+      "source_unchanged": true
+    },
+    "R03-validation": {
+      "api": "PASS",
+      "job_id": "e709e13a-9dd4-472b-b2dc-702047dc379c",
+      "failed_attempt": "d635f112-703d-4e7e-a534-88110060a52e",
+      "retry_attempt": "092491a2-e550-4386-8350-46a00b50275a",
+      "bundle_sha256": "093be680596d23a8fa9d3c25e52949c189a8f92da62b1560699d1043de1f02ae",
+      "real_validation": true,
+      "source_unchanged": true
+    },
+    "R04": {
+      "api": "PASS",
+      "failed_job": "be6d2870-dad7-4886-a84a-dcc9df274313",
+      "subsequent_job": "5d5a5d76-4c06-42fd-8dac-803b7d4b7037",
+      "uploads_retained_byte_identical": true,
+      "failed_record_unchanged": true,
+      "subsequent_mesh": "ordinary synthetic mock cube, not can quality acceptance"
+    }
+  },
+  "jobs": {
+    "raw": "e709e13a-9dd4-472b-b2dc-702047dc379c",
+    "historical": "4362f633-6af0-43f1-aa5e-d7405917d9eb"
+  },
+  "original_archive_unchanged_sha256": "e828bb548dae9e5828a29689f2e91c96f4069ee4c6aa8b5788a5700d2d01db6d",
+  "blocked_network_ledger_exists": false,
+  "status": "PASS_API_SCOPE"
+}

@@ -1,0 +1,7 @@
+{"action":"human rotated top, agent inspected actual screenshot","view":"top","window":"MuJoCo : kamino_b3357082-8624-4db0-9a7b-556d2025f597","at":"2026-10-25T09:48:17.017Z"}
+{"action":"human rotated front, agent inspected actual screenshot","view":"front","at":"2026-10-25T09:48:43.822Z"}
+{"action":"human rotated side, agent inspected actual screenshot","view":"side","at":"2026-10-25T09:49:29.306Z"}
+{"action":"human rotated underside, agent inspected base recess then zoomed","view":"underside","at":"2026-10-25T09:50:37.894Z"}
+{"action":"human returned front and enabled Frame World, agent inspected length parallel blue Z lid above base","view":"world-Z","at":"2026-10-25T09:52:07.970Z"}
+{"action":"agent actual Pause Reset Info Run stable rest Pause","resetTime":0,"contactTime":0.556,"contacts":4,"stableTime":5.091,"pausedTime":8.458,"at":"2026-10-25T09:52:46.686Z"}
+{"action":"capture corrected using explicit freshNative; human repeated top front side underside; fresh agent Reset Run Pause evidence","resetTime":0,"zeroContacts":0,"contactTime":1.474,"contacts":4,"finalPausedTime":8.558,"rawEncoding":"JPEG bytes preserved; proper PNG conversion for viewing","at":"2026-10-25T10:03:38.261Z"}

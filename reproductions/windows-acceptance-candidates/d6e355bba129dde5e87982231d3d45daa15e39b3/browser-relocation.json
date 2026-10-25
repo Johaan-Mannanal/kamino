@@ -1,0 +1,50 @@
+{
+  "sha": "d6e355bba129dde5e87982231d3d45daa15e39b3",
+  "artifact": "browser-retry.zip",
+  "zip_sha256": "bbf9172e1b497ac7f48bec9292076b05a96f8edda6129ac1de516e3d96e93bc0",
+  "zip_bytes": 1436533,
+  "zip_crc_passed": true,
+  "all_archive_paths_safe_relative": true,
+  "xml_references": [
+    {
+      "xml": "scene.xml",
+      "tag": "mesh",
+      "file": "meshes/visual.obj",
+      "resolved_relative": "meshes/visual.obj",
+      "exists": true
+    }
+  ],
+  "all_xml_references_relative_existing_within_relocation": true,
+  "job_id": "7f021e56-94b6-43f9-bc35-ef226a5b0a7a",
+  "input_revision": 5,
+  "active_attempt_id": "82b57713-9e34-4e3e-a87f-d4d92c42e0d6",
+  "mujoco": "3.17.0",
+  "steps": 30000,
+  "sim_time": 3.0000000000019065,
+  "finite": true,
+  "warnings": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "export_extent_m": [
+    0.0297936829310815,
+    0.02980661152025866,
+    0.131
+  ],
+  "expected_extent_m": [
+    0.02979368293108149,
+    0.029806611520258652,
+    0.131
+  ],
+  "maximum_extent_error_m": 6.938893903907228e-18,
+  "tolerance_m": 1e-07,
+  "visual_obj_sha256": "e1437620a734d028a9abd9fc9b0c99be5ea455e5bbacac3f50ac3ca4eeda66e7",
+  "scene": "C:\\Users\\srija\\calhacks-arm\\outputs\\windows-acceptance-results\\d6e355bba129dde5e87982231d3d45daa15e39b3\\browser-relocated\\scene.xml",
+  "status": "PASS_NUMERICAL_RELOCATION_ONLY",
+  "native_visual_or_physical_acceptance": false
+}

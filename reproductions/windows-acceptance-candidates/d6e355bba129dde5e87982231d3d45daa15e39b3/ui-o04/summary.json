@@ -1,0 +1,30 @@
+{
+  "sha": "d6e355bba129dde5e87982231d3d45daa15e39b3",
+  "job_id": "8ab6aa0a-466b-4127-8661-dbdf9fcab263",
+  "browser": "Chrome extension DOM",
+  "status": "PASS_UI_GATE_AND_CORRECTION_SCOPE",
+  "initial": [
+    "Completed historical job",
+    "Legacy three-axis sizing warning",
+    "No target selected",
+    "Generate disabled until target review",
+    "Reference preview/save disabled"
+  ],
+  "correction": [
+    "X rotation changed to90",
+    "Unsaved orientation blocked target review and generation",
+    "Save orientation clicked",
+    "Awaiting reviewed properties",
+    "Orientation saved; review target then reference full extent",
+    "Generation/preview/property save remain disabled pending reviews"
+  ],
+  "history": [
+    "Attempts1 expanded",
+    "Attempt1 Completed input revision1",
+    "Bundle/Report/Scene XML controls retained"
+  ],
+  "download_limitation": "Initial Download bundle click sent; extension waitForEvent download timed out and kernel reset. No successful browser-download assertion. API independently verified byte-identical historical bundle path through correction.",
+  "new_export": false,
+  "parent_job_touched": false,
+  "native_apps_touched": false
+}

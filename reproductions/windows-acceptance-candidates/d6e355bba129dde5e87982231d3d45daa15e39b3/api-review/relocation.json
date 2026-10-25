@@ -1,0 +1,29 @@
+{
+  "sha": "d6e355bba129dde5e87982231d3d45daa15e39b3",
+  "mujoco": "3.17.0",
+  "sim_time": 3.0000000000019065,
+  "steps": 30000,
+  "finite": true,
+  "warnings": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "export_extent_m": [
+    0.0297936829310815,
+    0.02980661152025866,
+    0.131
+  ],
+  "expected_extent_m": [
+    0.02979368293108149,
+    0.029806611520258652,
+    0.131
+  ],
+  "maximum_extent_error_m": 6.938893903907228e-18,
+  "scene": "C:\\Users\\srija\\calhacks-arm\\outputs\\windows-acceptance-results\\d6e355bba129dde5e87982231d3d45daa15e39b3\\api-review\\relocated-final-can\\scene.xml",
+  "physical_or_viewer_acceptance": false
+}

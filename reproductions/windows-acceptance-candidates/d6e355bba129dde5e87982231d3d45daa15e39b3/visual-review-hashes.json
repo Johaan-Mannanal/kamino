@@ -1,0 +1,22 @@
+[
+  {
+    "Hash": "46E901BD39DA99164D24624E136AF20DF5EA28AA507CBF40A0AE80141C8E7595",
+    "Path": "C:\\Users\\srija\\calhacks-arm\\outputs\\windows-acceptance-results\\d6e355bba129dde5e87982231d3d45daa15e39b3\\ui\\native-top-corrected.png"
+  },
+  {
+    "Hash": "DEA771256BA9CCE0C7C427AC23E457E657DB426CB1CB1EA1B879E3379C4DA6F8",
+    "Path": "C:\\Users\\srija\\calhacks-arm\\outputs\\windows-acceptance-results\\d6e355bba129dde5e87982231d3d45daa15e39b3\\ui\\native-front-corrected.png"
+  },
+  {
+    "Hash": "EF4C1644D1326BB2ABE20B066174A7C599A589C533C30D6082F209EE7193228F",
+    "Path": "C:\\Users\\srija\\calhacks-arm\\outputs\\windows-acceptance-results\\d6e355bba129dde5e87982231d3d45daa15e39b3\\ui\\native-side-corrected.png"
+  },
+  {
+    "Hash": "E59E79891337D4F33F4FDA3908CA156BBDD3499B64FE735FCA324FB3C21AE3F3",
+    "Path": "C:\\Users\\srija\\calhacks-arm\\outputs\\windows-acceptance-results\\d6e355bba129dde5e87982231d3d45daa15e39b3\\ui\\native-underside-close-corrected.png"
+  },
+  {
+    "Hash": "12BFF0595DA19FA0945D5FA4DE0C32DB201B9D2DA5CDEA408E64389F7989060C",
+    "Path": "C:\\Users\\srija\\calhacks-arm\\outputs\\windows-acceptance-results\\d6e355bba129dde5e87982231d3d45daa15e39b3\\ui\\native-paused-rest-8s-corrected.png"
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "sha": "d6e355bba129dde5e87982231d3d45daa15e39b3",
+  "disposition": "FOCUSED_ACCEPTANCE_PASS",
+  "full_release_acceptance": false,
+  "tests": {
+    "backend_focused_passed": 111,
+    "workspace_passed": 119,
+    "legacy_frontend_passed": 103,
+    "both_typechecks_and_builds": "PASS"
+  },
+  "focused_checks": {
+    "saved_caption": "PASS in REPORT.md scope",
+    "O04": "PASS in REPORT.md scope",
+    "P05": "PASS in REPORT.md scope",
+    "R03": "PASS in REPORT.md scope",
+    "R04": "PASS in REPORT.md scope",
+    "S02": "PASS in REPORT.md scope",
+    "O01": "PASS in REPORT.md scope",
+    "Z03": "PASS in REPORT.md scope",
+    "D03": "PASS in REPORT.md scope"
+  },
+  "original_files_verified_unchanged": 12086,
+  "real_application_provider_calls": 0,
+  "claude_review": "Completed with explicit scoped disclosure approval; no confirmed acceptance-blocking defect",
+  "limitations": [
+    "Full backend suite and full checklist not rerun",
+    "Original native backend failures not waived",
+    "Physical/contact/grasp accuracy unverified"
+  ],
+  "ui_export_sha256": "bbf9172e1b497ac7f48bec9292076b05a96f8edda6129ac1de516e3d96e93bc0",
+  "manual_evidence": "Corrected native screenshots independently reviewed; invalid provisional frames retained in capture-errors"
+}
