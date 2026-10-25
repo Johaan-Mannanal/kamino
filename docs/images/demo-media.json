@@ -1,26 +1,68 @@
 {
-  "simulation-demo.gif": {
-    "bytes": 1679365,
-    "size": [
-      480,
-      400
+  "current_asset": "demo-simulation-and-arm.gif",
+  "output": {
+    "dimensions": [
+      680,
+      480
     ],
-    "frames": 150,
-    "duration_s": 15.0,
-    "sha256": "799b5e4f9b2a25dcee8e9ea4b07d4b067f4459a9fa615a2770e5d6e6f2974bee",
-    "source_filename": "demo-preview.mp4",
-    "source_sha256": "d2d03d465574f5097f7562ecdc696412cf19d190c99e3e04bb4cd3528de1ea64"
+    "frames": 120,
+    "duration_s": 15.01,
+    "speed": 2,
+    "bytes": 8081905,
+    "sha256": "a516947fdf7db3b6be57d0757aecf62b8b05391fd02c7bc6ad6d988e048a65d7"
   },
-  "physical-arm-demo.gif": {
-    "bytes": 5963332,
-    "size": [
-      360,
-      300
-    ],
-    "frames": 139,
-    "duration_s": 17.38,
-    "sha256": "9fd8853425f00d93e92cdeb5e77c8d15f93620c5a6c2f80f90b94b218fc83108",
-    "source_filename": "Recording demo.mov",
-    "source_sha256": "7abb7833fb79a0024b666b00f11d2a1e7961bcc0c41826d9d29128ac4066559f"
-  }
+  "sources": {
+    "simulation": {
+      "filename": "demo-preview.mp4",
+      "sha256": "d2d03d465574f5097f7562ecdc696412cf19d190c99e3e04bb4cd3528de1ea64"
+    },
+    "physical": {
+      "filename": "Video Demo final.mov",
+      "sha256": "994cb33a6331cc2ecde403f4f2059ca47b3698903ba9d11d33f43f623b382861"
+    }
+  },
+  "method": "manually authored visual-event alignment, not telemetry synchronization",
+  "anchors": [
+    {
+      "simulation_s": 0,
+      "physical_video_s": 4.5
+    },
+    {
+      "simulation_s": 4,
+      "physical_video_s": 9.5
+    },
+    {
+      "simulation_s": 8,
+      "physical_video_s": 14.5
+    },
+    {
+      "simulation_s": 14.066666666666666,
+      "physical_video_s": 20.2
+    },
+    {
+      "simulation_s": 18,
+      "physical_video_s": 24.3
+    },
+    {
+      "simulation_s": 23.633333333333333,
+      "physical_video_s": 31.1
+    },
+    {
+      "simulation_s": 30,
+      "physical_video_s": 37.966666667
+    }
+  ],
+  "simulation_crop_xywh": [
+    190,
+    170,
+    520,
+    550
+  ],
+  "physical_crop_xywh": [
+    650,
+    0,
+    800,
+    1080
+  ],
+  "scope": "Shared-clock presentation composite; manually aligned visual events; recorded arm poses and scripted charger motion, not telemetry synchronization."
 }

@@ -1,23 +1,31 @@
-# README media
+# README demo media
 
-The side-by-side GIFs are presentation previews, not synchronized measurement evidence.
+`demo-simulation-and-arm.gif` replaces the earlier independent loops. Both panels
+share one GIF clock: 120 frames over 15.01 seconds, representing approximately
+2× playback. GIF centisecond timing adds 10 ms to the intended 15-second duration.
+[Static frame](demo-simulation-and-arm-poster.png).
 
-| File | Source | Encoding |
-| --- | --- | --- |
-| `simulation-demo.gif` | Illustrative demo v5, `demo-preview.mp4`, 30 seconds | Full clip at 2× speed, 10 fps, 480 × 400, 128-color palette |
-| `physical-arm-demo.gif` | User-supplied `Recording demo.mov`, 34.785 seconds | Full clip at 2× speed, 8 fps, 360 × 300 canvas; aspect-preserving video with padding, 96-color palette |
+- **Left:** illustrative MuJoCo demo v5, `demo-preview.mp4`, 30 seconds. Recorded
+  arm poses are retained; charger motion is scripted. Cropped overlays are replaced
+  by the visible “Recorded poses / scripted charger” footer.
+- **Right:** the user-supplied **Video Demo final.mov**, replacing the earlier
+  `Recording demo.mov`. Its first 4.5 seconds of idle footage are omitted. Side
+  crops center the white follower and charger and exclude most of the person on
+  the right; framing limits already present in the source are not reconstructed.
+- **Alignment:** manually selected visual anchors match approach, pickup, carry,
+  release and return. The physical footage is continuously retimed between them.
+  No action order, recorded joint data, mapping or simulated arm pose is changed.
+  This is presentation alignment, not synchronized replay feedback or a
+  contact-driven simulated grasp.
 
-The simulation retains the visible “Recorded arm replay · scripted charger motion”
-label and provisional-staging note. It uses recorded arm poses and authored charger
-motion; it does not demonstrate a contact-driven simulated grasp or a trajectory
-exported from simulation to hardware. The physical clip is the earlier recording,
-not the separately reported `Video Demo final.mov`. Their frames have not been
-synchronized. Both GIFs loop independently and omit audio.
+[Exact hashes, crop rectangles and timing anchors](demo-media.json). The full-quality
+composite retains 900 simulation display frames over 30 seconds. Its MP4 and
+original videos remain in the team's local evidence directory. Original/frozen
+packages are unchanged; earlier README GIFs remain in Git history.
 
-Source and output hashes, frame counts and durations are in
-[demo-media.json](demo-media.json). Original videos and frozen simulation packages
-were not changed. GIF conversion downsamples the display frames only.
+`workspace-demo.png` is an actual capture of the **procedural mug demo**, with API
+requests intercepted. It illustrates the interface and Echo identity; it is not
+evidence of a new reconstruction or a validated simulation export.
 
-`workflow.png` is a schematic illustration of the product workflow, not a captured
-reconstruction or simulation result. The README banner uses the Echo sharing artwork in `echo-banner.png`; canonical
-assets and usage are documented in [the brand guide](../brand-guidelines.md).
+`workflow.png` is a product schematic. `echo-banner.png` uses the current Echo
+identity; see [the brand guide](../brand-guidelines.md) for reusable artwork.
