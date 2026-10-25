@@ -1,0 +1,80 @@
+{
+  "trajectory_path": "C:\\Users\\ypira\\so101-demos\\trajectory-20261024-224752",
+  "verification": {
+    "dataset_metadata_fps": 30,
+    "dataset_metadata_total_frames": 900,
+    "episode": 0,
+    "episode_rows_read": 900,
+    "frame_index_first": 0,
+    "frame_index_last": 899,
+    "frame_indices_contiguous": true,
+    "timestamps_increasing": true,
+    "timestamp_span_s": 29.96666717529297,
+    "action_shape": [
+      900,
+      6
+    ],
+    "state_shape": [
+      900,
+      6
+    ],
+    "actions_and_observations_finite": true,
+    "video_path": null,
+    "source_hashes": {
+      "meta/info.json": "3d5c6ed62cdec9a436f78599b4e7c840f2d76218d0ff7cfab14c80d87d70baa7",
+      "data/chunk-000/file-000.parquet": "3627e19dcda71e47fe41387144581bc108759660b949ec956c544ab1bdd13fd1"
+    }
+  },
+  "operation_mode": "recorded joint-command replay; not a learned policy",
+  "replay_fps_operator_reported": 15,
+  "successful_replays_operator_reported": 5,
+  "replay_outcomes_independently_observed": false,
+  "failure_details": "not supplied",
+  "restart_repeatability": "not established",
+  "camera_video_included": false,
+  "agent_hardware_actions": [],
+  "operator_reported_successes": 5,
+  "operator_reported_attempts": 5,
+  "consecutive_attempts": "not separately established by saved logs; operator reports five successful runs",
+  "same_charger_as_reconstruction_photos": true,
+  "only_original_recording_observations_saved": true,
+  "actual_replay_observations_saved": false,
+  "exact_replay_command_file": "commands/replay-used.txt",
+  "replay_timing_audit": {
+    "requested_fps_in_command": 15,
+    "stored_dataset_fps": 30,
+    "installed_loop_timer": "CycleTimer(dataset.fps, records_data=False)",
+    "cli_dataset_fps_used_for_timer": false,
+    "actual_replay_cadence": "unmeasured; no run summary supplied",
+    "corrected_prior_claim": "Earlier approximately 60-second playback estimate assumed the 15 FPS option controlled pacing; that is not supported by the installed source."
+  },
+  "calibration_reference": {
+    "path": "references/hackathon_follower-current-reference.json",
+    "sha256": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+    "matches_historical_reference_hash": true,
+    "recording_time_calibration_snapshot": "not embedded in dataset; this is the current cached reference matching earlier evidence"
+  },
+  "first_frame_reference": {
+    "action": {
+      "shoulder_pan.pos": 1.8461538553237915,
+      "shoulder_lift.pos": -104.21977996826172,
+      "elbow_flex.pos": 91.03296661376953,
+      "wrist_flex.pos": 75.56044006347656,
+      "wrist_roll.pos": -12.175824165344238,
+      "gripper.pos": 0.4208754301071167
+    },
+    "original_observation": {
+      "shoulder_pan.pos": -8.04395580291748,
+      "shoulder_lift.pos": -103.73626708984375,
+      "elbow_flex.pos": 96.0879135131836,
+      "wrist_flex.pos": 78.06593322753906,
+      "wrist_roll.pos": -6.373626232147217,
+      "gripper.pos": 0.8867667317390442
+    },
+    "not_an_instruction_to_send_targets": true
+  },
+  "restart_check": {
+    "status": "pending operator-run software restart and video",
+    "agent_hardware_actions": []
+  }
+}

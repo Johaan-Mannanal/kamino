@@ -1,0 +1,17 @@
+{
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "executable": "C:\\Users\\ypira\\lerobot-env\\Scripts\\python.exe",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "lerobot": "0.6.2",
+    "rustypot": "1.13.1",
+    "numpy": "2.2.6",
+    "pyarrow": "26.0.0",
+    "torch": "2.11.0",
+    "datasets": "4.8.5"
+  },
+  "lerobot_source_path": "C:\\Users\\ypira\\lerobot",
+  "lerobot_source_sha": "146d8474932c8b566717eb2738ba459337ab71c4",
+  "lerobot_source_worktree": "clean at inspection",
+  "runtime_scope": "installed environment inspected now; no separate runtime log of past replay invocations supplied"
+}
