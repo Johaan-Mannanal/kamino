@@ -1,0 +1,122 @@
+{
+  ".gitattributes": {
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+    "bytes": 8
+  },
+  "A_positive_zero-baseline-forearm.png": {
+    "sha256": "a1c2eadc06b352491c9703a7e214a1c4bfa248ff1405ebb0de2917e09fbc5eba",
+    "bytes": 31782
+  },
+  "A_positive_zero-baseline-world-0.png": {
+    "sha256": "fe4a3199570416ba8c3a14510d4eb53e218889902041aae13e6f2fc5a1e7c992",
+    "bytes": 31705
+  },
+  "A_positive_zero-baseline-world-90.png": {
+    "sha256": "2ab44a872190b69a3565e7de8a7c8cb98a682ab574f4008f2f79eb2367ec8ee8",
+    "bytes": 34667
+  },
+  "A_positive_zero-changed-forearm.png": {
+    "sha256": "1fda19b2db432a3caebeef68257bdc7bfe05dff9ae40bc728c4d5115d1a8c10b",
+    "bytes": 31552
+  },
+  "A_positive_zero-changed-world-0.png": {
+    "sha256": "192d88cd83e6ee8ef893d09f54179e61c0ab2f78a875600bbbb80b2e11006561",
+    "bytes": 31037
+  },
+  "A_positive_zero-changed-world-90.png": {
+    "sha256": "8868a3e9f44a6d6265efed39053818173e6bd010ddd6265f5259f783de8131cd",
+    "bytes": 34816
+  },
+  "B_negative_zero-baseline-forearm.png": {
+    "sha256": "5c5340f6711798af05a7533555bbcad903d98656ee067f83a0914eaef2f5098d",
+    "bytes": 32265
+  },
+  "B_negative_zero-baseline-world-0.png": {
+    "sha256": "0a679b428f4557b5206d2fbc583e4959374bbfb980c4539742cf3c47305798af",
+    "bytes": 35976
+  },
+  "B_negative_zero-baseline-world-90.png": {
+    "sha256": "5351109d7a9ed0fc0da3e5740b6950e669938ccce950900114d6c2298179a0db",
+    "bytes": 34937
+  },
+  "B_negative_zero-changed-forearm.png": {
+    "sha256": "9e2220f4b31e169bbc1544d4b7c74d9d0136da1a99c2e04592b705a656c10178",
+    "bytes": 31363
+  },
+  "B_negative_zero-changed-world-0.png": {
+    "sha256": "e62d6d288d5db63eae9246e7aad91605071c2ec87c6730ffd5a4e6e7cdef9962",
+    "bytes": 34919
+  },
+  "B_negative_zero-changed-world-90.png": {
+    "sha256": "19faf82cb9c26f8cbef60b00ea9f424615b2ad8dda467c212cd415f982ea42ba",
+    "bytes": 34200
+  },
+  "C_positive_minus90-baseline-forearm.png": {
+    "sha256": "4abd902e0941c5b38b33e9b63652abd780f4b56986dceb1fbd2b9670951fb86d",
+    "bytes": 32543
+  },
+  "C_positive_minus90-baseline-world-0.png": {
+    "sha256": "a4b0e8f4db7d7b321113233bb49e163961785e7542fe2ef82479f850e1c7afdd",
+    "bytes": 35911
+  },
+  "C_positive_minus90-baseline-world-90.png": {
+    "sha256": "86d90fafb9f996345b5be82b7ee1fa555f44794d9388f0d927537c5540e013ca",
+    "bytes": 35311
+  },
+  "C_positive_minus90-changed-forearm.png": {
+    "sha256": "abf8b0f90f7f741e3500d688ce83c306a85ef8c781458f2476e6c40b667215b6",
+    "bytes": 32540
+  },
+  "C_positive_minus90-changed-world-0.png": {
+    "sha256": "dd971a46ca5530d81f82750abd36d203b61021baf7909ebbbcfed672798e8ffa",
+    "bytes": 34809
+  },
+  "C_positive_minus90-changed-world-90.png": {
+    "sha256": "5b3b9e8f7f87eac05cbebe0d11aea86a7a3cdec133f6a95be99e973cb36ab500",
+    "bytes": 35495
+  },
+  "D_negative_plus90-baseline-forearm.png": {
+    "sha256": "e2e00414a2f8c769c78d5725e9591abe52e06752208f98bc86c41c9384b1c0d3",
+    "bytes": 32854
+  },
+  "D_negative_plus90-baseline-world-0.png": {
+    "sha256": "6c82fcaa25d273c71869991f5e72c4ec93b399f714a40ed399edb0aafbbad480",
+    "bytes": 32486
+  },
+  "D_negative_plus90-baseline-world-90.png": {
+    "sha256": "9f77c082b635b433262eb97cb24a66a73e3c414cacb5f2162154e8809def054c",
+    "bytes": 34413
+  },
+  "D_negative_plus90-changed-forearm.png": {
+    "sha256": "92d1f838e33082936b295b38e2eaa39173bcb609cdb6290f37e844b213645aee",
+    "bytes": 32258
+  },
+  "D_negative_plus90-changed-world-0.png": {
+    "sha256": "c9d617802d4b1196c46f9f6bbc838464eb5ef743b4b9012f9e60081141c0702a",
+    "bytes": 32187
+  },
+  "D_negative_plus90-changed-world-90.png": {
+    "sha256": "911c5d00913009fd693a98bb8f156975225ee036b54c369c214690ea7c5069dc",
+    "bytes": 34034
+  },
+  "forearm-candidates.jpg": {
+    "sha256": "ca9adc4d08db55efae87b9e0e9015bb9a1cd8500975747ae78ca677a3017ea81",
+    "bytes": 278808
+  },
+  "paired-photos.jpg": {
+    "sha256": "0f2c0fe05836bcef1973fd0c0b447487b807a5511c8eccce8e05af5dac4b0a06",
+    "bytes": 399421
+  },
+  "README.md": {
+    "sha256": "ad856612269144bb8af5690862957beadcdc7d51eb5f941b2bd5c47d755af2b0",
+    "bytes": 7500
+  },
+  "report.json": {
+    "sha256": "9802c3f248cca2b0761c2d1606cf1aed075ec7e784ab02ab5d918de0664e2da0",
+    "bytes": 59226
+  },
+  "whole-arm-candidates.jpg": {
+    "sha256": "f1fd8157926af15765ce00d77d00e21b901a91e6ba712c40680fad924561b638",
+    "bytes": 402669
+  }
+}

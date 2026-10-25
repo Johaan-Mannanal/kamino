@@ -1,0 +1,1847 @@
+{
+  "scope": "Offline candidate FK at stationary endpoints; not trajectory, fitted calibration or hardware execution",
+  "evidence_commit": "cea2e95b2b6c028162c2e4e983e75150bf3c2982",
+  "bundle_sha256": "aff9c1a3a7690e8cafcae30eaa37ce5b33c82d7b46621dc51741fd05311344b0",
+  "scene_sha256": "758e6995c89a3a747e676da2005b6f111e70ddc2deebff15ae1b50d9fd745b74",
+  "mujoco_version": "3.17.0",
+  "capture_audits": {
+    "baseline": {
+      "schema_version": "stationary-audit-1.0",
+      "scope": "Saved capture integrity and signal ranges only; not physical calibration",
+      "capture_integrity_passed": true,
+      "units_verified": false,
+      "hardware_mapping_verified": false,
+      "physical_pose_pairing_verified": false,
+      "operator_stationarity_verified": false,
+      "source_hashes": {
+        "capture.json": "6a77bcd70725306ecf3e09ce94931826e7f10a74c81d01ca9183003bba70a7bc",
+        "calibration.json": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+        "observations.jsonl": "5dd278d832826365754481ac088fc3ae2fa7c8a3421edfe0077958e757c4fb7c"
+      },
+      "samples": 50,
+      "first_read_utc": "2026-10-24T22:57:22.259586+00:00",
+      "last_read_utc": "2026-10-24T22:57:32.081937+00:00",
+      "elapsed_span_s": 9.819417700004124,
+      "sample_rate_hz": 4.990112601074036,
+      "signals": {
+        "shoulder_pan.pos": {
+          "declared_unit": "degrees",
+          "minimum": 5.846153846153846,
+          "maximum": 5.934065934065934,
+          "span": 0.08791208791208849,
+          "median": 5.934065934065934
+        },
+        "shoulder_lift.pos": {
+          "declared_unit": "degrees",
+          "minimum": -103.91208791208791,
+          "maximum": -103.91208791208791,
+          "span": 0.0,
+          "median": -103.91208791208791
+        },
+        "elbow_flex.pos": {
+          "declared_unit": "degrees",
+          "minimum": 76.57142857142857,
+          "maximum": 76.57142857142857,
+          "span": 0.0,
+          "median": 76.57142857142857
+        },
+        "wrist_flex.pos": {
+          "declared_unit": "degrees",
+          "minimum": 52.65934065934066,
+          "maximum": 52.65934065934066,
+          "span": 0.0,
+          "median": 52.65934065934066
+        },
+        "wrist_roll.pos": {
+          "declared_unit": "degrees",
+          "minimum": -8.747252747252746,
+          "maximum": -8.747252747252746,
+          "span": 0.0,
+          "median": -8.747252747252746
+        },
+        "gripper.pos": {
+          "declared_unit": "normalized_0_100",
+          "minimum": 0.8867667121418827,
+          "maximum": 0.8867667121418827,
+          "span": 0.0,
+          "median": 0.8867667121418827
+        }
+      },
+      "mapping_review": {
+        "shoulder_pan.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "shoulder_lift.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "elbow_flex.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "wrist_flex.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "wrist_roll.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "gripper.pos": {
+          "declared_source_unit": "normalized_0_100",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        }
+      },
+      "mapping_equation": "q_rad = sign * radians_per_unit * observation + offset_rad",
+      "missing_evidence": [
+        "Associated whole-arm front/side photographs and operator unchanged-pose confirmation",
+        "Multiple distinct associated poses to resolve joint signs and offsets",
+        "Measured jaw opening and reviewed gripper conversion",
+        "Measured base/table placement before world-frame comparison"
+      ],
+      "limitations": [
+        "Calibration agreement checks recorded metadata against saved bytes; hardware was not contacted.",
+        "Units are declarations from capture metadata, not independently verified by this generic audit.",
+        "Encoder stability alone does not establish stationary camera association or joint mapping.",
+        "No normalized signal is treated as an angle; mapping fields intentionally remain unset.",
+        "No requested or sent actions are inferred from observations."
+      ]
+    },
+    "changed": {
+      "schema_version": "stationary-audit-1.0",
+      "scope": "Saved capture integrity and signal ranges only; not physical calibration",
+      "capture_integrity_passed": true,
+      "units_verified": false,
+      "hardware_mapping_verified": false,
+      "physical_pose_pairing_verified": false,
+      "operator_stationarity_verified": false,
+      "source_hashes": {
+        "capture.json": "6a77bcd70725306ecf3e09ce94931826e7f10a74c81d01ca9183003bba70a7bc",
+        "calibration.json": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+        "observations.jsonl": "70efcde60dc3a9ea82fe39c75926484f879479b1155b45deba7b61d99b03679d"
+      },
+      "samples": 50,
+      "first_read_utc": "2026-10-24T23:01:59.581978+00:00",
+      "last_read_utc": "2026-10-24T23:02:09.407366+00:00",
+      "elapsed_span_s": 9.82099069999822,
+      "sample_rate_hz": 4.989313349009574,
+      "signals": {
+        "shoulder_pan.pos": {
+          "declared_unit": "degrees",
+          "minimum": 4.351648351648351,
+          "maximum": 4.351648351648351,
+          "span": 0.0,
+          "median": 4.351648351648351
+        },
+        "shoulder_lift.pos": {
+          "declared_unit": "degrees",
+          "minimum": -103.91208791208791,
+          "maximum": -103.91208791208791,
+          "span": 0.0,
+          "median": -103.91208791208791
+        },
+        "elbow_flex.pos": {
+          "declared_unit": "degrees",
+          "minimum": 85.71428571428571,
+          "maximum": 85.71428571428571,
+          "span": 0.0,
+          "median": 85.71428571428571
+        },
+        "wrist_flex.pos": {
+          "declared_unit": "degrees",
+          "minimum": 66.9010989010989,
+          "maximum": 66.9010989010989,
+          "span": 0.0,
+          "median": 66.9010989010989
+        },
+        "wrist_roll.pos": {
+          "declared_unit": "degrees",
+          "minimum": -8.747252747252746,
+          "maximum": -8.747252747252746,
+          "span": 0.0,
+          "median": -8.747252747252746
+        },
+        "gripper.pos": {
+          "declared_unit": "normalized_0_100",
+          "minimum": 0.6821282401091405,
+          "maximum": 0.6821282401091405,
+          "span": 0.0,
+          "median": 0.6821282401091405
+        }
+      },
+      "mapping_review": {
+        "shoulder_pan.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "shoulder_lift.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "elbow_flex.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "wrist_flex.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "wrist_roll.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "gripper.pos": {
+          "declared_source_unit": "normalized_0_100",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        }
+      },
+      "mapping_equation": "q_rad = sign * radians_per_unit * observation + offset_rad",
+      "missing_evidence": [
+        "Associated whole-arm front/side photographs and operator unchanged-pose confirmation",
+        "Multiple distinct associated poses to resolve joint signs and offsets",
+        "Measured jaw opening and reviewed gripper conversion",
+        "Measured base/table placement before world-frame comparison"
+      ],
+      "limitations": [
+        "Calibration agreement checks recorded metadata against saved bytes; hardware was not contacted.",
+        "Units are declarations from capture metadata, not independently verified by this generic audit.",
+        "Encoder stability alone does not establish stationary camera association or joint mapping.",
+        "No normalized signal is treated as an angle; mapping fields intentionally remain unset.",
+        "No requested or sent actions are inferred from observations."
+      ]
+    },
+    "earlier_alternative": {
+      "schema_version": "stationary-audit-1.0",
+      "scope": "Saved capture integrity and signal ranges only; not physical calibration",
+      "capture_integrity_passed": true,
+      "units_verified": false,
+      "hardware_mapping_verified": false,
+      "physical_pose_pairing_verified": false,
+      "operator_stationarity_verified": false,
+      "source_hashes": {
+        "capture.json": "6a77bcd70725306ecf3e09ce94931826e7f10a74c81d01ca9183003bba70a7bc",
+        "calibration.json": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+        "observations.jsonl": "b1dd72a65b229c44ab227c278d8319b8a1609fa5e3b357034c9aea18b2532028"
+      },
+      "samples": 50,
+      "first_read_utc": "2026-10-24T22:52:49.786157+00:00",
+      "last_read_utc": "2026-10-24T22:52:59.615658+00:00",
+      "elapsed_span_s": 9.816662000004726,
+      "sample_rate_hz": 4.991513408526892,
+      "signals": {
+        "shoulder_pan.pos": {
+          "declared_unit": "degrees",
+          "minimum": 1.098901098901099,
+          "maximum": 1.098901098901099,
+          "span": 0.0,
+          "median": 1.098901098901099
+        },
+        "shoulder_lift.pos": {
+          "declared_unit": "degrees",
+          "minimum": -103.91208791208791,
+          "maximum": -103.91208791208791,
+          "span": 0.0,
+          "median": -103.91208791208791
+        },
+        "elbow_flex.pos": {
+          "declared_unit": "degrees",
+          "minimum": 70.15384615384616,
+          "maximum": 70.15384615384616,
+          "span": 0.0,
+          "median": 70.15384615384616
+        },
+        "wrist_flex.pos": {
+          "declared_unit": "degrees",
+          "minimum": 46.417582417582416,
+          "maximum": 46.417582417582416,
+          "span": 0.0,
+          "median": 46.417582417582416
+        },
+        "wrist_roll.pos": {
+          "declared_unit": "degrees",
+          "minimum": -5.758241758241758,
+          "maximum": -5.758241758241758,
+          "span": 0.0,
+          "median": -5.758241758241758
+        },
+        "gripper.pos": {
+          "declared_unit": "normalized_0_100",
+          "minimum": 0.4092769440654843,
+          "maximum": 0.4092769440654843,
+          "span": 0.0,
+          "median": 0.4092769440654843
+        }
+      },
+      "mapping_review": {
+        "shoulder_pan.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "shoulder_lift.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "elbow_flex.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "wrist_flex.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "wrist_roll.pos": {
+          "declared_source_unit": "degrees",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        },
+        "gripper.pos": {
+          "declared_source_unit": "normalized_0_100",
+          "simulation_joint": null,
+          "sign": null,
+          "offset_rad": null,
+          "radians_per_unit": null,
+          "status": "unreviewed",
+          "evidence": []
+        }
+      },
+      "mapping_equation": "q_rad = sign * radians_per_unit * observation + offset_rad",
+      "missing_evidence": [
+        "Associated whole-arm front/side photographs and operator unchanged-pose confirmation",
+        "Multiple distinct associated poses to resolve joint signs and offsets",
+        "Measured jaw opening and reviewed gripper conversion",
+        "Measured base/table placement before world-frame comparison"
+      ],
+      "limitations": [
+        "Calibration agreement checks recorded metadata against saved bytes; hardware was not contacted.",
+        "Units are declarations from capture metadata, not independently verified by this generic audit.",
+        "Encoder stability alone does not establish stationary camera association or joint mapping.",
+        "No normalized signal is treated as an angle; mapping fields intentionally remain unset.",
+        "No requested or sent actions are inferred from observations."
+      ]
+    }
+  },
+  "observed_values": {
+    "baseline": {
+      "shoulder_pan": 5.934065934065934,
+      "shoulder_lift": -103.91208791208791,
+      "elbow_flex": 76.57142857142857,
+      "wrist_flex": 52.65934065934066,
+      "wrist_roll": -8.747252747252746,
+      "gripper": 0.8867667121418827
+    },
+    "changed": {
+      "shoulder_pan": 4.351648351648351,
+      "shoulder_lift": -103.91208791208791,
+      "elbow_flex": 85.71428571428571,
+      "wrist_flex": 66.9010989010989,
+      "wrist_roll": -8.747252747252746,
+      "gripper": 0.6821282401091405
+    },
+    "earlier_alternative": {
+      "shoulder_pan": 1.098901098901099,
+      "shoulder_lift": -103.91208791208791,
+      "elbow_flex": 70.15384615384616,
+      "wrist_flex": 46.417582417582416,
+      "wrist_roll": -5.758241758241758,
+      "gripper": 0.4092769440654843
+    }
+  },
+  "changed_minus_paired_baseline": {
+    "shoulder_pan": -1.582417582417583,
+    "shoulder_lift": 0.0,
+    "elbow_flex": 9.142857142857139,
+    "wrist_flex": 14.241758241758248,
+    "wrist_roll": 0.0,
+    "gripper": -0.2046384720327422
+  },
+  "units": {
+    "shoulder_pan": "degrees",
+    "shoulder_lift": "degrees",
+    "elbow_flex": "degrees",
+    "wrist_flex": "degrees",
+    "wrist_roll": "degrees",
+    "gripper": "normalized_0_100"
+  },
+  "pairing": {
+    "status": "operator-confirmed stationary pairing; not synchronized",
+    "motion_method": "leader teleoperation, operator reported",
+    "helper_executed": false,
+    "photo_files": [
+      {
+        "file": "photos/baseline-front.png",
+        "attachment_number": 1,
+        "source_filename": "codex-clipboard-f589bca7-cd6b-456e-9248-4bbfe06299be.png",
+        "dimensions_px": [
+          832,
+          1154
+        ],
+        "sha256": "91f702956da5cc21de8f3943fa0ad512268f3a3c95791aca8c3fe438b9b5e00e",
+        "provenance": "Exact bytes of supplied clipboard PNG attachment; not asserted to be original phone camera file"
+      },
+      {
+        "file": "photos/baseline-side.png",
+        "attachment_number": 2,
+        "source_filename": "codex-clipboard-898c2d74-cef3-45ab-9a69-af7466a841b1.png",
+        "dimensions_px": [
+          2880,
+          2160
+        ],
+        "sha256": "7832bb1884425a4a820a0233da8d039d8a3a92d6d5983e4b791f705a0b0e88e3",
+        "provenance": "Exact bytes of supplied clipboard PNG attachment; not asserted to be original phone camera file"
+      },
+      {
+        "file": "photos/changed-front.png",
+        "attachment_number": 3,
+        "source_filename": "codex-clipboard-bf10445c-3c05-4cdb-925b-065f80cff6d0.png",
+        "dimensions_px": [
+          2160,
+          2880
+        ],
+        "sha256": "e7538e4c73113758e32211b6dea8880a45116003216f45e9f4b01cff777b04d9",
+        "provenance": "Exact bytes of supplied clipboard PNG attachment; not asserted to be original phone camera file"
+      },
+      {
+        "file": "photos/changed-side.png",
+        "attachment_number": 4,
+        "source_filename": "codex-clipboard-3ef5b46a-097e-49bc-9880-b2691059632d.png",
+        "dimensions_px": [
+          2880,
+          2160
+        ],
+        "sha256": "079dcbe9f3aac73bcfb986191f423eeb35d08f632250b8fbfec565c49b248151",
+        "provenance": "Exact bytes of supplied clipboard PNG attachment; not asserted to be original phone camera file"
+      }
+    ],
+    "photo_count_reported_by_operator": 4,
+    "baseline_capture_for_photos": "wrist-baseline-20261024-155719",
+    "unchanged_pose_and_jaws_between_capture_and_photos": "operator confirmed for each capture and its photo pair",
+    "photo_mirroring": "unconfirmed for these new photos",
+    "rear_camera_use": "unconfirmed; not inferred from take 3 or take 5",
+    "synchronization": "no hardware synchronization established",
+    "current_state": "unknown; no hardware access made during packaging",
+    "repeat_test_requested": false,
+    "changed_capture_for_photos": "wrist-changed-20261024-160156",
+    "intentional_motion": "wrist_flex only, operator reported",
+    "other_motion_explanation": "Operator suggests environmental effects; cause not independently verified",
+    "operator_confirmation": "yes exactly",
+    "confirmation_question": "Are photos 1\u20132 the baseline and photos 3\u20134 the changed pose? Does that baseline match the 3:57 p.m. capture (rather than 3:52 p.m.), and did the arm and jaw opening stay unchanged between each capture and its two photos?"
+  },
+  "new_photo_mirroring": "unknown",
+  "new_photo_camera_identity": "unknown",
+  "candidates": [
+    {
+      "id": "A_positive_zero",
+      "wrist_mapping": {
+        "sign": 1,
+        "offset_deg": 0
+      },
+      "all_other_arm_mappings": "positive sign, zero offset, degrees to radians; unverified",
+      "jaw_display_policy": "Unverified affine normalized 0\u2013100 to model min/max, for display only",
+      "states": {
+        "baseline": {
+          "qpos_rad": {
+            "shoulder_pan": 0.1035689885798833,
+            "shoulder_lift": -1.813608066687734,
+            "elbow_flex": 1.3364235415270866,
+            "wrist_flex": 0.9190788764348161,
+            "wrist_roll": -0.1526683609436798,
+            "gripper": -0.15750830109140518
+          },
+          "limit_conflicts": [
+            {
+              "joint": "shoulder_lift",
+              "q_deg": -103.91208791208791,
+              "limits_deg": [
+                -100.00000275052231,
+                100.00000275052231
+              ],
+              "excess_deg": 3.912085161565599
+            }
+          ],
+          "world_T_forearm": [
+            [
+              -0.8835316449107458,
+              -0.456818995981218,
+              0.10338393178836991,
+              -0.04819640720502806
+            ],
+            [
+              0.0918350712718442,
+              0.047482175987602016,
+              0.9946415246951918,
+              -0.0093301151102996
+            ],
+            [
+              -0.4592800367159514,
+              0.8882915331546242,
+              -5.551115123125783e-17,
+              0.2667131177839902
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_wrist": [
+            [
+              -0.425361051262493,
+              -0.89909940424674,
+              0.10338393178836969,
+              0.06861655291432923
+            ],
+            [
+              0.04421240901100243,
+              0.09345319813396491,
+              0.9946415246951918,
+              -0.02147175890973583
+            ],
+            [
+              -0.9039431613538037,
+              0.42765261725106907,
+              1.1102230246251565e-16,
+              0.33328911070937606
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_gripper": [
+            [
+              0.39609209850000765,
+              0.18636338371315236,
+              -0.8990994042467387,
+              0.12542277567917454
+            ],
+            [
+              -0.24223774139519216,
+              0.9657056365178189,
+              0.09345319813396513,
+              -0.00917873771873811
+            ],
+            [
+              0.8856816166939517,
+              0.18077973561407396,
+              0.427652617251069,
+              0.30715953579533567
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_wrist": [
+            [
+              0.7950432473712492,
+              0.6065527469308654,
+              1.2291671520039496e-16,
+              -0.13490000000000002
+            ],
+            [
+              -0.6065527469308654,
+              0.7950432473712493,
+              2.5303109453526616e-16,
+              0.005199999999999927
+            ],
+            [
+              7.941971794199284e-17,
+              -2.4650400476913925e-16,
+              1.0,
+              2.6020852139652106e-17
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_gripper": [
+            [
+              -0.7789817090034615,
+              -0.1590008246163105,
+              0.6065527469308643,
+              -0.17196037283747584
+            ],
+            [
+              0.5942991113593046,
+              0.12130457966176716,
+              0.7950432473712487,
+              -0.04337714241438345
+            ],
+            [
+              -0.19999015794679686,
+              0.9797979060624763,
+              1.1312865770198036e-16,
+              0.018100000000000043
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_wrist_z_heading_deg": -37.34065934065937
+        },
+        "changed": {
+          "qpos_rad": {
+            "shoulder_pan": 0.07595059162524774,
+            "shoulder_lift": -1.813608066687734,
+            "elbow_flex": 1.4959965017094252,
+            "wrist_flex": 1.167644449026536,
+            "wrist_roll": -0.1526683609436798,
+            "gripper": -0.16143707776261937
+          },
+          "limit_conflicts": [
+            {
+              "joint": "shoulder_lift",
+              "q_deg": -103.91208791208791,
+              "limits_deg": [
+                -100.00000275052231,
+                100.00000275052231
+              ],
+              "excess_deg": 3.912085161565599
+            }
+          ],
+          "world_T_forearm": [
+            [
+              -0.947245360706626,
+              -0.3113981656315717,
+              0.07587759261511509,
+              -0.04790556640767189
+            ],
+            [
+              0.07208250134401384,
+              0.023696456719425607,
+              0.9971171400286597,
+              -0.011729927614422937
+            ],
+            [
+              -0.3122984784141021,
+              0.949984031644867,
+              -5.551115123125783e-17,
+              0.2667131177839902
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_wrist": [
+            [
+              -0.7491362088791518,
+              -0.658055872616532,
+              0.0758775926151149,
+              0.0782585622903678
+            ],
+            [
+              0.0570069952552717,
+              0.050076057682596875,
+              0.9971171400286595,
+              -0.021330635470789366
+            ],
+            [
+              -0.6599584403870717,
+              0.751302107651684,
+              -5.551115123125783e-17,
+              0.31378209948660585
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_gripper": [
+            [
+              0.7188273170836555,
+              0.22416457509875762,
+              -0.6580558726165311,
+              0.11983916053357146
+            ],
+            [
+              -0.2552689489078187,
+              0.9655724479139117,
+              0.05007605768259712,
+              -0.006342462360677294
+            ],
+            [
+              0.6466258979795103,
+              0.13198519273133183,
+              0.7513021076516838,
+              0.26787754070908787
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_wrist": [
+            [
+              0.91982902195966,
+              0.3923194748680405,
+              1.7773487643111432e-16,
+              -0.13490000000000002
+            ],
+            [
+              -0.39231947486804064,
+              0.91982902195966,
+              5.4306018286817254e-17,
+              0.005199999999999982
+            ],
+            [
+              -1.2536431003774435e-16,
+              -1.3607377202977685e-16,
+              0.9999999999999998,
+              2.6020852139652106e-17
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_gripper": [
+            [
+              -0.9012465496515706,
+              -0.18395675138576004,
+              0.3923194748680398,
+              -0.15887071991443724
+            ],
+            [
+              0.3843937999832362,
+              0.07846003374446352,
+              0.9198290219596595,
+              -0.0510015532417353
+            ],
+            [
+              -0.19999015794679667,
+              0.9797979060624764,
+              1.7547631856421533e-16,
+              0.018100000000000033
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_wrist_z_heading_deg": -23.09890109890112
+        }
+      },
+      "wrist_relative_forearm_delta_deg": 14.241758241758248,
+      "world_gripper_rotation_magnitude_deg": 23.437351067377012,
+      "adopted_for_hardware": false,
+      "verified": false
+    },
+    {
+      "id": "B_negative_zero",
+      "wrist_mapping": {
+        "sign": -1,
+        "offset_deg": 0
+      },
+      "all_other_arm_mappings": "positive sign, zero offset, degrees to radians; unverified",
+      "jaw_display_policy": "Unverified affine normalized 0\u2013100 to model min/max, for display only",
+      "states": {
+        "baseline": {
+          "qpos_rad": {
+            "shoulder_pan": 0.1035689885798833,
+            "shoulder_lift": -1.813608066687734,
+            "elbow_flex": 1.3364235415270866,
+            "wrist_flex": -0.9190788764348161,
+            "wrist_roll": -0.1526683609436798,
+            "gripper": -0.15750830109140518
+          },
+          "limit_conflicts": [
+            {
+              "joint": "shoulder_lift",
+              "q_deg": -103.91208791208791,
+              "limits_deg": [
+                -100.00000275052231,
+                100.00000275052231
+              ],
+              "excess_deg": 3.912085161565599
+            }
+          ],
+          "world_T_forearm": [
+            [
+              -0.8835316449107458,
+              -0.456818995981218,
+              0.10338393178836991,
+              -0.04819640720502806
+            ],
+            [
+              0.0918350712718442,
+              0.047482175987602016,
+              0.9946415246951918,
+              -0.0093301151102996
+            ],
+            [
+              -0.4592800367159514,
+              0.8882915331546242,
+              -5.551115123125783e-17,
+              0.2667131177839902
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_wrist": [
+            [
+              0.9795306849877085,
+              -0.1727176881951767,
+              0.10338393178836977,
+              0.06861655291432923
+            ],
+            [
+              -0.10181329756207182,
+              0.017952431355092658,
+              0.9946415246951917,
+              -0.02147175890973583
+            ],
+            [
+              -0.17364817766692972,
+              -0.9848077530122071,
+              6.505213034913027e-17,
+              0.33328911070937606
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_gripper": [
+            [
+              -0.9804178829224168,
+              -0.09460113651767524,
+              -0.17271768819517688,
+              0.08104085282842409
+            ],
+            [
+              -0.09916205986360041,
+              0.9949093406396606,
+              0.01795243135509301,
+              -0.00456564086854902
+            ],
+            [
+              0.1701401208696229,
+              0.03472792647878317,
+              -0.984807753012206,
+              0.39346086441842193
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_wrist": [
+            [
+              -0.7950432473712497,
+              0.6065527469308646,
+              6.444521743798757e-17,
+              -0.13490000000000002
+            ],
+            [
+              -0.6065527469308647,
+              -0.7950432473712497,
+              1.7223012984567494e-16,
+              0.005199999999999927
+            ],
+            [
+              8.650734988775396e-17,
+              1.0609682590879217e-16,
+              0.9999999999999999,
+              2.6020852139652106e-17
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_gripper": [
+            [
+              0.7789817090034616,
+              0.15900082461631027,
+              0.6065527469308643,
+              -0.1719603728374759
+            ],
+            [
+              0.5942991113593046,
+              0.12130457966176758,
+              -0.7950432473712485,
+              0.05377714241438325
+            ],
+            [
+              -0.19999015794679686,
+              0.9797979060624762,
+              4.338166008172342e-16,
+              0.018100000000000026
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_wrist_z_heading_deg": -142.65934065934067
+        },
+        "changed": {
+          "qpos_rad": {
+            "shoulder_pan": 0.07595059162524774,
+            "shoulder_lift": -1.813608066687734,
+            "elbow_flex": 1.4959965017094252,
+            "wrist_flex": -1.167644449026536,
+            "wrist_roll": -0.1526683609436798,
+            "gripper": -0.16143707776261937
+          },
+          "limit_conflicts": [
+            {
+              "joint": "shoulder_lift",
+              "q_deg": -103.91208791208791,
+              "limits_deg": [
+                -100.00000275052231,
+                100.00000275052231
+              ],
+              "excess_deg": 3.912085161565599
+            }
+          ],
+          "world_T_forearm": [
+            [
+              -0.947245360706626,
+              -0.3113981656315717,
+              0.07587759261511509,
+              -0.04790556640767189
+            ],
+            [
+              0.07208250134401384,
+              0.023696456719425607,
+              0.9971171400286597,
+              -0.011729927614422937
+            ],
+            [
+              -0.3122984784141021,
+              0.949984031644867,
+              -5.551115123125783e-17,
+              0.2667131177839902
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_wrist": [
+            [
+              0.9934713385100503,
+              -0.08518973235068954,
+              0.07587759261511487,
+              0.0782585622903678
+            ],
+            [
+              -0.07560015816806824,
+              0.0064826804663195145,
+              0.9971171400286594,
+              -0.021330635470789366
+            ],
+            [
+              -0.08543603246880394,
+              -0.9963436577587013,
+              -1.2408693864096598e-16,
+              0.31378209948660585
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_gripper": [
+            [
+              -0.9885759089369524,
+              -0.12433978354288938,
+              -0.08518973235068987,
+              0.08483703936332858
+            ],
+            [
+              -0.12534073765472462,
+              0.9920925734719204,
+              0.006482680466319851,
+              -0.0036789070127627548
+            ],
+            [
+              0.08371004571522024,
+              0.01708636562778403,
+              -0.9963436577587002,
+              0.3746586969756625
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_wrist": [
+            [
+              -0.9198290219596601,
+              0.39231947486803975,
+              2.1890380084437425e-16,
+              -0.13490000000000002
+            ],
+            [
+              -0.39231947486803975,
+              -0.9198290219596603,
+              -3.062379039211824e-18,
+              0.005199999999999982
+            ],
+            [
+              1.8705194535606738e-16,
+              -9.043459493952999e-17,
+              0.9999999999999997,
+              2.6020852139652106e-17
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_gripper": [
+            [
+              0.9012465496515703,
+              0.18395675138576012,
+              0.39231947486803975,
+              -0.1588707199144373
+            ],
+            [
+              0.38439379998323603,
+              0.078460033744464,
+              -0.9198290219596591,
+              0.06140155324173524
+            ],
+            [
+              -0.1999901579467969,
+              0.9797979060624761,
+              2.1997808181348098e-16,
+              0.01810000000000003
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_wrist_z_heading_deg": -156.90109890109892
+        }
+      },
+      "wrist_relative_forearm_delta_deg": -14.241758241758255,
+      "world_gripper_rotation_magnitude_deg": 5.338650108232373,
+      "adopted_for_hardware": false,
+      "verified": false
+    },
+    {
+      "id": "C_positive_minus90",
+      "wrist_mapping": {
+        "sign": 1,
+        "offset_deg": -90
+      },
+      "all_other_arm_mappings": "positive sign, zero offset, degrees to radians; unverified",
+      "jaw_display_policy": "Unverified affine normalized 0\u2013100 to model min/max, for display only",
+      "states": {
+        "baseline": {
+          "qpos_rad": {
+            "shoulder_pan": 0.1035689885798833,
+            "shoulder_lift": -1.813608066687734,
+            "elbow_flex": 1.3364235415270866,
+            "wrist_flex": -0.6517174503600804,
+            "wrist_roll": -0.1526683609436798,
+            "gripper": -0.15750830109140518
+          },
+          "limit_conflicts": [
+            {
+              "joint": "shoulder_lift",
+              "q_deg": -103.91208791208791,
+              "limits_deg": [
+                -100.00000275052231,
+                100.00000275052231
+              ],
+              "excess_deg": 3.912085161565599
+            }
+          ],
+          "world_T_forearm": [
+            [
+              -0.8835316449107458,
+              -0.456818995981218,
+              0.10338393178836991,
+              -0.04819640720502806
+            ],
+            [
+              0.0918350712718442,
+              0.047482175987602016,
+              0.9946415246951918,
+              -0.0093301151102996
+            ],
+            [
+              -0.4592800367159514,
+              0.8882915331546242,
+              -5.551115123125783e-17,
+              0.2667131177839902
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_wrist": [
+            [
+              0.8990994042467401,
+              -0.425361051262493,
+              0.10338393178836988,
+              0.06861655291432923
+            ],
+            [
+              -0.09345319813396505,
+              0.04421240901100252,
+              0.9946415246951918,
+              -0.02147175890973583
+            ],
+            [
+              -0.42765261725106907,
+              -0.9039431613538038,
+              1.3357370765021415e-16,
+              0.33328911070937606
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_gripper": [
+            [
+              -0.9016114824704926,
+              -0.07851567197842561,
+              -0.425361051262493,
+              0.09647736231183712
+            ],
+            [
+              -0.10735326777773356,
+              0.9932374030345829,
+              0.04421240901100286,
+              -0.0061701255033251145
+            ],
+            [
+              0.41901313890473546,
+              0.08552631447040286,
+              -0.9039431613538028,
+              0.38852003786809347
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_wrist": [
+            [
+              -0.6065527469308655,
+              0.7950432473712493,
+              -5.397414869598099e-17,
+              -0.13490000000000002
+            ],
+            [
+              -0.7950432473712493,
+              -0.6065527469308655,
+              1.8285769607344405e-16,
+              0.005199999999999927
+            ],
+            [
+              1.0846976452352985e-16,
+              1.6914197410163895e-16,
+              1.0,
+              2.6020852139652106e-17
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_gripper": [
+            [
+              0.5942991113593047,
+              0.1213045796617669,
+              0.7950432473712489,
+              -0.1834771424143834
+            ],
+            [
+              0.7789817090034618,
+              0.15900082461631085,
+              -0.6065527469308646,
+              0.0422603728374758
+            ],
+            [
+              -0.19999015794679692,
+              0.9797979060624764,
+              5.073258627033819e-16,
+              0.01810000000000002
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_wrist_z_heading_deg": -127.34065934065937
+        },
+        "changed": {
+          "qpos_rad": {
+            "shoulder_pan": 0.07595059162524774,
+            "shoulder_lift": -1.813608066687734,
+            "elbow_flex": 1.4959965017094252,
+            "wrist_flex": -0.4031518777683604,
+            "wrist_roll": -0.1526683609436798,
+            "gripper": -0.16143707776261937
+          },
+          "limit_conflicts": [
+            {
+              "joint": "shoulder_lift",
+              "q_deg": -103.91208791208791,
+              "limits_deg": [
+                -100.00000275052231,
+                100.00000275052231
+              ],
+              "excess_deg": 3.912085161565599
+            }
+          ],
+          "world_T_forearm": [
+            [
+              -0.947245360706626,
+              -0.3113981656315717,
+              0.07587759261511509,
+              -0.04790556640767189
+            ],
+            [
+              0.07208250134401384,
+              0.023696456719425607,
+              0.9971171400286597,
+              -0.011729927614422937
+            ],
+            [
+              -0.3122984784141021,
+              0.949984031644867,
+              -5.551115123125783e-17,
+              0.2667131177839902
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_wrist": [
+            [
+              0.6580558726165321,
+              -0.7491362088791518,
+              0.0758775926151149,
+              0.0782585622903678
+            ],
+            [
+              -0.05007605768259682,
+              0.05700699525527175,
+              0.9971171400286596,
+              -0.021330635470789366
+            ],
+            [
+              -0.7513021076516841,
+              -0.6599584403870717,
+              1.3877787807814457e-17,
+              0.31378209948660585
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_gripper": [
+            [
+              -0.6599365377935131,
+              -0.05725999154104597,
+              -0.7491362088791513,
+              0.12540416907921764
+            ],
+            [
+              -0.15034919786451778,
+              0.9869880045843811,
+              0.05700699525527197,
+              -0.006765942646367732
+            ],
+            [
+              0.7361242318974455,
+              0.15025302717502187,
+              -0.6599584403870709,
+              0.35410556019425593
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_wrist": [
+            [
+              -0.3923194748680406,
+              0.91982902195966,
+              1.6406758161691295e-16,
+              -0.13490000000000002
+            ],
+            [
+              -0.9198290219596602,
+              -0.39231947486804064,
+              1.228552375319091e-16,
+              0.005199999999999982
+            ],
+            [
+              1.9836378628909436e-16,
+              -7.001318968233408e-17,
+              0.9999999999999999,
+              2.6020852139652106e-17
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_gripper": [
+            [
+              0.38439379998323625,
+              0.07846003374446364,
+              0.9198290219596593,
+              -0.19110155324173533
+            ],
+            [
+              0.9012465496515707,
+              0.1839567513857603,
+              -0.39231947486803986,
+              0.02917071991443726
+            ],
+            [
+              -0.19999015794679695,
+              0.9797979060624762,
+              1.7916687121441678e-16,
+              0.018100000000000036
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_wrist_z_heading_deg": -113.09890109890111
+        }
+      },
+      "wrist_relative_forearm_delta_deg": 14.241758241758253,
+      "world_gripper_rotation_magnitude_deg": 23.43735106737698,
+      "adopted_for_hardware": false,
+      "verified": false
+    },
+    {
+      "id": "D_negative_plus90",
+      "wrist_mapping": {
+        "sign": -1,
+        "offset_deg": 90
+      },
+      "all_other_arm_mappings": "positive sign, zero offset, degrees to radians; unverified",
+      "jaw_display_policy": "Unverified affine normalized 0\u2013100 to model min/max, for display only",
+      "states": {
+        "baseline": {
+          "qpos_rad": {
+            "shoulder_pan": 0.1035689885798833,
+            "shoulder_lift": -1.813608066687734,
+            "elbow_flex": 1.3364235415270866,
+            "wrist_flex": 0.6517174503600804,
+            "wrist_roll": -0.1526683609436798,
+            "gripper": -0.15750830109140518
+          },
+          "limit_conflicts": [
+            {
+              "joint": "shoulder_lift",
+              "q_deg": -103.91208791208791,
+              "limits_deg": [
+                -100.00000275052231,
+                100.00000275052231
+              ],
+              "excess_deg": 3.912085161565599
+            }
+          ],
+          "world_T_forearm": [
+            [
+              -0.8835316449107458,
+              -0.456818995981218,
+              0.10338393178836991,
+              -0.04819640720502806
+            ],
+            [
+              0.0918350712718442,
+              0.047482175987602016,
+              0.9946415246951918,
+              -0.0093301151102996
+            ],
+            [
+              -0.4592800367159514,
+              0.8882915331546242,
+              -5.551115123125783e-17,
+              0.2667131177839902
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_wrist": [
+            [
+              -0.17271768819517658,
+              -0.9795306849877088,
+              0.10338393178836969,
+              0.06861655291432923
+            ],
+            [
+              0.01795243135509267,
+              0.1018132975620718,
+              0.994641524695192,
+              -0.02147175890973583
+            ],
+            [
+              -0.9848077530122074,
+              0.17364817766692953,
+              1.1102230246251565e-16,
+              0.33328911070937606
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_gripper": [
+            [
+              0.14855266038606915,
+              0.13583719762910995,
+              -0.9795306849877075,
+              0.13033712693244776
+            ],
+            [
+              -0.2165082702746844,
+              0.9709573735969037,
+              0.101813297562072,
+              -0.00968953979379544
+            ],
+            [
+              0.964912574275453,
+              0.1969518580721414,
+              0.1736481776669299,
+              0.3226792070539266
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_wrist": [
+            [
+              0.6065527469308647,
+              0.79504324737125,
+              1.3311245625980434e-16,
+              -0.13490000000000002
+            ],
+            [
+              -0.7950432473712499,
+              0.6065527469308646,
+              2.5830267503934014e-16,
+              0.005199999999999927
+            ],
+            [
+              1.2685773478307372e-16,
+              -1.280663495279438e-16,
+              1.0000000000000002,
+              2.6020852139652106e-17
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_gripper": [
+            [
+              -0.5942991113593046,
+              -0.12130457966176734,
+              0.7950432473712487,
+              -0.1834771424143834
+            ],
+            [
+              0.7789817090034618,
+              0.15900082461631046,
+              0.6065527469308644,
+              -0.03186037283747595
+            ],
+            [
+              -0.19999015794679692,
+              0.9797979060624763,
+              2.039594648940539e-16,
+              0.01810000000000004
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_wrist_z_heading_deg": -52.659340659340685
+        },
+        "changed": {
+          "qpos_rad": {
+            "shoulder_pan": 0.07595059162524774,
+            "shoulder_lift": -1.813608066687734,
+            "elbow_flex": 1.4959965017094252,
+            "wrist_flex": 0.4031518777683604,
+            "wrist_roll": -0.1526683609436798,
+            "gripper": -0.16143707776261937
+          },
+          "limit_conflicts": [
+            {
+              "joint": "shoulder_lift",
+              "q_deg": -103.91208791208791,
+              "limits_deg": [
+                -100.00000275052231,
+                100.00000275052231
+              ],
+              "excess_deg": 3.912085161565599
+            }
+          ],
+          "world_T_forearm": [
+            [
+              -0.947245360706626,
+              -0.3113981656315717,
+              0.07587759261511509,
+              -0.04790556640767189
+            ],
+            [
+              0.07208250134401384,
+              0.023696456719425607,
+              0.9971171400286597,
+              -0.011729927614422937
+            ],
+            [
+              -0.3122984784141021,
+              0.949984031644867,
+              -5.551115123125783e-17,
+              0.2667131177839902
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_wrist": [
+            [
+              -0.08518973235068955,
+              -0.9934713385100504,
+              0.07587759261511484,
+              0.0782585622903678
+            ],
+            [
+              0.0064826804663196125,
+              0.0756001581680682,
+              0.9971171400286596,
+              -0.021330635470789366
+            ],
+            [
+              -0.9963436577587014,
+              0.08543603246880399,
+              0.0,
+              0.31378209948660585
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "world_T_gripper": [
+            [
+              0.06829394964350913,
+              0.09138181438961127,
+              -0.9934713385100493,
+              0.1403330454996655
+            ],
+            [
+              -0.20576533107236203,
+              0.9756768136087077,
+              0.07560015816806842,
+              -0.007901984900339592
+            ],
+            [
+              0.976215429590604,
+              0.1992589254844519,
+              0.08543603246880424,
+              0.30856195790276186
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_wrist": [
+            [
+              0.3923194748680398,
+              0.9198290219596602,
+              2.23912744864305e-16,
+              -0.13490000000000002
+            ],
+            [
+              -0.9198290219596604,
+              0.39231947486803986,
+              1.270187954796976e-16,
+              0.005199999999999982
+            ],
+            [
+              6.42736520000288e-18,
+              -2.285652856226251e-16,
+              0.9999999999999999,
+              2.6020852139652106e-17
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_T_gripper": [
+            [
+              -0.3843937999832359,
+              -0.0784600337444638,
+              0.919829021959659,
+              -0.19110155324173525
+            ],
+            [
+              0.9012465496515706,
+              0.18395675138576006,
+              0.39231947486803975,
+              -0.018770719914437323
+            ],
+            [
+              -0.19999015794679678,
+              0.9797979060624762,
+              7.610592264590271e-17,
+              0.018100000000000043
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "forearm_wrist_z_heading_deg": -66.90109890109895
+        }
+      },
+      "wrist_relative_forearm_delta_deg": -14.241758241758243,
+      "world_gripper_rotation_magnitude_deg": 5.338650108232236,
+      "adopted_for_hardware": false,
+      "verified": false
+    }
+  ],
+  "offset_candidates_rationale": "0 and illustrative +/-90-degree convention sensitivity; not fitted, exhaustive or adopted",
+  "gripper_display_delta_deg": -0.22510232191002977,
+  "jaw_policy_affects_forearm_T_wrist": false,
+  "views": {
+    "world": "Common lookat [0,0,0.30], distance .78, elevation -12, azimuth 0/90",
+    "local": "Rigid root transformation fixes lower_arm at [0,0,.35], identity orientation; upstream links hidden; same camera, elevation -90",
+    "fitted_to_photos": false
+  },
+  "limits_modified": false,
+  "values_clipped": false,
+  "dynamics_steps": 0,
+  "hardware_mapping_verified": false,
+  "gripper_conversion_verified": false,
+  "assessment": {
+    "strongest_supported_result": "Saved encoder wrist-flex delta is +14.241758 degrees. In this model, wrist-to-forearm rotation is +14.241758 for positive sign and -14.241758 for negative sign, independently of upstream changes and jaw display policy. These signed FK values are conditional predictions, not a measured physical angle.",
+    "qualitative_photo_review": {
+      "A_positive_zero": "Plausible folded-arm baseline: distal gripper projects away and below the wrist in side-view model render, broadly resembling supplied side photos. Not a fitted match or a verified mapping.",
+      "B_negative_zero": "Gripper projects predominantly upward under shared upstream/root assumptions; qualitatively less consistent with the downward-projecting distal assembly in supplied side photos. Conditional mismatch, not independently ruled out.",
+      "C_positive_minus90": "Also predominantly upward in model side view under shared assumptions; qualitatively less consistent. This illustrative offset is not fitted.",
+      "D_negative_plus90": "Distal assembly remains nearer horizontal in shared model side view; cannot select or reject rigorously from these differing perspectives."
+    },
+    "ruled_out_claims": [
+      "Only the wrist observation changed (elbow and pan also changed).",
+      "Every tested mapping satisfies all model limits (shoulder conflict in all eight states).",
+      "World gripper orientation change equals wrist-flex change (counterexamples 23.437351 versus 5.338650 degrees).",
+      "Relative endpoint change identifies wrist zero offset (constant offsets cancel)."
+    ],
+    "not_ruled_out": "Neither physical sign nor a unique zero offset is conclusively excluded or verified by this uncalibrated photo comparison. No candidate adopted.",
+    "remaining_ambiguity": [
+      "Other four arm signs and zeros remain assumed positive/zero; this is wrist sensitivity analysis, not a global mapping search.",
+      "Views are not fitted to camera intrinsics/extrinsics; front framing differs and side photos look from opposite sides.",
+      "New-photo mirroring and camera identity remain unknown; prior take confirmations do not apply automatically.",
+      "Gripper normalized-value conversion is unverified; affine model-range display is arbitrary.",
+      "Shoulder-lift zero/range conflict, root/table alignment and omitted camera/servos remain unresolved."
+    ],
+    "repeat_hardware_test_requested": false
+  },
+  "verification": {
+    "source_integrity_entries_passed": 23,
+    "capture_samples": {
+      "baseline": 50,
+      "changed": 50,
+      "earlier_alternative": 50
+    },
+    "shared_calibration_hash": "17db9518c585eec7fd5a28a436699c9824355e22816ccb9488d1ee6dc9682237",
+    "local_frame_identity_assertions": 8,
+    "signed_local_delta_assertions": 4,
+    "jaw_display_invariance_assertions": 8,
+    "finite_fk_assertions": 8,
+    "renders_visually_reviewed": true,
+    "dynamics_steps": 0,
+    "hardware_access": false
+  }
+}
