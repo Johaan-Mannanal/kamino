@@ -17,6 +17,7 @@ import {
 } from "./workflow";
 import { BackendSession, SessionCancelledError } from "./backend-session";
 import { UploadNavigation } from "./live-navigation";
+import { reviewPhoto, type CropRect } from "./photo-review";
 import {
   STATUS_LABEL,
   assemblyUrl,
@@ -56,7 +57,7 @@ const icon = (name: string, size = 16) =>
 const brand = () =>
   `<a class="brand" href="#home" aria-label="Kamino home">${icon("c76c7.svg", 22)}<span>Kamino</span></a>`;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-type Photo = { name: string; url: string; file?: File };
+type Photo = { name: string; url: string; file?: File; original?: File; crop?: CropRect; reviewed?: boolean };
 let photos: Photo[] = [];
 let draft = defaults();
 let revisions: Revision[] = [];
@@ -166,13 +167,17 @@ function mountResume(selector: string) {
 function upload() {
   app.innerHTML = `${header("Untitled asset")}${steps("upload")}<main class="upload-content"><p class="eyebrow">CREATE AN ASSET / NEW DRAFT</p><h1>Upload photos</h1><p class="muted">Add a few views of the same object. You’ll review its geometry and properties next.</p><div id="drop-zone" class="drop-zone">${icon("0e7df.svg", 28)}<strong>Drop photos here</strong><span class="muted">1–4 JPEG, PNG or WebP images · Up to 10 MiB each</span><button id="choose" class="secondary">Choose photos</button><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden></div><p id="upload-error" class="error" role="alert"></p><div class="selection-heading"><strong>Selected photos <span id="photo-count"></span></strong><button class="text-button accent" id="sample-photos">Use demo photos</button></div><div id="photo-list"></div><div class="upload-actions"><a class="quiet" href="#home">← Back to start</a><button id="create-mesh" class="primary">${icon("0f26a.svg")}Create mesh</button></div><p class="prototype-note" id="upload-note"></p><p class="live-upload-links small"><button class="text-button" id="access-token" type="button">Application access token</button><a class="text-button" href="${esc(assemblyUrl())}">Assembly workflow ↗</a></p></main>`;
   mountResume(".live-upload-links");
+  const guidance = document.createElement("p");
+  guidance.className = "photo-capture-guide small";
+  guidance.textContent = "Before creating a mesh, review each photo’s framing. Keep the full object and all protrusions; exclude nearby objects. Include distinct views of important faces such as ports. Hidden surfaces may be invented, and cropping does not guarantee accurate geometry.";
+  $("#photo-list").before(guidance);
   const draw = () => {
     const demo = photos.length > 0 && photos.some((p) => !p.file);
     $("#photo-count").textContent = `· ${photos.length} of 4`;
     $<HTMLButtonElement>("#create-mesh").disabled =
-      !photos.length || uploads.pending || checkingAccess;
-    $<HTMLButtonElement>("#choose").disabled = uploads.pending;
-    $<HTMLButtonElement>("#sample-photos").disabled = uploads.pending;
+      !photos.length || uploads.pending || checkingAccess || (!demo && photos.some(p => !p.reviewed));
+    $<HTMLButtonElement>("#choose").disabled = uploads.pending || checkingAccess;
+    $<HTMLButtonElement>("#sample-photos").disabled = uploads.pending || checkingAccess;
     if (uploads.pending)
       $("#create-mesh").lastChild!.textContent = "Uploading…";
     $("#upload-note").textContent = demo
@@ -184,21 +189,35 @@ function upload() {
     $("#photo-list").innerHTML = photos
       .map(
         (p, i) =>
-          `<div class="photo-row"><img src="${p.url}" alt="Selected object photo ${i + 1}"><div><strong>${esc(p.name)}</strong><small>${p.file ? "Local photo" : "Demo photo"}</small></div><button class="text-button" data-remove="${i}" aria-label="Remove ${esc(p.name)}">Remove ×</button></div>`,
+          `<div class="photo-row"><img src="${p.url}" alt="${p.reviewed ? "Image to submit" : "Original photo"} ${i + 1}"><div><strong>${esc(p.name)}</strong><small>${p.file ? (p.reviewed ? (p.file === p.original ? "Reviewed · Full original photo" : "Reviewed crop · Original kept in this tab") : "Review framing before creating mesh") : "Demo photo"}</small></div>${p.file ? `<button class="secondary compact" data-review="${i}" ${uploads.pending || checkingAccess ? "disabled" : ""}>${p.reviewed ? "Edit framing" : "Review framing"}</button>` : ""}<button class="text-button" data-remove="${i}" aria-label="Remove ${esc(p.name)}" ${uploads.pending || checkingAccess ? "disabled" : ""}>Remove ×</button></div>`,
       )
       .join("");
     app.querySelectorAll<HTMLButtonElement>("[data-remove]").forEach(
       (b) =>
         (b.onclick = () => {
-          if (uploads.pending) return;
+          if (uploads.pending || checkingAccess) return;
           const p = photos.splice(Number(b.dataset.remove), 1)[0];
           if (p.file) URL.revokeObjectURL(p.url);
           draw();
         }),
     );
+    app.querySelectorAll<HTMLButtonElement>("[data-review]").forEach(b => {
+      b.onclick = async () => {
+        if (uploads.pending || checkingAccess) return;
+        const photo = photos[Number(b.dataset.review)];
+        const token = navToken;
+        const result = await reviewPhoto(photo.original ?? photo.file!, photo.crop);
+        if (!result || token !== navToken || !photos.includes(photo)) return;
+        URL.revokeObjectURL(photo.url);
+        photo.original ??= photo.file;
+        photo.file = result.file; photo.crop = result.crop; photo.reviewed = true;
+        photo.url = URL.createObjectURL(result.file);
+        draw();
+      };
+    });
   };
   const add = (files: File[]) => {
-    if (uploads.pending) return;
+    if (uploads.pending || checkingAccess) return;
     if (!files.length) return;
     // Real photos replace demo photos so a real upload never mixes in demo art.
     const own = photos.filter((p) => p.file);
@@ -209,6 +228,8 @@ function upload() {
     photos.push(
       ...files.map((file) => ({
         file,
+        original: file,
+        reviewed: false,
         name: file.name,
         url: URL.createObjectURL(file),
       })),
@@ -221,7 +242,7 @@ function upload() {
     $<HTMLInputElement>("#photo-input").value = "";
   });
   $("#sample-photos").onclick = () => {
-    if (uploads.pending) return;
+    if (uploads.pending || checkingAccess) return;
     photos.forEach((p) => {
       if (p.file) URL.revokeObjectURL(p.url);
     });
@@ -287,6 +308,10 @@ function upload() {
       prepared.clear();
       meshIdentity++;
       route("creating");
+      return;
+    }
+    if (photos.some(p => !p.reviewed)) {
+      $("#upload-error").textContent = "Review every photo’s framing before creating the mesh.";
       return;
     }
     const token = navToken;
@@ -452,7 +477,7 @@ const field = (
 function workspace() {
   if (!photos.length) photos = demoPhotos();
   if (!revisions.length) revisions = [saveRevision(draft, [], meshIdentity)];
-  app.innerHTML = `${header(customMesh ? "Local mesh" : "Ceramic mug demo", true)}${steps("workspace")}<main class="workspace"><aside class="sources"><div class="section-line"><strong>Source photos</strong><span class="muted">${photos.length}/4</span></div>${photos.map((p, i) => `<button class="source-photo" data-photo="${i}"><img src="${p.url}" alt="Source view ${i + 1}"><span>${esc(p.file ? `View ${i + 1}` : p.name)}</span></button>`).join("")}<a class="secondary add-photos" href="#upload">${icon("49255.svg", 13)}Edit photos</a><p class="source-note">${customMesh ? "Local GLB" : "Procedural demo mesh"}<br>Photos not reconstructed<br>Y-up · millimetres</p></aside><section class="workspace-center"><div class="viewport"><div class="viewport-toolbar"><div class="segmented" role="group" aria-label="Viewport mode"><button class="selected" data-view="studio">Studio</button><button data-view="mesh">Mesh</button><button data-view="collision">Collision</button></div><div class="viewer-actions"><button class="secondary compact" id="replace-mesh">Replace mesh</button><input type="file" id="mesh-file" accept=".glb" hidden><button class="square" id="fullscreen" aria-label="Toggle fullscreen">${icon("28ea9.svg")}</button><button class="square" id="reset-camera" aria-label="Reset camera">${icon("f8f8a.svg")}</button></div></div><div class="viewport-label"><span>${customMesh ? "Local mesh" : "Ceramic mug"} / Perspective</span><span class="badge">${customMesh ? "Local GLB" : "Demo mesh"}</span><small id="preview-state">Saved</small></div><div id="viewer" class="viewer"></div><div class="viewport-help"><span>Drag to orbit · Shift to pan · Scroll to zoom</span><span>X → &nbsp;Y ↑ &nbsp;Z ↗ · Y-up</span></div></div></section><aside class="inspector"><div class="section-line"><h2>Physical properties</h2>${icon("66491.svg")}</div><p class="muted small">Manual editing</p><form id="properties"><section class="property-section"><h3>Orientation <span>Y-up</span></h3><div class="field-grid three">${draft.rotation.map((v, i) => field(["X", "Y", "Z"][i], `rotation${i}`, v, "°", -180, 180)).join("")}</div><button type="button" class="text-button" id="align">${icon("6ade8.svg", 14)}Align base to ground</button></section><section class="property-section"><h3>Sizing <span>Uniform scale</span></h3><div class="field-grid two">${field("Known length", "length", draft.length, "mm", 0.001, 100000)}<label class="property-field"><span>Axis</span><select name="axis" aria-label="Reference axis">${["x", "y", "z"].map((a) => `<option value="${a}" ${a === draft.axis ? "selected" : ""}>${a.toUpperCase()} · full extent</option>`).join("")}</select></label></div><div class="field-grid three dimensions">${["Width", "Height", "Depth"].map((l, i) => field(`${["X", "Y", "Z"][i]} · ${l}`, `dimension${i}`, [120, 100, 90][i], "mm", undefined, undefined, true)).join("")}</div><p class="muted small">${icon("fd1ec.svg", 13)}Preserve proportions · On</p><p class="muted tiny">Known length represents the full selected extent, including protrusions. Rotation updates that extent.</p></section><section class="property-section"><h3>Dynamics <span>Draft · Editable</span></h3><div class="field-grid two">${field("Mass", "mass", draft.mass, "kg", 0.001)}${field("Friction", "friction", draft.friction ?? "", "μ", 0)}</div><p class="muted tiny">Leave friction blank if unknown.</p></section><details class="suggestions"><summary>${icon("a4dc8.svg", 15)}Demo suggestions</summary><p class="muted small">Sample values · Not applied · No AI call</p><div class="section-line small"><span>Mass 0.32 kg</span><span>Friction 0.45 μ</span></div><button class="secondary compact" type="button" id="apply-suggestion">Apply to draft</button></details><p id="form-error" class="error" role="alert"></p><div class="save-row"><span class="muted small" id="save-status"></span><button class="primary compact" id="save" type="submit">Apply changes</button></div></form><p class="prototype-note">Frontend prototype. Preview and export are functional. Reconstruction and simulation validation are not run.</p></aside></main>`;
+  app.innerHTML = `${header(customMesh ? "Local mesh" : "Ceramic mug demo", true)}${steps("workspace")}<main class="workspace"><aside class="sources"><div class="section-line"><strong>Source photos</strong><span class="muted">${photos.length}/4</span></div>${photos.map((p, i) => `<button class="source-photo" data-photo="${i}"><img src="${p.url}" alt="Source view ${i + 1}"><span>${esc(p.file ? `View ${i + 1}` : p.name)}</span></button>`).join("")}<a class="secondary add-photos" href="#upload">${icon("49255.svg", 13)}Edit photos</a><p class="source-note">${customMesh ? "Local GLB" : "Procedural demo mesh"}<br>Photos not reconstructed<br>Y-up · millimetres</p></aside><section class="workspace-center"><div class="viewport"><div class="viewport-toolbar"><div class="segmented" role="group" aria-label="Viewport mode"><button class="selected" data-view="studio">Studio</button><button data-view="mesh">Mesh</button><button data-view="collision">Collision</button></div><div class="viewer-actions"><button class="secondary compact" id="replace-mesh">Replace mesh</button><input type="file" id="mesh-file" accept=".glb" hidden><button class="square" id="fullscreen" aria-label="Toggle fullscreen">${icon("28ea9.svg")}</button><button class="square" id="reset-camera" aria-label="Reset camera">${icon("f8f8a.svg")}</button></div></div><div class="viewport-label"><span>${customMesh ? "Local mesh" : "Ceramic mug"} / Perspective</span><span class="badge">${customMesh ? "Local GLB" : "Demo mesh"}</span><small id="preview-state">Applied preview · Session only</small></div><div id="viewer" class="viewer"></div><div class="viewport-help"><span>Drag to orbit · Shift to pan · Scroll to zoom</span><span>X → &nbsp;Y ↑ &nbsp;Z ↗ · Y-up</span></div></div></section><aside class="inspector"><div class="section-line"><h2>Physical properties</h2>${icon("66491.svg")}</div><p class="muted small">Manual editing</p><form id="properties"><section class="property-section"><h3>Orientation <span>Y-up</span></h3><div class="field-grid three">${draft.rotation.map((v, i) => field(["X", "Y", "Z"][i], `rotation${i}`, v, "°", -180, 180)).join("")}</div><button type="button" class="text-button" id="align">${icon("6ade8.svg", 14)}Align base to ground</button></section><section class="property-section"><h3>Sizing <span>Uniform scale</span></h3><div class="field-grid two">${field("Known length", "length", draft.length, "mm", 0.001, 100000)}<label class="property-field"><span>Axis</span><select name="axis" aria-label="Reference axis">${["x", "y", "z"].map((a) => `<option value="${a}" ${a === draft.axis ? "selected" : ""}>${a.toUpperCase()} · full extent</option>`).join("")}</select></label></div><div class="field-grid three dimensions">${["Width", "Height", "Depth"].map((l, i) => field(`${["X", "Y", "Z"][i]} · ${l}`, `dimension${i}`, [120, 100, 90][i], "mm", undefined, undefined, true)).join("")}</div><p class="muted small">${icon("fd1ec.svg", 13)}Preserve proportions · On</p><p class="muted tiny">Known length represents the full selected extent, including protrusions. Rotation updates that extent.</p></section><section class="property-section"><h3>Dynamics <span>Draft · Editable</span></h3><div class="field-grid two">${field("Mass", "mass", draft.mass, "kg", 0.001)}${field("Friction", "friction", draft.friction ?? "", "μ", 0)}</div><p class="muted tiny">Leave friction blank if unknown.</p></section><details class="suggestions"><summary>${icon("a4dc8.svg", 15)}Demo suggestions</summary><p class="muted small">Sample values · Not applied · No AI call</p><div class="section-line small"><span>Mass 0.32 kg</span><span>Friction 0.45 μ</span></div><button class="secondary compact" type="button" id="apply-suggestion">Apply to draft</button></details><p id="form-error" class="error" role="alert"></p><div class="save-row"><span class="muted small" id="save-status"></span><button class="primary compact" id="save" type="submit">Apply changes</button></div></form><p class="prototype-note">Session-only demo: refreshing resets changes and exports. Download your export before leaving. Reconstruction and simulation validation are not run.</p></aside></main>`;
   viewer = mount($("#viewer"));
   const canvas = $("#viewer canvas");
   if (canvas) {
@@ -479,13 +504,13 @@ function workspace() {
         $<HTMLInputElement>(`[name="dimension${i}"]`).value = v.toFixed(1);
       });
     }
-    $("#save-status").textContent = dirty() ? "Unsaved changes" : "Saved";
+    $("#save-status").textContent = dirty() ? "Unapplied changes" : "Applied for this session";
     $("#saved-state").textContent = dirty()
-      ? "Draft / Unsaved changes"
-      : "Saved";
+      ? "Draft / Unapplied changes"
+      : "Applied for this session";
     $("#preview-state").textContent = dirty()
-      ? "Scale preview · Unsaved"
-      : "Saved preview";
+      ? "Scale preview · Unapplied"
+      : "Applied preview · Session only";
     $<HTMLButtonElement>("#save").disabled = !!error || !dirty();
     $<HTMLButtonElement>("#prepare").disabled =
       !!error || dirty() || !viewer || busy;
@@ -544,7 +569,7 @@ function workspace() {
     if (error) return;
     revisions.push(saveRevision(draft, revisions, meshIdentity));
     update();
-    toast("Changes saved.");
+    toast("Changes applied for this session. Refresh resets the demo.");
   });
   $("#align").onclick = () => {
     draft.rotation = [0, 0, 0];
@@ -555,7 +580,7 @@ function workspace() {
     draft.mass = 0.32;
     draft.friction = 0.45;
     setForm();
-    toast("Demo values copied to draft. Save to keep them.");
+    toast("Demo values copied to draft. Apply changes to use them this session.");
   };
   $("#reset-camera").onclick = () => viewer?.resetCamera();
   $("#fullscreen").onclick = async () => {

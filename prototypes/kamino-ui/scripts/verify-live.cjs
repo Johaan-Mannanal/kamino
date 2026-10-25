@@ -144,6 +144,12 @@ async function main() {
   try {
     await page.goto(`${base}/#upload`);
     await page.locator('#photo-input').setInputFiles(path.join(root, 'frontend/fixtures/synthetic-test.png'));
+    assert(await page.locator('#create-mesh').isDisabled());
+    await page.getByRole('button', { name: 'Review framing', exact: true }).click();
+    await page.waitForFunction(() => Number(document.querySelector('[name="width"]')?.value) > 0);
+    await page.locator('[name="confirmed"]').check();
+    await page.getByRole('button', { name: 'Use this framing' }).click();
+    await page.waitForSelector('dialog', { state: 'detached' });
     await page.locator('#create-mesh').click();
     await grantToken();
     assert.equal(await page.locator('.photo-row').count(), 1);
