@@ -12,4 +12,4 @@ if [ "$(id -u)" = 0 ]; then
     exec gosu app "$0" "$@"
 fi
 test -w "$PHOTO2SIM_DATA_DIR" || { echo 'Job storage is not writable' >&2; exit 1; }
-exec python -m uvicorn photo2sim.api.app:create_app --factory --host :: --port "${PORT:-8000}" --workers 1
+exec python -m uvicorn photo2sim.api.app:create_app --factory --host 0.0.0.0 --port "${PORT:-8000}" --workers 1
