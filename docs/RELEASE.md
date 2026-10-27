@@ -1,5 +1,41 @@
 # Public release and evidence index
 
+## Experimental preview — October 27, 2026
+
+The first tagged GitHub prerelease is `v0.1.0-preview.1`. Its
+[release record](releases/experimental-preview.md) describes the curated synthetic
+example, original Apache-2.0 material, third-party boundaries and known limits.
+The application source is
+[`a7dff7f`](https://github.com/Johaan-Mannanal/kamino/commit/a7dff7f86f75c2251e3d27e5300d1bcf3c0a66b2);
+the tag also includes publication documentation. No local uncommitted work is
+included in the release.
+
+[Exact-application-commit CI](https://github.com/Johaan-Mannanal/kamino/actions/runs/40511013407)
+passed: 501 backend tests (2 optional skips), 150 shared frontend tests, 164 Workspace
+tests, both builds/typechecks, 12 combined-site browser checks, Ruff and both container
+builds with the mock pipeline/persistence check. Vite's existing large-chunk warnings
+and the Starlette/httpx deprecation warning remain.
+
+| Current component | Production Railway deployment |
+| --- | --- |
+| Frontend (`a7dff7f`) | `38285ecd-50e3-48b8-b630-5fd63dda8c21` |
+| Backend (`a7dff7f`) | `4618a9d8-5d51-4a02-96e4-1c4a489d878a` |
+
+Staging and production each passed 18 hosted checks, including public student
+sessions, origin checks, unchanged quotas, license files and the original example
+download. A live browser confirmed automatic student access. These checks created
+no generation jobs and made no provider requests. The public site now grants student
+access automatically; judge/team codes remain separate. See [access details](HOSTED_ACCESS.md).
+
+The historical desktop-to-phone assembly canvas overflow below was fixed in the
+release-readiness follow-up and is covered by the current browser checks. A passing
+synthetic simulation or browser check still does not establish physical accuracy.
+
+## October 25 application release — historical record
+
+The sections below preserve the earlier release's source, deployments and results.
+Use the October 27 identities above for the current hosted application.
+
 Application release: October 25, 2026. The advanced-physics baseline is
 [`410e88ac6c3e39ec5ab7a176593670d5b5fb7416`](https://github.com/Johaan-Mannanal/kamino/commit/410e88ac6c3e39ec5ab7a176593670d5b5fb7416).
 Public `main` includes this release; later documentation commits do not redeploy

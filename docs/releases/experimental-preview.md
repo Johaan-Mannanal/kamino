@@ -1,52 +1,72 @@
-# Experimental release preparation
+# Experimental preview — v0.1.0-preview.1
 
-Status: **prepared for review**. Original Kamino material is licensed under
-[Apache-2.0](../../LICENSE); publication still requires applicable
-[third-party permissions](../THIRD_PARTY.md) for every included asset.
+This first GitHub prerelease packages a small, reproducible example of Kamino's
+assembly/export workflow. It accompanies the current photo workspace and guided
+component-mesh assembly tools. Original Kamino code, documentation and synthetic
+examples use [Apache-2.0](../../LICENSE); [NOTICE](../../NOTICE) and
+[third-party terms](../THIRD_PARTY.md) remain part of redistribution.
 
-## Scope
+## Source and verification
 
-Photo reconstruction/review/export, saved correction history, and guided
-component-mesh assemblies. The separate SO-101 prototype demonstrates trajectory
-transfer with human iteration. Precise calibration and contact-rich manipulation
-remain ongoing work. No new robot commands or provider calls are part of this pass.
-
-## Example asset
-
-Reuse `examples/assemblies/hinged-panel/simulation.zip` unchanged, with its
-`SHA256SUMS`, [guide](../COMPLETE_EXAMPLE.md), assumptions and retained reports.
-Its synthetic inputs demonstrate assembly/export, not photo reconstruction.
-
-## Tested setup and checks
-
-Use [QUICKSTART.md](../QUICKSTART.md) and `constraints/macos-intel-py313.txt`.
-Fresh verification on Intel macOS / Python 3.13.7 / MuJoCo 3.3.7:
+The application source is
+[`a7dff7f`](https://github.com/Johaan-Mannanal/kamino/commit/a7dff7f86f75c2251e3d27e5300d1bcf3c0a66b2).
+The release tag also includes the accompanying publication documentation.
+[CI on that application commit](https://github.com/Johaan-Mannanal/kamino/actions/runs/40511013407)
+passed all four jobs:
 
 | Check | Result |
 | --- | --- |
-| Second clean install using constraints | Dependency versions matched exactly |
-| Full backend suite in that environment | 492 passed, 2 skipped; existing Starlette/httpx deprecation warning |
-| Shared frontend / Workspace | 143 / 163 passed; both typechecks and production builds passed |
-| Focused assembled-site browser checks | 10 passed, including both local Vite apps' example pages/downloads, 320/390px entry and desktop-to-phone canvas resize |
-| Example | Actual extracted ZIP passed motion and relocation checks |
+| Backend | 501 passed, 2 optional skips; existing Starlette/httpx deprecation warning |
+| Shared frontend / Workspace | 150 / 164 passed; both typechecks and production builds passed |
+| Combined-site browser acceptance | 12 passed, including automatic student access, saved-job links, judge upgrade, Assembly, mobile layout, downloads and shipped license files |
+| Containers | Both image builds and mock pipeline/persistence checks passed |
 | Python lint/format | Ruff passed |
 
-The original example ZIP remains byte-identical, SHA-256
-`53eeea937514a491d33bd9b98ec5ffb8cc5419cc9b46791b8c9b1cad5fa913eb`.
-Both builds retain Vite's existing large-chunk warning. Browser checks use a local
-fixture API, no provider calls and no hardware. CI now runs the focused site checks;
-its remote result is separate from the local results above. Earlier release
-counts remain in [RELEASE.md](../RELEASE.md) with their original scope.
+Staging and production each passed 18 hosted checks for sessions, origin checks,
+unchanged student limits, license files, the example and Assembly. The public
+site's upload page was also checked in a browser. These acceptance checks created
+no generation jobs or provider requests. Runtime/deployment identities are in
+[the release index](../RELEASE.md).
 
-## Known limits and maintenance
+## Attached example
+
+The curated synthetic-example download includes the unchanged hinged-panel
+`simulation.zip`, generated box inputs, reviewed project, assumptions and selected
+validation reports, plus LICENSE and NOTICE. A fresh headless check passed for
+both its original location and a relocated copy with MuJoCo 3.3.7 / NumPy 2.5.4.
+The verification receipt records its scope; no native-viewer or physical-hardware
+acceptance is claimed.
+
+The nested `simulation.zip` remains byte-identical, SHA-256
+`53eeea937514a491d33bd9b98ec5ffb8cc5419cc9b46791b8c9b1cad5fa913eb`.
+The attached `SHA256SUMS` covers the release downloads. See
+[the complete example](../COMPLETE_EXAMPLE.md) and [tested local setup](../QUICKSTART.md).
+
+Only original synthetic material is selected for the additional release assets.
+No provider-generated models, supplied CAD, photos, recordings, design/media,
+dependencies or private backups are added to those downloads. GitHub's automatic
+source archives contain the full tagged repository; they retain the separate
+licenses and unresolved redistribution questions in the [inventory](../THIRD_PARTY.md).
+They are not a blanket rights clearance for every repository asset.
+
+## Hosted access and limits
+
+The public site provides student access automatically. Its 30-minute sessions
+share a rolling allowance of 2 mesh submissions, 10 Gemini requests and 10
+simulation submissions per 24 hours, with existing cooldowns. Judge and team
+access use codes. The [offline example](../COMPLETE_EXAMPLE.md) is independent of
+hosted access; [photo handling and shared access](../HOSTED_ACCESS.md) are documented.
+
+## Known limits
 
 - Experimental project; no SLA or guaranteed support cadence.
-- Hosted reconstruction requires a team-issued code; offline example is independent.
-- Reconstruction can invent shape or surroundings; properties and collision/inertia may be approximate.
-- Browser mobile checks use Chromium emulation, not native-device certification.
-- Local checks and a PR do not imply a staging or production deployment.
+- Reconstruction can invent shape or surroundings. Physical properties,
+  collision geometry and inertia may be approximate and need review.
+- The example uses synthetic inputs and assumptions, rather than photographs or
+  measured real-world dynamics.
+- Browser mobile checks use Chromium emulation, rather than native-device certification.
+- The separate SO-101 prototype demonstrates leader-recorded motion previewed and
+  adjusted in MuJoCo, exported and executed on the follower arm with iteration.
+  Precise calibration and contact-rich manipulation remain ongoing work.
 
-Tag the reviewed merge commit, attach the example/checksum, include these limitations
-and actual verification receipts, and publish the experimental GitHub release. Include
-the root LICENSE and NOTICE and preserve applicable third-party notices. Do not tag a
-different source while reusing old results.
+Earlier results remain in [RELEASE.md](../RELEASE.md) with their original scope.
