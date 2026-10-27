@@ -1,4 +1,5 @@
 import type { ReviewProject, ReviewPackage } from './assembly-review'
+import { fetchWithBrowserAccess } from './access'
 
 export type AssemblyAttempt = {
   mapping_review_path?: string | null
@@ -41,7 +42,7 @@ export function setAssemblyToken(value: string) {
 async function request(path: string, init?: RequestInit): Promise<Response> {
   let response: Response
   try {
-    response = await fetch(base + path, {
+    response = await fetchWithBrowserAccess(base + path, {
       ...init,
       credentials: 'include',
       headers: {

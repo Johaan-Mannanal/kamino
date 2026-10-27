@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from "vitest";
-import { ApiError, type Api } from "../../../frontend/src/api";
+import { ApiError, liveApi, type Api } from "../../../frontend/src/api";
 import type {
   Job,
   Properties,
@@ -74,6 +74,7 @@ afterEach(() => {
   sessions.splice(0).forEach((s) => s.dispose());
   document.body.replaceChildren();
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
   sessionStorage.clear();
 });
 function mounted(current: Job = base) {
@@ -321,6 +322,36 @@ it("labels a saved full-source job without requesting target review", async () =
     "Draft · Unsaved changes",
   );
   expect(api.geometry).not.toHaveBeenCalled();
+});
+
+it("saves the visible workspace draft after session expiry without navigation or duplicate saves", async () => {
+  const { host, api, state } = mounted();
+  api.save = liveApi.save;
+  let active = false;
+  let renewals = 0;
+  let acceptedSaves = 0;
+  vi.stubGlobal("fetch", vi.fn(async (url: string, init: RequestInit) => {
+    const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status });
+    if (url.endsWith("/session")) {
+      if (init.method === "POST") { active = true; renewals++; }
+      return json({ required: true, authenticated: active, public_student_access: true });
+    }
+    if (!active) return json({ detail: "Application access token required" }, 401);
+    expect(url).toContain(`/jobs/${id}/properties`);
+    acceptedSaves++;
+    return json({ ...base, properties: JSON.parse(init.body as string), input_revision: 2 });
+  }));
+  readyDraft(host);
+  host.querySelector<HTMLButtonElement>("#live-save")!.click();
+  await vi.waitFor(() => expect(host.querySelector("#live-save-status")!.textContent).toBe("Saved"));
+  expect(state.dirty).toBe(false);
+  expect(state.job?.properties?.mass_kg.value).toBe(0.2);
+  expect(host.querySelector<HTMLInputElement>('[name="mass"]')!.value).toBe("0.2");
+  expect(host.querySelector<HTMLInputElement>('[name="description"]')!.value).toBe("Full reconstructed extent, all pieces");
+  expect(document.querySelector("dialog")).toBeNull();
+  expect(renewals).toBe(1);
+  expect(acceptedSaves).toBe(1);
+  expect(api.process).not.toHaveBeenCalled();
 });
 
 it("asks only for full-extent sizing after a whole-source orientation save", async () => {

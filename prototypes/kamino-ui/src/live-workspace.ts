@@ -609,8 +609,7 @@ export function mountLiveWorkspace(
       prompting = true;
       const accepted = await promptForToken(
         session,
-        "The API requires an application token. Your draft is kept; repeat your last action afterwards.",
-        true,
+        "Browser access could not be renewed. Your draft is kept. Sign in here, then repeat your last action.",
       );
       prompting = false;
       // Only the job status is re-read; no save, provider or processing request is retried.
@@ -618,7 +617,7 @@ export function mountLiveWorkspace(
         session
           .refresh()
           .then(retryArtifacts)
-          .catch((refreshError) => void handleError(refreshError));
+          .catch((refreshError) => toast(describeError(refreshError)));
       }
       return;
     }

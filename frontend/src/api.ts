@@ -1,4 +1,5 @@
 import type { TargetInventory, TargetReviewRequest } from './target-review'
+import { fetchWithBrowserAccess } from './access'
 import type {
   Job,
   Orientation,
@@ -93,7 +94,7 @@ const fileUrl = (id: string, path: string) =>
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response
   try {
-    response = await fetch(`${base}${path}`, {
+    response = await fetchWithBrowserAccess(`${base}${path}`, {
       ...init,
       credentials: 'include',
       headers: {
@@ -199,7 +200,7 @@ export const liveApi: Api = {
   async file(id, path) {
     let response: Response
     try {
-      response = await fetch(fileUrl(id, path), {
+      response = await fetchWithBrowserAccess(fileUrl(id, path), {
         credentials: 'include',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })

@@ -34,6 +34,13 @@ receive a 30-minute student cookie. Existing judge/team sessions are preserved;
 explicit invalid credentials are rejected. Both web interfaces request this
 session automatically. This spends no provider credits by itself.
 
+Workspace and Assembly requests also renew expired public browser access in place.
+Only the API's explicit pre-admission access rejection is retried, once, after the
+session endpoint confirms authentication. Concurrent requests share renewal; drafts
+stay in the current workspace. Explicit credentials, provider errors, quota failures
+and ambiguous network failures are never automatically retried. If renewal is
+unavailable, Workspace keeps its draft and offers code entry without navigation.
+
 All public visitors and student-code users share the same student allowance below.
 Session renewal, a new browser, logout and server restart do not reset it. Public
 student access can be disabled by setting the flag to `false` and redeploying;

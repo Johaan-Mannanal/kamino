@@ -74,3 +74,23 @@ export const browserAccess = {
     return request('DELETE')
   },
 }
+
+/** Retry only a rejection by our access middleware, before admission or provider work.
+ * Callers supply replayable JSON/FormData bodies. Never retry ambiguous transport or
+ * provider failures, or replace an explicitly supplied application credential.
+ */
+export async function fetchWithBrowserAccess(url: string, init: RequestInit): Promise<Response> {
+  const response = await fetch(url, init)
+  if (response.status !== 401 || new Headers(init.headers).has('Authorization')) return response
+  try {
+    const body = await response.clone().json()
+    if (body?.detail !== 'Application access token required') return response
+    const status = await browserAccess.status()
+    if (!status.authenticated || init.signal?.aborted) return response
+  } catch {
+    // Preserve the original 401 so the workspace can offer in-place code entry.
+    return response
+  }
+  // Deliberately not recursive: one rejected request gets at most one retry.
+  return fetch(url, init)
+}
