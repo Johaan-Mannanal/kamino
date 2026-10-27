@@ -5,11 +5,12 @@ No new reconstruction is needed to change the sizing of an existing job.
 
 1. Open the saved job; review the original mesh and labeled XYZ axes. Save the
    intended rotation first. Rotation follows fixed X, then Y, then Z.
-2. Inspect the surface-island preview and source photos. Explicitly select every
-   surface belonging to the target (multiple allowed), exclude distractors, record
-   the review and save it. A new selection starts empty. Fused or unfaithful
-   geometry remains unresolved; selection performs no reconstruction repair.
-3. Choose **Uniform: preserve proportions**. Select the corresponding **full
+2. Compare the source photos with the **entire reconstruction**. The current
+   hosted Workspace includes every reconstructed surface and has no island-selection
+   panel. Distractors, fused objects and unfaithful shape remain in the export;
+   uniform sizing cannot repair them. Selected-target review remains available
+   through the API for compatible clients (see below).
+3. The hosted Workspace uses **uniform sizing**. Select the corresponding **full
    mesh extent**, enter one length in millimetres or metres, record its source,
    and describe exactly what it includes. Confirm the correspondence explicitly.
 4. A body-only measurement cannot be assigned to an extent that also includes
@@ -30,12 +31,14 @@ verification of geometry or physical accuracy.
 
 ## Advanced stretching and old jobs
 
-**Advanced: stretch each axis** requires a separate acknowledgement and three
-full dimensions. It may distort proportions. Existing pre-upgrade jobs without
-sizing metadata retain **Legacy three-axis sizing**, so reopening/reprocessing
-does not silently change their sizing behavior. New attempts still require explicit
-target review and re-bound reference correspondence; existing ZIPs remain accessible. Once a legacy job chooses explicit sizing,
-it cannot drop the metadata to silently return to legacy stretching.
+The API retains `independent_axes` sizing with explicit distortion acknowledgement
+and three full dimensions, plus legacy three-axis compatibility where previously
+allowed. Those API modes can distort proportions. The current hosted Workspace
+edits uniform sizing only: it identifies saved stretched/legacy properties and
+requires a reviewed full-extent reference before replacing them with whole-source
+uniform sizing. Existing ZIPs remain accessible; old geometry is not rewritten.
+Once a legacy job chooses explicit sizing, it cannot drop that metadata to return
+silently to legacy stretching.
 
 ## Correcting a completed result
 
@@ -63,6 +66,7 @@ simulation can be retried after restoring storage. Prior exports remain intact.
 
 ```json
 {
+  "geometry_scope": "whole_reconstruction",
   "sizing": {
     "mode": "uniform",
     "reviewed_orientation": {"x_deg": 0, "y_deg": 0, "z_deg": 0},
@@ -79,14 +83,21 @@ simulation can be retried after restoring storage. Prior exports remain intact.
 }
 ```
 
-First GET `/api/jobs/{id}/geometry?preview=true`, save the explicit review via
-PATCH `/geometry-review` (source hash, island IDs, saved orientation, note,
-acknowledgement and expected input revision), and add its
-`geometry_context_sha256` to this example. POST to `/api/jobs/{id}/sizing-preview`. Save the returned `dimensions_m`
-alongside the same context hash, `sizing`, mass and friction to PATCH `/properties`.
-The backend computes uniform dimensions authoritatively rather than trusting
-stale submitted estimates. POST `/process` separately. All routes use the usual
-application Bearer token when configured.
+This example matches the current whole-reconstruction workflow. POST it to
+`/api/jobs/{id}/sizing-preview`. Save the returned `dimensions_m`,
+`source_mesh_sha256` and `geometry_context_sha256` alongside the same
+`geometry_scope`, `sizing`, mass and friction to PATCH `/properties`. Orientation
+must already be saved on the job. The backend computes uniform dimensions
+rather than trusting stale submitted estimates. POST `/process` separately.
+Browser clients use signed sessions; scripts may use an application Bearer code.
+
+For the retained selected-target API, use `geometry_scope: "reviewed_target"`
+(the API default), GET `/geometry?preview=true`, then PATCH `/geometry-review`
+with the source hash, explicit island IDs, saved orientation, note, acknowledgement
+and expected input revision. Use that review's `geometry_context_sha256` in the
+preview and property save. Multiple islands are allowed; selection starts empty.
+Selection/source/orientation changes invalidate correspondence. These controls
+are not exposed in the current hosted Workspace.
 
 Numerical validation and geometry review are separate outcomes. Passing box-drop
 or relocation checks does not establish proportions, material properties,

@@ -7,14 +7,14 @@ Authoritative Python models: `src/photo2sim/contracts.py`. Backend owns this fil
 - `GET /api/health`: service status and configured reconstruction provider.
 - `POST /api/jobs`: multipart field **`images`**, repeated for 1–4 JPEG/PNG/WebP images, at most 10 MiB and 25 megapixels each. Returns **202** and `JobRecord`.
 - `GET /api/jobs/{id}`: returns `JobRecord`; poll while reconstruction runs.
-- `POST /api/jobs/{id}/suggestions`: optional JSON `{object_hint, refresh}`; asks Gemini for unverified `PropertySuggestions` from the saved photos. Same hint/model uses cache unless `refresh: true`. No automatic calls, confirmation, processing or property changes.
+- `POST /api/jobs/{id}/suggestions`: optional JSON `{object_hint, refresh}`; asks Gemini for unverified `PropertySuggestions` from the saved photos. Same hint/model uses cache unless `refresh: true`. The current Workspace reads the cache first and automatically attempts one request per opened job/session when no saved suggestions exist. Friction can fill an untouched new-job draft; other fields require Apply. Properties change only on an explicit save, and simulation processing is separate.
 - `GET /api/jobs/{id}/suggestions`: returns saved suggestions, or 404 when absent. Survives server restart.
 - `GET /api/jobs/{id}/geometry?preview=true`: authenticated read-only surface-island inventory. Returns source SHA-256, algorithm, deterministic IDs, input-unit bounds and optional vertices/faces with node transforms baked. New jobs have no selected target.
 - `PATCH /api/jobs/{id}/geometry-review`: saves explicit nonempty `island_ids` (multiple allowed), `source_mesh_sha256`, saved `orientation`, `review_note`, `acknowledge_geometry: true` and `expected_input_revision`. Rejects stale source/orientation/revision with 409, invalid/unknown selections with 422. No reconstruction call.
 - `PATCH /api/jobs/{id}/properties`: JSON `AssetProperties`; accepted at `awaiting_properties`, `completed`, or after a simulation-stage failure. Saving corrected properties returns to `awaiting_properties` and clears current result pointers while retaining prior attempt inputs/files/downloads. Explicit sizing is required for new uploads. Processing starts with a separate explicit request.
-- `POST /api/jobs/{id}/sizing-preview`: authenticated read-only geometry sizing; JSON `{sizing, orientation, dimensions_m?, geometry_context_sha256?}`. Returns authoritative `dimensions_m` and `sizing_result`, without changing the job or making provider calls. Requires saved reconstruction and simulation dependencies. See [rigid sizing](RIGID_SIZING.md).
+- `POST /api/jobs/{id}/sizing-preview`: authenticated read-only geometry sizing; JSON `{sizing, orientation, geometry_scope?, dimensions_m?, geometry_context_sha256?}`. The current Workspace explicitly uses `geometry_scope: "whole_reconstruction"`; omitted scope defaults to `"reviewed_target"` for API compatibility. Returns authoritative `dimensions_m`, `sizing_result`, source hash and context hash, without changing the job or making provider calls. Requires saved reconstruction and simulation dependencies. See [rigid sizing](RIGID_SIZING.md).
 - `PATCH /api/jobs/{id}/orientation`: JSON `Orientation`, for example `{"x_deg":90,"y_deg":0,"z_deg":0}`. Saves rotation before dimension scaling; accepted at the same stages as property edits. Returns the updated job. It clears current result pointers and retains old attempt files; it never submits reconstruction or starts processing.
-- `POST /api/jobs/{id}/process`: no body. Requires a reconstructed mesh, a current source/selection/orientation-bound `geometry_review`, and saved properties bound to its `geometry_context_sha256`. This also applies to regeneration of historical jobs; missing/stale review or reference correspondence returns 409 without claiming an attempt. Returns **202** with status `preparing`, then runs preparation, export and headless validation asynchronously. Duplicate/running/completed requests return **409**. Failed simulation attempts can be retried with this endpoint; existing attempt files are retained. Reconstruction failures require separate diagnosis, not this retry.
+- `POST /api/jobs/{id}/process`: no body. Requires reconstruction and saved properties bound to the current source/orientation. For `whole_reconstruction`, the saved sizing, `source_mesh_sha256` and full-source `geometry_context_sha256` supply the binding; surface selection/review is not required. For `reviewed_target`, a current source/selection/orientation-bound `geometry_review` and matching property context are required. Missing/stale bindings return 409 without claiming an attempt. Returns **202** with status `preparing`, then runs preparation, export and headless validation asynchronously. Duplicate/running/completed requests return **409**. Save a correction first to regenerate a completed job. Failed simulation attempts can be retried; existing files are retained. Reconstruction failures require separate diagnosis.
 - `GET /api/jobs/{id}/files/{path}`: job-relative artifact download, e.g. `reconstruction/mesh.glb` or `uploads/00.png`.
 - `/docs` and `/openapi.json`: generated API documentation once the backend starts.
 
@@ -46,7 +46,18 @@ After processing, `export_path` names `attempts/{attempt}/bundle/scene.xml`, `va
 
 Restarting while preparing/validating marks the job `failed` with `processing_interrupted`; retry `/process` to use the cached reconstruction in a new attempt. This never submits another paid generation. Processing errors are sanitized and retain saved artifacts. Unexpected validator exceptions still produce a safe failure report. A failed simulation can be retried directly or have its properties corrected with PATCH first; reconstruction failures cannot use this recovery path. Without the simulation extra, geometry inspection/review returns 503; a worker that loses the runtime fails with `simulation_unavailable` and installation instructions.
 
-## Rigid target review
+## Rigid geometry scopes
+
+The current hosted Workspace uses the **entire reconstruction**. Its preview and
+property requests explicitly set `geometry_scope: "whole_reconstruction"` and bind
+the source hash, orientation and full-extent reference. It has no surface-island
+selection panel. Reopening older selected-target or stretched jobs displays their
+saved mode; saving in this Workspace replaces it with whole-source uniform sizing
+after explicit reference review. Earlier attempts remain downloadable.
+
+The API also retains **reviewed target selection** for compatible clients. Its
+default scope is `reviewed_target`; clients using that scope must follow the review
+steps below. This retained API capability is not a control in the current hosted UI.
 
 Review uses `surface-islands-exact-seams-v1`: edge-connected surface islands with
 exact-coordinate seams matched for connectivity only. Original vertices/triangles
@@ -65,8 +76,9 @@ also blocks generation. Property saves bind the current context; they do not
 silently transfer a body-only measurement onto a different mesh span.
 
 Old records deserialize without review metadata. Their completed downloads remain
-accessible. Their next attempt must explicitly review the source and bind sizing;
-legacy three-axis sizing remains available when previously allowed. Attempt input
+accessible. Their next attempt must bind sizing using the chosen scope: whole-source
+binding or explicit selected-target review. Legacy three-axis sizing remains
+available to compatible API clients when previously allowed. Attempt input
 snapshots and exported assets retain selection/review provenance alongside sizing.
 Numerical validation and user geometry review have separate outcomes. Neither
 constitutes a measured physical match.
@@ -94,7 +106,7 @@ Applying a suggestion requires an explicit PATCH to `/properties`; the server do
 
 When `PHOTO2SIM_API_TOKEN` is set, protected `/api/` routes accept either `Authorization: Bearer <application-token>` or the signed browser session. `/api/health` and `/api/session` expose no private job data without access. Missing/wrong credentials return 401. Docs/OpenAPI remain readable and Swagger provides an Authorize control. OPTIONS preflight does not require a token. Local development with a blank token remains unchanged.
 
-`GET /api/session` returns `required` and `authenticated`. `POST /api/session` with the correct Bearer code establishes a 12-hour HttpOnly browser cookie; it does not return the code. Cookie-authenticated mutations require a trusted Origin. `DELETE /api/session` from the trusted origin clears the browser cookie. Railway requires `PHOTO2SIM_PUBLIC_ORIGIN` to identify its HTTPS frontend through TLS termination; see [deployment access](../deploy/railway/README.md).
+`GET /api/session` returns `required`, `authenticated` and public-access availability. `POST /api/session` exchanges a valid code for an HttpOnly cookie: student 30 minutes, judge 6 hours, team/original code 12 hours. When explicitly enabled, a code-free POST grants public student access. It does not return a code. Cookie-authenticated mutations require a trusted Origin. `DELETE /api/session` clears the browser cookie. Workspace and Assembly renew expired public access in place and retry only the explicit pre-admission access rejection, once; drafts are retained. Provider, quota and ambiguous transport failures are not retried. See [access limits and handling](HOSTED_ACCESS.md) and [Railway setup](../deploy/railway/README.md).
 
 This application token is distinct from Gemini/Meshy/Agentverse/Vultr keys. Never put provider keys in browser code. Team-demo clients need the app token through private configuration, user entry or a server-side proxy; do not bundle it into a public frontend. File downloads also require authorization: fetch them with headers and create a local Blob download, rather than relying on an unauthenticated anchor URL.
 
@@ -115,7 +127,10 @@ the final axes. For the reviewed cleaned charger, use `x_deg: 90`: raw +Y pins
 become +Z, raw +Z becomes -Y, and raw X stays X. This is a manually selected
 setting for this asset, not a rule applied to all GLBs.
 
-Save orientation, select/review the target, then preview and save properties with the returned `geometry_context_sha256`; await the responses before POST `/process`.
+Save orientation, then preview and save properties in the intended geometry scope.
+For the current whole-source workflow include `geometry_scope: "whole_reconstruction"`
+and the returned source/context hashes. For selected-target clients, first save
+the explicit target review and use its context. Await saves before POST `/process`.
 GET job responses expose the saved orientation. A retry always starts from the
 unchanged raw reconstruction; rotations do not accumulate. Edits during active
 processing return 409. Completed jobs can save a correction and explicitly

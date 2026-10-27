@@ -11,7 +11,8 @@ or [local quickstart](QUICKSTART.md).
 - [Hosted access and photo handling](HOSTED_ACCESS.md): access codes and data flow.
 - [Advanced physics](advanced-physics.md): units, assumptions and exported settings.
 - [Guided assemblies](GUIDED_ASSEMBLIES.md) and [assembly format](ASSEMBLIES.md).
-- [SO-101 robotics demonstration](ROBOTICS_DEMO.md): leader → simulation → follower.
+- [SO-101 robotics demonstration](ROBOTICS_DEMO.md): team-reported workflow,
+  recorded/scripted presentation and public reproduction limits.
 - [API](API.md), [configuration](ENVIRONMENT.md), [Railway hosting](../deploy/railway/README.md).
 - [Contributing](../CONTRIBUTING.md) and [private security reports](../SECURITY.md).
 

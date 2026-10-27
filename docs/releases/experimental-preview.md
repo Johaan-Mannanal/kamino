@@ -65,8 +65,11 @@ hosted access; [photo handling and shared access](../HOSTED_ACCESS.md) are docum
 - The example uses synthetic inputs and assumptions, rather than photographs or
   measured real-world dynamics.
 - Browser mobile checks use Chromium emulation, rather than native-device certification.
-- The separate SO-101 prototype demonstrates leader-recorded motion previewed and
-  adjusted in MuJoCo, exported and executed on the follower arm with iteration.
+- The team reports an SO-101 leader → simulation review/adjustment → exported
+  follower execution workflow with human iteration. A complete hardware runner
+  and export-to-measured-execution receipt are not published. The README media
+  is recorded arm replay with scripted charger motion beside physical footage,
+  manually aligned for presentation. See [the robotics scope](../ROBOTICS_DEMO.md).
   Precise calibration and contact-rich manipulation remain ongoing work.
 
 Earlier results remain in [RELEASE.md](../RELEASE.md) with their original scope.

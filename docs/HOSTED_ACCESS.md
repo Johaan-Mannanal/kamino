@@ -6,8 +6,13 @@ or provider key is needed. Student sessions last 30 minutes and share one rollin
 10 Gemini requests (30 seconds apart), and 10 simulation submissions (30 seconds
 apart). Another visitor may already have used the available allowance.
 
-Refresh or continue from the photo upload page to renew an expired student
-session. Renewal does not reset usage. Saved reads and downloads do not use the
+Workspace and Assembly requests renew expired public student access in place.
+After the API rejects access, the browser confirms renewal and retries that
+request once; drafts stay in the current workspace. Explicit credentials,
+provider/quota errors and ambiguous network failures are not automatically retried.
+If renewal is unavailable, Workspace keeps the draft and offers code entry.
+Refresh or the upload access check can also renew a session.
+Renewal does not reset usage. Saved reads and downloads do not use the
 generation allowance. The server reports a wait time when a limit is reached.
 Judge and team access still require a code; use **Student access** on the upload
 page or **Generation access** in Assembly to enter one. Signing out clears this

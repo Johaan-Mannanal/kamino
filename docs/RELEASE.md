@@ -1,5 +1,36 @@
 # Public release and evidence index
 
+## Current hosted follow-up — October 27, 2026
+
+The frontend session-renewal and access-wording fix is
+[`09fff23f44897ae3a5d67b562be1c3746de10154`](https://github.com/Johaan-Mannanal/kamino/commit/09fff23f44897ae3a5d67b562be1c3746de10154).
+The backend remains on the preview application baseline. Documentation commits
+following this source do not themselves change hosted code.
+
+| Current component | Production Railway deployment |
+| --- | --- |
+| Frontend (`09fff23`) | `59363f92-8adc-4ec8-b8e2-4c83821fa478` |
+| Backend (`a7dff7f`) | `4618a9d8-5d51-4a02-96e4-1c4a489d878a` |
+
+[Exact-source CI](https://github.com/Johaan-Mannanal/kamino/actions/runs/40560850077)
+passed all four jobs: 501 backend tests (2 optional skips), 160 shared frontend
+tests, 165 Workspace tests, both builds/typechecks, 12 combined-site browser
+checks, Ruff and both container checks. Existing chunk/deprecation warnings remain.
+
+Staging browser checks cleared access in a second tab, then successfully previewed
+and saved the unchanged Workspace draft with exactly one saved revision and all
+six prior attempts retained. Production repeated session loss before sizing
+preview and ZIP download on the existing charger job; both recovered without
+navigation. Its saved record and both earlier ZIP hashes stayed unchanged. The
+served Workspace asset matched the tested local build byte-for-byte.
+
+The staging fixture unexpectedly initiated its existing automatic Gemini estimate
+because it had no cache. It was then reused. These follow-up checks made no Meshy
+submission and no new Gemini request on the production charger. Local detailed
+receipts are retained under `outputs/session-renewal-20261027`; that directory is
+not a public download. The prior frontend deployment below remains the rollback
+reference.
+
 ## Experimental preview — October 27, 2026
 
 The first tagged GitHub prerelease is `v0.1.0-preview.1`. Its
@@ -16,7 +47,7 @@ tests, both builds/typechecks, 12 combined-site browser checks, Ruff and both co
 builds with the mock pipeline/persistence check. Vite's existing large-chunk warnings
 and the Starlette/httpx deprecation warning remain.
 
-| Current component | Production Railway deployment |
+| Preview component (historical) | Production Railway deployment |
 | --- | --- |
 | Frontend (`a7dff7f`) | `38285ecd-50e3-48b8-b630-5fd63dda8c21` |
 | Backend (`a7dff7f`) | `4618a9d8-5d51-4a02-96e4-1c4a489d878a` |
@@ -150,10 +181,10 @@ a full backend rollback requires its matched snapshot and preservation of any
 post-cutover jobs before restoration. Documentation publication does not change
 services, data or rollback artifacts.
 
-The robotics prototype demonstrates trajectory transfer: initial leader-arm joint
-recordings were previewed and adjusted in MuJoCo, exported, and executed on the
-SO-101 follower arm, with iteration between simulation and hardware. See
-[the robotics demonstration](ROBOTICS_DEMO.md). This account was clarified by the
-team on October 25, 2026; it does not extend the software test results above into
-physical calibration or contact/grasp accuracy claims. Earlier illustrative
-animations and observation-only playback retain their original artifact scope.
+The team reported a leader-recording → simulation review/adjustment → exported
+follower execution workflow on October 25, 2026. The public repository does not
+yet provide the complete hardware runner or export-to-measured-execution receipt.
+See [available evidence and reproduction gaps](ROBOTICS_DEMO.md). The README
+composite uses recorded arm replay with scripted charger motion beside physical
+footage. Software checks above do not establish physical calibration or grasp
+accuracy; historical artifacts retain their original scope.

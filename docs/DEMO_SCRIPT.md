@@ -1,8 +1,12 @@
 # Kamino demo script
 
+Historical presenter draft. Its scheduling and pending statuses below describe
+the original preparation, not current release status. Use [the release index](RELEASE.md)
+and [current robotics evidence](ROBOTICS_DEMO.md) for present claims.
+
 Scheduling update: this remains a draft. Final recording and presentation
-practice follow deployment/sponsorship integration and the final improvements
-phase in [the master roadmap](handoffs/master-roadmap.md).
+practice were scheduled after deployment/sponsorship integration and the final
+improvements phase in the historical coordination plan.
 
 Prepared 2026-10-24 by the coordination chat. Target: four minutes. This is a
 presenter script, not a claim that every step has been rehearsed. Same-source
@@ -12,24 +16,26 @@ Windows acceptance remain pending. Yash's offline comparison is complete but
 does not verify physical mapping; every candidate retains a shoulder-limit conflict.
 Sponsor/deployment work is deferred.
 
-## Updated robotics account — October 25, 2026
+## Robotics presentation clarification — October 27, 2026
 
-Kamino connects simulation with physical robotics. We used the SO-101 leader arm to record an initial joint trajectory, brought that motion into MuJoCo, and previewed and adjusted it for the charger demonstration. We then exported the joint motion and executed it on the physical SO-101 follower arm, iterating between simulation and hardware to account for real-world differences. The prototype demonstrates corresponding, working motions side by side, powered by our software. Precise calibration and contact-rich manipulation remain ongoing work.
-
-This clarification supersedes earlier descriptions of the overall demonstration as observation playback alone. Older artifact-specific results below remain historical. See [the robotics demonstration](ROBOTICS_DEMO.md).
+The team reports leader-recorded motion reviewed/adjusted in simulation and exported
+for follower execution with human iteration. Public reproduction still needs the
+hardware runner and export-to-measured-execution receipt. The README composite
+shows recorded arm replay with scripted charger motion beside recorded physical
+footage; timing is manually aligned. See [the robotics demonstration](ROBOTICS_DEMO.md).
 
 ## Choose the route before presenting
 
 Use the main route only after the corresponding items in
-[the evidence checklist](DEMO_EVIDENCE_CHECKLIST.md) pass on the selected build.
+[the release evidence](RELEASE.md) pass on the selected build.
 Do not discover whether a feature works during the presentation.
 
 - **Main route:** matching charger photos → cached reconstruction → reviewed
-  reference/shape → corrected export → guided SO101 → simulation-to-follower trajectory transfer.
+  reference/shape → corrected export → guided SO101 → labelled recorded/scripted robotics presentation.
 - **If the hardware demonstration is unavailable during presentation:** show the
-  recorded simulation and follower-arm executions side by side, label them as
-  recordings, and explain the leader → simulation adjustment → export → follower
-  workflow. Precise calibration remains ongoing.
+  recorded arm replay with scripted charger motion beside physical follower
+  footage. Explain the hardware workflow as team-reported and identify the
+  missing reproduction evidence. Precise calibration remains ongoing.
 - **Without the accepted sizing fix:** show the older cleaned charger as a
   historical photo-derived pipeline example with estimated dimensions, then use
   the synthetic hinged panel to demonstrate the already recorded correction loop.
@@ -48,7 +54,7 @@ Do not discover whether a feature works during the presentation.
 | 1:35–2:05 | “We can correct a completed asset and generate another export from the same reconstruction. Earlier results remain available.” | Explicit save/regenerate, old/new attempts and unchanged source identity. Use a rehearsed short process or identify a previously generated result if latency is too long. |
 | 2:05–2:35 | “The bundle includes geometry, physical assumptions and validation results. This check shows the scene runs and survives relocation. The collision box and estimated properties remain visible.” | New validation result, authenticated ZIP download, and the exact exported scene in MuJoCo. Switch visual/collision views if rehearsed. |
 | 2:35–3:10 | “The same preparation workflow supports articulated models. For this SO101 example, we use CAD components and a reviewed joint template.” | Generated SO101 saved job, link/joint structure, reviewed assumptions and simulated movement. Label CAD/template assistance. |
-| 3:10–3:45 | “We recorded an initial joint trajectory with the leader arm, previewed and adjusted it in MuJoCo for the charger, then exported the motion and executed it on the follower arm. We iterated between simulation and hardware. These corresponding motions demonstrate trajectory transfer; precise calibration and contact-rich manipulation remain ongoing work.” | Show the corresponding simulation and physical follower-arm executions side by side. Identify recorded footage as recorded; describe the leader as the initial motion source and the follower as executing the exported motion. |
+| 3:10–3:45 | “The left panel replays recorded arm observations with scripted charger motion. The right is recorded physical footage, manually aligned for presentation. Our team reports a leader-to-simulation-to-follower workflow with human iteration; its complete runner and export-to-measured-execution receipt are not yet published.” | Show the labelled presentation and identify the scripted object motion. Link to the robotics reproduction scope; do not present the animation as contact-driven pickup or synchronized measured feedback. |
 | 3:45–4:00 | “The result is a model you can inspect, revise and export, with its sources and assumptions retained. Our working examples cover a photo-derived rigid object and guided articulated mechanisms.” | Final output bundle and one clear limitation/next measurement. |
 
 Optional Gemini insert, only if it helps and fits within the review segment:

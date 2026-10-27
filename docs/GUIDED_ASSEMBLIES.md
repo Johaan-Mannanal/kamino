@@ -15,7 +15,7 @@ implemented. The rigid-object app stays separate. See [local startup](DEMO.md).
    engineering fixtures synthetic. The initial base has an estimated 0.1 kg
    starting mass; review it before processing.
 2. Use **Add a link and connection** to name a link, select its parent and choose
-   a fixed or revolute connection. Rename links in their editor. Names must start
+   a fixed, revolute or prismatic connection. Rename links in their editor. Names must start
    with a letter and contain only letters, digits, underscores or hyphens (up to 64).
 3. Assign each part to a link, or give an explicit exclusion reason. Set each
    link pivot in the common reference frame and review mass/friction. Edit joint
@@ -25,8 +25,12 @@ implemented. The rigid-object app stays separate. See [local startup](DEMO.md).
    available for operations not exposed in the forms, such as removing a link.
 4. Inspect the hierarchy, yellow joint axes and sliders. Sliders are **kinematic**;
    they neither simulate forces nor test collisions. The review requires a connected
-   tree with one fixed root. Each movable joint is revolute; fixed joints are also
-   supported. Coupled, prismatic and closed-loop mechanisms are not supported.
+   tree with one fixed root. Moving joints can be revolute hinges or prismatic
+   sliders. Review radians for hinges and metres for sliders. Optional springs
+   and linked follower motion are supported; a follower uses a same-type driver,
+   an explicit ratio/offset and no competing actuator. The mapped driver range
+   must fit its limits. Closed-loop link graphs and floating bases are unsupported.
+   See [units and linked-motion rules](advanced-physics.md#assembly-sliders-springs-and-linked-motion).
 5. Apply edits, write review notes and acknowledge each link/joint. All input
    edits invalidate earlier acknowledgements. A semantic snapshot also rejects
    externally edited stale approvals at preparation time. This is a consistency

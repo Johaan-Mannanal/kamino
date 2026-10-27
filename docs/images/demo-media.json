@@ -14,7 +14,8 @@
   "sources": {
     "simulation": {
       "filename": "demo-preview.mp4",
-      "sha256": "d2d03d465574f5097f7562ecdc696412cf19d190c99e3e04bb4cd3528de1ea64"
+      "sha256": "d2d03d465574f5097f7562ecdc696412cf19d190c99e3e04bb4cd3528de1ea64",
+      "motion_scope": "Recorded original arm observations; scripted charger pickup, carry, release and settling; no contact-driven grasp."
     },
     "physical": {
       "filename": "Video Demo final.mov",
@@ -64,6 +65,7 @@
     800,
     1080
   ],
-  "scope": "Shared-clock presentation composite of MuJoCo simulation and physical SO-101 follower execution; manually aligned visual events, not telemetry synchronization.",
-  "presentation_update": "Removed the scripted-charger footer label; underlying motion and alignment are unchanged."
+  "scope": "Recorded arm replay with scripted charger motion beside physical follower footage; manually aligned presentation events, not telemetry synchronization or verified simulation-to-hardware execution.",
+  "presentation_update": "Removed the scripted-charger footer label; underlying motion and alignment are unchanged.",
+  "caption_update": "2026-10-27: README caption explicitly identifies recorded arm replay and scripted charger motion. Source media, crop, timing and frozen packages unchanged."
 }

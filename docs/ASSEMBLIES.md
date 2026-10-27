@@ -1,9 +1,10 @@
 # Reviewed assembly format and export (assembly-1.0)
 
-This **local library/CLI** is separate from the rigid AssetRecord v1 and its job
-API. A [local guided workbench and optional STEP import/grouping](GUIDED_ASSEMBLIES.md)
-now precede this exporter. HTTP assembly jobs and photo-based part inference
-remain future work. The format contains reviewed input data and provenance,
+This **library/CLI** is separate from the rigid AssetRecord v1. The
+[guided workbench](GUIDED_ASSEMBLIES.md) and [HTTP assembly jobs](API.md#articulated-assets)
+provide review, saved revisions and processing around the exporter. Optional STEP
+import is a separate local utility; photo-based part inference is not implemented.
+The format contains reviewed input data and provenance,
 not an assertion that articulation was inferred correctly.
 
 See the [minimal example](../examples/assemblies/two-link-hinge/input/assembly.json)
@@ -13,14 +14,17 @@ and [working export](../examples/assemblies/two-link-hinge/README.md).
 - Assembly: name, synthetic flag, root link, root pose, links, joints and notes.
 - Link: unique name, relative geometry-only OBJ/STL, geometry source/note, mass
   with provenance, optional sliding friction with provenance.
-- Joint: unique name, parent/child, fixed or revolute, origin pose, source/note.
-  Revolute joints additionally require a unit axis, finite ordered limits
-  including zero, damping, and a position drive with positive gain/torque limit.
+- Joint: unique name, parent/child, fixed, revolute or prismatic, origin pose,
+  source/note. Moving joints require a unit axis, finite ordered limits including
+  zero and damping. Independent joints have a positive-gain position drive with
+  a torque limit (hinge) or force limit (slider). Optional springs and linked
+  same-type followers are supported; followers have no competing drive.
 - Graph: one fixed root, connected acyclic tree; every other link has exactly
-  one parent. No floating bases, closed loops, prismatic or coupled joints yet.
+  one parent. No floating bases or closed-loop link graphs. Linked-motion driver
+  dependencies must also be acyclic and remain within follower limits.
 
-All positions/vertices are **metres**, angles and position-control inputs are
-**radians**, axes are right-handed and unit length. A quaternion is **w,x,y,z**
+All positions/vertices and slider inputs are **metres**; hinge angles and inputs
+are **radians**. Axes are right-handed and unit length. A quaternion is **w,x,y,z**
 and unit length. Joint origin transforms child coordinates into parent coordinates
 at q=0. The hinge passes through the child origin; its axis is expressed in that
 child frame. Mesh vertices are already in local link coordinates: **the exporter
@@ -28,9 +32,11 @@ never fits scale, recentres, or infers frames**. Root pose maps root coordinates
 to world. Pose corrections must transform the mesh and joint definitions
 consistently upstream.
 
-Position drive: torque = kp × (target − angle), saturated by force_limit_nm;
-kp has units Nm/rad. Joint damping is Nm·s/rad. These parameters are supplied,
-not inferred from photos. Physical motor dynamics require separate calibration.
+Hinge position drive: torque = kp × (target − angle), saturated by force_limit_nm;
+kp has units N·m/rad and damping N·m·s/rad. Slider drives use N/m gain, force_limit_n
+and N·s/m damping. See [spring and linked-motion units](advanced-physics.md#assembly-sliders-springs-and-linked-motion).
+These parameters are supplied, not inferred from photos. Physical motor dynamics
+require separate calibration.
 
 Every reviewed value uses existing `measured`, `user_supplied`, `sourced`, or
 `estimated` provenance. Joint `source`/`note` cover frame, axis and limits; drive,
@@ -65,8 +71,9 @@ not mass-distribution estimation. Unknown sliding friction stays null in the
 record; a simulator default of 0.8 is documented in simulation.json. Gravity,
 timestep, contact settings and source mesh hashes are recorded there too.
 
-Motion validation exercises each hinge separately with all others commanded to
-zero: half its upper limit, half its lower limit, then zero, two seconds per phase.
+Motion validation exercises each independent moving joint separately, with other
+independent joints commanded to zero and linked followers deriving their targets:
+half its upper limit, half its lower limit, then zero, two seconds per phase.
 It repeats from reset and runs a relocated copy. Compiled-model checks verify reviewed body/joint frames, hierarchy, mesh bounds and
 hashes, mass/inertia, collision proxies, gravity, drives and limits. Motion checks
 cover finite states,

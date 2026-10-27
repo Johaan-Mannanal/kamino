@@ -1,27 +1,69 @@
-# SO-101 trajectory-transfer demonstration
+# SO-101 demonstration and reproduction scope
 
-Updated October 25, 2026, from the team’s clarified account of the prototype.
+Updated October 27, 2026. The team-reported hardware workflow and the public
+presentation video have different evidence and reproduction boundaries.
 
-Kamino connects simulation with physical robotics. We used the SO-101 leader arm to record an initial joint trajectory, brought that motion into MuJoCo, and previewed and adjusted it for the charger demonstration. We then exported the joint motion and executed it on the physical SO-101 follower arm, iterating between simulation and hardware to account for real-world differences. The prototype demonstrates corresponding, working motions side by side, powered by our software. Precise calibration and contact-rich manipulation remain ongoing work.
+## Team-reported hardware workflow
 
-## How the motion was developed
+The team reports recording initial motion with the SO-101 leader, reviewing and
+adjusting motion in MuJoCo, exporting joint motion, then executing it on the
+physical follower with human iteration. This account records the team's report;
+it is not a complete public reproduction of that hardware execution.
 
-1. **Record initial motion with the leader arm.** Manually moving the leader supplied the initial servo/joint trajectory.
-2. **Preview and refine in simulation.** Bring that joint motion into MuJoCo, preview it, and adjust it for the charger demonstration.
-3. **Export and execute.** Export the joint motion and execute it on the physical SO-101 follower arm.
-4. **Iterate between simulation and hardware.** Adjust the motion through back-and-forth trials to account for variables that are difficult to predict.
-5. **Demonstrate corresponding motions side by side.** Show the working simulation and physical executions, identifying recorded footage as recorded when applicable.
+The public repository provides SO-101 reference-model inspection, capture mapping
+review and observation replay. It does not yet publish a complete hardware runner
+or a traceable simulation-export-to-measured-execution receipt. The hosted photo
+workspace exports simulation assets and has no robot execution controls.
 
-The leader is the source of the initial motion; the follower executes the exported trajectory after simulation refinement. The demonstrated workflow includes human adjustments and hardware feedback.
+## What the README video shows
 
-## What this demonstrates
+The left panel replays recorded arm observations in MuJoCo with **scripted charger
+motion**. Authored pickup/carry/release moves the charger; contact physics does not
+produce that grasp. The source is the preserved v5 presentation video, SHA-256
+`d2d03d465574f5097f7562ecdc696412cf19d190c99e3e04bb4cd3528de1ea64`.
+The right panel is the supplied physical follower-arm recording,
+`Video Demo final.mov`.
 
-The prototype demonstrates trajectory transfer from simulation to a physical SO-101 arm. It extends beyond replaying physical observations as a simulation animation.
+Visual approach, pickup, carry, release and return events were manually aligned.
+The physical video is retimed between those anchors. Same-run association and
+visual alignment do not establish synchronized measured joint telemetry. The
+recorded observations driving the left panel are from the original recording;
+they are not verified measurements from the execution filmed on the right.
 
-Precise calibration, quantitative motion accuracy and contact-rich manipulation remain ongoing work. This account does not claim autonomous trajectory planning, exact physical equivalence, validated grasp/contact prediction, or a completed general-purpose sim-to-real system.
+[Media provenance, hashes and timing](images/README.md) retain the exact source
+identities. The caption identifies the recorded arm replay and scripted object
+motion. This video illustrates the demonstration; it is not acceptance of a
+physics-driven simulated pickup or quantitative real-world accuracy.
 
-## Relationship to the website and earlier evidence
+## Public offline tools
 
-The hardware prototype is distinct from the controls exposed in the hosted photo-to-simulation workspace. Its demonstration does not imply that the website provides hardware execution controls.
+- [SO-101 reference workspace](../examples/so101/WORKSPACE.md): model and scene inspection.
+- [Capture mapping review](MAPPING_REVIEW.md): explicit units, signs, offsets,
+  normalized conversions and limit findings across recorded stationary poses.
+- [Observation replay](../examples/assemblies/observation-replay/README.md):
+  retained inputs, kinematic replay and repeatable software checks.
 
-Earlier stationary-pose comparisons, observation-only playback, synthetic motion examples and illustrative charger animations retain their original scope. Their reports describe those specific artifacts, rather than the full trajectory-transfer demonstration. Existing numerical software checks are not retroactively reclassified as physical calibration tests.
+Follow each guide's own input format and scope. These tools do not provide a
+turnkey hardware execution workflow. No robot movement is needed to run the
+retained offline examples.
+
+## Evidence needed for reproducible simulation-to-hardware execution
+
+A future public hardware reproduction needs all of the following together:
+
+1. The exact exported motion file, hash, schema, joint names, units and timestamps.
+2. The simulation model and reviewed mapping/calibration identities, including
+   directions, zero offsets, gripper conversion and unresolved limit findings.
+3. The executable hardware runner, pinned dependencies and invocation, with the
+   commanded motion kept distinct from measured follower observations.
+4. A run receipt identifying the exported file actually executed and the measured
+   observations for that same run. Video event correspondence needs an explicit
+   association with those observations; a fitted visual time offset is insufficient.
+5. A stated acceptance scope and separate results for motion reproduction,
+   calibration, contact/grasp behavior and physical accuracy.
+
+These items remain publication/reproduction gaps, not instructions to run hardware
+or alter the recorded trajectory. Earlier stationary-pose comparisons, synthetic
+examples, observation playback and illustrative animations retain their original
+results. Numerical simulation checks do not retroactively establish calibration
+or grasp accuracy.

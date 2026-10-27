@@ -10,8 +10,12 @@ editable simulation models, and portable MuJoCo exports. It retains the inputs
 and assumptions needed to understand a result and revise it.
 
 **Does Kamino transfer motion from simulation to the real arm?**
-Yes. Kamino connects simulation with physical robotics. We used the SO-101 leader arm to record an initial joint trajectory, brought that motion into MuJoCo, and previewed and adjusted it for the charger demonstration. We then exported the joint motion and executed it on the physical SO-101 follower arm, iterating between simulation and hardware to account for real-world differences. The prototype demonstrates corresponding, working motions side by side, powered by our software. Precise calibration and contact-rich manipulation remain ongoing work.
-See [the robotics demonstration](ROBOTICS_DEMO.md). The leader supplied the initial motion; the follower executed the exported trajectory after simulation adjustments and hardware iteration. This is a human-reviewed prototype, not a claim of autonomous motion planning or calibrated contact prediction.
+The team reports that workflow with an SO-101 leader/follower and human iteration.
+The public repository does not yet include the complete hardware runner or a
+receipt linking a simulation export to measured positions from that execution.
+The README video uses recorded arm observations and scripted charger motion beside
+physical footage, manually aligned for presentation. It does not establish a
+contact-driven simulated grasp. See [available evidence and reproduction gaps](ROBOTICS_DEMO.md).
 
 **What does the AI do?**
 Meshy produces the photo-derived geometry. Gemini proposes properties for human
@@ -45,10 +49,11 @@ shape errors already in the reconstruction. We review those separately.
 The proposed approximately 27 mm housing thickness comes from a third-party
 measurement of an Apple A2940 charger. It is a provisional reference, not a
 measurement of our specimen. The matching mesh extent and variant uncertainty
-must be reviewed. See [the dimension sources](CHARGER_DIMENSIONS_REFERENCE.md).
+must be reviewed. See [ChargerLAB's A2940 teardown](https://www.chargerlab.com/updated-power-ic-teardown-of-new-apple-20w-charger-a2940/).
 
 **What does the earlier stationary-pose evidence establish?**
-The following answer concerns the earlier stationary-pose comparison only. It does not summarize the later trajectory-transfer demonstration described above.
+The following answer concerns the earlier stationary-pose comparison only. It does
+not verify the separate team-reported hardware workflow.
 
 It supplies two stationary poses, readings and operator-paired photos for an
 offline comparison. The wrist, elbow and shoulder pan all changed. It is not an
@@ -73,10 +78,11 @@ photos; we are demonstrating review and correction.” Describe any screenshots
 or video as recorded results. Never substitute playback for an alleged live call.
 
 **What if Gemini is unavailable?**
-Manual property entry remains available. The fallback fixes passed focused
-master checks on 057ea63; acceptance alongside the sizing changes remains pending.
-Claim verified fallback on the demo build only after its combined checks. Existing
-synthetic live-model records establish compatibility, not property accuracy.
+Manual property entry remains available. The October 27 paid charger test observed
+`gemini-3.8-flash` falling back to `gemini-3.6-flash`, then reusing the saved result
+on reopening. This establishes that observed provider path, not property accuracy
+or guaranteed provider availability. Current application checks are recorded in
+[the release index](RELEASE.md).
 
 **What remains approximate?**
 The provisional size reference, unmeasured physical properties, simplified

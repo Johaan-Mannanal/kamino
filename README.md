@@ -12,11 +12,13 @@ Built for robotics builders, students and engineers at **Cal Hacks 13.0**.
 
 ## Demo in motion
 
-![MuJoCo recorded-arm visualization beside the final SO-101 physical replay, cropped around the arm and charger and manually aligned at visible motion events.](docs/images/demo-simulation-and-arm.gif)
+![Recorded arm replay with scripted charger motion in MuJoCo beside recorded SO-101 physical footage, manually aligned for presentation.](docs/images/demo-simulation-and-arm.gif)
 
-**One shared loop, 2× playback.** MuJoCo simulation on the left; physical SO-101
-follower-arm execution on the right. Timing is visually aligned
-for presentation. [Still frame](docs/images/demo-simulation-and-arm-poster.png) ·
+**Recorded arm replay · scripted charger motion, 2× playback.** The left panel
+replays recorded joint observations in MuJoCo with authored charger pickup/carry/
+release. The right panel is recorded physical SO-101 footage. Timing is manually
+aligned for presentation; the charger animation does not demonstrate a simulated
+physics grasp. [Still frame](docs/images/demo-simulation-and-arm-poster.png) ·
 [Sources, crops and timing](docs/images/README.md)
 
 ## Try it
@@ -55,11 +57,18 @@ and linked motion. [Guided workflow](docs/GUIDED_ASSEMBLIES.md).
 
 ## Simulation to physical robotics
 
-Kamino connects simulation with physical robotics. We used the SO-101 leader arm to record an initial joint trajectory, brought that motion into MuJoCo, and previewed and adjusted it for the charger demonstration. We then exported the joint motion and executed it on the physical SO-101 follower arm, iterating between simulation and hardware to account for real-world differences. The prototype demonstrates corresponding, working motions side by side, powered by our software. Precise calibration and contact-rich manipulation remain ongoing work.
+The team reports using leader-recorded motion, simulation review/adjustment and
+exported motion on a physical SO-101 follower, with human iteration. The public
+repository provides model inspection, mapping review and observation replay, but
+does not yet package a complete simulation-to-hardware runner or a receipt linking
+a specific simulation export to measured positions from its physical execution.
 
-**Workflow:** leader-arm recording → simulation preview and adjustment → joint-motion export → follower-arm execution → iteration between simulation and hardware.
+**Team-reported workflow:** leader recording → simulation review/adjustment →
+motion export → follower execution → human iteration.
 
-See [the robotics demonstration](docs/ROBOTICS_DEMO.md) for the workflow and its scope. This prototype is distinct from the controls exposed in the hosted photo workspace.
+See [the robotics demonstration](docs/ROBOTICS_DEMO.md) for the available evidence
+and the remaining reproduction requirements. The GIF above is a presentation
+animation; the hosted photo workspace has no hardware execution controls.
 
 ## Scope and limitations
 
@@ -70,9 +79,9 @@ behavior, not calibrated dynamics or grasp accuracy.
 
 Automatic photo-based part segmentation/joint inference, end-user CAD upload in
 the photo workspace and automatic parameter-correction proposals are not shipped.
-Browser assembly motion is kinematic; dynamics run in MuJoCo. The hardware prototype
-demonstrates trajectory transfer with human iteration; precise calibration and
-contact-rich manipulation remain ongoing work.
+Browser assembly motion is kinematic; dynamics run in MuJoCo. The hardware account
+remains separate from reproducible public software acceptance; precise calibration
+and contact-rich manipulation remain ongoing work.
 
 ## Architecture
 
