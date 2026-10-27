@@ -14,7 +14,8 @@
     "test": "vitest run --configLoader native",
     "test:browser": "node scripts/verify-browser.mjs",
     "test:live": "node scripts/verify-live.cjs",
-    "prebuild": "node ../../tools/branding/sync-assets.mjs --check --frontend-only"
+    "prebuild": "node ../../tools/branding/sync-assets.mjs --check --frontend-only",
+    "test:readiness": "node scripts/verify-readiness.mjs"
   },
   "dependencies": {
     "three": "0.180.0"

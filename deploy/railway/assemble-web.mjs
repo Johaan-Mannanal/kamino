@@ -2,6 +2,7 @@
 // Fail rather than silently overwrite an assembly asset with different bytes.
 import { readdir, readFile, mkdir, copyFile, access } from 'node:fs/promises';
 import path from 'node:path';
+import { exampleRoot, exampleFiles } from './example-assets.mjs';
 
 const [legacy, modern, destination] = process.argv.slice(2);
 if (!legacy || !modern || !destination) throw new Error('Expected legacy-dist modern-dist empty-destination');
@@ -35,3 +36,13 @@ for (const [root, entries] of [[legacy, oldFiles], [modern, newFiles]]) {
   }
 }
 console.log(JSON.stringify({ legacyFiles: oldFiles.length, modernFiles: newFiles.length, rootOwner: 'prototypes/kamino-ui', assemblyRetained: true }));
+
+// Publish only the selected, existing synthetic example. No provider inputs or job stores.
+const exampleDestination = path.join(destination, "examples/hinged-panel");
+await mkdir(exampleDestination, { recursive: true });
+for (const [source, name] of exampleFiles) {
+  await copyFile(
+    path.join(exampleRoot, source),
+    path.join(exampleDestination, name),
+  );
+}

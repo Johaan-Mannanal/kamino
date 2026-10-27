@@ -113,7 +113,7 @@ function steps(active: string, liveJob = false) {
 function guide() {
   const dialog = document.createElement("dialog");
   dialog.className = "guide";
-  dialog.innerHTML = `<h2>A small guide to Kamino.</h2><p>Upload 2–4 photos for better coverage. One photo is supported. Include different angles and important details such as ports and pins. Photos are sent to the configured Kamino API for reconstruction. Keep the job URL to resume it later. Provider credentials stay on the server.</p><p>Drag to orbit, shift-drag to pan, and scroll over the viewer to zoom. Review orientation and a known full extent, preview dimensions on the server, then save reviewed properties. Generate simulation is a separate action; its downloadable bundle requires successful validation.</p><p>Try the demo and Use demo photos open a separate procedural ceramic mug. Those demo photos are not uploaded or reconstructed. Demo export contains a GLB and properties JSON, with no simulation validation.</p><form method="dialog"><button class="primary">Got it</button></form>`;
+  dialog.innerHTML = `<h2>A small guide to Kamino.</h2><p><a href="/example.html">Run a complete synthetic example</a> with a portable MuJoCo bundle, or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">set up Kamino locally</a>.</p><p>Upload 2–4 photos for better coverage. One photo is supported. Include different angles and important details such as ports and pins. Hosted generation requires a team-issued access code. Photos go to the Kamino backend and reconstruction provider; photo-based property assistance uses Gemini. Inputs and artifacts are retained to reopen jobs. See the <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">photo-handling details</a>. Keep the job URL to resume it later. Provider credentials stay on the server.</p><p>Drag to orbit, shift-drag to pan, and scroll over the viewer to zoom. Review orientation and a known full extent, preview dimensions on the server, then save reviewed properties. Generate simulation is a separate action; its downloadable bundle requires successful validation.</p><p>Try the demo and Use demo photos open a separate procedural ceramic mug. Those demo photos are not uploaded or reconstructed. Demo export contains a GLB and properties JSON, with no simulation validation.</p><form method="dialog"><button class="primary">Got it</button></form>`;
   document.body.append(dialog);
   dialog.addEventListener("close", () => dialog.remove());
   dialog.showModal();
@@ -178,7 +178,7 @@ function mountResume(selector: string) {
 }
 
 function upload() {
-  app.innerHTML = `${header("Untitled asset")}${steps("upload")}<main class="upload-content"><p class="eyebrow">CREATE AN ASSET / NEW DRAFT</p><h1>Upload photos</h1><p class="muted">Upload 2–4 photos of the same object from different angles. Include important details such as ports and pins. One photo is supported.</p><div id="drop-zone" class="drop-zone">${icon("0e7df.svg", 28)}<strong>Drop photos here</strong><span class="muted">2–4 photos recommended · One photo supported · JPEG, PNG or WebP · Up to 10 MiB each</span><button id="choose" class="secondary">Choose photos</button><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden></div><p id="upload-error" class="error" role="alert"></p><div class="selection-heading"><strong>Selected photos <span id="photo-count"></span></strong><button class="text-button accent" id="sample-photos">Use demo photos</button></div><div id="photo-list"></div><div class="upload-actions"><a class="quiet" href="#home">← Back to start</a><button id="create-mesh" class="primary">${icon("0f26a.svg")}Create mesh</button></div><p class="prototype-note" id="upload-note"></p><p class="live-upload-links small"><button class="text-button" id="access-token" type="button">Application access token</button><a class="text-button" href="${esc(assemblyUrl())}">Assembly workflow ↗</a></p></main>`;
+  app.innerHTML = `${header("Untitled asset")}${steps("upload")}<main class="upload-content"><p class="eyebrow">CREATE AN ASSET / NEW DRAFT</p><h1>Upload photos</h1><p class="muted">Upload 2–4 photos of the same object from different angles. Include important details such as ports and pins. One photo is supported.</p><p id="generation-access" class="access-disclosure">Hosted generation requires an access code from the team. <a href="/example.html">Explore a complete example</a> or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">run locally</a> without hosted access. <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">Photo handling and access details</a>.</p><div id="drop-zone" class="drop-zone">${icon("0e7df.svg", 28)}<strong>Drop photos here</strong><span class="muted">2–4 photos recommended · One photo supported · JPEG, PNG or WebP · Up to 10 MiB each</span><button id="choose" class="secondary">Choose photos</button><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden></div><p id="upload-error" class="error" role="alert"></p><div class="selection-heading"><strong>Selected photos <span id="photo-count"></span></strong><button class="text-button accent" id="sample-photos">Use demo photos</button></div><div id="photo-list"></div><div class="upload-actions"><a class="quiet" href="#home">← Back to start</a><button id="create-mesh" class="primary">${icon("0f26a.svg")}Create mesh</button></div><p class="prototype-note" id="upload-note"></p><p class="live-upload-links small"><button class="text-button" id="access-token" type="button">Application access token</button><a class="text-button" href="${esc(assemblyUrl())}">Assembly workflow ↗</a></p></main>`;
   mountResume(".live-upload-links");
   const guidance = document.createElement("p");
   guidance.className = "photo-capture-guide small";
@@ -282,14 +282,14 @@ function upload() {
     $("#drop-zone").classList.remove("drag-over");
     add(Array.from((e as DragEvent).dataTransfer?.files ?? []));
   });
-  $("#access-token").textContent = "Team sign-in";
+  $("#access-token").textContent = "Generation access";
   $("#access-token").onclick = async () => {
     try {
       const status = await browserAccess.status();
       if (status.required && status.authenticated) {
         await browserAccess.signOut();
         live().setToken("");
-        $("#access-token").textContent = "Team sign-in";
+        $("#access-token").textContent = "Generation access";
         toast("Signed out on this browser.");
       } else if (status.required) {
         if (

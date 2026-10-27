@@ -43,6 +43,29 @@ jobs:
         run: pnpm --dir prototypes/kamino-ui test
       - name: Workspace production build
         run: pnpm --dir prototypes/kamino-ui build
+      - name: Assembly build for browser acceptance
+        run: pnpm --dir frontend build
+      - name: Install browser
+        run: pnpm --dir prototypes/kamino-ui exec playwright install --with-deps chromium
+      - name: Install pinned Caddy and verify its checksum
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 https://github.com/caddyserver/caddy/releases/download/v2.10.2/caddy_2.10.2_linux_amd64.tar.gz -o /tmp/caddy_2.10.2_linux_amd64.tar.gz
+          curl --fail --location --retry 3 https://github.com/caddyserver/caddy/releases/download/v2.10.2/caddy_2.10.2_checksums.txt -o /tmp/caddy-checksums.txt
+          cd /tmp
+          awk '$2 == "caddy_2.10.2_linux_amd64.tar.gz"' caddy-checksums.txt > caddy-selected-checksum.txt
+          test -s caddy-selected-checksum.txt
+          sha512sum --check caddy-selected-checksum.txt
+          tar -xzf caddy_2.10.2_linux_amd64.tar.gz caddy
+      - name: Complete example, mobile assembly and HTTP recovery
+        run: CADDY_BIN=/tmp/caddy pnpm --dir prototypes/kamino-ui test:readiness
+      - name: Browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-readiness-browser
+          path: outputs/release-readiness/browser
+          if-no-files-found: ignore
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -76,6 +99,8 @@ jobs:
         run: |
           docker compose config --quiet
           docker run --rm -e PHOTO2SIM_PUBLIC_HOST -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2 caddy validate --config /etc/caddy/Caddyfile
+      - name: Build combined frontend image
+        run: docker build -f deploy/railway/frontend.Dockerfile -t kamino-web:ci .
       - name: Build backend image
         run: docker build -t photo2sim:ci .
       - name: Start authenticated mock backend
