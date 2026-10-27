@@ -337,25 +337,37 @@ try {
       await page.screenshot({ path: path.join(evidence, "404-mobile.png") });
     },
   );
-  await check('local Vite example uses the same downloadable bundle as production', async () => {
-    const probe = createServer();
-    await new Promise(resolve => probe.listen(0, '127.0.0.1', resolve));
-    const devPort = probe.address().port;
-    await new Promise(resolve => probe.close(resolve));
-    const dev = spawn(process.execPath, [path.join(root, 'prototypes/kamino-ui/node_modules/vite/bin/vite.js'), '--configLoader', 'native', '--host', '127.0.0.1', '--port', String(devPort), '--strictPort'], { cwd: path.join(root, 'prototypes/kamino-ui'), stdio: 'ignore' });
-    try {
-      let ready = false;
-      for (let i = 0; i < 80; i++) {
-        try { ready = (await fetch(`http://127.0.0.1:${devPort}/example.html`)).ok; } catch {}
-        if (ready) break;
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      assert.ok(ready, 'Vite did not start');
-      const response = await fetch(`http://127.0.0.1:${devPort}/examples/hinged-panel/simulation.zip`);
-      assert.equal(response.status, 200);
-      const original = await readFile(path.join(root, 'examples/assemblies/hinged-panel/simulation.zip'));
-      assert.deepEqual(Buffer.from(await response.arrayBuffer()), original);
-    } finally { dev.kill(); }
+  await check('both local Vite apps expose a usable example and the original bundle', async () => {
+    for (const app of ['prototypes/kamino-ui', 'frontend']) {
+      const probe = createServer();
+      await new Promise(resolve => probe.listen(0, '127.0.0.1', resolve));
+      const devPort = probe.address().port;
+      await new Promise(resolve => probe.close(resolve));
+      const args = [path.join(root, app, 'node_modules/vite/bin/vite.js')];
+      if (app !== 'frontend') args.push('--configLoader', 'native');
+      args.push('--host', '127.0.0.1', '--port', String(devPort), '--strictPort');
+      const dev = spawn(process.execPath, args, { cwd: path.join(root, app), stdio: 'ignore' });
+      try {
+        let ready = false;
+        const devBase = `http://127.0.0.1:${devPort}`;
+        for (let i = 0; i < 80; i++) {
+          try { ready = (await fetch(devBase + '/example.html')).ok; } catch {}
+          if (ready) break;
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        assert.ok(ready, app + ' Vite did not start');
+        if (app === 'frontend') {
+          await page.goto(devBase + '/assembly.html');
+          await page.locator('details > summary').first().click();
+          await page.getByRole('link', { name: 'Explore a complete offline example', exact: true }).click();
+        } else await page.goto(devBase + '/example.html');
+        await page.getByRole('link', { name: 'Download MuJoCo bundle', exact: true }).waitFor({ timeout: 3000 });
+        const response = await fetch(devBase + '/examples/hinged-panel/simulation.zip');
+        assert.equal(response.status, 200);
+        const original = await readFile(path.join(root, 'examples/assemblies/hinged-panel/simulation.zip'));
+        assert.deepEqual(Buffer.from(await response.arrayBuffer()), original);
+      } finally { dev.kill(); }
+    }
   });
   await check(
     "API 404 and 503 remain JSON responses from the backend",

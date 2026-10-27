@@ -21,19 +21,19 @@ No portfolio, paid provider, hardware, licensing grant, destructive cleanup or p
 
 ## Task 1: Documentation, example and licensing preparation
 
-- [ ] Rewrite README/contributor guide, add docs index, quickstart, complete example, access, license options/inventory and release notes.
-- [ ] Freeze the freshly installed Intel Python environment as platform-specific constraints; reinstall into a second environment from those constraints.
-- [ ] Run the unchanged hinged-panel ZIP through the existing assembly validation CLI and relocation checks; retain checksum.
+- [x] Rewrite README/contributor guide, add docs index, quickstart, complete example, access, license options/inventory and release notes.
+- [x] Freeze the freshly installed Intel Python environment as platform-specific constraints; reinstall into a second environment from those constraints.
+- [x] Run the unchanged hinged-panel ZIP through the existing assembly validation CLI and relocation checks; retain checksum.
 
 ## Task 2: Site entry points and recovery
 
-- [ ] Add browser checks for first-screen example links, access disclosure, portable download, 390px assembly layout and 404/API separation; observe failures first.
-- [ ] Add static example/404 pages, package existing example assets in the build, expose first-screen links and update access copy.
-- [ ] Fix grid/canvas shrink behavior; use Caddy's error handler for static 404 recovery.
-- [ ] Re-run focused browser checks and all frontend/backend suites; build both frontends and assemble the deployed layout.
+- [x] Add browser checks for first-screen example links, access disclosure, portable download, 390px assembly layout and 404/API separation; observe failures first.
+- [x] Add static example/404 pages, package existing example assets in the build, expose first-screen links and update access copy.
+- [x] Fix grid/canvas shrink behavior; use Caddy's error handler for static 404 recovery.
+- [x] Re-run focused browser checks and all frontend/backend suites; build both frontends and assemble the deployed layout.
 
 ## Task 3: Review and delivery
 
-- [ ] Check links, artifact hashes, fresh environment evidence, lint and formatting.
-- [ ] Obtain a fresh whole-branch review; fix significant findings with regression coverage.
+- [x] Check links, artifact hashes, fresh environment evidence, lint and formatting.
+- [x] Obtain a fresh whole-branch review; fix significant findings with regression coverage.
 - [ ] Commit and open a reviewable PR. Leave license selection, merge/deployment and tagged publication explicit.

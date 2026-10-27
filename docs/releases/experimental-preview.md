@@ -27,7 +27,7 @@ Fresh verification on Intel macOS / Python 3.13.7 / MuJoCo 3.3.7:
 | Second clean install using constraints | Dependency versions matched exactly |
 | Full backend suite in that environment | 492 passed, 2 skipped; existing Starlette/httpx deprecation warning |
 | Shared frontend / Workspace | 143 / 163 passed; both typechecks and production builds passed |
-| Focused assembled-site browser checks | 10 passed, including local Vite download, 390px entry and desktop-to-phone canvas resize |
+| Focused assembled-site browser checks | 10 passed, including both local Vite apps' example pages/downloads, 320/390px entry and desktop-to-phone canvas resize |
 | Example | Actual extracted ZIP passed motion and relocation checks |
 | Python lint/format | Ruff passed |
 
