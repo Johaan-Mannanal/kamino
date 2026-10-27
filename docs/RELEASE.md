@@ -5,6 +5,14 @@ Application release: October 25, 2026. The advanced-physics baseline is
 Public `main` includes this release; later documentation commits do not redeploy
 services. The application is available at [kamino.design](https://kamino.design).
 
+## Release-readiness follow-up
+
+The [experimental release preparation](releases/experimental-preview.md) records
+the offline example, tested dependency constraints, documentation cleanup and local
+site verification. It does not change the deployed source identities below or
+apply a project-wide license. [License options](LICENSING_OPTIONS.md) remain for
+the team to choose before a licensed tagged release.
+
 ## Source and hosted identity
 
 | Component | Railway deployment |

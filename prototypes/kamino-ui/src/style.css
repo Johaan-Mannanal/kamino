@@ -2611,3 +2611,55 @@ html.live-workspace-page,
 .crop-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
 .crop-actions button, [data-review] { min-height: 44px; }
 @media(max-width: 600px) { .photo-review-dialog { padding: 16px; } .crop-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .photo-row { flex-wrap: wrap; } .photo-row [data-review] { margin-left: auto; } }
+
+/* Release entry points stay reachable without completing the scroll narrative. */
+.site-header .nav-example,
+.site-header .nav-source {
+  color: var(--text, #f3f4f6);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.site-header a:focus-visible {
+  outline: 2px solid #75a7f8;
+  outline-offset: 4px;
+}
+.access-disclosure {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 20px 0;
+}
+.access-disclosure a {
+  color: #75a7f8;
+  text-decoration: underline;
+}
+@media (max-width: 1000px) {
+  .site-header .nav-source {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .home-refined > .site-header {
+    padding: 0 16px;
+    gap: 10px;
+  }
+  .site-header > div {
+    gap: 12px;
+  }
+  .site-header .nav-example,
+  .site-header .nav-upload {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 360px) {
+  .home-refined > .site-header .kamino-brand-lockup {
+    display: none;
+  }
+  .home-refined > .site-header .kamino-brand-mark {
+    display: block;
+  }
+  .site-header > div {
+    gap: 8px;
+  }
+}

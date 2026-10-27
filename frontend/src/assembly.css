@@ -245,3 +245,37 @@ button:disabled {
 #sliders input[hidden] {
   display: none;
 }
+
+/* Let grid children shrink when a desktop canvas is resized onto a phone. */
+.layout > *,
+.stage,
+.edit,
+.guided-grid > *,
+#fields > * {
+  min-width: 0;
+}
+#viewer {
+  width: 100%;
+  min-width: 0;
+}
+#viewer canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+input[type='file'] {
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  header {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .guided-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

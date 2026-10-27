@@ -1,28 +1,63 @@
-# Working together
+# Contributing to Kamino
 
-## Coordination
+Start with the [quickstart](docs/QUICKSTART.md) and run the complete example.
+The repository is `https://github.com/Johaan-Mannanal/kamino`; existing local
+folders may still be named `calhacks-arm`. Use `.venv` for this checkout and keep
+robot/LeRobot environments separate.
 
-Choose a scoped task from [the ordered phases](docs/PROJECT.md) and announce the files you are changing. Coordinate shared interfaces and preserve other people's work. Responsibilities are intentionally unassigned for now.
+## Before making a change
 
-## Share context
+Check [existing issues](https://github.com/Johaan-Mannanal/kamino/issues), then open
+an issue describing the problem or proposed change. For a small correction, a
+focused pull request is welcome. Maintainer: [Johaan Mannanal](https://github.com/Johaan-Mannanal).
+There is no promised response time; this is an experimental project.
 
-Upload Markdown to `docs/team-notes/` using `YYYY-MM-DD-name-topic.md`. Include the author, what is confirmed, what is proposed, and what needs an answer. Start from `_template.md` if useful.
+A root license has not been selected. Read [license status](docs/LICENSING_OPTIONS.md)
+before submitting new code; maintainers need to resolve contributor terms before
+accepting outside code contributions. Bug reports and documentation feedback can
+still be discussed. No CLA or DCO is imposed by this guide.
 
-Keep agreed decisions in `docs/decisions/`. Summarize relevant changes in `docs/PROJECT.md` so old notes do not silently change the plan.
+## Code map
 
-## Code workflow
+- `src/photo2sim/api`: FastAPI, job persistence and workers.
+- `src/photo2sim/assets`, `simulation`, `assemblies`: geometry, physics and exports.
+- `src/photo2sim/integrations`: Meshy and Gemini adapters.
+- `prototypes/kamino-ui`: current website and Workspace (historical directory name).
+- `frontend`: shared API/viewer controls and the assembly workbench.
+- `tests`, frontend `src/*.test.ts`: backend and UI regression tests.
+- `examples`: small intentional fixtures with their provenance.
+- `deploy/railway`: combined website build and hosting configuration.
 
-1. Pull the latest `main` before starting; do not discard local changes.
-2. Use a short branch such as `codex/reconstruction`, `codex/simulation`, or `codex/upload-ui`.
-3. Keep commits focused. Open a PR with the behavior changed and checks performed.
-4. Coordinate shared changes to `pyproject.toml`, the asset schema, and the README.
+## Workflow and checks
 
-Use mock reconstruction jobs and small synthetic fixtures to develop independently. Label synthetic fixtures and cached outputs. Verify API failures, unit conversion, invalid property values, scene loading, and portable exports as their implementations arrive.
+Branch from current `main`, preserve unrelated local work, and keep the change
+focused. Add a regression test for a behavior change. Use synthetic inputs and
+mock providers; routine checks must not spend provider credits or command hardware.
 
-Use `.venv-sim` for simulation development. Keep the existing LeRobot environment intact. Generated assets and job databases belong under ignored directories; small deliberate examples belong in `examples/simulation/`.
+From the repository root with `.venv` active:
 
-## Handoff
+```sh
+python -m pytest -q
+python -m ruff check .
+python -m ruff format --check .
+pnpm --dir frontend test
+pnpm --dir frontend build
+pnpm --dir prototypes/kamino-ui test
+pnpm --dir prototypes/kamino-ui build
+```
 
-Leave a team note with your branch, full commit SHA, push status, environment versions, changed files, exact run commands, results, blockers, and next action. Report headless simulation and viewer checks separately. Record measurements separately from AI suggestions and assumptions.
+For a site change, also run `pnpm --dir prototypes/kamino-ui test:readiness` after
+both builds. This checks entry links, example downloads, access disclosure, mobile
+assembly layout and HTTP 404 recovery against the assembled site. It needs Caddy
+2.10.2 on PATH (or `CADDY_BIN`) and Playwright Chromium installed.
 
-A local file path does not transfer a file to another computer. Push needed code and small fixtures, and explicitly share larger artifacts. After the repository rename, update `origin` to `https://github.com/Johaan-Mannanal/photo2sim.git`; the local folder name may stay unchanged.
+## Pull requests
+
+Explain the concrete problem, resulting behavior, checks run and known limitations.
+Include before/after screenshots for visible changes and label synthetic/cached
+inputs. Keep API keys, codes, personal photos, databases and large captures out of Git.
+Use ignored `outputs/` for local results. Never overwrite earlier evidence or infer
+physical accuracy from numerical checks. For a vulnerability, follow [SECURITY.md](SECURITY.md).
+
+Older `docs/team-notes` and handoffs are historical team coordination; a new
+contributor does not need to create a team handoff note for every pull request.

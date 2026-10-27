@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>A complete example · Kamino</title><meta name="description" content="Download and run a complete synthetic MuJoCo assembly, with its inputs, reviewed properties and validation report. No access code or provider calls."><link rel="stylesheet" href="/release-pages.css"></head><body><header><a href="/" aria-label="Kamino home"><img src="/brand/kamino-lockup-on-dark.svg" alt="Kamino"></a></header><main>
+<p class="eyebrow">A COMPLETE EXAMPLE / NO ACCESS CODE</p><h1>From two parts to a moving assembly.</h1>
+<p>This synthetic hinged panel shows Kamino's assembly-to-simulation workflow. Inspect the component meshes and reviewed joint settings, then download a portable MuJoCo scene with its validation report. No server, account or provider request is needed to run it.</p>
+<div class="actions"><a class="primary" href="/examples/hinged-panel/simulation.zip" download>Download MuJoCo bundle</a><a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/COMPLETE_EXAMPLE.md">Full reproduction guide</a></div>
+<p class="note">Both parts are generated boxes. Mass, friction and drive settings are assumptions. This example demonstrates assembly preparation and export; it is not a photo reconstruction or physical accuracy test.</p>
+<h2>Inspect the inputs and result</h2><ul>
+<li>Component meshes: <a href="/examples/hinged-panel/post.obj" download>Post</a> and <a href="/examples/hinged-panel/panel.obj" download>panel</a>, in millimetres.</li>
+<li><a href="/examples/hinged-panel/reviewed-project.json">Reviewed properties and hinge settings</a>.</li>
+<li><a href="/examples/hinged-panel/validation.json">Retained motion and relocation report</a> and <a href="/examples/hinged-panel/SHA256SUMS">ZIP checksum</a>.</li>
+<li><a href="https://github.com/Johaan-Mannanal/kamino/blob/main/examples/assemblies/hinged-panel/README.md">Correction history</a>: an insufficient drive gain failed tracking; a corrected revision passed while preserving the earlier attempt.</li>
+</ul>
+<h2>Open the download</h2><p>In an isolated Python environment, install MuJoCo 3.3.7. Extract the ZIP, change to its directory and open the scene:</p>
+<pre><code>python -m pip install mujoco==3.3.7
+python -m mujoco.viewer --mjcf scene.xml</code></pre>
+<p>On macOS, use <code>mjpython -m mujoco.viewer --mjcf scene.xml</code> if MuJoCo requests its dedicated launcher.</p>
+<p>To rerun Kamino's headless motion and relocation checks, follow the <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">tested local setup</a>, then run:</p>
+<pre><code>python -m photo2sim.assemblies validate scene.xml --report validation-new.json</code></pre>
+<p>Success prints <code>"passed": true</code>. It establishes the checks in that report under the saved assumptions, not measured physical fidelity.</p>
+<h2>Keep exploring</h2><p><a href="/#upload">Upload your own photos</a> requires a team-issued generation code. The hosted procedural mug demo is a separate interface preview. The <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/ROBOTICS_DEMO.md">SO-101 prototype</a> demonstrates leader-recorded motion refined in simulation and exported for physical follower-arm execution.</p>
+<p><a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/LICENSING_OPTIONS.md">Project-wide license pending the team's choice</a>. Existing third-party notices remain applicable.</p>
+</main></body></html>

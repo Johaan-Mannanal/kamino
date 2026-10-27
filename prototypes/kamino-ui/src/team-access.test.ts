@@ -32,8 +32,10 @@ it("keeps rejected sign-in open and clears the code only after a successful exch
   const session = new BackendSession();
   const token = vi.spyOn(session, "setToken");
   const result = promptForToken(session, "Sign in before uploading.");
-  expect(document.querySelector("dialog")?.textContent).toContain("Friends: 30 minutes");
-  expect(document.querySelector("dialog")?.textContent).toContain("Judges: 6 hours");
+  expect(
+    document.querySelector<HTMLAnchorElement>('dialog a[href="/example.html"]')
+      ?.href,
+  ).toContain("/example.html");
   const input = document.querySelector<HTMLInputElement>("input")!;
   const form = document.querySelector("form")!;
   input.value = "wrong";
