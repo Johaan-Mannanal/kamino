@@ -1,13 +1,34 @@
 # Public release and evidence index
 
-## Current hosted follow-up — October 27, 2026
+## Current hosted documentation clarification — October 27, 2026
+
+Public claim/guide corrections and the matching example-page wording are deployed
+from [`1264b1acd4992a0137fc84eee1a32f1990c5d14c`](https://github.com/Johaan-Mannanal/kamino/commit/1264b1acd4992a0137fc84eee1a32f1990c5d14c).
+This is a documentation/static-copy revision of the session-renewal baseline
+below. Application TypeScript/Python and the demo GIF were unchanged. The README
+caption explicitly identifies recorded arm replay and scripted charger motion;
+[robotics scope](ROBOTICS_DEMO.md) distinguishes the team-reported hardware workflow
+from its public reproduction gaps. The prerelease description was clarified without
+changing its tag or downloadable assets.
+
+| Current component | Production Railway deployment |
+| --- | --- |
+| Frontend (`1264b1a`; runtime code from `09fff23`) | `79b49cf8-b09b-4ae3-b774-455022342f31` |
+| Backend (`a7dff7f`) | `4618a9d8-5d51-4a02-96e4-1c4a489d878a` |
+
+The copy revision passed TypeScript/build, brand-asset checks, JSON/HTML parsing
+and validation of 123 local documentation links/anchors. The served Workspace
+JavaScript remains `index--nDlFzNp.js`, from the accepted runtime baseline below.
+The following documentation-only receipt commit does not redeploy either service.
+
+## Session-renewal acceptance baseline — October 27, 2026
 
 The frontend session-renewal and access-wording fix is
 [`09fff23f44897ae3a5d67b562be1c3746de10154`](https://github.com/Johaan-Mannanal/kamino/commit/09fff23f44897ae3a5d67b562be1c3746de10154).
 The backend remains on the preview application baseline. Documentation commits
 following this source do not themselves change hosted code.
 
-| Current component | Production Railway deployment |
+| Session-renewal component (historical) | Production Railway deployment |
 | --- | --- |
 | Frontend (`09fff23`) | `59363f92-8adc-4ec8-b8e2-4c83821fa478` |
 | Backend (`a7dff7f`) | `4618a9d8-5d51-4a02-96e4-1c4a489d878a` |
