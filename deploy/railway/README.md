@@ -25,9 +25,25 @@ the signing secret and remains a valid team code. Codes must be distinct. Existi
 Bearer authentication, with the same limits as its browser session. Changing a
 tier code revokes its sessions; changing the original token revokes every session.
 
+The public deployment enables `PHOTO2SIM_PUBLIC_STUDENT_ACCESS=true`. This is an
+explicit opt-in and defaults to `false` for self-hosters. It requires the existing
+signing secret and a private `PHOTO2SIM_STUDENT_CODE`; neither goes in frontend
+build variables. A read-only GET `/api/session` advertises availability. The
+browser then POSTs to the same route without a code, from an allowed origin, to
+receive a 30-minute student cookie. Existing judge/team sessions are preserved;
+explicit invalid credentials are rejected. Both web interfaces request this
+session automatically. This spends no provider credits by itself.
+
+All public visitors and student-code users share the same student allowance below.
+Session renewal, a new browser, logout and server restart do not reset it. Public
+student access can be disabled by setting the flag to `false` and redeploying;
+already issued cookies remain valid until expiry. Rotate the student code as well
+to revoke those cookies immediately. Keep the signing secret and usage database
+unchanged when enabling access, so existing sessions and usage survive.
+
 | Access | Session | Mesh submissions / 24h | Gemini requests / 24h | Simulation submissions / 24h |
 | --- | --- | --- | --- | --- |
-| Student/friends | 30 minutes | 2, 5-minute cooldown | 10, 30-second cooldown | 10, 30-second cooldown |
+| Public student and student code | 30 minutes | 2, 5-minute cooldown | 10, 30-second cooldown | 10, 30-second cooldown |
 | Judge | 6 hours | 10, 30-second cooldown | 40, 5-second cooldown | 50, 5-second cooldown |
 | Team and original code | 12 hours | No quota | No quota | No quota |
 
@@ -58,3 +74,10 @@ access. Preserve the exact deployed source and rollback records separately.
 
 Frontend build variable `KAMINO_PUBLIC_ORIGIN` controls the Assembly link; it is
 distinct from the backend's `PHOTO2SIM_PUBLIC_ORIGIN` and must match the environment.
+
+For local checks against the combined production proxy, build both frontends with
+`VITE_API_BASE_URL=/` and the Workspace with `VITE_API_MODE=live`, then run
+`CADDY_BIN=/path/to/caddy pnpm --dir prototypes/kamino-ui test:readiness`.
+The fixture checks automatic student access, judge upgrade, refresh, Assembly and
+sign-out without submitting provider jobs. Backend tests separately exercise the
+real signed sessions and persistent quotas.

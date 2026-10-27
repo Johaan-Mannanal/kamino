@@ -68,7 +68,7 @@ class AccessLimits:
                 raise HTTPException(
                     429,
                     f"{role.title()} access {action} limit reached. Try again in "
-                    f"{math.ceil(seconds / 60)} minute(s). Limits are shared by this code; "
+                    f"{math.ceil(seconds / 60)} minute(s). Limits are shared by this access tier; "
                     "saved jobs and downloads remain available.",
                     headers={"Retry-After": str(seconds)},
                 )

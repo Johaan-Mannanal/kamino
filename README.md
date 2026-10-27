@@ -28,8 +28,8 @@ for presentation. [Still frame](docs/images/demo-simulation-and-arm-poster.png) 
   opens a procedural mug. Its session-only GLB/property export is not a validated
   MuJoCo bundle; use the complete example above for a runnable simulation.
 - **Reconstruct your own object:** [upload photos](https://kamino.design/#upload).
-  Hosted generation requires a team-issued access code because provider usage
-  is metered. [Access and photo handling](docs/HOSTED_ACCESS.md).
+  The public site grants student access automatically, with a shared daily
+  allowance because provider usage is metered. Judge and team access use codes. [Access and photo handling](docs/HOSTED_ACCESS.md).
 - **Develop locally:** follow the [tested quickstart](docs/QUICKSTART.md), which
   starts with an offline example and uses mock reconstruction for local jobs.
 
@@ -101,9 +101,9 @@ source, runtime and artifact scope they tested.
 Built by **Johaan Mannanal, Atul Modur, Srijan Kumbam and Yashwanth Piratla**.
 Atul's Figma design/prototype informed the interface.
 
-The repository is public; a project-wide license is **pending the team's choice**.
-[License options](docs/LICENSING_OPTIONS.md) and [third-party inventory](docs/THIRD_PARTY.md)
-record the remaining decisions. No new project-wide license is granted here.
+Kamino’s original code and documentation are licensed under [Apache-2.0](LICENSE).
+See [NOTICE](NOTICE), [license scope](docs/LICENSING_OPTIONS.md) and the
+[third-party inventory](docs/THIRD_PARTY.md) for attribution and material with separate terms.
 Imported SO-101 assets retain their upstream Apache-2.0 license and attribution.
 
 Hardware work builds on [LeRobot](https://github.com/huggingface/lerobot) and

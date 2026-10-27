@@ -12,10 +12,13 @@ an issue describing the problem or proposed change. For a small correction, a
 focused pull request is welcome. Maintainer: [Johaan Mannanal](https://github.com/Johaan-Mannanal).
 There is no promised response time; this is an experimental project.
 
-A root license has not been selected. Read [license status](docs/LICENSING_OPTIONS.md)
-before submitting new code; maintainers need to resolve contributor terms before
-accepting outside code contributions. Bug reports and documentation feedback can
-still be discussed. No CLA or DCO is imposed by this guide.
+Kamino's original work is licensed under [Apache-2.0](LICENSE). By submitting a
+contribution for inclusion, you agree to license that contribution under Apache-2.0,
+unless you explicitly state different terms in writing and the maintainers accept
+them. This follows Apache-2.0 section 5; no CLA or DCO is imposed by this guide.
+Read the [licensing scope](docs/LICENSING_OPTIONS.md) and
+[third-party inventory](docs/THIRD_PARTY.md) before contributing assets or code
+derived from other work.
 
 ## Code map
 

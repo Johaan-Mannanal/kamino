@@ -1,18 +1,32 @@
 # Hosted generation and photo handling
 
-Kamino's hosted generation is currently team-managed. You need an access code
-before submitting a reconstruction because Meshy and Gemini usage is metered.
-For access questions, contact [Johaan](https://github.com/Johaan-Mannanal); a code
-or response time is not guaranteed. The [complete example](COMPLETE_EXAMPLE.md)
-and [local mock setup](QUICKSTART.md) work without hosted access.
+The public site gives every visitor student access automatically. No access code
+or provider key is needed. Student sessions last 30 minutes and share one rolling
+24-hour allowance across all visitors: 2 mesh submissions (5 minutes apart),
+10 Gemini requests (30 seconds apart), and 10 simulation submissions (30 seconds
+apart). Another visitor may already have used the available allowance.
+
+Refresh or continue from the photo upload page to renew an expired student
+session. Renewal does not reset usage. Saved reads and downloads do not use the
+generation allowance. The server reports a wait time when a limit is reached.
+Judge and team access still require a code; use **Student access** on the upload
+page or **Generation access** in Assembly to enter one. Signing out clears this
+browser's session; public student access resumes on refresh or the next upload
+access check. Existing judge and team sessions keep their role.
+
+For access questions, contact [Johaan](https://github.com/Johaan-Mannanal). The
+[complete example](COMPLETE_EXAMPLE.md) and [local mock setup](QUICKSTART.md)
+work without hosted access or a generation allowance. Self-hosted deployments
+must explicitly enable public student access; it is off by default.
 
 ## Where inputs go
 
 Uploaded photos go to the configured Kamino backend. Real reconstruction sends
 them to Meshy; requesting photo-based property assistance sends images to Gemini.
 Jobs, original inputs and generated artifacts are retained in backend storage so
-users can reopen and revise them. Hosted codes are shared access tiers, not
-individual private accounts. Provider API keys stay on the server.
+users can reopen and revise them. Hosted access uses shared tiers, not individual
+private accounts. Student access is public; a job ID is not a private account or
+ownership check. Provider API keys and shared access codes stay on the server.
 
 The service does not currently publish a guaranteed retention period or provide
 a self-service deletion interface. For a removal request, contact the maintainer

@@ -11,6 +11,7 @@ COPY prototypes/kamino-ui ./prototypes/kamino-ui
 COPY deploy/railway/assemble-web.mjs deploy/railway/example-assets.mjs ./deploy/railway/
 COPY examples/assemblies/hinged-panel ./examples/assemblies/hinged-panel
 COPY tools/branding ./tools/branding
+COPY LICENSE NOTICE ./
 ARG KAMINO_PUBLIC_ORIGIN=https://kamino.design
 ENV VITE_API_BASE_URL=/ VITE_API_MODE=live
 ENV VITE_KAMINO_ASSEMBLY_URL=${KAMINO_PUBLIC_ORIGIN}/assembly.html

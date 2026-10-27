@@ -16,7 +16,8 @@ presenting and reproducing the delivered project, not changing the production ap
   no Azure integration, sponsor approval or customer impact numbers are invented.
 - Known display issues and verification boundaries recorded without overwriting
   historical acceptance evidence.
-- Upstream SO-101 asset license and attribution retained under `third_party`.
+- Root Apache-2.0 [LICENSE](../LICENSE) and [NOTICE](../NOTICE), with upstream
+  SO-101 asset license and attribution retained under `third_party`.
 
 ## Still needed from the team
 
@@ -31,8 +32,10 @@ presenting and reproducing the delivered project, not changing the production ap
 3. **Microsoft clarification and opt-in check.** Obtain a sponsor/organizer answer
    if available, and verify the actual Devpost selections for all intended tracks.
    A confirmed pursuit does not establish eligibility or submitted opt-in.
-4. **Project license choice.** There is no root project license yet. The team must
-   choose the intended reuse terms; third-party licenses remain independent.
+4. **Asset clearance.** The root Apache-2.0 license applies only to original
+   Kamino material. Confirm permissions for provider outputs, supplied assets and
+   design/media before including them in a release; third-party licenses remain
+   independent.
 
 ## Publication hygiene
 

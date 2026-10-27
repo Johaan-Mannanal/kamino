@@ -126,6 +126,7 @@ def register_session_routes(app, settings):
             {
                 "required": bool(settings.api_token),
                 "authenticated": role is not None,
+                **({"public_student_access": True} if settings.public_student_access else {}),
                 **(role_details(role) if role and settings.api_token else {}),
             },
             headers={"Cache-Control": "no-store"},
@@ -137,7 +138,17 @@ def register_session_routes(app, settings):
             request, settings.cors_origins, settings.public_origin
         ):
             raise HTTPException(403, "Sign in from the Kamino website")
-        role = bearer_role(request, settings) if settings.api_token else "team"
+        public_request = settings.public_student_access and "authorization" not in request.headers
+        if public_request and not trusted_origin(
+            request, settings.cors_origins, settings.public_origin
+        ):
+            raise HTTPException(403, "Sign in from the Kamino website")
+        existing_role = access_role(request, settings) if public_request else None
+        if public_request:
+            # Keep an existing privileged session; anonymous visitors only receive student access.
+            role = existing_role or "student"
+        else:
+            role = bearer_role(request, settings) if settings.api_token else "team"
         if role is None:
             raise HTTPException(401, "That team access code was not accepted")
         secure = bool(settings.public_origin) or request.url.scheme == "https"
@@ -146,13 +157,12 @@ def register_session_routes(app, settings):
         result = JSONResponse(
             {"authenticated": True, **role_details(role)}, headers={"Cache-Control": "no-store"}
         )
-        if settings.api_token:
+        if settings.api_token and not existing_role:
             lifetime = SESSION_SECONDS[role]
             value = f"{int(time.time()) + lifetime}.{secrets.token_hex(16)}"
-            if not bearer_access(request, settings.api_token):
-                fingerprint = signature("code:" + tier_codes(settings)[role], settings.api_token)[
-                    :16
-                ]
+            code = tier_codes(settings)[role]
+            if code and not bearer_access(request, settings.api_token):
+                fingerprint = signature("code:" + code, settings.api_token)[:16]
                 value = f"v2.{role}.{value}.{fingerprint}"
             result.set_cookie(
                 COOKIE,

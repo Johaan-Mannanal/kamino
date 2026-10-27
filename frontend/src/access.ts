@@ -3,6 +3,7 @@ const base = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').repl
 export type AccessStatus = {
   authenticated?: boolean
   required?: boolean
+  public_student_access?: boolean
   role?: 'student' | 'judge' | 'team'
   session_seconds?: number
 }
@@ -45,8 +46,31 @@ async function request(method: string, code?: string): Promise<AccessStatus> {
   }
 }
 
+let pendingStatus: Promise<AccessStatus> | undefined
+
 export const browserAccess = {
-  status: () => request('GET'),
-  signIn: (code: string) => request('POST', code),
-  signOut: () => request('DELETE'),
+  status(): Promise<AccessStatus> {
+    if (!pendingStatus) {
+      pendingStatus = request('GET').then(async (status) => {
+        if (status.required && !status.authenticated && status.public_student_access) {
+          await request('POST')
+          const confirmed = await request('GET')
+          if (!confirmed.authenticated)
+            throw new Error('Could not establish browser access. Allow cookies for this site and refresh.')
+          return confirmed
+        }
+        return status
+      }).finally(() => { pendingStatus = undefined })
+    }
+    return pendingStatus
+  },
+  async signIn(code: string): Promise<AccessStatus> {
+    // Finish a public bootstrap before replacing its cookie with a privileged session.
+    await pendingStatus?.catch(() => {})
+    return request('POST', code)
+  },
+  async signOut(): Promise<AccessStatus> {
+    await pendingStatus?.catch(() => {})
+    return request('DELETE')
+  },
 }

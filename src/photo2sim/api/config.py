@@ -23,6 +23,7 @@ class Settings:
     gemini_backoff_seconds: float = 0.5
     api_token: str = field(default="", repr=False)
     student_code: str = field(default="", repr=False)
+    public_student_access: bool = False
     judge_code: str = field(default="", repr=False)
     team_code: str = field(default="", repr=False)
     public_origin: str = ""
@@ -33,6 +34,8 @@ class Settings:
     max_polls: int = 300
 
     def __post_init__(self):
+        if self.public_student_access and not (self.api_token and self.student_code):
+            raise ValueError("Public student access requires a signing secret and student code")
         codes = [self.student_code, self.judge_code, self.team_code]
         if any(codes) and not self.api_token:
             raise ValueError("Tier codes require PHOTO2SIM_API_TOKEN as the signing secret")
@@ -73,6 +76,9 @@ class Settings:
     def from_env(cls, env_file: Path | None = Path(".env")):
         values = dict(dotenv_values(env_file)) if env_file is not None else {}
         values.update(os.environ)
+        public_student_access = (values.get("PHOTO2SIM_PUBLIC_STUDENT_ACCESS") or "false").lower()
+        if public_student_access not in {"true", "false"}:
+            raise ValueError("PHOTO2SIM_PUBLIC_STUDENT_ACCESS must be true or false")
         return cls(
             data_dir=Path(values.get("PHOTO2SIM_DATA_DIR") or "artifacts/photo2sim"),
             provider=values.get("PHOTO2SIM_PROVIDER") or "mock",
@@ -94,6 +100,7 @@ class Settings:
             gemini_backoff_seconds=float(values.get("GEMINI_BACKOFF_SECONDS") or 0.5),
             api_token=values.get("PHOTO2SIM_API_TOKEN") or "",
             student_code=values.get("PHOTO2SIM_STUDENT_CODE") or "",
+            public_student_access=public_student_access == "true",
             judge_code=values.get("PHOTO2SIM_JUDGE_CODE") or "",
             team_code=values.get("PHOTO2SIM_TEAM_CODE") or "",
             public_origin=(values.get("PHOTO2SIM_PUBLIC_ORIGIN") or "").rstrip("/"),

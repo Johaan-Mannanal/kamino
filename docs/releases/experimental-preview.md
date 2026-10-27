@@ -1,8 +1,8 @@
 # Experimental release preparation
 
-Status: **prepared for review; not a published licensed release**. The team must
-choose a [project-wide license](../LICENSING_OPTIONS.md) and resolve applicable
-[third-party permissions](../THIRD_PARTY.md) before publication.
+Status: **prepared for review**. Original Kamino material is licensed under
+[Apache-2.0](../../LICENSE); publication still requires applicable
+[third-party permissions](../THIRD_PARTY.md) for every included asset.
 
 ## Scope
 
@@ -46,6 +46,7 @@ counts remain in [RELEASE.md](../RELEASE.md) with their original scope.
 - Browser mobile checks use Chromium emulation, not native-device certification.
 - Local checks and a PR do not imply a staging or production deployment.
 
-After license approval, tag the reviewed merge commit, attach the example/checksum,
-include these limitations and actual verification receipts, and publish the
-experimental GitHub release. Do not tag a different source while reusing old results.
+Tag the reviewed merge commit, attach the example/checksum, include these limitations
+and actual verification receipts, and publish the experimental GitHub release. Include
+the root LICENSE and NOTICE and preserve applicable third-party notices. Do not tag a
+different source while reusing old results.

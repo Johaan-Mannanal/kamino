@@ -9,9 +9,10 @@ services. The application is available at [kamino.design](https://kamino.design)
 
 The [experimental release preparation](releases/experimental-preview.md) records
 the offline example, tested dependency constraints, documentation cleanup and local
-site verification. It does not change the deployed source identities below or
-apply a project-wide license. [License options](LICENSING_OPTIONS.md) remain for
-the team to choose before a licensed tagged release.
+site verification. It does not change the deployed source identities below. Original
+Kamino material is now licensed under [Apache-2.0](../LICENSE); its scope and
+third-party boundaries are recorded in [licensing](LICENSING_OPTIONS.md) and the
+[third-party inventory](THIRD_PARTY.md).
 
 ## Source and hosted identity
 

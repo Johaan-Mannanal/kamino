@@ -5,7 +5,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --uid 10001 --user-group --create-home app
 WORKDIR /app
-COPY pyproject.toml README.md ./
+COPY pyproject.toml README.md LICENSE NOTICE ./
 COPY src ./src
 RUN python -m pip install --no-cache-dir '.[simulation]'
 COPY deploy/railway/start-backend.sh /usr/local/bin/start-backend

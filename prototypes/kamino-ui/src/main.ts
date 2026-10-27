@@ -113,7 +113,7 @@ function steps(active: string, liveJob = false) {
 function guide() {
   const dialog = document.createElement("dialog");
   dialog.className = "guide";
-  dialog.innerHTML = `<h2>A small guide to Kamino.</h2><p><a href="/example.html">Run a complete synthetic example</a> with a portable MuJoCo bundle, or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">set up Kamino locally</a>.</p><p>Upload 2–4 photos for better coverage. One photo is supported. Include different angles and important details such as ports and pins. Hosted generation requires a team-issued access code. Photos go to the Kamino backend and reconstruction provider; photo-based property assistance uses Gemini. Inputs and artifacts are retained to reopen jobs. See the <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">photo-handling details</a>. Keep the job URL to resume it later. Provider credentials stay on the server.</p><p>Drag to orbit, shift-drag to pan, and scroll over the viewer to zoom. Review orientation and a known full extent, preview dimensions on the server, then save reviewed properties. Generate simulation is a separate action; its downloadable bundle requires successful validation.</p><p>Try the demo and Use demo photos open a separate procedural ceramic mug. Those demo photos are not uploaded or reconstructed. Demo export contains a GLB and properties JSON, with no simulation validation.</p><form method="dialog"><button class="primary">Got it</button></form>`;
+  dialog.innerHTML = `<h2>A small guide to Kamino.</h2><p><a href="/example.html">Run a complete synthetic example</a> with a portable MuJoCo bundle, or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">set up Kamino locally</a>.</p><p>Upload 2–4 photos for better coverage. One photo is supported. Include different angles and important details such as ports and pins. The public site provides student access automatically, with a shared daily allowance. Judge and team access use codes. Photos go to the Kamino backend and reconstruction provider; photo-based property assistance uses Gemini. Inputs and artifacts are retained to reopen jobs. See the <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">photo-handling details</a>. Keep the job URL to resume it later. Provider credentials stay on the server.</p><p>Drag to orbit, shift-drag to pan, and scroll over the viewer to zoom. Review orientation and a known full extent, preview dimensions on the server, then save reviewed properties. Generate simulation is a separate action; its downloadable bundle requires successful validation.</p><p>Try the demo and Use demo photos open a separate procedural ceramic mug. Those demo photos are not uploaded or reconstructed. Demo export contains a GLB and properties JSON, with no simulation validation.</p><form method="dialog"><button class="primary">Got it</button></form>`;
   document.body.append(dialog);
   dialog.addEventListener("close", () => dialog.remove());
   dialog.showModal();
@@ -178,7 +178,7 @@ function mountResume(selector: string) {
 }
 
 function upload() {
-  app.innerHTML = `${header("Untitled asset")}${steps("upload")}<main class="upload-content"><p class="eyebrow">CREATE AN ASSET / NEW DRAFT</p><h1>Upload photos</h1><p class="muted">Upload 2–4 photos of the same object from different angles. Include important details such as ports and pins. One photo is supported.</p><p id="generation-access" class="access-disclosure">Hosted generation requires an access code from the team. <a href="/example.html">Explore a complete example</a> or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">run locally</a> without hosted access. <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">Photo handling and access details</a>.</p><div id="drop-zone" class="drop-zone">${icon("0e7df.svg", 28)}<strong>Drop photos here</strong><span class="muted">2–4 photos recommended · One photo supported · JPEG, PNG or WebP · Up to 10 MiB each</span><button id="choose" class="secondary">Choose photos</button><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden></div><p id="upload-error" class="error" role="alert"></p><div class="selection-heading"><strong>Selected photos <span id="photo-count"></span></strong><button class="text-button accent" id="sample-photos">Use demo photos</button></div><div id="photo-list"></div><div class="upload-actions"><a class="quiet" href="#home">← Back to start</a><button id="create-mesh" class="primary">${icon("0f26a.svg")}Create mesh</button></div><p class="prototype-note" id="upload-note"></p><p class="live-upload-links small"><button class="text-button" id="access-token" type="button">Application access token</button><a class="text-button" href="${esc(assemblyUrl())}">Assembly workflow ↗</a></p></main>`;
+  app.innerHTML = `${header("Untitled asset")}${steps("upload")}<main class="upload-content"><p class="eyebrow">CREATE AN ASSET / NEW DRAFT</p><h1>Upload photos</h1><p class="muted">Upload 2–4 photos of the same object from different angles. Include important details such as ports and pins. One photo is supported.</p><p id="generation-access" class="access-disclosure">Student access is automatic on the public site, with a shared daily allowance. Judge and team access use codes. <a href="/example.html">Explore a complete example</a> or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">run locally</a> without hosted access. <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">Photo handling and access details</a>.</p><div id="drop-zone" class="drop-zone">${icon("0e7df.svg", 28)}<strong>Drop photos here</strong><span class="muted">2–4 photos recommended · One photo supported · JPEG, PNG or WebP · Up to 10 MiB each</span><button id="choose" class="secondary">Choose photos</button><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden></div><p id="upload-error" class="error" role="alert"></p><div class="selection-heading"><strong>Selected photos <span id="photo-count"></span></strong><button class="text-button accent" id="sample-photos">Use demo photos</button></div><div id="photo-list"></div><div class="upload-actions"><a class="quiet" href="#home">← Back to start</a><button id="create-mesh" class="primary">${icon("0f26a.svg")}Create mesh</button></div><p class="prototype-note" id="upload-note"></p><p class="live-upload-links small"><button class="text-button" id="access-token" type="button">Application access token</button><a class="text-button" href="${esc(assemblyUrl())}">Assembly workflow ↗</a></p></main>`;
   mountResume(".live-upload-links");
   const guidance = document.createElement("p");
   guidance.className = "photo-capture-guide small";
@@ -286,11 +286,16 @@ function upload() {
   $("#access-token").onclick = async () => {
     try {
       const status = await browserAccess.status();
-      if (status.required && status.authenticated) {
+      if (status.public_student_access && status.role === "student") {
+        if (await promptForToken(live(), "Student access is active. Enter a judge or team code for higher limits.")) {
+          const next = await browserAccess.status();
+          $("#access-token").textContent = next.role === "student" ? "Student access" : "Sign out";
+        }
+      } else if (status.required && status.authenticated) {
         await browserAccess.signOut();
         live().setToken("");
         $("#access-token").textContent = "Generation access";
-        toast("Signed out on this browser.");
+        toast(status.public_student_access ? "Signed out. Student access resumes when you continue or refresh." : "Signed out on this browser.");
       } else if (status.required) {
         if (
           await promptForToken(
@@ -309,7 +314,7 @@ function upload() {
     .status()
     .then((status) => {
       if (navToken === accessView && status.required && status.authenticated)
-        $("#access-token").textContent = "Sign out";
+        $("#access-token").textContent = status.public_student_access && status.role === "student" ? "Student access" : "Sign out";
     })
     .catch(() => {
       /* Create mesh retries the access check with a visible error. */
@@ -376,6 +381,7 @@ function upload() {
         void promptForToken(
           live(),
           "Sign in again, then choose Create mesh. The rejected request did not start reconstruction.",
+          true,
         );
       } else
         $("#upload-error").textContent =
@@ -396,10 +402,15 @@ function liveLoading(token: number, id: string) {
   const session = live();
   app.innerHTML = `<header class="site-header">${brand()}</header><main class="loading"><h1>Creating your mesh</h1><p class="muted" id="live-load-status" role="status" aria-live="polite">Loading job status…</p><div class="progress" id="live-load-bar" role="progressbar" aria-label="Server job progress" aria-valuemin="0" aria-valuemax="100"><span></span></div><p class="loading-note">Job ${esc(id.slice(0, 8))} · status from the server</p><p id="live-load-error" class="error" role="alert"></p><div class="live-load-actions"><button class="secondary compact" id="live-load-retry" hidden>Retry</button><button class="text-button" id="live-load-back">Back to photos</button></div><p class="prototype-note">Leaving this page stops watching; the server job continues and can be reopened from this URL.</p></main>`;
   let failure: unknown = null;
-  const restore = () => {
+  const restore = async () => {
     failure = null;
     paint();
-    session.restore(id).catch(fail);
+    try {
+      await browserAccess.status();
+      if (token === navToken) await session.restore(id);
+    } catch (error) {
+      await fail(error);
+    }
   };
   const fail = async (error: unknown) => {
     if (token !== navToken || error instanceof SessionCancelledError) return;
@@ -407,7 +418,7 @@ function liveLoading(token: number, id: string) {
     paint();
     if (
       isAuthError(error) &&
-      (await promptForToken(session, "Sign in to open this saved job."))
+      (await promptForToken(session, "Sign in to open this saved job.", true))
     )
       if (token === navToken) restore();
   };

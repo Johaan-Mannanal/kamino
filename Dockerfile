@@ -11,7 +11,7 @@ RUN apt-get update \
     && mkdir /data && chown app:app /data
 
 WORKDIR /app
-COPY pyproject.toml README.md ./
+COPY pyproject.toml README.md LICENSE NOTICE ./
 COPY src ./src
 RUN python -m pip install --no-cache-dir '.[simulation]'
 
