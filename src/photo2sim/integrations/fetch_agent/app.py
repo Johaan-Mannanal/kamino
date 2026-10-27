@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException
 from photo2sim.integrations.fetch_agent.workflow import Workflow
 
 
-def create_app(*, workflow=None, send=None, seed=None) -> FastAPI:
+def create_app(*, workflow=None, send=None, seed=None, allowed_senders=None) -> FastAPI:
     try:
         from uagents_core.contrib.protocols.chat import (
             ChatAcknowledgement,
@@ -26,6 +26,14 @@ def create_app(*, workflow=None, send=None, seed=None) -> FastAPI:
         raise RuntimeError("Install fetch_agent/requirements.txt for Agentverse ACP.") from error
 
     identity = Identity.from_seed(seed or os.environ["AGENT_SEED_PHRASE"], 0)
+    configured = (
+        os.getenv("PHOTO2SIM_AGENT_ALLOWED_SENDERS", "").split(",")
+        if allowed_senders is None
+        else allowed_senders
+    )
+    if isinstance(configured, str) or any(not isinstance(value, str) for value in configured):
+        raise ValueError("Allowed senders must be an explicit collection of agent addresses")
+    permitted = frozenset(value.strip() for value in configured if value.strip())
     owns_client = workflow is None
     workflow = workflow or Workflow(
         os.getenv("PHOTO2SIM_API_BASE_URL", "http://127.0.0.1:8000"),
@@ -55,6 +63,11 @@ def create_app(*, workflow=None, send=None, seed=None) -> FastAPI:
                 raise ValueError("Expired envelope")
         except Exception:
             raise HTTPException(401, "Invalid or expired signed envelope") from None
+
+        # A valid signature proves an identity, not permission to use our backend token.
+        # Deny before acknowledgements, replay-cache access, outbound delivery or tool work.
+        if envelope.sender not in permitted:
+            raise HTTPException(403, "Agent sender is not authorized")
 
         if envelope.schema_digest == Model.build_schema_digest(ChatAcknowledgement):
             return {"status": "accepted"}

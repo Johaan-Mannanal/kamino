@@ -7,6 +7,8 @@ const retryCodes = new Set([
   'export_failed',
   'validation_failed',
   'packaging_failed',
+  'storage_budget_exhausted',
+  'publication_failed',
 ])
 export function canRetry(job: Job | null): boolean {
   return (

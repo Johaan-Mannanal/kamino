@@ -122,7 +122,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       const body = await response.json()
       if (body && typeof body === 'object' && !Array.isArray(body)) {
-        if (typeof body.category === 'string' && suggestionErrorCategories.has(body.category))
+        if (
+          typeof body.category === 'string' &&
+          (suggestionErrorCategories.has(body.category) ||
+            ['job_access', 'storage'].includes(body.category))
+        )
           details.category = body.category
         if (typeof body.retryable === 'boolean') details.retryable = body.retryable
         if (typeof body.manual_entry_available === 'boolean')
@@ -207,11 +211,20 @@ export const liveApi: Api = {
     } catch {
       throw new ApiError('Download failed. Check your connection and try again.')
     }
-    if (!response.ok)
+    if (!response.ok) {
+      const details: ApiErrorDetails = {}
+      try {
+        const body = await response.json()
+        if (body?.category === 'job_access') details.category = 'job_access'
+      } catch {
+        /* retain a safe download error for non-JSON responses */
+      }
       throw new ApiError(
         `Download failed (HTTP ${response.status}). Check API access and retry.`,
         response.status,
+        details,
       )
+    }
     return response.blob()
   },
   fileUrl,

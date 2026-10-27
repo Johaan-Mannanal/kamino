@@ -110,6 +110,29 @@ When `PHOTO2SIM_API_TOKEN` is set, protected `/api/` routes accept either `Autho
 
 This application token is distinct from Gemini/Meshy/Agentverse/Vultr keys. Never put provider keys in browser code. Team-demo clients need the app token through private configuration, user entry or a server-side proxy; do not bundle it into a public frontend. File downloads also require authorization: fetch them with headers and create a local Blob download, rather than relying on an unauthenticated anchor URL.
 
+New rigid/assembly jobs record a browser owner, supplied by a separate signed
+`kamino_owner` HttpOnly cookie. Student and judge sessions require the matching
+owner on every job read, mutation and download; a mismatch returns 403 with
+`category: "job_access"`. Automatic access renewal does not retry this denial.
+Team/original application access is administrative. Legacy unowned jobs require
+team access and are never claimed by reading. Team-only `POST /api/jobs/{id}/claim`
+and `/api/assembly-jobs/{id}/claim` accept exactly
+`{"acknowledge_legacy_claim": true}` to atomically bind a legacy job to the current
+browser; an already owned job returns 409. Sign-out clears both cookies. This is
+browser ownership with operator recovery, not account authentication.
+
+Request bodies are bounded while streaming: 2 MiB metadata, 8 MiB mapping reviews,
+41 MiB image multipart and 66 MiB assembly multipart including overhead. Assembly
+source meshes are limited to 32 MiB each / 64 MiB total; native import runs in a
+bounded subprocess. Student/judge parser and retained-save cooldowns are separate
+from paid-operation allowances and remain charged for rejected parsing. New
+assembly revisions/mapping versions and processing attempts have retention caps.
+Storage exhaustion returns 413 (`category: "storage"`) without deleting history.
+Defaults are 3 GiB global, 512 MiB per job and 256 MiB free-space reserve; configure
+`PHOTO2SIM_STORAGE_MAX_TOTAL_BYTES`, `PHOTO2SIM_STORAGE_MAX_JOB_BYTES`, and
+`PHOTO2SIM_STORAGE_MIN_FREE_BYTES` for the actual volume. Existing data above a
+lowered limit remains readable. See [security operations](SECURITY_OPERATIONS.md).
+
 ## Property input
 
 ### Orientation before dimensions

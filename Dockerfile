@@ -12,8 +12,9 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE NOTICE ./
+COPY requirements/production-py312.txt ./requirements/production-py312.txt
 COPY src ./src
-RUN python -m pip install --no-cache-dir '.[simulation]'
+RUN python -m pip install --no-cache-dir --constraint requirements/production-py312.txt '.[simulation]'
 
 USER app
 EXPOSE 8000

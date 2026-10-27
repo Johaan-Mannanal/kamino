@@ -245,6 +245,8 @@ class ReconstructionProgress(Contract):
 class JobRecord(Contract):
     schema_version: Literal["1.0"] = "1.0"
     id: UUID
+    owner_principal_id: Annotated[str, Field(pattern=r"^[0-9a-f]{32}$")] | None = None
+    owner_claimed_at: datetime | None = None
     status: JobStatus
     provider: ProviderName
     synthetic: bool

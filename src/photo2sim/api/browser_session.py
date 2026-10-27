@@ -173,6 +173,9 @@ def register_session_routes(app, settings):
                 httponly=True,
                 samesite="strict",
             )
+        from photo2sim.api.job_access import ensure_owner_cookie
+
+        ensure_owner_cookie(result, request, settings)
         return result
 
     @app.delete("/api/session")
@@ -182,6 +185,15 @@ def register_session_routes(app, settings):
         result = JSONResponse({"authenticated": False}, headers={"Cache-Control": "no-store"})
         result.delete_cookie(
             COOKIE,
+            path="/api",
+            secure=bool(settings.public_origin) or request.url.scheme == "https",
+            httponly=True,
+            samesite="strict",
+        )
+        from photo2sim.api.job_access import OWNER_COOKIE
+
+        result.delete_cookie(
+            OWNER_COOKIE,
             path="/api",
             secure=bool(settings.public_origin) or request.url.scheme == "https",
             httponly=True,

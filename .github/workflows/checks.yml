@@ -23,6 +23,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Frontend tests
         run: pnpm test
+      - name: Audit locked dependencies, including developer tooling
+        run: pnpm audit --audit-level moderate
       - name: Production build
         run: pnpm build
   workspace:
@@ -41,6 +43,8 @@ jobs:
         run: pnpm --dir prototypes/kamino-ui install --frozen-lockfile
       - name: Workspace tests
         run: pnpm --dir prototypes/kamino-ui test
+      - name: Audit locked Workspace dependencies, including developer tooling
+        run: pnpm --dir prototypes/kamino-ui audit --audit-level moderate
       - name: Workspace production build
         env:
           VITE_API_BASE_URL: /
@@ -88,6 +92,29 @@ jobs:
         run: python -c "import photo2sim"
       - name: Tests
         run: python -m pytest -q
+  agent-adapter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned optional adapter and test dependencies
+        run: python -m pip install -e '.[dev]' -r src/photo2sim/integrations/fetch_agent/requirements.txt
+      - name: Verify signed sender authorization without external delivery
+        run: python -m pytest -q tests/test_fetch_agent.py tests/test_fetch_agent_acp.py
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Audit the accepted production Python resolution
+        run: |
+          python -m venv /tmp/kamino-pip-audit
+          /tmp/kamino-pip-audit/bin/python -m pip install --disable-pip-version-check pip-audit==2.9.0
+          /tmp/kamino-pip-audit/bin/pip-audit --requirement requirements/production-py312.txt --strict
   container:
     runs-on: ubuntu-latest
     env:

@@ -7,6 +7,25 @@ afterEach(() => {
   setApiToken('')
 })
 describe('shared HTTP contract', () => {
+  it.each(['job', 'download'])(
+    'preserves ownership denial for %s without automatic renewal',
+    async (kind) => {
+      const fetch = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            detail: 'This browser does not own this job',
+            category: 'job_access',
+          }),
+          { status: 403 },
+        ),
+      )
+      vi.stubGlobal('fetch', fetch)
+      await expect(
+        kind === 'job' ? liveApi.get('job-id') : liveApi.file('job-id', 'simulation.zip'),
+      ).rejects.toMatchObject({ status: 403, category: 'job_access' })
+      expect(fetch).toHaveBeenCalledTimes(1)
+    },
+  )
   it('uses repeated images fields and lets the browser set multipart Content-Type', async () => {
     const fetch = vi.fn().mockResolvedValue(new Response('{}', { status: 202 }))
     vi.stubGlobal('fetch', fetch)

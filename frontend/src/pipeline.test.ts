@@ -42,4 +42,13 @@ describe('pipeline contract', () => {
       canRetry({ ...job, status: 'failed', error: { code: 'provider_failed', message: '' } }),
     ).toBe(false)
   })
+  it.each(['storage_budget_exhausted', 'publication_failed'])(
+    'allows cached-source recovery after %s',
+    (code) => {
+      expect(canRetry({ ...job, status: 'failed', error: { code, message: '' } })).toBe(true)
+      expect(
+        canRetry({ ...job, status: 'failed', mesh_path: null, error: { code, message: '' } }),
+      ).toBe(false)
+    },
+  )
 })

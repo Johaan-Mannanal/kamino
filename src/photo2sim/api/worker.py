@@ -1,9 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from threading import Event
 from uuid import UUID
 
 from photo2sim.api.config import Settings
+from photo2sim.api.storage import StorageLimitError
 from photo2sim.api.store import JobStore
 from photo2sim.contracts import JobError, ReconstructionProgress
 from photo2sim.integrations.reconstruction import ProviderError, ReconstructionProvider
@@ -124,8 +127,33 @@ class JobWorker:
                 )
                 if snapshot.status == "succeeded":
                     root = self.store.job_dir(job_id)
-                    mesh = self.provider.download(snapshot, root / "reconstruction")
-                    relative = mesh.resolve().relative_to(root.resolve()).as_posix()
+                    # A recovered provider task may have only its SQLite record left.
+                    root.mkdir(parents=True, exist_ok=True)
+                    # Provider output can be large. Reserve a job-sized allowance before
+                    # downloading into private same-job staging, then publish atomically. Provider
+                    # implementations still enforce stream limits; the reserve prevents
+                    # simultaneous jobs from treating scratch as unbounded.
+                    with TemporaryDirectory(prefix="photo2sim-download-", dir=root) as temp:
+                        staged_root = Path(temp)
+                        staged = staged_root / "reconstruction"
+                        existing_job_bytes = self.store.storage._tree_bytes(root)
+                        allowance = min(
+                            self.settings.max_asset_bytes,
+                            max(0, self.store.storage.max_job_bytes - existing_job_bytes),
+                        )
+                        if allowance == 0:
+                            raise StorageLimitError(
+                                "job storage budget has no room for provider output"
+                            )
+                        with self.store.storage.write_admission(root, allowance):
+                            mesh = self.provider.download(snapshot, staged)
+                            if self.store.storage._tree_bytes(staged) > allowance:
+                                raise StorageLimitError(
+                                    "provider output exceeds the bounded staging allowance"
+                                )
+                        mesh_relative = mesh.resolve().relative_to(staged.resolve())
+                        self.store.storage.publish_directory(staged, root / "reconstruction", root)
+                    relative = (Path("reconstruction") / mesh_relative).as_posix()
                     self.store.update(
                         job_id,
                         status="awaiting_properties",
@@ -144,6 +172,12 @@ class JobWorker:
             )
         except ProviderError as error:
             self.fail(job_id, error.code, error.message)
+        except StorageLimitError:
+            self.fail(
+                job_id,
+                "storage_budget_exhausted",
+                "Reconstruction output could not be retained within the storage budget.",
+            )
         except Exception:
             # Raw SDK/HTTP exceptions can contain keys or signed asset URLs.
             self.fail(

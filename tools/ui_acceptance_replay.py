@@ -9,7 +9,7 @@ import json
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
-from threading import Lock
+from threading import Lock, local
 from unittest.mock import patch
 
 import httpx
@@ -100,6 +100,9 @@ class OfflineReplay:
             ident = Path(path).resolve().relative_to(self.root).parts[0]
         except (ValueError, IndexError):
             return False
+        return self.consume_identity(ident, stage)
+
+    def consume_identity(self, ident, stage):
         with self.lock:
             if self.consumed or ident != self.processing_job or stage != self.stage:
                 return False
@@ -115,14 +118,21 @@ class OfflineReplay:
         from photo2sim.api import pipeline
 
         original_prepare, original_validate = pipeline.prepare_asset, pipeline.validate_export
+        active = local()
 
         def prepare(source, *args, **kwargs):
+            # Generated scenes now live in private scratch outside the retained job root.
+            # Carry only the source's verified job identity in this worker thread.
+            try:
+                active.job_id = Path(source).resolve().relative_to(self.root).parts[0]
+            except (ValueError, IndexError):
+                active.job_id = None
             if self.consume(source, "preparation"):
                 raise ValueError("Offline acceptance preparation failure")
             return original_prepare(source, *args, **kwargs)
 
         def validate(scene, *args, **kwargs):
-            if self.consume(scene, "validation"):
+            if self.consume_identity(getattr(active, "job_id", None), "validation"):
                 return {
                     "passed": False,
                     "viewer_inspected": False,
