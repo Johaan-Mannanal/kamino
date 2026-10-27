@@ -9,6 +9,17 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+it("recovers public access after expiry without displaying a code dialog", async () => {
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+  vi.stubGlobal("fetch", vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: false, public_student_access: true })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: true, role: "student", session_seconds: 1800 })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: true, public_student_access: true, role: "student", session_seconds: 1800 }))));
+  const pending = promptForToken(new BackendSession(), "Session expired", true);
+  await vi.waitFor(() => expect(document.querySelector("dialog")).toBeNull());
+  await expect(pending).resolves.toBe(true);
+});
+
 it("keeps rejected sign-in open and clears the code only after a successful exchange", async () => {
   HTMLDialogElement.prototype.showModal = function () {
     this.setAttribute("open", "");

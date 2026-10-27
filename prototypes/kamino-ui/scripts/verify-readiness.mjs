@@ -18,7 +18,30 @@ const evidence =
   process.env.KAMINO_EVIDENCE_DIR ||
   path.join(root, "outputs/release-readiness/browser");
 await mkdir(evidence, { recursive: true });
+let generationRequests = 0;
 const backend = createServer((req, res) => {
+  if (req.url === "/api/session") {
+    const role = req.headers.cookie?.includes("fixture.judge") ? "judge"
+      : req.headers.cookie?.includes("fixture.student") ? "student" : null;
+    res.setHeader("Content-Type", "application/json");
+    if (req.method === "GET") {
+      res.end(JSON.stringify({ required: true, authenticated: !!role, role, public_student_access: true }));
+    } else if (req.method === "DELETE") {
+      res.setHeader("Set-Cookie", "kamino_session=; Path=/api; Max-Age=0; HttpOnly; SameSite=Strict");
+      res.end(JSON.stringify({ authenticated: false }));
+    } else {
+      const granted = req.headers.authorization === "Bearer fixture-judge" ? "judge" : role || "student";
+      res.setHeader("Set-Cookie", `kamino_session=fixture.${granted}; Path=/api; HttpOnly; SameSite=Strict`);
+      res.end(JSON.stringify({ authenticated: true, role: granted, session_seconds: granted === "judge" ? 21600 : 1800 }));
+    }
+    return;
+  }
+  if (req.method === "POST") generationRequests++;
+  if (req.url === "/api/jobs/11111111-1111-4111-8111-111111111111") {
+    res.writeHead(req.headers.cookie?.includes("fixture.") ? 404 : 401, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ detail: "Fixture saved job not found" }));
+    return;
+  }
   const status = req.url === "/api/unavailable" ? 503 : 404;
   res.writeHead(status, { "Content-Type": "application/json" });
   res.end(
@@ -211,7 +234,8 @@ try {
       await page.locator("#choose").waitFor();
       const disclosure = page.locator("#generation-access");
       await disclosure.waitFor({ state: "visible", timeout: 3000 });
-      assert.match(await disclosure.innerText(), /access code/i);
+      assert.match(await disclosure.innerText(), /student access is automatic/i);
+      assert.match(await disclosure.innerText(), /shared daily allowance/i);
       assert.ok(
         await disclosure.locator('a[href="/example.html"]').isVisible(),
       );
@@ -275,6 +299,33 @@ try {
       });
     },
   );
+  await check("a saved-job URL obtains public access without demanding a code", async () => {
+    await context.clearCookies();
+    await page.goto(base + "/?job=11111111-1111-4111-8111-111111111111#creating");
+    await page.waitForFunction(() => document.querySelector("#live-load-error")?.textContent.includes("Fixture saved job not found"));
+    assert.equal(await page.locator("dialog.live-token").count(), 0);
+    assert.ok((await context.cookies()).some(cookie => cookie.name === "kamino_session" && cookie.value === "fixture.student"));
+  });
+  await check("public student access is automatic and judge access survives refresh and Assembly", async () => {
+    await context.clearCookies();
+    await page.goto(base + "/#upload");
+    await page.getByRole("button", { name: "Student access", exact: true }).waitFor();
+    assert.equal(await page.locator("dialog.live-token").count(), 0);
+    await page.getByRole("button", { name: "Student access", exact: true }).click();
+    await page.getByLabel("Team access code", { exact: true }).fill("fixture-judge");
+    await page.locator("dialog.live-token").getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.getByRole("button", { name: "Sign out", exact: true }).waitFor();
+    await page.reload();
+    await page.getByRole("button", { name: "Sign out", exact: true }).waitFor();
+    await page.goto(base + "/assembly.html");
+    await page.waitForFunction(() => document.querySelector("#access-status")?.textContent.includes("judge"));
+    await page.locator("details > summary").first().click();
+    await page.getByRole("button", { name: "Sign out", exact: true }).click();
+    await page.waitForFunction(() => document.querySelector("#access-status")?.textContent.includes("Signed out"));
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector("#access-status")?.textContent.includes("student"));
+    assert.equal(generationRequests, 0, "access must not create provider or simulation work");
+  });
   await check(
     "assembly entry fits 390px without horizontal overflow",
     async () => {

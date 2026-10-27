@@ -19,7 +19,7 @@ or [local quickstart](QUICKSTART.md).
 
 - [Release evidence](RELEASE.md): source/runtime identities and bounded checks.
 - [Experimental release preparation](releases/experimental-preview.md).
-- [License decision](LICENSING_OPTIONS.md) and [third-party inventory](THIRD_PARTY.md).
+- [Apache-2.0 licensing scope](LICENSING_OPTIONS.md) and [third-party inventory](THIRD_PARTY.md).
 - [Examples and provenance](../examples/README.md), [brand guide](brand-guidelines.md).
 
 ## Historical development records

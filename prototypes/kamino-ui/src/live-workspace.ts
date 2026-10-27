@@ -411,14 +411,23 @@ export const esc = (value: string) =>
   );
 
 /** Exchange the team code for an HttpOnly session; never persist the code in JS. */
-export function promptForToken(
+export async function promptForToken(
   session: BackendSession,
   message: string,
+  restorePublicAccess = false,
 ): Promise<boolean> {
+  if (restorePublicAccess) {
+    try {
+      const status = await browserAccess.status();
+      if (status.public_student_access && status.authenticated) return true;
+    } catch {
+      // Keep code entry available if the access check itself failed.
+    }
+  }
   return new Promise((resolve) => {
     const dialog = document.createElement("dialog");
     dialog.className = "guide live-token";
-    dialog.innerHTML = `<h2>Generation access</h2><p class="muted small">${esc(message)}</p><p class="muted small">Hosted generation is team-managed and requires an access code. Contact <a href="https://github.com/Johaan-Mannanal">Johaan</a> about access, or <a href="/example.html">run the complete example</a> without a code. Session duration and shared usage limits depend on the code; refresh does not reset them. Provider API keys are not needed. <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">Access and photo handling</a>.</p><form><label class="property-field"><span>Team access code</span><div class="input-shell"><input name="token" type="password" autocomplete="off" spellcheck="false" required aria-label="Team access code"></div></label><p class="error" role="alert"></p><div class="save-row"><button class="text-button" type="button" data-cancel>Cancel</button><button class="primary compact" type="submit">Sign in</button></div></form>`;
+    dialog.innerHTML = `<h2>Generation access</h2><p class="muted small">${esc(message)}</p><p class="muted small">The public site provides student access automatically. Judge and team codes unlock higher limits. Other deployments may require a code. Contact <a href="https://github.com/Johaan-Mannanal">Johaan</a> about access, or <a href="/example.html">run the complete example</a> without a code. Session duration and shared usage limits depend on the access tier; refresh does not reset them. Provider API keys are not needed. <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">Access and photo handling</a>.</p><form><label class="property-field"><span>Team access code</span><div class="input-shell"><input name="token" type="password" autocomplete="off" spellcheck="false" required aria-label="Team access code"></div></label><p class="error" role="alert"></p><div class="save-row"><button class="text-button" type="button" data-cancel>Cancel</button><button class="primary compact" type="submit">Sign in</button></div></form>`;
     document.body.append(dialog);
     const input = dialog.querySelector<HTMLInputElement>("input")!;
     const submit = dialog.querySelector<HTMLButtonElement>(
@@ -601,6 +610,7 @@ export function mountLiveWorkspace(
       const accepted = await promptForToken(
         session,
         "The API requires an application token. Your draft is kept; repeat your last action afterwards.",
+        true,
       );
       prompting = false;
       // Only the job status is re-read; no save, provider or processing request is retried.

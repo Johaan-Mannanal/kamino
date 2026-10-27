@@ -6,6 +6,67 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+it('automatically obtains a student cookie only when the server offers public access', async () => {
+  const fetch = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: false, public_student_access: true })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: true, role: 'student', session_seconds: 1800 })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: true, public_student_access: true, role: 'student', session_seconds: 1800 })))
+  vi.stubGlobal('fetch', fetch)
+  const access = await browserAccess.status()
+  expect(access.role).toBe('student')
+  expect(access.authenticated).toBe(true)
+  expect(access.public_student_access).toBe(true)
+  expect(fetch.mock.calls.map(([, options]) => options.method)).toEqual(['GET', 'POST', 'GET'])
+  expect(fetch.mock.calls[1][1].headers).toEqual({})
+  expect(fetch.mock.calls[1][1].credentials).toBe('include')
+})
+
+it.each([
+  { required: true, authenticated: false },
+  { required: false, authenticated: true },
+  { required: true, authenticated: true, role: 'judge', public_student_access: true },
+])('preserves existing access without silently requesting another session: %j', async (status) => {
+  const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(status)))
+  vi.stubGlobal('fetch', fetch)
+  expect(await browserAccess.status()).toEqual(status)
+  expect(fetch).toHaveBeenCalledOnce()
+})
+
+it('shares an in-flight public bootstrap and allows sign-out to clear the resulting cookie', async () => {
+  const fetch = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: false, public_student_access: true })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: true, role: 'student', session_seconds: 1800 })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: true, public_student_access: true, role: 'student', session_seconds: 1800 })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: false })))
+  vi.stubGlobal('fetch', fetch)
+  const first = browserAccess.status()
+  const second = browserAccess.status()
+  const signedOut = browserAccess.signOut()
+  expect((await first).role).toBe('student')
+  expect((await second).role).toBe('student')
+  expect((await signedOut).authenticated).toBe(false)
+  expect(fetch.mock.calls.map(([, options]) => options.method)).toEqual(['GET', 'POST', 'GET', 'DELETE'])
+})
+
+it('shows a failed public bootstrap without falling back to a code or uploading photos', async () => {
+  const fetch = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: false, public_student_access: true })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ detail: 'Use HTTPS' }), { status: 400 }))
+  vi.stubGlobal('fetch', fetch)
+  await expect(browserAccess.status()).rejects.toThrow('Use HTTPS')
+  expect(fetch).toHaveBeenCalledTimes(2)
+})
+
+it('reports blocked cookies instead of claiming public access and looping on saved jobs', async () => {
+  const fetch = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: false, public_student_access: true })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: true, role: 'student', session_seconds: 1800 })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ required: true, authenticated: false, public_student_access: true })))
+  vi.stubGlobal('fetch', fetch)
+  await expect(browserAccess.status()).rejects.toThrow(/cookies/i)
+  expect(fetch.mock.calls.map(([, options]) => options.method)).toEqual(['GET', 'POST', 'GET'])
+})
+
 it('describes the granted tier without promising every user a 12-hour session', async () => {
   const { accessDescription } = await import('./access')
   expect(accessDescription({ role: 'student', session_seconds: 1800 })).toContain('30 minutes')
