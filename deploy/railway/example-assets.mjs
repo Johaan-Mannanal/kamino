@@ -13,6 +13,8 @@ export const exampleFiles = [
 
 // Both local frontends use the current UI's static example page and stylesheet.
 const examplePages = new Map([
+  ['/LICENSE', fileURLToPath(new URL('../../LICENSE', import.meta.url))],
+  ['/NOTICE', fileURLToPath(new URL('../../NOTICE', import.meta.url))],
   ['/example.html', fileURLToPath(new URL('../../prototypes/kamino-ui/public/example.html', import.meta.url))],
   ['/release-pages.css', fileURLToPath(new URL('../../prototypes/kamino-ui/public/release-pages.css', import.meta.url))],
 ]);

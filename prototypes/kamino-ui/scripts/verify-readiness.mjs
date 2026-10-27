@@ -258,6 +258,11 @@ try {
     async () => {
       const response = await page.goto(base + "/example.html");
       assert.equal(response.status(), 200);
+      for (const name of ["LICENSE", "NOTICE"]) {
+        const legal = await fetch(base + "/" + name);
+        assert.equal(legal.status, 200, name + " must accompany distributed web assets");
+        assert.deepEqual(Buffer.from(await legal.arrayBuffer()), await readFile(path.join(root, name)));
+      }
       assert.match(await page.locator("main").innerText(), /synthetic/i);
       const link = page.getByRole("link", {
         name: "Download MuJoCo bundle",

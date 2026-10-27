@@ -46,3 +46,8 @@ for (const [source, name] of exampleFiles) {
     path.join(exampleDestination, name),
   );
 }
+
+// Keep the project's license and attribution alongside distributed JavaScript.
+for (const name of ['LICENSE', 'NOTICE']) {
+  await copyFile(new URL('../../' + name, import.meta.url), path.join(destination, name));
+}
