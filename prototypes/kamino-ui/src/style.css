@@ -1583,6 +1583,51 @@ figcaption {
 }
 .home-refined.static-home .static-chapters {
   display: block;
+  max-width: 1000px;
+  margin: auto;
+  padding: 0 24px;
+}
+.home-refined.static-home .static-chapters section {
+  padding: clamp(40px, 5vw, 60px) 0;
+  border-top: 1px solid var(--line);
+}
+.home-refined.static-home .static-chapters h2 {
+  font-size: clamp(29px, 3.5vw, 38px);
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+.home-refined.static-home .static-chapters p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.home-refined.static-home .static-thumbs {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+.home-refined.static-home .static-thumbs img {
+  width: clamp(72px, 10vw, 100px);
+  height: clamp(72px, 10vw, 100px);
+  object-fit: cover;
+  border-radius: 8px;
+}
+.home-refined.static-home .static-dim {
+  padding: 25px;
+  background: var(--surface);
+  margin-top: 22px;
+}
+.home-refined.static-home .story-bottom {
+  display: none;
+}
+.home-viewer-notice {
+  margin: 12px clamp(20px, 5vw, 80px);
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
 }
 .static-actions {
   display: flex;

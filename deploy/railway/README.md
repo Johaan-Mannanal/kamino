@@ -3,6 +3,14 @@
 Deploy the backend and frontend from the same accepted commit. Preserve the existing
 volume, application credential, provider settings and rollback deployment images.
 
+The frontend accepts `www.kamino.design` only to redirect it to
+`https://kamino.design`, preserving the request path and query. Register both
+hostnames on the same Railway frontend service and use the exact DNS records
+Railway supplies for each. The `www` hostname needs a valid Railway-managed TLS
+certificate before its redirect can work over HTTPS; a registrar's HTTP-only
+forward is insufficient. Keep the backend public origin at the canonical root
+URL so browser sessions and saved-job ownership stay on one origin.
+
 The backend requires `PHOTO2SIM_PUBLIC_ORIGIN` as its exact public HTTPS frontend
 origin, without a path. Production uses `https://kamino.design`; the isolated release
 environment uses its own Railway frontend URL. Configure this variable before deploying

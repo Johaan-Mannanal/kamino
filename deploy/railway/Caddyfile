@@ -4,6 +4,8 @@
 }
 
 :{$PORT:8080} {
+	@www host www.kamino.design
+	redir @www https://kamino.design{uri} 308
 	encode zstd gzip
 	header {
 		# Railway serves this listener only behind its HTTPS edge.

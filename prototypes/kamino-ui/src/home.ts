@@ -25,6 +25,7 @@ export function mountHome(app: HTMLElement, options: HomeOptions) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   // Touch and narrow screens share the narrative; only an explicit motion preference opts out.
   let staticMode = reduced.matches;
+  let viewerUnavailable = false;
   const actions = `<a class="primary" href="#upload"><img class="icon" src="/assets/0f26a.svg" width="16" height="16" alt="">Upload your photos</a><button class="quiet" data-demo>Try the demo <img class="icon" src="/assets/55033.svg" width="16" height="16" alt=""></button>`;
   app.innerHTML = `<main class="home home-refined"><header class="site-header">${options.brand}<div><a class="nav-example" href="/example.html">Explore example</a><a class="nav-source" href="https://github.com/Johaan-Mannanal/kamino">GitHub / Run locally</a><button class="text-button" data-guide>Quick guide</button><a class="accent nav-upload" href="#upload">Upload photos ↗</a></div></header><div id="story"><div class="story-sticky"><div class="depth-stage" aria-hidden="true"><canvas class="projected-grid" aria-hidden="true"></canvas><div class="depth-horizon"></div></div><div id="story-copy">${titles.map((title, index) => `<section class="story-panel" data-story-panel="${index}" ${index ? 'aria-hidden="true" inert' : ""}><h1>${title}</h1><p>${descriptions[index]}</p>${index === 4 ? `<div id="story-actions">${actions}</div>` : ""}</section>`).join("")}</div><div class="story-stage"><img id="hero-art" src="/assets/46613.png" alt="Cream ceramic mug"><div id="story-viewer"></div><div id="capture-phone" aria-hidden="true"><div><img src="${options.photos[0].url}" alt=""></div><span></span></div><div id="capture-thumbs" aria-label="Example capture angles">${options.photos.map((p) => `<figure><img src="${p.url}" alt="${p.name} view"><figcaption>${p.name}</figcaption></figure>`).join("")}</div><div id="dimension-peek" aria-hidden="true"><span class="muted">Known length · X</span><strong>120 → 132 <small>mm</small></strong><span>132 × 110 × 99 mm</span></div></div><div class="story-bottom"><span id="scroll-label">Scroll to explore ↓</span><div id="chapters"><div class="story-progress" role="progressbar" aria-label="Homepage progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="story-progress-fill"></span></div>${titles.map((_, i) => `<button aria-label="Go to chapter ${i + 1}" class="chapter ${i === 0 ? "active" : ""}" data-chapter="${i}"></button>`).join("")}</div></div></div></div><div class="static-chapters">${titles
     .slice(1)
@@ -60,13 +61,29 @@ export function mountHome(app: HTMLElement, options: HomeOptions) {
     disposed = false,
     step = 1,
     origin = 0;
+  const stopViewer = () => {
+    view?.renderer.domElement.removeEventListener("webglcontextlost", showStatic);
+    view?.dispose();
+    view = undefined;
+  };
+  const showStatic = () => {
+    if (disposed || viewerUnavailable) return;
+    viewerUnavailable = true;
+    stopViewer();
+    const notice = document.createElement("p");
+    notice.className = "home-viewer-notice";
+    notice.setAttribute("role", "status");
+    notice.textContent = "3D preview unavailable on this browser. Showing the complete page without animation. You can still upload photos or explore the example.";
+    q(".site-header").after(notice);
+    resize();
+  };
   const startViewer = () => {
     if (view || staticMode) return;
     try {
       view = new MugViewer(stage, true, groundCanvas);
+      view.renderer.domElement.addEventListener("webglcontextlost", showStatic);
     } catch {
-      stage.innerHTML =
-        '<img class="viewer-fallback" src="/assets/46613.png" alt="Ceramic mug">';
+      showStatic();
     }
   };
   const paint = () => {
@@ -157,12 +174,11 @@ export function mountHome(app: HTMLElement, options: HomeOptions) {
     schedule();
   };
   const resize = () => {
-    const nextStatic = reduced.matches;
+    const nextStatic = reduced.matches || viewerUnavailable;
     if (nextStatic !== staticMode) {
       staticMode = nextStatic;
       if (staticMode) {
-        view?.dispose();
-        view = undefined;
+        stopViewer();
         cancelAnimationFrame(raf);
         raf = 0;
         current = target = 0;
@@ -206,7 +222,7 @@ export function mountHome(app: HTMLElement, options: HomeOptions) {
       panel.getAnimations().forEach((animation) => animation.cancel()),
     );
     cancelAnimationFrame(raf);
-    view?.dispose();
+    stopViewer();
     window.removeEventListener("scroll", scroll);
     window.removeEventListener("resize", resize);
     reduced.removeEventListener("change", resize);
