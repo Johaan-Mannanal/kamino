@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { spawn, execFileSync } from "node:child_process";
-import { createServer } from "node:http";
+import { createServer, get as httpGet } from "node:http";
 import { mkdtemp, readFile, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -197,12 +197,86 @@ try {
       /max-age=31536000; includeSubDomains/,
     );
   });
+  await check("www redirects to the canonical HTTPS host without losing the job URL", async () => {
+    const response = await new Promise((resolve, reject) => {
+      httpGet(base + "/?job=58b11f2c-a5b6-471e-9c4a-aad2d4147276&view=%2F", {
+        headers: { Host: "www.kamino.design" },
+      }, response => { response.resume(); resolve(response); }).on("error", reject);
+    });
+    assert.equal(response.statusCode, 308);
+    assert.equal(response.headers.location, "https://kamino.design/?job=58b11f2c-a5b6-471e-9c4a-aad2d4147276&view=%2F");
+  });
   browser = await chromium.launch({
     headless: true,
     args: ["--enable-unsafe-swiftshader"],
     ...(process.env.KAMINO_BROWSER_EXECUTABLE
       ? { executablePath: process.env.KAMINO_BROWSER_EXECUTABLE }
       : {}),
+  });
+  await check("unavailable WebGL leaves a complete readable homepage with working actions", async () => {
+    const fallbackContext = await browser.newContext();
+    try {
+      await fallbackContext.addInitScript(() => {
+        const original = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+          if (type === "webgl" || type === "webgl2" || type === "experimental-webgl") return null;
+          return original.call(this, type, ...args);
+        };
+      });
+      const fallback = await fallbackContext.newPage();
+      const errors = [];
+      fallback.on("pageerror", error => errors.push(error.message));
+      await fallback.goto(base);
+      await fallback.locator(".home.static-home").waitFor({ timeout: 3000 });
+      assert.ok(await fallback.locator('.home [role="status"]').isVisible());
+      assert.match(await fallback.locator('.home [role="status"]').innerText(), /3D.*unavailable/i);
+      for (const section of await fallback.locator(".static-chapters > section").all()) assert.ok(await section.isVisible());
+      for (const width of [1280, 390]) {
+        await fallback.setViewportSize({ width, height: 900 });
+        for (const image of await fallback.locator(".static-thumbs img").all()) {
+          const box = await image.boundingBox();
+          assert.ok(box && box.width <= 100 && box.height <= 100, "fallback photos remain thumbnails");
+        }
+        assert.ok(await fallback.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "fallback fits the viewport");
+      }
+      await fallback.setViewportSize({ width: 1280, height: 900 });
+      await fallback.screenshot({ path: path.join(evidence, "home-no-webgl.png"), fullPage: true });
+      await fallback.locator('.static-actions a[href="#upload"]').click();
+      await fallback.locator("#photo-input").waitFor({ state: "attached", timeout: 3000 });
+      assert.deepEqual(errors, []);
+    } finally { await fallbackContext.close(); }
+  });
+  await check("lost graphics context switches to static content without a runtime error", async () => {
+    const graphicsContext = await browser.newContext();
+    try {
+      const graphics = await graphicsContext.newPage();
+      const errors = [];
+      graphics.on("pageerror", error => errors.push(error.message));
+      await graphics.goto(base);
+      await graphics.locator("#story-viewer canvas").waitFor({ state: "attached", timeout: 3000 });
+      await graphics.locator("#story-viewer canvas").evaluate(canvas => {
+        const gl = canvas.getContext("webgl2");
+        const extension = gl?.getExtension("WEBGL_lose_context");
+        if (!extension) throw Error("Test browser lacks context-loss support");
+        extension.loseContext();
+      });
+      await graphics.locator(".home.static-home").waitFor({ timeout: 3000 });
+      assert.ok(await graphics.locator('.home [role="status"]').isVisible());
+      await graphics.setViewportSize({ width: 390, height: 844 });
+      assert.ok(await graphics.locator(".home.static-home").isVisible());
+      assert.deepEqual(errors, []);
+    } finally { await graphicsContext.close(); }
+  });
+  await check("reduced motion keeps the accessible static presentation without a graphics warning", async () => {
+    const reducedContext = await browser.newContext({ reducedMotion: "reduce" });
+    try {
+      const reduced = await reducedContext.newPage();
+      await reduced.goto(base);
+      await reduced.locator(".home.static-home").waitFor({ timeout: 3000 });
+      assert.equal(await reduced.locator('.home [role="status"]').count(), 0);
+      assert.equal(await reduced.locator("#story-viewer canvas").count(), 0);
+      for (const section of await reduced.locator(".static-chapters > section").all()) assert.ok(await section.isVisible());
+    } finally { await reducedContext.close(); }
   });
   const context = await browser.newContext({
     viewport: { width: 1280, height: 900 }, isMobile: true, hasTouch: true,
