@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 const identity = { position_m: [0, 0, 0], quaternion_wxyz: [1, 0, 0, 0] }
 const pack = {
   format: 'photo2sim-review-package-1.0',
@@ -56,6 +56,12 @@ beforeEach(() => {
   vi.resetModules()
   vi.doUnmock('./assembly-api')
   document.body.innerHTML = '<div id="assembly-app"></div>'
+  // Each mount checks access; keep the DOM fixture off real localhost services.
+  vi.stubGlobal('fetch', vi.fn(async (url: string | URL | Request) => {
+    if (!String(url).endsWith('/api/session'))
+      throw Error(`Unexpected request from assembly DOM fixture: ${url}`)
+    return new Response(JSON.stringify({ required: true, authenticated: false }))
+  }))
   vi.doMock('three', async () => {
     const actual = await vi.importActual<typeof import('three')>('three')
     return {
@@ -68,6 +74,7 @@ beforeEach(() => {
     }
   })
 })
+afterEach(() => vi.unstubAllGlobals())
 it('exchanges assembly access code for a browser session and clears the input', async () => {
   const fetch = vi
     .fn()

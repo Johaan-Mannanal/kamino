@@ -19,9 +19,11 @@ const evidence =
   path.join(root, "outputs/release-readiness/browser");
 await mkdir(evidence, { recursive: true });
 let generationRequests = 0;
+let legacyJobReads = 0;
 const backend = createServer((req, res) => {
   if (req.url === "/api/session") {
-    const role = req.headers.cookie?.includes("fixture.judge") ? "judge"
+    const role = req.headers.cookie?.includes("fixture.team") ? "team"
+      : req.headers.cookie?.includes("fixture.judge") ? "judge"
       : req.headers.cookie?.includes("fixture.student") ? "student" : null;
     res.setHeader("Content-Type", "application/json");
     if (req.method === "GET") {
@@ -30,13 +32,23 @@ const backend = createServer((req, res) => {
       res.setHeader("Set-Cookie", "kamino_session=; Path=/api; Max-Age=0; HttpOnly; SameSite=Strict");
       res.end(JSON.stringify({ authenticated: false }));
     } else {
-      const granted = req.headers.authorization === "Bearer fixture-judge" ? "judge" : role || "student";
+      const granted = req.headers.authorization === "Bearer fixture-team" ? "team"
+        : req.headers.authorization === "Bearer fixture-judge" ? "judge" : role || "student";
       res.setHeader("Set-Cookie", `kamino_session=fixture.${granted}; Path=/api; HttpOnly; SameSite=Strict`);
       res.end(JSON.stringify({ authenticated: true, role: granted, session_seconds: granted === "judge" ? 21600 : 1800 }));
     }
     return;
   }
   if (req.method === "POST") generationRequests++;
+  if (req.url === "/api/jobs/22222222-2222-4222-8222-222222222222") {
+    legacyJobReads++;
+    const denied = !req.headers.cookie?.includes("fixture.team");
+    res.writeHead(denied ? 403 : 404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(denied
+      ? { detail: "Use team access for legacy recovery", category: "job_access" }
+      : { detail: "Fixture recovered legacy job not found" }));
+    return;
+  }
   if (req.url === "/api/jobs/11111111-1111-4111-8111-111111111111") {
     res.writeHead(req.headers.cookie?.includes("fixture.") ? 404 : 401, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ detail: "Fixture saved job not found" }));
@@ -333,6 +345,20 @@ try {
     await page.waitForFunction(() => document.querySelector("#live-load-error")?.textContent.includes("Fixture saved job not found"));
     assert.equal(await page.locator("dialog.live-token").count(), 0);
     assert.ok((await context.cookies()).some(cookie => cookie.name === "kamino_session" && cookie.value === "fixture.student"));
+  });
+  await check("a legacy-job denial requests privileged sign-in instead of looping public access", async () => {
+    await context.clearCookies();
+    legacyJobReads = 0;
+    await page.goto(base + "/?job=22222222-2222-4222-8222-222222222222#creating");
+    const dialog = page.locator("dialog.live-token");
+    await dialog.waitFor({ state: "visible", timeout: 3000 });
+    assert.equal(legacyJobReads, 1, "ownership denial must not loop student restoration");
+    await page.getByLabel("Team access code", { exact: true }).fill("fixture-team");
+    await dialog.getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.waitForFunction(() => document.querySelector("#live-load-error")?.textContent.includes("Fixture recovered legacy job not found"));
+    assert.equal(await dialog.count(), 0);
+    assert.equal(legacyJobReads, 2, "restore the saved URL once after privileged sign-in");
+    assert.equal(generationRequests, 0, "recovery must not submit provider or simulation work");
   });
   await check("public student access is automatic and judge access survives refresh and Assembly", async () => {
     await context.clearCookies();
