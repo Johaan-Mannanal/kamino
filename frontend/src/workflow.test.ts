@@ -104,12 +104,12 @@ const reviewedSizing = (length: number) => ({
     description: 'Synthetic full Y span',
   },
 })
-function installFetch(fetch: ReturnType<typeof vi.fn>) {
+function installFetch(fetch: (url: string, init?: RequestInit) => Promise<Response>) {
   vi.stubGlobal('fetch', (url: string, init?: RequestInit) =>
     url.includes('/geometry?') ? Promise.resolve(json(geometryInventory)) : fetch(url, init),
   )
 }
-async function start(fetch: ReturnType<typeof vi.fn>) {
+async function start(fetch: (url: string, init?: RequestInit) => Promise<Response>) {
   vi.stubGlobal('fetch', (url: string, init?: RequestInit) =>
     url.includes('/geometry?') ? Promise.resolve(json(geometryInventory)) : fetch(url, init),
   )

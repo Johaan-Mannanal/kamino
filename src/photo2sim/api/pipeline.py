@@ -4,11 +4,13 @@ import hashlib
 import json
 import shutil
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from uuid import UUID
 from zipfile import ZIP_DEFLATED, ZipFile
 
 import trimesh
 
+from photo2sim.api.storage import StorageLimitError
 from photo2sim.api.store import JobStore
 from photo2sim.assets.prepare import prepare_asset
 from photo2sim.contracts import JobError
@@ -29,8 +31,12 @@ def process_job(store: JobStore, job_id: UUID) -> None:
         attempt.mkdir(parents=True)
         snapshot_path = attempt / "inputs.json"
         snapshot_partial = attempt / "inputs.json.partial"
-        snapshot_partial.write_text(inputs.model_dump_json(indent=2) + "\n", encoding="utf-8")
-        snapshot_partial.replace(snapshot_path)
+        snapshot = inputs.model_dump_json(indent=2) + "\n"
+        # The input snapshot is evidence, so admit it before mutating retained storage.
+        # If admission fails, the error path accurately reports that no snapshot published.
+        with store.storage.write_admission(root, len(snapshot.encode("utf-8"))):
+            snapshot_partial.write_text(snapshot, encoding="utf-8")
+            snapshot_partial.replace(snapshot_path)
         attempt_record.inputs_path = snapshot_path.relative_to(root).as_posix()
         store.update(job_id, attempts=job.attempts)
         snapshot_published = True
@@ -42,7 +48,6 @@ def process_job(store: JobStore, job_id: UUID) -> None:
             raise ValueError("Reconstruction must remain inside the job directory")
         if hashlib.sha256(source.read_bytes()).hexdigest() != inputs.source_mesh_sha256:
             raise ValueError("Source changed after processing claim")
-        prepared = attempt / "prepared"
         review = inputs.geometry_review
         if inputs.properties.geometry_scope == "whole_reconstruction":
             from photo2sim.assets.target import whole_geometry_context
@@ -60,89 +65,121 @@ def process_job(store: JobStore, job_id: UUID) -> None:
             or inputs.properties.geometry_context_sha256 != review.geometry_context_sha256
         ):
             raise ValueError("A current source-bound target and sizing review is required")
-        asset = prepare_asset(
-            source,
-            prepared,
-            inputs.properties,
-            orientation=inputs.orientation,
-            geometry_review=review,
-        )
-        asset.synthetic = job.synthetic
-        (prepared / "asset.json").write_text(
-            asset.model_dump_json(indent=2) + "\n", encoding="utf-8"
-        )
-        store.update(job_id, asset=asset, sizing_result=asset.sizing_result)
+        # Geometry/export work stays in private same-job scratch, which the app owns
+        # even when the mounted parent is root-owned. Publish only after admission.
+        with TemporaryDirectory(prefix="photo2sim-attempt-", dir=root) as temp:
+            staged_attempt = Path(temp)
+            prepared = staged_attempt / "prepared"
+            asset = prepare_asset(
+                source,
+                prepared,
+                inputs.properties,
+                orientation=inputs.orientation,
+                geometry_review=review,
+            )
+            asset.synthetic = job.synthetic
+            (prepared / "asset.json").write_text(
+                asset.model_dump_json(indent=2) + "\n", encoding="utf-8"
+            )
 
-        # Preserve the rich prepared bundle. The initial MuJoCo exporter accepts
-        # geometry only, so remove visual attributes in a separate copy.
-        stage = "export"
-        geometry_dir = attempt / "simulation-input"
-        visual = geometry_dir / asset.visual_mesh
-        visual.parent.mkdir(parents=True)
-        rich_mesh = trimesh.load_mesh(prepared / asset.visual_mesh, process=False)
-        geometry = trimesh.Trimesh(
-            vertices=rich_mesh.vertices, faces=rich_mesh.faces, process=False
-        )
-        geometry.export(visual, file_type="obj", digits=17)
-        if asset.collision.mesh_path is not None:
-            collision_copy = geometry_dir / asset.collision.mesh_path
-            collision_copy.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(prepared / asset.collision.mesh_path, collision_copy)
-        asset = asset.model_copy(
-            update={
-                "notes": [
-                    *asset.notes,
-                    "Simulation visual is a geometry-only copy; original reconstruction and prepared "
-                    "materials are retained separately. No texture fidelity is claimed.",
-                ]
-            }
-        )
-        (geometry_dir / "asset.json").write_text(
-            asset.model_dump_json(indent=2) + "\n", encoding="utf-8"
-        )
-        scene = export_asset(asset, geometry_dir, attempt / "bundle")
-        shutil.copyfile(snapshot_path, scene.parent / "inputs.json")
+            # Preserve the rich prepared bundle. The initial MuJoCo exporter accepts
+            # geometry only, so remove visual attributes in a separate copy.
+            stage = "export"
+            geometry_dir = staged_attempt / "simulation-input"
+            visual = geometry_dir / asset.visual_mesh
+            visual.parent.mkdir(parents=True)
+            rich_mesh = trimesh.load_mesh(prepared / asset.visual_mesh, process=False)
+            geometry = trimesh.Trimesh(
+                vertices=rich_mesh.vertices, faces=rich_mesh.faces, process=False
+            )
+            geometry.export(visual, file_type="obj", digits=17)
+            if asset.collision.mesh_path is not None:
+                collision_copy = geometry_dir / asset.collision.mesh_path
+                collision_copy.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(prepared / asset.collision.mesh_path, collision_copy)
+            asset = asset.model_copy(
+                update={
+                    "notes": [
+                        *asset.notes,
+                        "Simulation visual is a geometry-only copy; original reconstruction and prepared "
+                        "materials are retained separately. No texture fidelity is claimed.",
+                    ]
+                }
+            )
+            (geometry_dir / "asset.json").write_text(
+                asset.model_dump_json(indent=2) + "\n", encoding="utf-8"
+            )
+            scene = export_asset(asset, geometry_dir, staged_attempt / "bundle")
+            shutil.copyfile(snapshot_path, scene.parent / "inputs.json")
 
-        def relative(path: Path) -> str:
-            return path.relative_to(root).as_posix()
+            stage = "validation"
+            try:
+                report = validate_export(scene)
+            except Exception:
+                report = {
+                    "passed": False,
+                    "viewer_inspected": False,
+                    "error": "Validation could not finish. The exported scene is retained for diagnosis.",
+                }
+            report_path = scene.parent / "validation-report.json"
+            report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
-        store.update(job_id, asset=asset, status="validating", export_path=relative(scene))
-        stage = "validation"
-        try:
-            report = validate_export(scene)
-        except Exception:
-            report = {
-                "passed": False,
-                "viewer_inspected": False,
-                "error": "Validation could not finish. The exported scene is retained for diagnosis.",
-            }
-        report_path = scene.parent / "validation-report.json"
-        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        store.update(job_id, validation_path=relative(report_path))
-        if report.get("passed") is not True:
+            archive = None
+            if report.get("passed") is True:
+                stage = "packaging"
+                archive = staged_attempt / "simulation.zip"
+                with ZipFile(archive, "w", compression=ZIP_DEFLATED) as zipped:
+                    for path in sorted(scene.parent.rglob("*")):
+                        if path.is_file():
+                            if path.is_symlink() or not path.resolve().is_relative_to(
+                                scene.parent.resolve()
+                            ):
+                                raise ValueError("Bundle files must be local regular files")
+                            zipped.write(path, path.relative_to(scene.parent).as_posix())
+
+            stage = "publication"
+            published = attempt / "artifacts"
+            store.storage.publish_directory(staged_attempt, published, root)
+
+            def relative(path: Path) -> str:
+                return (published / path.relative_to(staged_attempt)).relative_to(root).as_posix()
+
+            export_path = relative(scene)
+            validation_path = relative(report_path)
+            if report.get("passed") is not True:
+                store.update(
+                    job_id,
+                    asset=asset,
+                    sizing_result=asset.sizing_result,
+                    status="failed",
+                    export_path=export_path,
+                    validation_path=validation_path,
+                    error=JobError(
+                        code="validation_failed",
+                        message="Simulation checks failed. Inspect the retained report and scene before retrying.",
+                    ),
+                )
+                return
+            assert archive is not None
             store.update(
                 job_id,
-                status="failed",
-                error=JobError(
-                    code="validation_failed",
-                    message="Simulation checks failed. Inspect the retained report and scene before retrying.",
-                ),
+                asset=asset,
+                sizing_result=asset.sizing_result,
+                status="completed",
+                export_path=export_path,
+                validation_path=validation_path,
+                bundle_path=relative(archive),
+                error=None,
             )
-            return
-
-        stage = "packaging"
-        archive = attempt / "simulation.zip"
-        temporary = attempt / "simulation.zip.partial"
-        with ZipFile(temporary, "w", compression=ZIP_DEFLATED) as zipped:
-            for path in sorted(scene.parent.rglob("*")):
-                if path.is_file():
-                    if path.is_symlink() or not path.resolve().is_relative_to(
-                        scene.parent.resolve()
-                    ):
-                        raise ValueError("Bundle files must be local regular files")
-                    zipped.write(path, path.relative_to(scene.parent).as_posix())
-        temporary.rename(archive)
-        store.update(job_id, status="completed", bundle_path=relative(archive), error=None)
+    except StorageLimitError:
+        store.update(
+            job_id,
+            status="failed",
+            error=JobError(
+                code="storage_budget_exhausted",
+                message="Simulation artifacts could not be retained within the storage budget.",
+            ),
+        )
     except Exception:
         # Do not publish raw library errors, which may embed paths or provider secrets.
         store.update(

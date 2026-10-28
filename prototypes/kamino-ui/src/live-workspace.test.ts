@@ -16,6 +16,7 @@ import {
   draftFromJob,
   jobIdFromSearch,
   meshReady,
+  isAuthError,
   parseProvenance,
   searchWithJob,
   toScalar,
@@ -25,6 +26,11 @@ import {
   mountLiveWorkspace,
   type Draft,
 } from "./live-workspace";
+
+it("offers in-place team recovery only for a job ownership denial", () => {
+  expect(isAuthError(new ApiError("Wrong browser", 403, { category: "job_access" }))).toBe(true);
+  expect(isAuthError(new ApiError("Forbidden origin", 403))).toBe(false);
+});
 
 vi.mock("../../../frontend/src/viewer", () => ({
   mountViewer: vi.fn(() =>

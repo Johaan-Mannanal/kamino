@@ -30,6 +30,9 @@ class Settings:
     cors_origins: tuple[str, ...] = ("http://localhost:5173", "http://127.0.0.1:5173")
     max_image_bytes: int = 10 * 1024 * 1024
     max_asset_bytes: int = 100 * 1024 * 1024
+    storage_max_total_bytes: int = 3 * 1024**3
+    storage_max_job_bytes: int = 512 * 1024**2
+    storage_min_free_bytes: int = 256 * 1024**2
     poll_interval: float = 3
     max_polls: int = 300
 
@@ -59,6 +62,15 @@ class Settings:
             object.__setattr__(self, "public_origin", f"https://{host}{port}")
         if self.provider not in ("mock", "meshy"):
             raise ValueError("PHOTO2SIM_PROVIDER must be mock or meshy")
+        if any(
+            isinstance(value, bool) or value < 0
+            for value in (
+                self.storage_max_total_bytes,
+                self.storage_max_job_bytes,
+                self.storage_min_free_bytes,
+            )
+        ):
+            raise ValueError("Storage limits must be nonnegative byte counts")
         if self.provider == "meshy" and not self.meshy_api_key:
             raise ValueError("MESHY_API_KEY is required when PHOTO2SIM_PROVIDER=meshy")
         if self.poll_interval < 0 or self.max_polls < 1:
@@ -101,6 +113,15 @@ class Settings:
             api_token=values.get("PHOTO2SIM_API_TOKEN") or "",
             student_code=values.get("PHOTO2SIM_STUDENT_CODE") or "",
             public_student_access=public_student_access == "true",
+            storage_max_total_bytes=int(
+                values.get("PHOTO2SIM_STORAGE_MAX_TOTAL_BYTES") or 3 * 1024**3
+            ),
+            storage_max_job_bytes=int(
+                values.get("PHOTO2SIM_STORAGE_MAX_JOB_BYTES") or 512 * 1024**2
+            ),
+            storage_min_free_bytes=int(
+                values.get("PHOTO2SIM_STORAGE_MIN_FREE_BYTES") or 256 * 1024**2
+            ),
             judge_code=values.get("PHOTO2SIM_JUDGE_CODE") or "",
             team_code=values.get("PHOTO2SIM_TEAM_CODE") or "",
             public_origin=(values.get("PHOTO2SIM_PUBLIC_ORIGIN") or "").rstrip("/"),

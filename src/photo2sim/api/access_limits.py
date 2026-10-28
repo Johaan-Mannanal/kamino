@@ -11,9 +11,34 @@ from fastapi import HTTPException
 SESSION_SECONDS = {"student": 1800, "judge": 21600, "team": 43200}
 # Maximum admitted operations per rolling 24 hours, minimum seconds between them.
 LIMITS = {
-    "student": {"mesh": (2, 300), "gemini": (10, 30), "simulation": (10, 30)},
-    "judge": {"mesh": (10, 30), "gemini": (40, 5), "simulation": (50, 5)},
+    "student": {
+        "mesh": (2, 300),
+        "gemini": (10, 30),
+        "simulation": (10, 30),
+        "parse": (60, 5),
+        "save": (120, 1),
+    },
+    "judge": {
+        "mesh": (10, 30),
+        "gemini": (40, 5),
+        "simulation": (50, 5),
+        "parse": (120, 2),
+        "save": (500, 0.5),
+    },
 }
+
+
+def request_abuse_action(method, path):
+    path = path.rstrip("/")
+    if method == "POST" and path in {"/api/assembly-jobs", "/api/assembly-jobs/from-meshes"}:
+        return "parse"
+    if (
+        method == "PUT"
+        and path.startswith("/api/assembly-jobs/")
+        and path.endswith(("/revisions", "/mapping-review"))
+    ):
+        return "save"
+    return None
 
 
 def request_action(method, path):

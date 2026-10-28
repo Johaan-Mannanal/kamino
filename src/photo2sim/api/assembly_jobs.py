@@ -3,6 +3,7 @@
 import hashlib
 import json
 import shutil
+import tempfile
 import threading
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
@@ -14,20 +15,29 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
+from starlette.concurrency import run_in_threadpool
 
+from photo2sim.api.job_access import require_legacy_claim
+from photo2sim.api.mesh_import import MeshImportBusy, MeshImportError, import_meshes, review_import
+from photo2sim.api.storage import StorageBudget, StorageLimitError
 from photo2sim.assemblies.contracts import AssemblyRecord
-from photo2sim.assemblies.draft import draft_from_meshes
 from photo2sim.assemblies.export import export_assembly
 from photo2sim.assemblies.mapping_review import validate_mapping_review
 from photo2sim.assemblies.review import (
     ReviewProject,
     assembly_record,
-    checked_parts,
     prepare_review,
     review_package,
 )
 from photo2sim.assemblies.validate import validate_assembly
 from photo2sim.contracts import bundle_path
+
+MAX_REVISIONS = 50
+MAX_MAPPING_VERSIONS = 50
+MAX_ATTEMPTS = 30
+MAX_REVIEW_BYTES = 2 * 1024**2
+MAX_MAPPING_BYTES = 8 * 1024**2
+PROCESSING_SCRATCH_RESERVE = 64 * 1024**2
 
 
 def now():
@@ -47,14 +57,21 @@ class ProcessRequest(BaseModel):
 
 
 class AssemblyJobs:
-    def __init__(self, data_dir: Path):
-        self.root = data_dir.resolve() / "assemblies"
+    def __init__(self, data_dir: Path, storage: StorageBudget | None = None):
+        self.data_dir = data_dir.resolve()
+        self.root = self.data_dir / "assemblies"
+        self.storage = storage or StorageBudget(self.data_dir)
         self.lock = threading.RLock()
         self.executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="assembly")
         for path in self.root.glob("*/job.json"):
             job = json.loads(path.read_text(encoding="utf-8"))
             migrated = False
-            for key, value in (("mapping_review_path", None), ("mapping_version", 0)):
+            for key, value in (
+                ("mapping_review_path", None),
+                ("mapping_version", 0),
+                ("owner_principal_id", None),
+                ("owner_claimed_at", None),
+            ):
                 if key not in job:
                     job[key] = value
                     migrated = True
@@ -98,59 +115,103 @@ class AssemblyJobs:
             self.write(job)
             return job
 
+    def claim_owner(self, job_id: UUID, owner_principal_id: str | None):
+        """Explicit privileged recovery for an unowned pre-ownership job only."""
+        if not owner_principal_id:
+            raise RuntimeError("A browser ownership cookie is required for recovery")
+        with self.lock:
+            job = self.get(job_id)
+            if job.get("owner_principal_id") is not None:
+                raise RuntimeError("This job already has a browser owner")
+            return self.update(
+                job_id, owner_principal_id=owner_principal_id, owner_claimed_at=now()
+            )
+
     def create(
         self,
         project: ReviewProject,
         uploads: dict[str, bytes],
         originals: dict[str, bytes] | None = None,
+        package: dict | None = None,
+        owner_principal_id: str | None = None,
     ):
         job_id = uuid4()
         root = self.directory(job_id)
         root.mkdir(parents=True)
         try:
-            for name, data in (originals or {}).items():
-                target = root / "originals" / bundle_path(name)
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(data)
-            for name, data in uploads.items():
-                target = root / "sources" / name
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(data)
-            package = review_package(project, root / "sources")
-            revision = root / "revisions/0001"
-            revision.mkdir(parents=True)
-            (revision / "project.json").write_text(
-                project.model_dump_json(indent=2) + "\n", encoding="utf-8"
+            if package is None:
+                # API callers supply an importer-produced package.  This fallback preserves
+                # the service's existing direct callers without changing their semantics.
+                with tempfile.TemporaryDirectory(prefix="kamino-review-") as temporary:
+                    source = self._temporary_sources(Path(temporary), uploads)
+                    package = review_package(project, source)
+            project_bytes = (project.model_dump_json(indent=2) + "\n").encode()
+            package_bytes = (json.dumps(package, allow_nan=False) + "\n").encode()
+            retained_bytes = (
+                sum(map(len, uploads.values()))
+                + sum(map(len, (originals or {}).values()))
+                + len(project_bytes)
+                + len(package_bytes)
+                + 16 * 1024
             )
-            (revision / "package.json").write_text(json.dumps(package) + "\n", encoding="utf-8")
-            job = {
-                "schema_version": "assembly-job-1.0",
-                "id": str(job_id),
-                "name": project.name,
-                "synthetic": project.synthetic,
-                "status": "awaiting_review",
-                "created_at": now(),
-                "updated_at": now(),
-                "revision": 1,
-                "project_path": "revisions/0001/project.json",
-                "package_path": "revisions/0001/package.json",
-                "mapping_review_path": None,
-                "mapping_version": 0,
-                "export_generated": False,
-                "motion_validation_passed": None,
-                "export_path": None,
-                "validation_path": None,
-                "bundle_path": None,
-                "error": None,
-                "attempts": [],
-            }
-            self.write(job)
+            with self.storage.write_admission(root, retained_bytes):
+                for name, data in (originals or {}).items():
+                    target = root / "originals" / bundle_path(name)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(data)
+                for name, data in uploads.items():
+                    target = root / "sources" / bundle_path(name)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(data)
+                revision = root / "revisions/0001"
+                revision.mkdir(parents=True)
+                (revision / "project.json").write_bytes(project_bytes)
+                (revision / "package.json").write_bytes(package_bytes)
+                job = {
+                    "schema_version": "assembly-job-1.0",
+                    "id": str(job_id),
+                    "name": project.name,
+                    "synthetic": project.synthetic,
+                    "status": "awaiting_review",
+                    "created_at": now(),
+                    "updated_at": now(),
+                    "revision": 1,
+                    "project_path": "revisions/0001/project.json",
+                    "package_path": "revisions/0001/package.json",
+                    "mapping_review_path": None,
+                    "mapping_version": 0,
+                    "owner_principal_id": owner_principal_id,
+                    "owner_claimed_at": now() if owner_principal_id else None,
+                    "export_generated": False,
+                    "motion_validation_passed": None,
+                    "export_path": None,
+                    "validation_path": None,
+                    "bundle_path": None,
+                    "error": None,
+                    "attempts": [],
+                }
+                self.write(job)
             return job
         except Exception:
-            shutil.rmtree(root)
+            shutil.rmtree(root, ignore_errors=True)
             raise
 
-    def save(self, job_id: UUID, project: ReviewProject, expected_revision: int):
+    @staticmethod
+    def _temporary_sources(root: Path, uploads: dict[str, bytes]) -> Path:
+        sources = root / ".review-sources"
+        for name, data in uploads.items():
+            target = sources / bundle_path(name)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+        return sources
+
+    def save(
+        self,
+        job_id: UUID,
+        project: ReviewProject,
+        expected_revision: int,
+        package: dict | None = None,
+    ):
         with self.lock:
             job = self.get(job_id)
             if job["revision"] != expected_revision or job["status"] in {
@@ -174,8 +235,13 @@ class AssemblyJobs:
                 raise ValueError(
                     "Source paths, hashes, poses, provenance and synthetic label are immutable; import a new job"
                 )
-            package = review_package(project, root / "sources")
             number = expected_revision + 1
+            if number > MAX_REVISIONS:
+                raise StorageLimitError(
+                    "Revision retention limit reached; prior revisions remain available"
+                )
+            if package is None:
+                package = review_package(project, root / "sources")
             folder = root / "revisions" / f"{number:04d}"
             # job.json is the publication point. A crash may leave the next
             # revision unreferenced; retain it separately before retrying.
@@ -183,13 +249,14 @@ class AssemblyJobs:
                 retained = root / "interrupted-revisions"
                 retained.mkdir(exist_ok=True)
                 folder.rename(retained / f"{number:04d}-{uuid4().hex}")
-            staging = root / "revisions" / f".pending-{uuid4().hex}"
-            staging.mkdir()
-            (staging / "project.json").write_text(
-                project.model_dump_json(indent=2) + "\n", encoding="utf-8"
-            )
-            (staging / "package.json").write_text(json.dumps(package) + "\n", encoding="utf-8")
-            staging.rename(folder)
+            project_bytes = (project.model_dump_json(indent=2) + "\n").encode()
+            package_bytes = (json.dumps(package, allow_nan=False) + "\n").encode()
+            with self.storage.write_admission(root, len(project_bytes) + len(package_bytes) + 4096):
+                staging = root / "revisions" / f".pending-{uuid4().hex}"
+                staging.mkdir()
+                (staging / "project.json").write_bytes(project_bytes)
+                (staging / "package.json").write_bytes(package_bytes)
+                staging.rename(folder)
             return self.update(
                 job_id,
                 revision=number,
@@ -230,16 +297,23 @@ class AssemblyJobs:
             )
             validate_mapping_review(review, project)
             version = expected_mapping_version + 1
+            if version > MAX_MAPPING_VERSIONS:
+                raise StorageLimitError(
+                    "Mapping-review retention limit reached; prior reviews remain available"
+                )
             relative = f"revisions/{job['revision']:04d}/mapping-review-{version:04d}.json"
             target = root / relative
             # This is immutable evidence.  A version collision can only mean a
             # corrupted publication state; never replace it.
             if target.exists():
                 raise RuntimeError("Mapping review version already exists; reload before saving")
-            target.write_text(
-                json.dumps(review, ensure_ascii=False, separators=(",", ":"), allow_nan=False),
-                encoding="utf-8",
-            )
+            encoded = json.dumps(
+                review, ensure_ascii=False, separators=(",", ":"), allow_nan=False
+            ).encode()
+            if len(encoded) > MAX_MAPPING_BYTES:
+                raise StorageLimitError("Mapping review exceeds the retained metadata limit")
+            with self.storage.write_admission(root, len(encoded) + 4096):
+                target.write_bytes(encoded)
             return self.update(job_id, mapping_review_path=relative, mapping_version=version)
 
     def start(self, job_id: UUID, request: ProcessRequest):
@@ -268,8 +342,31 @@ class AssemblyJobs:
                 (root / job["project_path"]).read_text(encoding="utf-8")
             )
             assembly_record(project)
-            checked_parts(project, root / "sources")
+            # Import/revision review already validated the geometry in a bounded child.
+            # Recheck immutable source identity here without running a native parser
+            # before the processing claim. Preparation validates geometry in the worker.
+            source_root = (root / "sources").resolve(strict=True)
+            if not source_root.is_relative_to(root.resolve()):
+                raise ValueError("Source directory must remain inside the job")
+            verified = {}
+            for part in project.parts:
+                if part.mesh in verified:
+                    if verified[part.mesh] != part.sha256:
+                        raise ValueError("Conflicting source hashes")
+                    continue
+                path = (source_root / bundle_path(part.mesh)).resolve(strict=True)
+                if not path.is_relative_to(source_root) or not path.is_file():
+                    raise ValueError("Source must remain inside the job")
+                with path.open("rb") as stream:
+                    actual = hashlib.file_digest(stream, "sha256").hexdigest()
+                if actual != part.sha256:
+                    raise ValueError("Source changed; re-import and review")
+                verified[part.mesh] = actual
             attempt = len(job["attempts"]) + 1
+            if attempt > MAX_ATTEMPTS:
+                raise StorageLimitError(
+                    "Attempt retention limit reached; prior exports remain available"
+                )
             mapping_bytes = (root / mapping_path).read_bytes() if mapping_path else None
             project_bytes = (root / job["project_path"]).read_bytes()
             job["attempts"].append(
@@ -324,9 +421,16 @@ class AssemblyJobs:
         mapping_bytes: bytes | None,
     ):
         root = self.directory(job_id)
-        folder = root / "attempts" / f"{attempt:04d}"
+        destination = root / "attempts" / f"{attempt:04d}"
+        temporary_root = Path(tempfile.mkdtemp(prefix="kamino-assembly-pending-", dir=root))
+        folder = temporary_root / "attempt"
         try:
-            folder.mkdir(parents=True)
+            # Generation writes only into a private, same-volume scratch directory.  This
+            # preflight preserves the configured free-space reserve before native exporters
+            # create temporary output; final retained bytes are admitted again at publication.
+            with self.storage.write_admission(root, PROCESSING_SCRATCH_RESERVE):
+                pass
+            folder.mkdir()
             prepared = prepare_review(project, root / "sources", folder / "prepared")
             self.stage(job_id, "exporting")
             record = AssemblyRecord.model_validate_json(prepared.read_text(encoding="utf-8"))
@@ -349,14 +453,34 @@ class AssemblyJobs:
                 raise FileNotFoundError("Observation replay runner is unavailable")
             if replay.is_file():
                 shutil.copyfile(replay, evidence / "replay_observations.py")
-            export_path = scene.relative_to(root).as_posix()
-            self.stage(job_id, "validating", export_generated=True, export_path=export_path)
             report = validate_assembly(scene)
             report_path = folder / "bundle/validation.json"
             report_path.write_text(
                 json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8"
             )
-            validation_path = report_path.relative_to(root).as_posix()
+            if report["passed"]:
+                archive = folder / "simulation.zip"
+                with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_DEFLATED) as zipped:
+                    for tree, prefix in (
+                        (folder / "bundle", ""),
+                        (folder / "prepared", "prepared"),
+                        (root / "sources", "sources"),
+                        (root / "originals", "originals"),
+                        (folder / "evidence", ""),
+                    ):
+                        if not tree.is_dir():
+                            continue
+                        for path in tree.rglob("*"):
+                            if path.is_file():
+                                zipped.write(
+                                    path, (Path(prefix) / path.relative_to(tree)).as_posix()
+                                )
+            # No status exposes files until the complete immutable attempt has passed
+            # storage admission and has been atomically published.
+            folder = self.storage.publish_directory(folder, destination, root)
+            export_path = (folder / "bundle" / "scene.xml").relative_to(root).as_posix()
+            validation_path = (folder / "bundle" / "validation.json").relative_to(root).as_posix()
+            self.stage(job_id, "validating", export_generated=True, export_path=export_path)
             if not report["passed"]:
                 self.stage(
                     job_id,
@@ -369,29 +493,19 @@ class AssemblyJobs:
                     },
                 )
                 return
-            archive = folder / "simulation.zip"
-            with zipfile.ZipFile(archive, "x", compression=zipfile.ZIP_DEFLATED) as zipped:
-                for tree, prefix in (
-                    (folder / "bundle", ""),
-                    (folder / "prepared", "prepared"),
-                    (root / "sources", "sources"),
-                    (root / "originals", "originals"),
-                    (folder / "evidence", ""),
-                ):
-                    for path in tree.rglob("*"):
-                        if path.is_file():
-                            zipped.write(path, (Path(prefix) / path.relative_to(tree)).as_posix())
             self.stage(
                 job_id,
                 "completed",
                 motion_validation_passed=True,
                 validation_path=validation_path,
-                bundle_path=archive.relative_to(root).as_posix(),
+                bundle_path=(folder / "simulation.zip").relative_to(root).as_posix(),
             )
         except Exception as exc:
             code = "preparation_failed" if not (folder / "prepared").exists() else "export_failed"
             if (folder / "bundle/scene.xml").exists():
                 code = "validation_failed"
+            if isinstance(exc, StorageLimitError):
+                code = "storage_budget_exhausted"
             details = {"code": code, "message": f"Assembly processing failed: {type(exc).__name__}"}
             report = folder / "bundle/validation.json"
             if code == "validation_failed" and not report.exists():
@@ -399,15 +513,27 @@ class AssemblyJobs:
                     json.dumps({"passed": False, "error": details}, indent=2) + "\n",
                     encoding="utf-8",
                 )
-                self.stage(
-                    job_id,
-                    "failed",
-                    motion_validation_passed=False,
-                    validation_path=report.relative_to(root).as_posix(),
-                    error=details,
-                )
-            else:
-                self.stage(job_id, "failed", error=details)
+            if code == "validation_failed" and folder.is_dir() and not destination.exists():
+                try:
+                    folder = self.storage.publish_directory(folder, destination, root)
+                    self.stage(
+                        job_id,
+                        "failed",
+                        motion_validation_passed=False,
+                        validation_path=(folder / "bundle/validation.json")
+                        .relative_to(root)
+                        .as_posix(),
+                        error=details,
+                    )
+                    return
+                except (StorageLimitError, OSError, ValueError):
+                    details = {
+                        "code": "storage_budget_exhausted",
+                        "message": "Assembly processing failed before a retained attempt could be published.",
+                    }
+            self.stage(job_id, "failed", error=details)
+        finally:
+            shutil.rmtree(temporary_root, ignore_errors=True)
 
 
 def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
@@ -430,6 +556,7 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
 
     @router.post("/from-meshes", status_code=202)
     async def from_meshes(
+        request: Request,
         name: str = Form(...),
         units: Literal["m", "mm"] = Form(...),
         synthetic: bool = Form(False),
@@ -443,20 +570,44 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
                 filename = mesh.filename or ""
                 if filename.casefold() in {n.casefold() for n in uploads}:
                     raise ValueError("Duplicate mesh filenames; give each part a unique filename")
-                data = await mesh.read(max_bytes + 1)
+                data = await mesh.read(min(max_bytes, 32 * 1024 * 1024) + 1)
                 total += len(data)
-                if len(data) > max_bytes or total > 200 * 1024 * 1024:
+                if (
+                    len(data) > max_bytes
+                    or len(data) > 32 * 1024 * 1024
+                    or total > 64 * 1024 * 1024
+                ):
                     raise HTTPException(413, "Mesh upload limit exceeded")
                 uploads[filename] = data
-            project, normalized = draft_from_meshes(name, uploads, units, synthetic)
-            return service.create(project, normalized, originals=uploads)
+            project, normalized, originals, package = await run_in_threadpool(
+                import_meshes, name, uploads, units, synthetic
+            )
+            return await run_in_threadpool(
+                service.create,
+                project,
+                normalized,
+                originals,
+                package,
+                getattr(request.state, "owner_principal_id", None),
+            )
+        except MeshImportBusy as exc:
+            raise HTTPException(429, str(exc), headers={"Retry-After": "5"}) from None
+        except StorageLimitError:
+            raise HTTPException(
+                413, "Storage budget exhausted. Saved exports remain available."
+            ) from None
+        except MeshImportError as exc:
+            status = 413 if "limit" in str(exc).lower() else 422
+            raise HTTPException(status, str(exc)) from None
         except (ValueError, OSError) as exc:
             raise HTTPException(422, str(exc)) from None
 
     @router.post("", status_code=202)
-    async def create(project: UploadFile = File(...), meshes: list[UploadFile] = File(...)):
-        content = await project.read(2 * 1024 * 1024 + 1)
-        if len(content) > 2 * 1024 * 1024:
+    async def create(
+        request: Request, project: UploadFile = File(...), meshes: list[UploadFile] = File(...)
+    ):
+        content = await project.read(MAX_REVIEW_BYTES + 1)
+        if len(content) > MAX_REVIEW_BYTES:
             raise HTTPException(413, "Review project exceeds 2 MiB")
         try:
             parsed = ReviewProject.model_validate_json(content)
@@ -474,9 +625,13 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
                 bundle_path(name)
                 if name not in paths or name in uploads:
                     raise ValueError("Mesh filename must match a distinct project path exactly")
-                data = await mesh.read(max_bytes + 1)
+                data = await mesh.read(min(max_bytes, 32 * 1024 * 1024) + 1)
                 total += len(data)
-                if len(data) > max_bytes or total > 200 * 1024 * 1024:
+                if (
+                    len(data) > max_bytes
+                    or len(data) > 32 * 1024 * 1024
+                    or total > 64 * 1024 * 1024
+                ):
                     raise HTTPException(413, "Mesh upload limit exceeded")
                 uploads[name] = data
             if set(uploads) != paths:
@@ -484,9 +639,26 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
             for part in parsed.parts:
                 if hashlib.sha256(uploads[part.mesh]).hexdigest() != part.sha256:
                     raise ValueError(f"Source hash mismatch for {part.id}")
-            return service.create(parsed, uploads)
+            package = await run_in_threadpool(review_import, parsed, uploads)
+            return await run_in_threadpool(
+                service.create,
+                parsed,
+                uploads,
+                None,
+                package,
+                getattr(request.state, "owner_principal_id", None),
+            )
         except HTTPException:
             raise
+        except MeshImportBusy as exc:
+            raise HTTPException(429, str(exc), headers={"Retry-After": "5"}) from None
+        except StorageLimitError:
+            raise HTTPException(
+                413, "Storage budget exhausted. Saved exports remain available."
+            ) from None
+        except MeshImportError as exc:
+            status = 413 if "limit" in str(exc).lower() else 422
+            raise HTTPException(status, str(exc)) from None
         except (ValueError, OSError) as exc:
             raise HTTPException(422, str(exc)) from None
 
@@ -495,10 +667,25 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
         return find(job_id)
 
     @router.put("/{job_id}/revisions", status_code=201)
-    def save(job_id: UUID, body: RevisionRequest):
+    async def save(job_id: UUID, body: RevisionRequest):
         find(job_id)
         try:
-            return service.save(job_id, body.project, body.expected_revision)
+            root = service.directory(job_id)
+            uploads = {
+                part.mesh: (root / "sources" / bundle_path(part.mesh)).read_bytes()
+                for part in body.project.parts
+            }
+            package = await run_in_threadpool(review_import, body.project, uploads)
+            return service.save(job_id, body.project, body.expected_revision, package=package)
+        except MeshImportBusy as exc:
+            raise HTTPException(429, str(exc), headers={"Retry-After": "5"}) from None
+        except MeshImportError as exc:
+            status = 413 if "limit" in str(exc).lower() else 422
+            raise HTTPException(status, str(exc)) from None
+        except StorageLimitError:
+            raise HTTPException(
+                413, "Storage budget exhausted. Saved exports remain available."
+            ) from None
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from None
         except ValueError as exc:
@@ -508,7 +695,7 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
     async def save_mapping_review(job_id: UUID, request: Request):
         find(job_id)
         content = await request.body()
-        if len(content) > 50 * 1024 * 1024:
+        if len(content) > MAX_MAPPING_BYTES:
             raise HTTPException(413, "Mapping review exceeds 50 MiB")
         try:
             body = json.loads(content)
@@ -530,6 +717,10 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
             return service.save_mapping_review(job_id, revision, version, review)
         except json.JSONDecodeError:
             raise HTTPException(422, "Mapping review must be valid JSON") from None
+        except StorageLimitError:
+            raise HTTPException(
+                413, "Storage budget exhausted. Saved exports remain available."
+            ) from None
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from None
         except ValueError as exc:
@@ -540,6 +731,10 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
         find(job_id)
         try:
             return service.start(job_id, body)
+        except StorageLimitError:
+            raise HTTPException(
+                413, "Storage budget exhausted. Saved exports remain available."
+            ) from None
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from None
         except ValueError as exc:
@@ -562,5 +757,18 @@ def assembly_router(service: AssemblyJobs, settings, max_bytes: int):
         except ValueError:
             raise HTTPException(404, "File not found") from None
         return FileResponse(target, filename=target.name)
+
+    @router.post("/{job_id}/claim")
+    async def claim(job_id: UUID, request: Request):
+        from photo2sim.api.browser_session import access_role
+
+        if access_role(request, settings) != "team":
+            raise HTTPException(403, "Team access is required for legacy recovery")
+        await require_legacy_claim(request)
+        find(job_id)
+        try:
+            return service.claim_owner(job_id, getattr(request.state, "owner_principal_id", None))
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from None
 
     return router

@@ -16,7 +16,7 @@ Renewal does not reset usage. Saved reads and downloads do not use the
 generation allowance. The server reports a wait time when a limit is reached.
 Judge and team access still require a code; use **Student access** on the upload
 page or **Generation access** in Assembly to enter one. Signing out clears this
-browser's session; public student access resumes on refresh or the next upload
+browser's access and ownership cookies; public student access resumes on refresh or the next upload
 access check. Existing judge and team sessions keep their role.
 
 For access questions, contact [Johaan](https://github.com/Johaan-Mannanal). The
@@ -29,9 +29,21 @@ must explicitly enable public student access; it is off by default.
 Uploaded photos go to the configured Kamino backend. Real reconstruction sends
 them to Meshy; requesting photo-based property assistance sends images to Gemini.
 Jobs, original inputs and generated artifacts are retained in backend storage so
-users can reopen and revise them. Hosted access uses shared tiers, not individual
-private accounts. Student access is public; a job ID is not a private account or
-ownership check. Provider API keys and shared access codes stay on the server.
+users can reopen and revise them. New jobs bind to a separate signed, HttpOnly
+browser ownership cookie (30 days); renewing an access tier preserves it. A job
+URL alone does not let another ordinary student/judge browser read or change it.
+This is browser ownership, not a user account: clearing cookies, changing browser,
+signing out or expiry can require team recovery. Team/original application access
+is privileged and can read all retained jobs. Existing jobs without ownership
+metadata require team access; reading them never assigns an owner. A team operator
+may explicitly claim an unowned legacy job for their current browser after
+confirming the request. Local token-free development keeps its existing behavior.
+Provider API keys and shared access codes stay on the server.
+
+Retained assembly saves and native imports also have independent abuse cooldowns.
+Storage admission is bounded globally and per job, with a free-space reserve;
+reaching a limit rejects new writes and preserves existing downloads. These limits
+do not guarantee deletion or backup. See [security operations](SECURITY_OPERATIONS.md).
 
 The service does not currently publish a guaranteed retention period or provide
 a self-service deletion interface. For a removal request, contact the maintainer

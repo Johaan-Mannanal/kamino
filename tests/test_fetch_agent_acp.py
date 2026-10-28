@@ -49,6 +49,7 @@ def test_signed_chat_ack_reply_and_no_ack_loop():
         workflow=workflow,
         send=lambda **payload: sent.append(payload),
         seed="photo2sim-test-agent-not-a-live-agent",
+        allowed_senders={Identity.from_seed("photo2sim-test-sender-not-a-live-agent", 0).address},
     )
     with TestClient(app) as client:
         address = client.get("/status").json()["address"]
@@ -85,3 +86,51 @@ def test_unsigned_and_wrong_target_messages_cannot_execute_tools():
         wrong_target = make_envelope("agent-wrong-target", message)
         assert client.post("/chat", json=wrong_target.model_dump(mode="json")).status_code == 401
         assert workflow.calls == []
+
+
+def test_valid_signed_sender_is_denied_by_default_before_any_reply(monkeypatch):
+    monkeypatch.delenv("PHOTO2SIM_AGENT_ALLOWED_SENDERS", raising=False)
+    workflow, sent = StubWorkflow(), []
+    app = create_app(
+        workflow=workflow,
+        send=lambda **payload: sent.append(payload),
+        seed="photo2sim-test-private-adapter",
+    )
+    with TestClient(app) as client:
+        target = client.get("/status").json()["address"]
+        message = ChatMessage(content=[TextContent(type="text", text="upload")])
+        envelope = make_envelope(target, message)
+        result = client.post("/chat", json=envelope.model_dump(mode="json"))
+        assert result.status_code == 403
+        assert workflow.calls == []
+        assert sent == []
+
+
+def test_explicit_allowlist_rejects_other_signed_sender_and_env_allows_operator(monkeypatch):
+    sender = Identity.from_seed("photo2sim-test-sender-not-a-live-agent", 0).address
+    workflow, sent = StubWorkflow(), []
+    monkeypatch.setenv("PHOTO2SIM_AGENT_ALLOWED_SENDERS", "  " + sender + "  ")
+    app = create_app(
+        workflow=workflow,
+        send=lambda **payload: sent.append(payload),
+        seed="photo2sim-test-allowed-adapter",
+    )
+    with TestClient(app) as client:
+        target = client.get("/status").json()["address"]
+        message = ChatMessage(content=[TextContent(type="text", text="help")])
+        envelope = make_envelope(target, message)
+        assert client.post("/chat", json=envelope.model_dump(mode="json")).status_code == 200
+        assert workflow.calls == [("help", [])]
+    rejected = create_app(
+        workflow=workflow,
+        send=lambda **payload: sent.append(payload),
+        seed="photo2sim-test-other-adapter",
+        allowed_senders={"agent-unrelated"},
+    )
+    with TestClient(rejected) as client:
+        target = client.get("/status").json()["address"]
+        envelope = make_envelope(target, message)
+        before = len(sent)
+        assert client.post("/chat", json=envelope.model_dump(mode="json")).status_code == 403
+        assert len(sent) == before
+        assert workflow.calls == [("help", [])]

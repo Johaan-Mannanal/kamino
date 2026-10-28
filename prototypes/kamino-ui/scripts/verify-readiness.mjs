@@ -162,6 +162,29 @@ try {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   assert.ok(ready, "Caddy did not start: " + serverLog);
+  await check("Caddy returns compatible browser security headers", async () => {
+    const response = await fetch(base);
+    const csp = response.headers.get("content-security-policy") || "";
+    assert.match(csp, /default-src 'self'/);
+    assert.match(csp, /frame-ancestors 'none'/);
+    assert.match(csp, /style-src 'self' 'unsafe-inline'/);
+    assert.match(csp, /img-src 'self' data: blob:/);
+    assert.match(csp, /worker-src 'self' blob:/);
+    assert.equal(response.headers.get("x-frame-options"), "DENY");
+    assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+    assert.equal(
+      response.headers.get("referrer-policy"),
+      "strict-origin-when-cross-origin",
+    );
+    assert.equal(
+      response.headers.get("permissions-policy"),
+      "camera=(self), microphone=(), geolocation=()",
+    );
+    assert.match(
+      response.headers.get("strict-transport-security") || "",
+      /max-age=31536000; includeSubDomains/,
+    );
+  });
   browser = await chromium.launch({
     headless: true,
     args: ["--enable-unsafe-swiftshader"],

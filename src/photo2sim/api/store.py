@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
+from photo2sim.api.storage import StorageBudget
 from photo2sim.contracts import JobRecord
 
 
@@ -14,9 +15,10 @@ class JobConflict(ValueError):
 class JobStore:
     """Each operation owns its connection, including transactions between threads."""
 
-    def __init__(self, data_dir: Path):
+    def __init__(self, data_dir: Path, storage: StorageBudget | None = None):
         self.data_dir = data_dir.resolve()
         self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.storage = storage or StorageBudget(self.data_dir)
         self.database = self.data_dir / "jobs.sqlite3"
         with self.connect() as connection:
             connection.execute("PRAGMA journal_mode=WAL")
@@ -92,6 +94,33 @@ class JobStore:
                 "UPDATE jobs SET record = ? WHERE id = ?", (result.model_dump_json(), str(job_id))
             )
         return result
+
+    def claim_owner(self, job_id: UUID, principal: str) -> JobRecord:
+        """Atomically attach an owner to an unowned legacy job exactly once."""
+        if not isinstance(principal, str) or not principal.strip():
+            raise ValueError("principal must be a non-empty string")
+        with self.connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT record FROM jobs WHERE id = ?", (str(job_id),)
+            ).fetchone()
+            if row is None:
+                raise KeyError(str(job_id))
+            job = JobRecord.model_validate_json(row[0])
+            if job.owner_principal_id is not None:
+                raise JobConflict("Job already belongs to another principal")
+            claimed = job.model_copy(
+                update={
+                    "owner_principal_id": principal,
+                    "owner_claimed_at": datetime.now(UTC),
+                    "updated_at": datetime.now(UTC),
+                }
+            )
+            connection.execute(
+                "UPDATE jobs SET record = ? WHERE id = ?",
+                (claimed.model_dump_json(), str(job_id)),
+            )
+        return claimed
 
     def active(self) -> list[JobRecord]:
         with self.connect() as connection:

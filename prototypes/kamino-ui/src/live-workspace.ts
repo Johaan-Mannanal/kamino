@@ -156,7 +156,8 @@ export const isRunning = (job: Job | null) =>
 export const meshReady = (job: Job | null) =>
   !!job?.mesh_path && !["queued", "reconstructing"].includes(job.status);
 export const isAuthError = (error: unknown) =>
-  error instanceof ApiError && error.status === 401;
+  error instanceof ApiError && (error.status === 401 ||
+    (error.status === 403 && error.category === "job_access"));
 export const sameOrientation = (a: Orientation, b: Orientation) =>
   a.x_deg === b.x_deg && a.y_deg === b.y_deg && a.z_deg === b.z_deg;
 const text = (value: number | null | undefined) =>
@@ -609,7 +610,9 @@ export function mountLiveWorkspace(
       prompting = true;
       const accepted = await promptForToken(
         session,
-        "Browser access could not be renewed. Your draft is kept. Sign in here, then repeat your last action.",
+        error instanceof ApiError && error.category === "job_access"
+          ? "This browser does not own this saved job. Your draft is kept. Enter team access for recovery, then repeat your last action."
+          : "Browser access could not be renewed. Your draft is kept. Sign in here, then repeat your last action.",
       );
       prompting = false;
       // Only the job status is re-read; no save, provider or processing request is retried.

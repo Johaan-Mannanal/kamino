@@ -17,6 +17,14 @@ share this browser session. Sign out clears this browser's cookie; it does not r
 copies elsewhere. Rotating the application code invalidates all existing sessions.
 This is shared team access, not individual user accounts.
 
+New jobs also bind to a separate signed browser-ownership cookie. Student and
+judge access require the same browser owner on reads, saves and downloads;
+renewing the short-lived access session preserves ownership. Team/original
+application access remains administrative. Existing jobs without owner metadata
+require team access and are never silently claimed. Preserve their files and
+SQLite records; use the explicit legacy-claim API only after confirming recovery.
+Signing out clears both cookies. See [ownership and recovery](../../docs/HOSTED_ACCESS.md).
+
 Optional `PHOTO2SIM_STUDENT_CODE`, `PHOTO2SIM_JUDGE_CODE` and `PHOTO2SIM_TEAM_CODE`
 add access levels. Configure them only as private server variables, never frontend
 build variables or committed values. Keep `PHOTO2SIM_API_TOKEN` unchanged: it is
@@ -68,6 +76,14 @@ with a human-readable wait time and `Retry-After`. Refresh, re-sign-in and serve
 restart do not reset allowance. Expiry does not cancel accepted background work:
 sign in again to inspect it. Existing provider deadlines and worker safeguards still
 apply to every tier. These are shared project access codes, not separate private accounts.
+
+Native mesh imports and retained assembly saves have separate abuse admission;
+rejected parsing still consumes that admission even when generation admission is
+refunded. Request-body, retained-byte and history limits apply to team access too.
+Set the storage limits for the actual persistent volume, leaving room for scratch
+files and SQLite growth. Exhaustion rejects new writes while preserving prior
+downloads; restored capacity permits explicit cached-source simulation retries.
+Review [security operations](../../docs/SECURITY_OPERATIONS.md) before release.
 
 API scripts may continue using the existing Bearer header. Browser writes authenticated
 by cookies must come from the configured public origin or explicitly allowed CORS

@@ -6,8 +6,9 @@ RUN apt-get update \
     && useradd --uid 10001 --user-group --create-home app
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE NOTICE ./
+COPY requirements/production-py312.txt ./requirements/production-py312.txt
 COPY src ./src
-RUN python -m pip install --no-cache-dir '.[simulation]'
+RUN python -m pip install --no-cache-dir --constraint requirements/production-py312.txt '.[simulation]'
 COPY deploy/railway/start-backend.sh /usr/local/bin/start-backend
 RUN chmod 755 /usr/local/bin/start-backend
 EXPOSE 8000

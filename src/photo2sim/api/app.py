@@ -1,4 +1,6 @@
 import hashlib
+import re
+import secrets
 import shutil
 import warnings
 from contextlib import asynccontextmanager
@@ -7,14 +9,14 @@ from io import BytesIO
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPBearer
 from PIL import Image, UnidentifiedImageError
 from starlette.concurrency import run_in_threadpool
 
-from photo2sim.api.access_limits import AccessLimits, request_action
+from photo2sim.api.access_limits import AccessLimits, request_abuse_action, request_action
 from photo2sim.api.browser_session import (
     access_role,
     bearer_role,
@@ -22,7 +24,15 @@ from photo2sim.api.browser_session import (
     trusted_origin,
 )
 from photo2sim.api.config import Settings
+from photo2sim.api.job_access import (
+    owner_principal,
+    request_owner,
+    require_legacy_claim,
+    set_owner_cookie,
+)
+from photo2sim.api.request_limits import RequestLimits
 from photo2sim.api.rigid_history import new_attempt, retained_attempts
+from photo2sim.api.storage import StorageBudget, StorageLimitError
 from photo2sim.api.store import JobConflict, JobStore
 from photo2sim.api.suggestions import (
     SuggestionRequest,
@@ -55,6 +65,8 @@ def retryable_processing(job: JobRecord) -> bool:
             "packaging_failed",
             "processing_interrupted",
             "simulation_unavailable",
+            "storage_budget_exhausted",
+            "publication_failed",
         }
     )
 
@@ -75,7 +87,13 @@ def create_app(
             provider = MockProvider()
     if provider.name != settings.provider:
         raise ValueError("Provider implementation does not match configured provider")
-    store = JobStore(settings.data_dir)
+    storage = StorageBudget(
+        settings.data_dir,
+        settings.storage_max_total_bytes,
+        settings.storage_max_job_bytes,
+        settings.storage_min_free_bytes,
+    )
+    store = JobStore(settings.data_dir, storage=storage)
     try:
         from photo2sim.api.assembly_jobs import AssemblyJobs, assembly_router
     except ModuleNotFoundError as exc:
@@ -83,7 +101,7 @@ def create_app(
             raise
         assembly_jobs = None
     else:
-        assembly_jobs = AssemblyJobs(settings.data_dir)
+        assembly_jobs = AssemblyJobs(settings.data_dir, storage=storage)
     suggestions = SuggestionService(store, settings, gemini_transport)
 
     @asynccontextmanager
@@ -104,6 +122,17 @@ def create_app(
         lifespan=lifespan,
         dependencies=[Depends(HTTPBearer(auto_error=False))] if settings.api_token else [],
     )
+    app.add_exception_handler(
+        StorageLimitError,
+        lambda request, error: JSONResponse(
+            status_code=413,
+            content={
+                "detail": "Storage budget exhausted. Saved exports remain available.",
+                "category": "storage",
+            },
+        ),
+    )
+    app.add_middleware(RequestLimits)
     if settings.api_token:
         access_limits = AccessLimits(settings.data_dir)
 
@@ -111,6 +140,9 @@ def create_app(
         async def application_access(request, call_next):
             reservation = None
             action = None
+            abuse_reservation = None
+            abuse_action = None
+            new_owner = None
             if (
                 request.method != "OPTIONS"
                 and request.url.path.startswith("/api/")
@@ -123,6 +155,10 @@ def create_app(
                         content={"detail": "Application access token required"},
                         headers={"WWW-Authenticate": "Bearer"},
                     )
+                request.state.owner_principal_id = owner_principal(request, settings)
+                if request.state.owner_principal_id is None:
+                    new_owner = secrets.token_hex(16)
+                    request.state.owner_principal_id = new_owner
                 if (
                     request.method not in {"GET", "HEAD", "OPTIONS"}
                     and not bearer_role(request, settings)
@@ -132,7 +168,39 @@ def create_app(
                         status_code=403,
                         content={"detail": "Use the Kamino website for this action"},
                     )
+                match = re.fullmatch(r"/api/(jobs|assembly-jobs)/([^/]+)(?:/.*)?", request.url.path)
+                if match and role != "team":
+                    try:
+                        job_id = UUID(match[2])
+                        saved = (
+                            await run_in_threadpool(store.get, job_id)
+                            if match[1] == "jobs"
+                            else await run_in_threadpool(assembly_jobs.get, job_id)
+                            if assembly_jobs
+                            else None
+                        )
+                        owner = (
+                            saved.owner_principal_id
+                            if isinstance(saved, JobRecord)
+                            else saved.get("owner_principal_id")
+                            if saved
+                            else None
+                        )
+                        if saved is not None and owner != request.state.owner_principal_id:
+                            return JSONResponse(
+                                status_code=403,
+                                content={
+                                    "detail": "This browser does not own this job. Use team access for recovery.",
+                                    "category": "job_access",
+                                },
+                            )
+                    except (ValueError, KeyError):
+                        pass
                 try:
+                    abuse_action = request_abuse_action(request.method, request.url.path)
+                    abuse_reservation = await run_in_threadpool(
+                        access_limits.reserve, role, abuse_action
+                    )
                     action = request_action(request.method, request.url.path)
                     reservation = await run_in_threadpool(
                         access_limits.reserve,
@@ -140,6 +208,7 @@ def create_app(
                         action,
                     )
                 except HTTPException as error:
+                    await run_in_threadpool(access_limits.refund, abuse_reservation)
                     return JSONResponse(
                         status_code=error.status_code,
                         content={"detail": error.detail},
@@ -152,9 +221,21 @@ def create_app(
                 action == "gemini" and response.status_code == 422
             ):
                 await run_in_threadpool(access_limits.refund, reservation)
+            # Parsing and retained-write admission are independent from paid-operation limits.
+            # Retain these admissions even when native parsing or validation rejects the body.
+            if new_owner:
+                set_owner_cookie(response, new_owner, request, settings)
             return response
 
     register_session_routes(app, settings)
+
+    @app.middleware("http")
+    async def private_api_responses(request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "private, no-store"
+        return response
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(settings.cors_origins),
@@ -249,7 +330,9 @@ def create_app(
         return {"status": "ok", "provider": provider.name}
 
     @app.post("/api/jobs", response_model=JobRecord, status_code=202)
-    async def create_job(images: Annotated[list[UploadFile], File(min_length=1, max_length=4)]):
+    async def create_job(
+        request: Request, images: Annotated[list[UploadFile], File(min_length=1, max_length=4)]
+    ):
         validated = []
         for image in images:
             content = await image.read(settings.max_image_bytes + 1)
@@ -292,21 +375,40 @@ def create_app(
             created_at=now,
             updated_at=now,
             legacy_sizing_allowed=False,
+            owner_principal_id=request_owner(request),
         )
-        try:
-            (root / "uploads").mkdir(parents=True)
-            for name, (_, content) in zip(source_images, validated, strict=True):
-                (root / name).write_bytes(content)
-            store.create(job)
-        except Exception:
-            shutil.rmtree(root, ignore_errors=True)
-            raise
+
+        def persist_upload():
+            try:
+                with storage.write_admission(
+                    root, sum(len(data) for _, data in validated) + 64 * 1024
+                ):
+                    (root / "uploads").mkdir(parents=True)
+                    for name, (_, content) in zip(source_images, validated, strict=True):
+                        (root / name).write_bytes(content)
+                    store.create(job)
+            except Exception:
+                shutil.rmtree(root, ignore_errors=True)
+                raise
+
+        await run_in_threadpool(persist_upload)
         app.state.worker.enqueue(job_id)
         return job
 
     @app.get("/api/jobs/{job_id}", response_model=JobRecord)
     def job_status(job_id: UUID):
         return get_job(job_id)
+
+    @app.post("/api/jobs/{job_id}/claim")
+    async def claim_legacy_job(job_id: UUID, request: Request):
+        if access_role(request, settings) != "team":
+            raise HTTPException(403, "Team access is required for legacy recovery")
+        await require_legacy_claim(request)
+        get_job(job_id)
+        try:
+            return store.claim_owner(job_id, request_owner(request))
+        except JobConflict:
+            raise HTTPException(409, "This job already has a browser owner") from None
 
     @app.get("/api/jobs/{job_id}/suggestions", response_model=PropertySuggestions)
     def cached_suggestions(job_id: UUID):
@@ -411,6 +513,10 @@ def create_app(
             raise HTTPException(409, "Job is not ready for simulation processing")
         if job.properties is None or job.mesh_path is None:
             raise HTTPException(409, "Save confirmed properties and finish reconstruction first")
+        if len(retained_attempts(job)) >= 30:
+            raise HTTPException(
+                413, "Attempt retention limit reached. Earlier exports remain available."
+            )
         target = reviewed_geometry(job, job_source(job), properties=job.properties, required=True)
         if job.properties.sizing is not None:
             if job.properties.sizing.reviewed_orientation != job.orientation:

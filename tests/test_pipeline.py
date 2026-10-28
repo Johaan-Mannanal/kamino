@@ -252,6 +252,51 @@ def test_preparation_failure_is_sanitized_and_cached_mesh_is_retained(tmp_path, 
     assert source.read_bytes() == before
 
 
+def test_storage_rejection_keeps_input_snapshot_but_publishes_no_generated_paths(
+    tmp_path, monkeypatch
+):
+    from photo2sim.api import pipeline
+
+    job_id, store = seed_job(tmp_path)
+    original = pipeline.export_asset
+
+    def oversized_export(*args, **kwargs):
+        scene = original(*args, **kwargs)
+        (scene.parent / "too-large.bin").write_bytes(b"x" * 100_000)
+        return scene
+
+    monkeypatch.setattr(pipeline, "export_asset", oversized_export)
+    constrained = Settings(
+        data_dir=tmp_path,
+        storage_max_total_bytes=50_000,
+        storage_max_job_bytes=200_000,
+        storage_min_free_bytes=0,
+    )
+    with TestClient(create_app(constrained)) as client:
+        assert client.post(f"/api/jobs/{job_id}/process").status_code == 202
+        failed = terminal(client, job_id)
+
+    assert failed["status"] == "failed"
+    assert failed["error"]["code"] == "storage_budget_exhausted"
+    assert failed["attempts"][0]["inputs_path"]
+    assert failed["export_path"] is None
+    assert failed["validation_path"] is None
+    assert failed["bundle_path"] is None
+    assert not (
+        store.job_dir(job_id) / "attempts" / failed["attempts"][0]["id"] / "artifacts"
+    ).exists()
+    snapshot_path = store.job_dir(job_id) / failed["attempts"][0]["inputs_path"]
+    snapshot = snapshot_path.read_bytes()
+    # Restoring capacity must allow cached-source regeneration, retaining the failed inputs.
+    monkeypatch.setattr(pipeline, "export_asset", original)
+    with TestClient(create_app(Settings(data_dir=tmp_path))) as client:
+        assert client.post(f"/api/jobs/{job_id}/process").status_code == 202
+        recovered = terminal(client, job_id)
+        assert recovered["status"] == "completed"
+        assert len(recovered["attempts"]) == 2
+        assert snapshot_path.read_bytes() == snapshot
+
+
 def test_failed_simulation_allows_correcting_properties_before_retry(tmp_path, monkeypatch):
     from photo2sim.api import pipeline
 
