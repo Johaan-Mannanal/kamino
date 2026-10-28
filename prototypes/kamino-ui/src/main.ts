@@ -1,6 +1,7 @@
 import { brandLink } from "../../../frontend/src/brand";
 import "./style.css";
 import { browserAccess } from "../../../frontend/src/access";
+import { ApiError } from "../../../frontend/src/api";
 import { initAppearance } from "./appearance";
 initAppearance();
 import { mountHome } from "./home";
@@ -418,7 +419,11 @@ function liveLoading(token: number, id: string) {
     paint();
     if (
       isAuthError(error) &&
-      (await promptForToken(session, "Sign in to open this saved job.", true))
+      (await promptForToken(
+        session,
+        "Sign in to open this saved job.",
+        error instanceof ApiError && error.status === 401,
+      ))
     )
       if (token === navToken) restore();
   };
