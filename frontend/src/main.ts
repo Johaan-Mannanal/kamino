@@ -1,4 +1,5 @@
 import { brandLink } from './brand'
+import { meshyKeyField, validMeshyKey, canResumeMeshy } from './meshy-key'
 import './style.css'
 import './workflow.css'
 import { liveApi, setApiToken, type Api } from './api'
@@ -29,6 +30,12 @@ import { canRetry, canDownloadBundle, preparedMeshPath } from './pipeline'
 const mode = import.meta.env.VITE_API_MODE === 'live' ? 'live' : 'mock'
 const api: Api = mode === 'live' ? liveApi : mockApi
 const app = document.querySelector<HTMLDivElement>('#app')!
+let meshyKey = ''
+let needsMeshyKey = mode === 'live'
+if (mode === 'live') void api.health().then(health => {
+  needsMeshyKey = health.provider !== 'mock'
+  render()
+}).catch(() => { /* Keep the key gate until the backend is reachable. */ })
 let files: File[] = [],
   job: Job | null = null,
   message = '',
@@ -465,11 +472,11 @@ function render() {
   ${mode === 'mock' || job?.synthetic ? `<div class="mode-note"><strong>Synthetic demo</strong><span>Synthetic geometry. This job does not demonstrate photo reconstruction.</span></div>` : ''}
   ${message ? `<div class="notice" role="status" aria-live="polite">${esc(message)} <button id="dismiss" aria-label="Dismiss">×</button></div>` : ''}
   ${mode === 'live' ? '<details class="access"><summary>API access</summary><label>Application token<input id="api-token" type="password" autocomplete="off" placeholder="Only needed for a protected backend"></label><button id="connect" type="button">Set token</button></details>' : ''}
-  <section><h2><span>1</span>Photos</h2><div class="body"><label class="drop" id="drop" for="photos">Drop photos here or choose files <span>2–4 photos recommended · One photo supported · JPEG, PNG, or WebP · 10 MiB each · 25 MP</span></label><input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>${files.map((f, i) => `<div class="selected"><span>${esc(f.name)}</span><button type="button" data-index="${i}" class="remove" aria-label="Remove ${esc(f.name)}">Remove</button></div>`).join('')}${mode === 'mock' ? `<label class="demo">Demo result ${selectScenario()}</label>` : ''}<button class="primary" id="upload" ${busy || !files.length ? 'disabled' : ''}>${busyAction === 'upload' ? '<span class="spinner" aria-hidden="true"></span>' : ''}${job ? 'Start new job' : 'Upload photos'}</button></div></section>
+  <section><h2><span>1</span>Photos</h2><div class="body"><label class="drop" id="drop" for="photos">Drop photos here or choose files <span>2–4 photos recommended · One photo supported · JPEG, PNG, or WebP · 10 MiB each · 25 MP</span></label><input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>${files.map((f, i) => `<div class="selected"><span>${esc(f.name)}</span><button type="button" data-index="${i}" class="remove" aria-label="Remove ${esc(f.name)}">Remove</button></div>`).join('')}${mode === 'mock' ? `<label class="demo">Demo result ${selectScenario()}</label>` : ''}${needsMeshyKey ? meshyKeyField() : ''}<button class="primary" id="upload" ${busy || !files.length || (needsMeshyKey && !validMeshyKey(meshyKey)) ? 'disabled' : ''}>${busyAction === 'upload' ? '<span class="spinner" aria-hidden="true"></span>' : ''}${job ? 'Start new job' : 'Upload photos'}</button></div></section>
   ${job?.mesh_path ? targetReviewControls(job, targetState) : ''}
   <section><h2><span>2</span>Object data</h2><div class="body">${editable && !done ? suggestionView(!!canSave) : ''}${done ? propertySummary() : editable ? `<form id="properties">${sizingForm()}<div class="grid two gap">${input('mass', 'Mass · grams', job?.properties ? job.properties.mass_kg.value * 1000 : '', !!done, true)}<label>Mass source ${select('mass_source', job?.properties?.mass_kg.source || 'user_supplied', !!done)}</label></div>${input('mass_note', 'Mass note · optional', job?.properties?.mass_kg.note || '', !!done)}<div class="grid two gap"><label>Sliding friction · blank if unknown<input name="friction" type="number" min="0" step="any" value="${val('friction', job?.properties?.sliding_friction?.value ?? '')}" ${done ? 'disabled' : ''}></label><label>Friction source ${select('friction_source', job?.properties?.sliding_friction?.source || 'estimated', !!done)}</label></div>${input('friction_note', 'Friction note · optional', job?.properties?.sliding_friction?.note || '', !!done)}<div class="form-end"><span>mm → m and g → kg when saved</span>${!done ? `<button id="save-properties" type="submit" class="primary" ${!canSave || busy ? 'disabled' : ''}>${busy ? 'Saving…' : 'Save properties'}</button>` : ''}</div>${!canSave && !done ? `<p class="hint">${job ? 'Enter measurements now. Save after reconstruction.' : 'Upload photos to start.'}</p>` : ''}</form>` : '<p class="empty">Upload photos to add measurements.</p>'}</div></section>
   ${orientationView(!!canSave, !!done)}
-  <section><h2><span>3</span>Process</h2><div class="body"><div class="stages" aria-label="Processing stages">${stages()}</div>${job ? `<div class="jobline"><span>Job ${esc(job.id.slice(0, 8))} · ${esc(job.provider)} · ${job.synthetic ? 'Synthetic' : 'Provider generated'}</span><button id="refresh" ${busy ? 'disabled' : ''}>Refresh</button></div>` : ''}${job?.status === 'failed' ? `<div class="failure"><strong>${esc(job.error?.code || 'Failed')}</strong><p>${esc(job.error?.message || 'The provider did not finish.')}</p></div>` : ''}${(job?.status === 'awaiting_properties' && job.properties) || canRetry(job) ? `<button class="primary" id="process" ${busy || !targetIsReady() ? 'disabled' : ''}>${canRetry(job) ? 'Retry simulation' : 'Generate simulation'}</button>` : ''}<p>Geometry review: reference correspondence and physical accuracy remain unverified. Numerical validation reports simulation smoke checks separately.</p>${reportView()}${attemptHistory()}</div></section>
+  <section><h2><span>3</span>Process</h2><div class="body"><div class="stages" aria-label="Processing stages">${stages()}</div>${job ? `<div class="jobline"><span>Job ${esc(job.id.slice(0, 8))} · ${esc(job.provider)} · ${job.synthetic ? 'Synthetic' : 'Provider generated'}</span><button id="refresh" ${busy ? 'disabled' : ''}>Refresh</button></div>` : ''}${job?.status === 'failed' ? `<div class="failure"><strong>${esc(job.error?.code || 'Failed')}</strong><p>${esc(job.error?.message || 'The provider did not finish.')}</p></div>` : ''}${job && canResumeMeshy(job) ? '<button type="button" id="resume-reconstruction">Resume saved Meshy task with your key</button>' : ''}${(job?.status === 'awaiting_properties' && job.properties) || canRetry(job) ? `<button class="primary" id="process" ${busy || !targetIsReady() ? 'disabled' : ''}>${canRetry(job) ? 'Retry simulation' : 'Generate simulation'}</button>` : ''}<p>Geometry review: reference correspondence and physical accuracy remain unverified. Numerical validation reports simulation smoke checks separately.</p>${reportView()}${attemptHistory()}</div></section>
   <section><h2><span>4</span>Files</h2><div class="body">${job?.mesh_path || job?.export_path ? `<div class="files">${job?.mesh_path ? link(job.mesh_path, 'Reconstructed mesh') : ''}${preparedMeshPath(job) ? link(preparedMeshPath(job)!, 'Prepared mesh') : ''}${job?.export_path ? link(job.export_path, canDownloadBundle(job) ? 'MuJoCo scene' : 'Diagnostic scene') : ''}${job?.validation_path ? link(job.validation_path, 'Validation report') : ''}${canDownloadBundle(job) ? link(job!.bundle_path!, 'Simulation ZIP') : ''}</div>` : '<p class="empty">Files appear when available.</p>'}${job?.status === 'completed' && mode === 'mock' ? '<p class="hint">Synthetic UI demo. No geometry or simulation validation was run.</p>' : ''}</div></section></main>`
   bind()
   syncTargetView()
@@ -561,6 +568,38 @@ async function refresh() {
   }
 }
 function bind() {
+  const meshyField = document.querySelector<HTMLInputElement>('#meshy-api-key')
+  if (meshyField) {
+    meshyField.value = meshyKey
+    meshyField.disabled = busy
+    meshyField.addEventListener('input', () => {
+      meshyKey = meshyField.value
+      const button = document.querySelector<HTMLButtonElement>('#upload')
+      if (button) button.disabled = busy || !files.length || (needsMeshyKey && !validMeshyKey(meshyKey))
+      const resume = document.querySelector<HTMLButtonElement>('#resume-reconstruction')
+      if (resume) resume.disabled = busy || !validMeshyKey(meshyKey)
+    })
+  }
+  const resume = document.querySelector<HTMLButtonElement>('#resume-reconstruction')
+  if (resume) {
+    resume.disabled = busy || !validMeshyKey(meshyKey)
+    resume.addEventListener('click', async () => {
+      if (!job || busy || !validMeshyKey(meshyKey) || !api.resumeReconstruction) return
+      busy = true
+      render()
+      try {
+        job = await api.resumeReconstruction(job.id, meshyKey)
+        meshyKey = ''
+        message = 'Resuming the existing Meshy task. No new reconstruction was requested.'
+      } catch (error) {
+        message = (error as Error).message
+      } finally {
+        busy = false
+        render()
+        schedule()
+      }
+    })
+  }
   const targetForm = document.querySelector<HTMLFormElement>('#target-review-form')
   targetForm?.addEventListener('input', () => {
     targetState.draft = readTargetDraft(targetForm)
@@ -669,7 +708,9 @@ function bind() {
     setMockScenario(scenario)
   })
   document.querySelector('#upload')?.addEventListener('click', async () => {
-    const error = validatePhotos(files)
+    const error =
+      validatePhotos(files) ||
+      (needsMeshyKey && !validMeshyKey(meshyKey) ? 'Enter your own Meshy API key.' : null)
     if (error) {
       message = error
       render()
@@ -681,7 +722,8 @@ function bind() {
     message = ''
     render()
     try {
-      job = await api.create(files)
+      job = await api.create(files, mode === 'live' ? meshyKey : undefined)
+      meshyKey = ''
       files = []
       draft = {}
       orientationDraft = {}

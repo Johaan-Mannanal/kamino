@@ -30,8 +30,9 @@ physics grasp. [Still frame](docs/images/demo-simulation-and-arm-poster.png) ·
   opens a procedural mug. Its session-only GLB/property export is not a validated
   MuJoCo bundle; use the complete example above for a runnable simulation.
 - **Reconstruct your own object:** [upload photos](https://kamino.design/#upload).
-  The public site grants student access automatically, with a shared daily
-  allowance because provider usage is metered. Judge and team access use codes. [Access and photo handling](docs/HOSTED_ACCESS.md).
+  Bring your own Meshy API key and API-enabled plan; reconstruction uses your
+  credits. The public site grants student access automatically, with shared daily
+  limits. Existing job review, regeneration and downloads need no Meshy key. Judge and team access use codes. [Access and photo handling](docs/HOSTED_ACCESS.md).
 - **Develop locally:** follow the [tested quickstart](docs/QUICKSTART.md), which
   starts with an offline example and uses mock reconstruction for local jobs.
 

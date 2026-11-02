@@ -437,11 +437,11 @@ export class BackendSession {
     }
   }
 
-  async upload(files: File[]) {
+  async upload(files: File[], meshyKey?: string) {
     if (this.busy) throw new Error("Wait for the current operation to finish.");
     this.cancel();
     return this.mutation(async (generation) => {
-      const job = await this.api.create(files);
+      const job = await (meshyKey ? this.api.create(files, meshyKey) : this.api.create(files));
       this.check(generation);
       this.setJob(job);
       this.dirty = false;
@@ -449,6 +449,19 @@ export class BackendSession {
       this.sizingPreview = null;
       this.changed();
       if (job.mesh_path) void this.loadGeometry(true);
+      return job;
+    });
+  }
+
+  async resumeReconstruction(meshyKey: string) {
+    if (this.busy || !this.job || !this.api.resumeReconstruction)
+      throw new Error("Open an interrupted Meshy job before resuming.");
+    const id = this.job.id;
+    return this.mutation(async (generation) => {
+      const job = await this.api.resumeReconstruction!(id, meshyKey);
+      this.check(generation);
+      this.setJob(job);
+      this.changed();
       return job;
     });
   }

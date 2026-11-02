@@ -21,7 +21,7 @@ Create a private `.env.deploy` from `deploy/env.example`, set permissions to 600
 - `PHOTO2SIM_PUBLIC_HOST`: actual public DNS hostname, without scheme/path.
 - `PHOTO2SIM_API_TOKEN`: one randomly generated application access token; team clients use it in the Authorization header. It is different from all provider keys.
 - `PHOTO2SIM_CORS_ORIGINS`: exact frontend origins, comma-separated. Keep localhost origins for Atul's local frontend, then add the actual deployed frontend origin.
-- Gemini/Meshy keys and model names, transferred privately from the operator's local configuration. No Agentverse or Vultr infrastructure key belongs in the backend container.
+- Optional Gemini key and provider model names, transferred privately from operator configuration. Meshy keys are supplied by each user per reconstruction; do not configure a shared `MESHY_API_KEY`. No Agentverse or Vultr infrastructure key belongs in the backend container.
 - `PHOTO2SIM_PROVIDER=mock` initially, so deployment acceptance cannot incur reconstruction charges.
 
 Never print resolved Compose configuration with real credentials; use `config --quiet`. Docker's build context excludes `.env` files, and the image copies only package sources and metadata. The backend runs as a non-root user. The application token is a private team-demo gate, not a multi-user account system; do not bake it into a public frontend bundle. Clients need to provide it through their private configuration or an authenticated server-side proxy.
@@ -45,7 +45,7 @@ python tools/deployment/smoke.py --base-url https://YOUR_HOST --env-file .env.de
 
 This checks unauthenticated rejection, token acceptance, mock upload, property confirmation, simulation export/validation, and ZIP download. It refuses to create a job if the provider is not mock. Restart the backend and check the saved job/ZIP again to confirm the persistent volume works.
 
-Once the mock smoke passes, change only `PHOTO2SIM_PROVIDER` to `meshy`, retaining the verified provider keys. Then:
+Once the mock smoke passes, set `PHOTO2SIM_PROVIDER=meshy`. Each real upload must supply its own `X-Meshy-Key`; the HTTP app never uses an operator Meshy key. Remove the unused shared `MESHY_API_KEY` from runtime configuration and rotate it if it was previously exposed. Then:
 
 ```bash
 docker compose --env-file .env.deploy up -d backend

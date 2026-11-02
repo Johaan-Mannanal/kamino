@@ -71,8 +71,6 @@ class Settings:
             )
         ):
             raise ValueError("Storage limits must be nonnegative byte counts")
-        if self.provider == "meshy" and not self.meshy_api_key:
-            raise ValueError("MESHY_API_KEY is required when PHOTO2SIM_PROVIDER=meshy")
         if self.poll_interval < 0 or self.max_polls < 1:
             raise ValueError("Polling interval/count must be nonnegative/positive")
         if (

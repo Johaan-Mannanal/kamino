@@ -15,7 +15,8 @@ calls. Keep robot/LeRobot and simulation Python environments separate.
 | `PHOTO2SIM_STUDENT_CODE`, `PHOTO2SIM_JUDGE_CODE`, `PHOTO2SIM_TEAM_CODE` | Optional hosted access tiers; do not commit real values |
 | `PHOTO2SIM_PUBLIC_ORIGIN` | Exact public HTTPS frontend origin for hosted session configuration |
 | `PHOTO2SIM_CORS_ORIGINS` | Comma-separated exact frontend origins; add port 5188 for the current UI |
-| `MESHY_API_KEY`, `MESHY_MODEL` | Backend-only reconstruction credentials/model |
+| `MESHY_MODEL` | Reconstruction model; real API uploads require a per-request user `X-Meshy-Key` |
+| `MESHY_API_KEY` | Legacy direct-adapter configuration only; the HTTP app ignores it and never falls back to it |
 | `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_FALLBACK_MODELS` | Backend-only optional estimate service and configured model sequence |
 | `GEMINI_MAX_ATTEMPTS`, `GEMINI_DEADLINE_SECONDS`, `GEMINI_BACKOFF_SECONDS` | Bounded estimate retries/deadline/backoff |
 

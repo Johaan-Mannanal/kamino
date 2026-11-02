@@ -1,7 +1,8 @@
 import { brandLink } from "../../../frontend/src/brand";
 import "./style.css";
 import { browserAccess } from "../../../frontend/src/access";
-import { ApiError } from "../../../frontend/src/api";
+import { ApiError, liveApi } from "../../../frontend/src/api";
+import { meshyKeyField, validMeshyKey, canResumeMeshy } from "../../../frontend/src/meshy-key";
 import { initAppearance } from "./appearance";
 initAppearance();
 import { mountHome } from "./home";
@@ -114,7 +115,7 @@ function steps(active: string, liveJob = false) {
 function guide() {
   const dialog = document.createElement("dialog");
   dialog.className = "guide";
-  dialog.innerHTML = `<h2>A small guide to Kamino.</h2><p><a href="/example.html">Run a complete synthetic example</a> with a portable MuJoCo bundle, or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">set up Kamino locally</a>.</p><p>Upload 2–4 photos for better coverage. One photo is supported. Include different angles and important details such as ports and pins. The public site provides student access automatically, with a shared daily allowance. Judge and team access use codes. Photos go to the Kamino backend and reconstruction provider; photo-based property assistance uses Gemini. Inputs and artifacts are retained to reopen jobs. See the <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">photo-handling details</a>. Keep the job URL to resume it later. Provider credentials stay on the server.</p><p>Drag to orbit, shift-drag to pan, and scroll over the viewer to zoom. Review orientation and a known full extent, preview dimensions on the server, then save reviewed properties. Generate simulation is a separate action; its downloadable bundle requires successful validation.</p><p>Try the demo and Use demo photos open a separate procedural ceramic mug. Those demo photos are not uploaded or reconstructed. Demo export contains a GLB and properties JSON, with no simulation validation.</p><form method="dialog"><button class="primary">Got it</button></form>`;
+  dialog.innerHTML = `<h2>A small guide to Kamino.</h2><p><a href="/example.html">Run a complete synthetic example</a> with a portable MuJoCo bundle, or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">set up Kamino locally</a>.</p><p>Upload 2–4 photos for better coverage. One photo is supported. Include different angles and important details such as ports and pins. The public site provides student access automatically, with a shared daily allowance. Judge and team access use codes. Photos go to the Kamino backend and reconstruction provider; photo-based property assistance uses Gemini. Inputs and artifacts are retained to reopen jobs. See the <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">photo-handling details</a>. Keep the job URL to resume it later. New reconstructions require your own Meshy API key and use your credits. Keys are held only in memory for the reconstruction; re-enter a key after a server restart to resume its saved task.</p><p>Drag to orbit, shift-drag to pan, and scroll over the viewer to zoom. Review orientation and a known full extent, preview dimensions on the server, then save reviewed properties. Generate simulation is a separate action; its downloadable bundle requires successful validation.</p><p>Try the demo and Use demo photos open a separate procedural ceramic mug. Those demo photos are not uploaded or reconstructed. Demo export contains a GLB and properties JSON, with no simulation validation.</p><form method="dialog"><button class="primary">Got it</button></form>`;
   document.body.append(dialog);
   dialog.addEventListener("close", () => dialog.remove());
   dialog.showModal();
@@ -179,8 +180,10 @@ function mountResume(selector: string) {
 }
 
 function upload() {
-  app.innerHTML = `${header("Untitled asset")}${steps("upload")}<main class="upload-content"><p class="eyebrow">CREATE AN ASSET / NEW DRAFT</p><h1>Upload photos</h1><p class="muted">Upload 2–4 photos of the same object from different angles. Include important details such as ports and pins. One photo is supported.</p><p id="generation-access" class="access-disclosure">Student access is automatic on the public site, with a shared daily allowance. Judge and team access use codes. <a href="/example.html">Explore a complete example</a> or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">run locally</a> without hosted access. <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">Photo handling and access details</a>.</p><div id="drop-zone" class="drop-zone">${icon("0e7df.svg", 28)}<strong>Drop photos here</strong><span class="muted">2–4 photos recommended · One photo supported · JPEG, PNG or WebP · Up to 10 MiB each</span><button id="choose" class="secondary">Choose photos</button><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden></div><p id="upload-error" class="error" role="alert"></p><div class="selection-heading"><strong>Selected photos <span id="photo-count"></span></strong><button class="text-button accent" id="sample-photos">Use demo photos</button></div><div id="photo-list"></div><div class="upload-actions"><a class="quiet" href="#home">← Back to start</a><button id="create-mesh" class="primary">${icon("0f26a.svg")}Create mesh</button></div><p class="prototype-note" id="upload-note"></p><p class="live-upload-links small"><button class="text-button" id="access-token" type="button">Application access token</button><a class="text-button" href="${esc(assemblyUrl())}">Assembly workflow ↗</a></p></main>`;
+  app.innerHTML = `${header("Untitled asset")}${steps("upload")}<main class="upload-content"><p class="eyebrow">CREATE AN ASSET / NEW DRAFT</p><h1>Upload photos</h1><p class="muted">Upload 2–4 photos of the same object from different angles. Include important details such as ports and pins. One photo is supported.</p><p id="generation-access" class="access-disclosure">Student access is automatic on the public site, with a shared daily allowance. Judge and team access use codes. <a href="/example.html">Explore a complete example</a> or <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/QUICKSTART.md">run locally</a> without hosted access. <a href="https://github.com/Johaan-Mannanal/kamino/blob/main/docs/HOSTED_ACCESS.md">Photo handling and access details</a>.</p>${meshyKeyField()}<div id="drop-zone" class="drop-zone">${icon("0e7df.svg", 28)}<strong>Drop photos here</strong><span class="muted">2–4 photos recommended · One photo supported · JPEG, PNG or WebP · Up to 10 MiB each</span><button id="choose" class="secondary">Choose photos</button><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden></div><p id="upload-error" class="error" role="alert"></p><div class="selection-heading"><strong>Selected photos <span id="photo-count"></span></strong><button class="text-button accent" id="sample-photos">Use demo photos</button></div><div id="photo-list"></div><div class="upload-actions"><a class="quiet" href="#home">← Back to start</a><button id="create-mesh" class="primary">${icon("0f26a.svg")}Create mesh</button></div><p class="prototype-note" id="upload-note"></p><p class="live-upload-links small"><button class="text-button" id="access-token" type="button">Application access token</button><a class="text-button" href="${esc(assemblyUrl())}">Assembly workflow ↗</a></p></main>`;
   mountResume(".live-upload-links");
+  const meshyField = $<HTMLInputElement>("#meshy-api-key");
+  let needsMeshyKey = true;
   const guidance = document.createElement("p");
   guidance.className = "photo-capture-guide small";
   guidance.textContent =
@@ -189,8 +192,10 @@ function upload() {
   const draw = () => {
     const demo = photos.length > 0 && photos.some((p) => !p.file);
     $("#photo-count").textContent = `· ${photos.length} of 4`;
+    meshyField.disabled = uploads.pending || checkingAccess;
+    meshyField.closest<HTMLElement>(".meshy-credentials")!.hidden = demo || !needsMeshyKey;
     $<HTMLButtonElement>("#create-mesh").disabled =
-      !photos.length || uploads.pending || checkingAccess;
+      !photos.length || uploads.pending || checkingAccess || (!demo && needsMeshyKey && !validMeshyKey(meshyField.value));
     $<HTMLButtonElement>("#choose").disabled =
       uploads.pending || checkingAccess;
     $<HTMLButtonElement>("#sample-photos").disabled =
@@ -199,7 +204,7 @@ function upload() {
       $("#create-mesh").lastChild!.textContent = "Uploading…";
     $("#upload-note").textContent = demo
       ? "Demo photos open the synthetic procedural mug. Nothing is uploaded or reconstructed."
-      : "Your photos are uploaded to the configured Kamino API for reconstruction. Provider keys stay on the server.";
+      : "Your photos go to Kamino and Meshy for reconstruction using your Meshy key and credits. Your key is not saved.";
     if (!demo && (liveJobId() || uploads.acceptedId || liveSession?.job))
       $("#upload-note").textContent +=
         " A server job already exists. Resume it above; Create mesh starts another reconstruction.";
@@ -335,6 +340,12 @@ function upload() {
       route("creating");
       return;
     }
+    if (needsMeshyKey && !validMeshyKey(meshyField.value)) {
+      $("#upload-error").textContent = "Enter your own Meshy API key before creating a mesh.";
+      meshyField.focus();
+      return;
+    }
+    const key = meshyField.value.trim();
     const token = navToken;
     $("#upload-error").textContent = "";
     checkingAccess = true;
@@ -350,7 +361,11 @@ function upload() {
         return;
       if (token !== navToken) return;
       checkingAccess = false;
-      const request = uploads.submit(() => live().upload(files), {
+      const request = uploads.submit(async () => {
+        const job = await live().upload(files, key);
+        meshyField.value = "";
+        return job;
+      }, {
         remember: setLiveJob,
         isCurrent: () => token === navToken,
         openCurrent: () => route("creating"),
@@ -395,14 +410,38 @@ function upload() {
       } else void render();
     }
   };
+  const providerView = navToken;
+  void liveApi.health().then((health) => {
+    if (providerView !== navToken) return;
+    needsMeshyKey = health.provider !== "mock";
+    draw();
+  }).catch(() => { /* Remain fail-closed until the backend is reachable. */ });
+  meshyField.addEventListener("input", draw);
   draw();
   wireGuides();
 }
 
 function liveLoading(token: number, id: string) {
   const session = live();
-  app.innerHTML = `<header class="site-header">${brand()}</header><main class="loading"><h1>Creating your mesh</h1><p class="muted" id="live-load-status" role="status" aria-live="polite">Loading job status…</p><div class="progress" id="live-load-bar" role="progressbar" aria-label="Server job progress" aria-valuemin="0" aria-valuemax="100"><span></span></div><p class="loading-note">Job ${esc(id.slice(0, 8))} · status from the server</p><p id="live-load-error" class="error" role="alert"></p><div class="live-load-actions"><button class="secondary compact" id="live-load-retry" hidden>Retry</button><button class="text-button" id="live-load-back">Back to photos</button></div><p class="prototype-note">Leaving this page stops watching; the server job continues and can be reopened from this URL.</p></main>`;
+  app.innerHTML = `<header class="site-header">${brand()}</header><main class="loading"><h1>Creating your mesh</h1><p class="muted" id="live-load-status" role="status" aria-live="polite">Loading job status…</p><div class="progress" id="live-load-bar" role="progressbar" aria-label="Server job progress" aria-valuemin="0" aria-valuemax="100"><span></span></div><p class="loading-note">Job ${esc(id.slice(0, 8))} · status from the server</p><p id="live-load-error" class="error" role="alert"></p><div id="meshy-resume" hidden>${meshyKeyField()}<button type="button" class="primary" id="meshy-resume-button">Resume saved Meshy task</button><p class="muted small">Checks the existing task only; does not request a new paid reconstruction.</p></div><div class="live-load-actions"><button class="secondary compact" id="live-load-retry" hidden>Retry</button><button class="text-button" id="live-load-back">Back to photos</button></div><p class="prototype-note">Leaving this page stops watching; the server job continues and can be reopened from this URL.</p></main>`;
   let failure: unknown = null;
+  let resuming = false;
+  const resumeField = $<HTMLInputElement>("#meshy-api-key");
+  const resumeButton = $<HTMLButtonElement>("#meshy-resume-button");
+  resumeField.addEventListener("input", () => {
+    resumeButton.disabled = resuming || !validMeshyKey(resumeField.value);
+  });
+  resumeButton.onclick = async () => {
+    if (resuming || !validMeshyKey(resumeField.value)) return;
+    resuming = true;
+    failure = null;
+    paint();
+    try {
+      await session.resumeReconstruction(resumeField.value.trim());
+      resumeField.value = "";
+    } catch (error) { await fail(error); }
+    finally { resuming = false; paint(); }
+  };
   const restore = async () => {
     failure = null;
     paint();
@@ -437,6 +476,10 @@ function liveLoading(token: number, id: string) {
     }
     const error = failure ?? session.error;
     const failed = job?.status === "failed";
+    const resumable = !!job && canResumeMeshy(job);
+    $("#meshy-resume").hidden = !resumable;
+    resumeField.disabled = resuming;
+    resumeButton.disabled = resuming || !validMeshyKey(resumeField.value);
     const display = reconstructionDisplay(job);
     $("#live-load-status").textContent = display.label;
     $(".loading-note").textContent =
@@ -446,7 +489,7 @@ function liveLoading(token: number, id: string) {
     paintReconstructionBar(bar, display.percent);
     bar.setAttribute("aria-valuetext", display.detail);
     $("#live-load-error").textContent = failed
-      ? `Reconstruction failed${job.error ? `: ${job.error.code} — ${job.error.message}` : "."} Your selected photos are kept for another attempt.`
+      ? `${error ? describeError(error) + " · " : ""}Reconstruction failed${job.error ? `: ${job.error.code} — ${job.error.message}` : "."} Your selected photos are kept for another attempt.`
       : error
         ? describeError(error)
         : "";

@@ -1,7 +1,22 @@
 # Hosted generation and photo handling
 
-The public site gives every visitor student access automatically. No access code
-or provider key is needed. Student sessions last 30 minutes and share one rolling
+The public site gives every visitor student access automatically; no application
+access code is needed. **New photo reconstructions require your own Meshy API key**
+and use your Meshy account credits. Your Meshy plan must include API access.
+Keys are entered in a masked field, sent over HTTPS to Kamino and then Meshy,
+and held only in memory for the running reconstruction. They are not saved in
+browser storage, jobs, exports or application logs. Closing/reloading the upload
+page clears its field; an accepted upload clears it immediately. Existing job
+reads, geometry review, simulation regeneration and downloads need no Meshy key.
+
+If a server restart interrupts reconstruction, re-enter your key on the saved
+job page to resume its existing task. This never submits another paid task; an
+uncertain submission without a saved task ID requires checking your Meshy
+dashboard before starting a new job. A zero credit balance does not block
+resuming an already paid task. Local mock reconstruction and procedural demos
+need no provider key.
+
+ Student sessions last 30 minutes and share one rolling
 24-hour allowance across all visitors: 2 mesh submissions (5 minutes apart),
 10 Gemini requests (30 seconds apart), and 10 simulation submissions (30 seconds
 apart). Another visitor may already have used the available allowance.

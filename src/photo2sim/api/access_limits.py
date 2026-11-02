@@ -33,6 +33,12 @@ def request_abuse_action(method, path):
     if method == "POST" and path in {"/api/assembly-jobs", "/api/assembly-jobs/from-meshes"}:
         return "parse"
     if (
+        method == "POST"
+        and path.startswith("/api/jobs/")
+        and path.endswith("/resume-reconstruction")
+    ):
+        return "save"
+    if (
         method == "PUT"
         and path.startswith("/api/assembly-jobs/")
         and path.endswith(("/revisions", "/mapping-review"))

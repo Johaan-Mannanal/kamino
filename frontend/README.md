@@ -18,7 +18,7 @@ Live mode uses the merged backend's complete pipeline: upload → reconstruction
 
 Validation displays original and relocated results, scope, viewer status and geometry assumptions. Prepared mesh paths resolve relative to the scene directory. A GLB viewer is deferred; available OBJ/GLB files can be downloaded.
 
-Protected deployments: open **API access** and enter the application token. It stays in memory, is never put in a URL or public build, and is sent in Authorization headers for API calls and Blob downloads. Provider keys never enter the browser. The application token must be re-entered after reload. Live job IDs appear in the URL so a job can be reopened while its backend storage exists.
+Protected deployments: open **API access** and enter the application token. It stays in memory, is never put in a URL or public build, and is sent in Authorization headers for API calls and Blob downloads. Real Meshy uploads require a user-entered key in the masked field. That key is sent only in `X-Meshy-Key` on explicit upload/resume requests, stays in memory for that reconstruction, and is never bundled, stored in browser storage, saved with jobs or included in URLs. Mock workflows need no Meshy key. The application token must be re-entered after reload. Live job IDs appear in the URL so a job can be reopened while its backend storage exists.
 
 Uploads use repeated multipart `images` fields and browser-generated Content-Type. The app polls running jobs at one-second intervals and stops on `awaiting_properties`, `failed`, or `completed`. Dimensions entered in millimetres and mass in grams are divided by 1000 before PATCHing metre/kilogram values. Empty friction is sent as `null`.
 

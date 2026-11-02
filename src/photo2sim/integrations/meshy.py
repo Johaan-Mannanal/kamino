@@ -2,6 +2,7 @@
 
 import base64
 import struct
+from dataclasses import replace
 from pathlib import Path
 from urllib.parse import quote, urlsplit
 
@@ -19,6 +20,24 @@ class MeshyProvider:
         self.settings = settings
         self.transport = transport
 
+    def with_key(self, api_key: str) -> "MeshyProvider":
+        """A job-local client; never mutate shared settings or another job's key."""
+        return MeshyProvider(replace(self.settings, meshy_api_key=api_key), self.transport)
+
+    def validate_access(self, *, require_credits: bool = True) -> None:
+        """Free balance read only. This does not create or retry a paid task."""
+        result = self.request("GET", "https://api.meshy.ai/openapi/v1/balance")
+        balance = result.get("balance")
+        if type(balance) is not int or balance < 0:
+            raise ProviderError(
+                "provider_response_error", "Meshy returned an invalid credit balance."
+            )
+        if require_credits and balance == 0:
+            raise ProviderError(
+                "meshy_credits_exhausted",
+                "Your Meshy account has no credits available. Add credits before creating a mesh.",
+            )
+
     def request(self, method: str, url: str, **kwargs) -> dict:
         try:
             with httpx.Client(timeout=60, transport=self.transport) as client:
@@ -34,6 +53,18 @@ class MeshyProvider:
                     raise ValueError("Expected task object")
                 return result
         except httpx.HTTPStatusError as error:
+            status = error.response.status_code
+            if status in {401, 403}:
+                raise ProviderError(
+                    "meshy_key_rejected",
+                    f"Meshy rejected your key or API access (HTTP {status}). "
+                    "Check your Meshy API key and active API-enabled plan.",
+                ) from None
+            if status == 402:
+                raise ProviderError(
+                    "meshy_credits_exhausted",
+                    "Meshy returned HTTP 402. Check your account's credits and billing.",
+                ) from None
             raise ProviderError(
                 "provider_http_error",
                 f"Meshy returned HTTP {error.response.status_code}. Check API access/credits/task.",

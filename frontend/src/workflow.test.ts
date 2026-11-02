@@ -106,12 +106,12 @@ const reviewedSizing = (length: number) => ({
 })
 function installFetch(fetch: (url: string, init?: RequestInit) => Promise<Response>) {
   vi.stubGlobal('fetch', (url: string, init?: RequestInit) =>
-    url.includes('/geometry?') ? Promise.resolve(json(geometryInventory)) : fetch(url, init),
+    url.endsWith('/api/health') ? Promise.resolve(json({ status: 'ok', provider: 'meshy' })) : url.includes('/geometry?') ? Promise.resolve(json(geometryInventory)) : fetch(url, init),
   )
 }
 async function start(fetch: (url: string, init?: RequestInit) => Promise<Response>) {
   vi.stubGlobal('fetch', (url: string, init?: RequestInit) =>
-    url.includes('/geometry?') ? Promise.resolve(json(geometryInventory)) : fetch(url, init),
+    url.endsWith('/api/health') ? Promise.resolve(json({ status: 'ok', provider: 'meshy' })) : url.includes('/geometry?') ? Promise.resolve(json(geometryInventory)) : fetch(url, init),
   )
   await import('./main')
   await vi.waitFor(() => expect(document.querySelector('#process')).not.toBeNull())

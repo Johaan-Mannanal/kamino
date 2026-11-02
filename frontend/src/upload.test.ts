@@ -47,7 +47,7 @@ afterEach(() => {
   document.body.innerHTML = ''
 })
 
-async function selectImage() {
+async function selectImage(withKey = true) {
   vi.doMock('./viewer', () => ({ mountViewer: () => () => {} }))
   await import('./main')
   const input = document.querySelector<HTMLInputElement>('#photos')!
@@ -55,12 +55,17 @@ async function selectImage() {
     value: [new File(['test'], 'input.png', { type: 'image/png' })],
   })
   input.dispatchEvent(new Event('change', { bubbles: true }))
+  if (withKey) {
+    const key = document.querySelector<HTMLInputElement>('#meshy-api-key')!
+    key.value = 'msy_test_user_private_key'
+    key.dispatchEvent(new Event('input', { bubbles: true }))
+  }
 }
 
 const uploadButton = () => document.querySelector<HTMLButtonElement>('#upload')!
 
 it('requires new photo selection after success instead of creating a duplicate paid job', async () => {
-  const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(record), { status: 202 }))
+  const fetch = vi.fn().mockImplementation(() => Promise.resolve(new Response(JSON.stringify(record), { status: 202 })))
   vi.stubGlobal('fetch', fetch)
   await selectImage()
   uploadButton().click()
@@ -124,4 +129,26 @@ it('resumes polling the retained running job after a replacement upload fails wh
     ),
   ).toHaveLength(1)
   expect(document.querySelector<HTMLButtonElement>('#properties button')!.disabled).toBe(false)
+})
+
+it('blocks real uploads until a masked Meshy key is supplied and clears it after acceptance', async () => {
+  const fetch = vi.fn().mockImplementation(() => Promise.resolve(new Response(JSON.stringify(record), { status: 202 })))
+  vi.stubGlobal('fetch', fetch)
+  await selectImage(false)
+  expect(uploadButton().disabled).toBe(true)
+  const field = document.querySelector<HTMLInputElement>('#meshy-api-key')!
+  expect(field.type).toBe('password')
+  field.value = 'msy_user_private_key'
+  field.dispatchEvent(new Event('input', { bubbles: true }))
+  expect(uploadButton().disabled).toBe(false)
+  uploadButton().click()
+  await vi.waitFor(() => expect(location.search).toContain(record.id))
+  expect(
+    new Headers(fetch.mock.calls.find(([, init]) => init?.method === 'POST')![1].headers).get(
+      'X-Meshy-Key',
+    ),
+  ).toBe('msy_user_private_key')
+  expect(document.querySelector<HTMLInputElement>('#meshy-api-key')!.value).toBe('')
+  expect(localStorage.getItem('meshy-api-key')).toBeNull()
+  expect(sessionStorage.getItem('meshy-api-key')).toBeNull()
 })

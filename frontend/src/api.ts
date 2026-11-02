@@ -14,7 +14,8 @@ export type Api = {
   geometry(id: string, preview?: boolean): Promise<TargetInventory>
   reviewGeometry(id: string, request: TargetReviewRequest): Promise<Job>
   health(): Promise<{ status: string; provider: string }>
-  create(files: File[]): Promise<Job>
+  create(files: File[], meshyKey?: string): Promise<Job>
+  resumeReconstruction?(id: string, meshyKey: string): Promise<Job>
   get(id: string): Promise<Job>
   save(id: string, properties: Properties): Promise<Job>
   saveOrientation(id: string, orientation: Orientation): Promise<Job>
@@ -125,7 +126,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         if (
           typeof body.category === 'string' &&
           (suggestionErrorCategories.has(body.category) ||
-            ['job_access', 'storage'].includes(body.category))
+            ['job_access', 'storage', 'meshy_credentials'].includes(body.category))
         )
           details.category = body.category
         if (typeof body.retryable === 'boolean') details.retryable = body.retryable
@@ -165,11 +166,20 @@ export const liveApi: Api = {
       body: JSON.stringify(review),
     }),
   health: () => request('/api/health'),
-  create: (files) => {
+  create: (files, meshyKey) => {
     const form = new FormData()
     files.forEach((file) => form.append('images', file))
-    return request('/api/jobs', { method: 'POST', body: form })
+    return request('/api/jobs', {
+      method: 'POST',
+      body: form,
+      headers: meshyKey ? { 'X-Meshy-Key': meshyKey.trim() } : {},
+    })
   },
+  resumeReconstruction: (id, meshyKey) =>
+    request(`/api/jobs/${encodeURIComponent(id)}/resume-reconstruction`, {
+      method: 'POST',
+      headers: { 'X-Meshy-Key': meshyKey.trim() },
+    }),
   get: (id) => request(`/api/jobs/${encodeURIComponent(id)}`),
   save: (id, properties) =>
     request(`/api/jobs/${encodeURIComponent(id)}/properties`, {

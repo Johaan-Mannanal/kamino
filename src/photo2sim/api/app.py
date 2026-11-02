@@ -4,6 +4,7 @@ import secrets
 import shutil
 import warnings
 from contextlib import asynccontextmanager
+from dataclasses import replace
 from datetime import UTC, datetime
 from io import BytesIO
 from typing import Annotated
@@ -78,6 +79,9 @@ def create_app(
     gemini_transport: Transport | None = None,
 ) -> FastAPI:
     settings = settings or Settings.from_env()
+    # Hosted reconstruction always needs a request-scoped user key, including team access.
+    # Keep the legacy Settings field for direct adapter/CLI compatibility, never as a fallback.
+    settings = replace(settings, meshy_api_key="")
     if provider is None:
         if settings.provider == "meshy":
             from photo2sim.integrations.meshy import MeshyProvider
@@ -217,9 +221,10 @@ def create_app(
             response = await call_next(request)
             # Gemini cache-write errors currently return 422 after inference, so
             # conservatively retain Gemini 422 as well as all provider-ambiguous 5xx.
-            if 300 <= response.status_code < 500 and not (
-                action == "gemini" and response.status_code == 422
-            ):
+            if (
+                300 <= response.status_code < 500
+                and not (action == "gemini" and response.status_code == 422)
+            ) or (action == "mesh" and getattr(request.state, "meshy_preflight_rejected", False)):
                 await run_in_threadpool(access_limits.refund, reservation)
             # Parsing and retained-write admission are independent from paid-operation limits.
             # Retain these admissions even when native parsing or validation rejects the body.
@@ -241,7 +246,7 @@ def create_app(
         allow_origins=list(settings.cors_origins),
         allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
         allow_credentials=True,
-        allow_headers=["Content-Type", "Authorization"],
+        allow_headers=["Content-Type", "Authorization", "X-Meshy-Key"],
     )
     if assembly_jobs is not None:
         app.include_router(assembly_router(assembly_jobs, settings, settings.max_asset_bytes))
@@ -329,10 +334,33 @@ def create_app(
     def health():
         return {"status": "ok", "provider": provider.name}
 
+    async def reconstruction_provider(request: Request, *, require_credits=True):
+        if settings.provider != "meshy":
+            return None
+        from photo2sim.api.meshy_credentials import user_provider
+
+        try:
+            return await run_in_threadpool(
+                user_provider, request, provider, require_credits=require_credits
+            )
+        except HTTPException as error:
+            # This failure is known to precede persistence and paid submission.
+            # Even a 503 here must release the shared paid-generation reservation.
+            request.state.meshy_preflight_rejected = True
+            # Provider credential errors must not be confused with application sign-in expiry.
+            # Return no secret input, provider response body, or library exception string.
+            return JSONResponse(
+                status_code=error.status_code,
+                content={"detail": error.detail, "category": "meshy_credentials"},
+            )
+
     @app.post("/api/jobs", response_model=JobRecord, status_code=202)
     async def create_job(
         request: Request, images: Annotated[list[UploadFile], File(min_length=1, max_length=4)]
     ):
+        scoped_provider = await reconstruction_provider(request)
+        if isinstance(scoped_provider, JSONResponse):
+            return scoped_provider
         validated = []
         for image in images:
             content = await image.read(settings.max_image_bytes + 1)
@@ -392,8 +420,48 @@ def create_app(
                 raise
 
         await run_in_threadpool(persist_upload)
-        app.state.worker.enqueue(job_id)
+        if scoped_provider is None:
+            app.state.worker.enqueue(job_id)
+        else:
+            app.state.worker.enqueue(job_id, scoped_provider)
         return job
+
+    @app.post("/api/jobs/{job_id}/resume-reconstruction", response_model=JobRecord, status_code=202)
+    async def resume_reconstruction(job_id: UUID, request: Request):
+        job = get_job(job_id)
+        if (
+            settings.provider != "meshy"
+            or job.provider != "meshy"
+            or job.status != "failed"
+            or not job.provider_task_id
+            or job.mesh_path
+            or not job.error
+            or job.error.code
+            not in {
+                "meshy_key_required",
+                "meshy_key_rejected",
+                "meshy_credits_exhausted",
+                "provider_timeout",
+                "provider_response_error",
+                "provider_http_error",
+                "reconstruction_error",
+                "asset_download_error",
+                "storage_budget_exhausted",
+            }
+        ):
+            raise HTTPException(409, "Only an interrupted saved Meshy task can be resumed.")
+        # Polling an existing paid task does not need remaining generation credits.
+        scoped_provider = await reconstruction_provider(request, require_credits=False)
+        if isinstance(scoped_provider, JSONResponse):
+            return scoped_provider
+        try:
+            claimed = store.update(job_id, expected_status=("failed",), status="queued", error=None)
+        except JobConflict:
+            raise HTTPException(
+                409, "This task is already being resumed. Refresh its status."
+            ) from None
+        app.state.worker.enqueue(job_id, scoped_provider)
+        return claimed
 
     @app.get("/api/jobs/{job_id}", response_model=JobRecord)
     def job_status(job_id: UUID):

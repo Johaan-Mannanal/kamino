@@ -112,3 +112,15 @@ For local checks against the combined production proxy, build both frontends wit
 The fixture checks automatic student access, judge upgrade, refresh, Assembly and
 sign-out without submitting provider jobs. Backend tests separately exercise the
 real signed sessions and persistent quotas.
+
+## Per-user Meshy credentials
+
+New real reconstructions require `X-Meshy-Key`, supplied through the masked
+upload field, including for judge/team access. The API never falls back to
+`MESHY_API_KEY`; remove that unused shared variable after deploying this version.
+Keys stay in worker memory and are not written to retained storage. Configure
+`PHOTO2SIM_PROVIDER=meshy` and `MESHY_MODEL` without a server Meshy key. Existing
+exports/review/regeneration need no provider key. Restarted reconstruction tasks
+require explicit key re-entry and the existing-task resume endpoint; no paid
+submission is automatically retried. Do not configure proxies/APM to capture the
+`X-Meshy-Key` header. Gemini configuration is independent and unchanged.

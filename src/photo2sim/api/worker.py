@@ -28,11 +28,21 @@ class JobWorker:
                     "processing_interrupted",
                     "Simulation processing was interrupted. Artifacts are retained; retry processing.",
                 )
+            elif job.provider != self.provider.name:
+                self.fail(job.id, "provider_mismatch", "Restart with the original job provider.")
+            elif job.provider == "meshy":
+                self.fail(
+                    job.id,
+                    "meshy_key_required",
+                    "Reconstruction was interrupted. Re-enter your Meshy API key to resume the "
+                    "saved task without a new reconstruction. If no task ID was saved, inspect "
+                    "your Meshy dashboard before starting another job.",
+                )
             else:
                 self.enqueue(job.id)
 
-    def enqueue(self, job_id: UUID):
-        self.executor.submit(self.run, job_id)
+    def enqueue(self, job_id: UUID, provider: ReconstructionProvider | None = None):
+        self.executor.submit(self.run, job_id, provider)
 
     def enqueue_processing(self, job_id: UUID):
         self.executor.submit(self.run_processing, job_id)
@@ -58,7 +68,7 @@ class JobWorker:
     def fail(self, job_id: UUID, code: str, message: str):
         self.store.update(job_id, status="failed", error=JobError(code=code, message=message))
 
-    def run(self, job_id: UUID):
+    def run(self, job_id: UUID, provider: ReconstructionProvider | None = None):
         try:
             job = self.store.get(job_id)
             if self.stopping.is_set():
@@ -66,6 +76,13 @@ class JobWorker:
             if job.provider != self.provider.name:
                 self.fail(job_id, "provider_mismatch", "Restart with the original job provider.")
                 return
+            if job.provider == "meshy" and provider is None:
+                raise ProviderError(
+                    "meshy_key_required", "Re-enter your Meshy key to resume this task."
+                )
+            provider = provider or self.provider
+            if job.provider != provider.name:
+                raise ProviderError("provider_mismatch", "Use the original job provider.")
             if job.status == "reconstructing" and not job.provider_task_id:
                 self.fail(
                     job_id,
@@ -82,14 +99,14 @@ class JobWorker:
                     ),
                 )
                 paths = [self.store.job_dir(job_id) / path for path in job.source_images]
-                task_id = self.provider.submit(paths)
+                task_id = provider.submit(paths)
                 job = self.store.update(job_id, provider_task_id=task_id)
             else:
                 job = self.store.update(job_id, status="reconstructing")
             for _ in range(self.settings.max_polls):
                 if self.stopping.is_set():
                     return
-                snapshot = self.provider.poll(job.provider_task_id)
+                snapshot = provider.poll(job.provider_task_id)
                 if snapshot.status == "failed":
                     raise ProviderError(
                         "provider_failed", "Reconstruction failed. Inspect the provider task."
@@ -146,7 +163,7 @@ class JobWorker:
                                 "job storage budget has no room for provider output"
                             )
                         with self.store.storage.write_admission(root, allowance):
-                            mesh = self.provider.download(snapshot, staged)
+                            mesh = provider.download(snapshot, staged)
                             if self.store.storage._tree_bytes(staged) > allowance:
                                 raise StorageLimitError(
                                     "provider output exceeds the bounded staging allowance"

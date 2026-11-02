@@ -12,7 +12,13 @@ from photo2sim.api.app import create_app
 ORIGIN = {"Origin": "https://kamino.test"}
 
 
-def test_expensive_rejected_mesh_import_keeps_an_abuse_cooldown(tmp_path):
+def test_expensive_rejected_mesh_import_keeps_an_abuse_cooldown(tmp_path, monkeypatch):
+    # As in the revision test below, native startup must not advance admission time
+    # past the very cooldown this test is checking on a busy/slow host.
+    admission_time = time.time()
+    monkeypatch.setattr(
+        "photo2sim.api.access_limits.time", SimpleNamespace(time=lambda: admission_time)
+    )
     app = create_app(settings(tmp_path, public_student_access=True))
     with TestClient(app, base_url="https://kamino.test", headers=ORIGIN) as client:
         client.post("/api/session")
